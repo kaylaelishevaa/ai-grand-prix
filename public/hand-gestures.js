@@ -16,6 +16,7 @@
     return runtimePromise;
   }
 
+  // Short open-palm motions are responsive; neutral rearming still prevents accidental repeated actions.
   // Separate, deterministic motion recognition makes false-positive cases testable.
   class NookSwipeDetector {
     constructor() {
@@ -32,13 +33,13 @@
       if (!Number.isFinite(now) || now <= this.lastTime) return null;
       const gap = now - this.lastTime;
       this.lastTime = now;
-      const valid = sample && sample.open !== false && (sample.confidence ?? 1) >= 0.65 &&
+      const valid = sample && sample.open !== false && (sample.confidence ?? 1) >= 0.55 &&
         Number.isFinite(sample.x) && Number.isFinite(sample.y) && sample.x >= 0 && sample.x <= 1 && sample.y >= 0 && sample.y <= 1;
       if (!valid) {
         this.samples = [];
         this.neutralPoint = null;
         if (this.neutralSince === null) this.neutralSince = now;
-        if (now - this.neutralSince >= 200) this.needsNeutral = false;
+        if (now - this.neutralSince >= 160) this.needsNeutral = false;
         return null;
       }
       const point = {x: sample.mirror ? 1 - sample.x : sample.x, y: sample.y, time: now};
@@ -48,7 +49,7 @@
         if (point.x >= 0.35 && point.x <= 0.65 && this.neutralPoint &&
             Math.hypot(point.x - this.neutralPoint.x, point.y - this.neutralPoint.y) < 0.045) {
           if (this.neutralSince === null) this.neutralSince = now;
-          if (now - this.neutralSince >= 300) this.needsNeutral = false;
+          if (now - this.neutralSince >= 200) this.needsNeutral = false;
         } else {this.neutralSince = null; this.neutralPoint = point;}
         return null;
       }
@@ -59,20 +60,20 @@
       const previous = this.samples[this.samples.length - 1];
       if (previous && Math.abs(point.x - previous.x) > 0.32) {this.samples = [point]; return null;}
       this.samples.push(point);
-      this.samples = this.samples.filter(item => now - item.time <= 1000);
+      this.samples = this.samples.filter(item => now - item.time <= 600);
       if (this.samples.length < 3) return null;
       const first = this.samples[0];
       const dx = point.x - first.x;
       const ys = this.samples.map(item => item.y);
-      if (Math.max(...ys) - Math.min(...ys) >= 0.22 || now - first.time < 150) return null;
-      if (Math.abs(dx) < 0.20) return null;
+      if (Math.max(...ys) - Math.min(...ys) >= 0.22 || now - first.time < 100) return null;
+      if (Math.abs(dx) < 0.12) return null;
       const direction = Math.sign(dx);
       const steps = this.samples.slice(1).map((item, index) => item.x - this.samples[index].x);
-      const deliberateSteps = steps.filter(step => step * direction >= 0.03).length;
+      const deliberateSteps = steps.filter(step => step * direction >= 0.025).length;
       const pathLength = steps.reduce((sum, step) => sum + Math.abs(step), 0);
       if (deliberateSteps < 2 || Math.abs(dx) / Math.max(pathLength, 0.001) < 0.8) return null;
       this.samples = [];
-      this.cooldownUntil = now + 1200;
+      this.cooldownUntil = now + 650;
       this.needsNeutral = true;
       return direction > 0 ? 'right' : 'left';
     }
@@ -120,7 +121,7 @@
         try {
           const {mod,files} = await this.runtimeLoader();
           if (generation !== this.generation) return false;
-          const options = {baseOptions:{modelAssetPath:MODEL,delegate:'GPU'},runningMode:'VIDEO',numHands:1,minHandDetectionConfidence:0.65,minHandPresenceConfidence:0.65,minTrackingConfidence:0.65};
+          const options = {baseOptions:{modelAssetPath:MODEL,delegate:'GPU'},runningMode:'VIDEO',numHands:1,minHandDetectionConfidence:0.55,minHandPresenceConfidence:0.55,minTrackingConfidence:0.55};
           try {model = await mod.HandLandmarker.createFromOptions(files, options);}
           catch (error) {
             if (generation !== this.generation) return false;
@@ -163,7 +164,7 @@
       if (!this.running || !this.model) return;
       this.frameId = requestAnimationFrame(this._frame);
       if (!this.isEnabled()) {this.detector.reset(); return;}
-      if (this.video.readyState < 2 || !this.video.videoWidth || this.video.paused || now - this.lastDetect < 100 || this.video.currentTime === this.lastVideoTime) return;
+      if (this.video.readyState < 2 || !this.video.videoWidth || this.video.paused || now - this.lastDetect < 60 || this.video.currentTime === this.lastVideoTime) return;
       this.lastDetect = now;
       this.lastVideoTime = this.video.currentTime;
       try {

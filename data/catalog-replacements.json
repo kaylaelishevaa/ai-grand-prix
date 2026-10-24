@@ -1,0 +1,100 @@
+[
+  {
+    "retiredId": "7950092256",
+    "replacementId": "6775922884",
+    "productType": "chair",
+    "name": "도리퍼니처 Edgar 식탁 의자 2p, 옐로우",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "20145368",
+    "replacementId": "6775922884-gray",
+    "productType": "chair",
+    "name": "도리퍼니처 Edgar 식탁 의자 2p, 그레이",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "7950092244",
+    "replacementId": "8491783776",
+    "productType": "chair",
+    "name": "가구느낌 체스 좌식의자, 블랙, 1개",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "6331079250",
+    "replacementId": "8539057200",
+    "productType": "glasses",
+    "name": "리끌로우 남녀공용 옐린 블랙 선글라스, FREE(146 x 154 x 41 mm)",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "7143578845",
+    "replacementId": "6520241489",
+    "productType": "lamp",
+    "name": "파파 LED 와이드 스탠드 PA-800B, 블랙",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "9086958339",
+    "replacementId": "6908241889",
+    "productType": "chair",
+    "name": "코멧 5단 각도조절 패브릭 좌식의자, 그레이",
+    "reason": "Solid armless silhouette replaces mesh; a simple runtime outline excludes the photographed floor shadow."
+  },
+  {
+    "retiredId": "5186051654",
+    "replacementId": "9604052548",
+    "productType": "tshirt",
+    "name": "트리플에이 반팔 1301 단품 무지 헤비 아메리칸어패럴 AAA 18수 티셔츠, XL",
+    "reason": "Selected a single front-facing garment photo with intact sleeves and verified its clean cutout in the live preview renderer."
+  },
+  {
+    "retiredId": "215801766",
+    "replacementId": "8310483629-brown",
+    "productType": "tshirt",
+    "name": "유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, M",
+    "reason": "Selected a single front-facing garment photo with intact sleeves and verified its clean cutout in the live preview renderer."
+  },
+  {
+    "retiredId": "7735720128",
+    "replacementId": "8310483629-olive",
+    "productType": "tshirt",
+    "name": "유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, XL",
+    "reason": "Selected a single front-facing garment photo with intact sleeves and verified its clean cutout in the live preview renderer."
+  },
+  {
+    "retiredId": "6271725686",
+    "replacementId": "8310483629-blue",
+    "productType": "tshirt",
+    "name": "유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, L",
+    "reason": "Selected a single front-facing garment photo with intact sleeves and verified its clean cutout in the live preview renderer."
+  },
+  {
+    "retiredId": "240870751",
+    "replacementId": "7411084109",
+    "productType": "tshirt",
+    "name": "챔피온 US 스크립트 로고 Powerblend 반팔티셔츠, 00S",
+    "reason": "Selected a single front-facing garment photo with intact sleeves and verified its clean cutout in the live preview renderer."
+  },
+  {
+    "retiredId": "8832206567",
+    "replacementId": "7187298300",
+    "productType": "tshirt",
+    "name": "(남여공용) 챔피온 반팔 로고 그래픽 티셔츠 GT23H, M",
+    "reason": "Selected a single front-facing garment photo with intact sleeves and verified its clean cutout in the live preview renderer."
+  },
+  {
+    "retiredId": "331802095",
+    "replacementId": "7856352896",
+    "productType": "hoodie",
+    "name": "엘라모 3H 라모싸인 후드티, 2XL",
+    "reason": "Selected a single front-facing garment photo with intact sleeves and verified its clean cutout in the live preview renderer."
+  },
+  {
+    "retiredId": "8610766199",
+    "replacementId": "8391704299",
+    "productType": "hoodie",
+    "name": "챔피온 남녀공용 US Powerblend 스크립트 로고 러버 프린트 후드티, XL",
+    "reason": "Selected a single front-facing garment photo with intact sleeves and verified its clean cutout in the live preview renderer."
+  }
+]

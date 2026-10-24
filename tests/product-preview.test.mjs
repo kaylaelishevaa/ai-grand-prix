@@ -83,3 +83,51 @@ test('clothing head occlusion restores the mouth and chin but stops above the or
   const a=Preview.headOcclusion(p,720,1280,{}),b=Preview.headOcclusion(p,720,1280,{mirror:true});
   assert(a);assert(a.y+a.ry>.28*1280);assert(a.y+a.ry<.4*1280);assert(Math.abs(a.x+b.x-720)<1e-8);assert(a.rx<720*.2);p[9].visibility=.1;assert.equal(Preview.headOcclusion(p,720,1280,{}),null);
 });
+
+test('verified silhouettes preserve white product fabric while removing hangers and enclosed gaps',()=>{
+  const {Preview}=fixture(),image=pixels(40,40),spec={keep:[[[.2,.2],[.8,.2],[.8,.9],[.2,.9]]],clear:[[[.4,.3],[.6,.3],[.6,.5],[.4,.5]]]};
+  color(image,20,4,[130,70,20,255]); // A hanger outside the sourced garment outline.
+  color(image,12,25,[245,244,246,255]);
+  Preview.applySilhouette(image,spec);
+  assert.equal(image.data[(4*40+20)*4+3],0);
+  assert.equal(image.data[(16*40+20)*4+3],0);
+  assert.deepEqual([...image.data.slice((25*40+12)*4,(25*40+12)*4+4)],[245,244,246,255]);
+});
+
+test('silhouette selection is tied to the exact product asset, not a generic replacement',()=>{
+  const {Preview}=fixture(),p={id:'6431292464',image:'/products/6431292464.jpg',preview:{}};
+  const mask=Preview.packshotMask(p,Preview.normalizedCrop());assert(mask.keep.length);assert.equal(mask.anchor.shoulderWidth,.52);
+  assert.equal(Preview.packshotMask({...p,image:'/products/other.jpg'},Preview.normalizedCrop()),null);
+  assert.equal(Preview.packshotMask({...p,id:'unknown'},Preview.normalizedCrop()),null);
+  assert.throws(()=>Preview.rasterizePolygons([[[0,0],[1,0],[Infinity,1]]],10,10),/silhouette is invalid/);
+});
+
+test('transparent lens holes can seed neutral backdrop removal without changing dark rims',()=>{
+  const {Preview}=fixture(),image=pixels(20,20);for(let y=3;y<17;y++)for(let x=3;x<17;x++)color(image,x,y,[10,10,10,255]);
+  for(let y=6;y<14;y++)for(let x=6;x<14;x++)color(image,x,y,[255,255,255,255]);
+  color(image,10,10,[255,255,255,0]);Preview.removeEdgeWhite(image,{transparentSeeds:true});
+  assert.equal(image.data[(8*20+8)*4+3],0);assert.deepEqual([...image.data.slice((5*20+5)*4,(5*20+5)*4+4)],[10,10,10,255]);
+});
+
+test('gold edge matting removes white paper without turning warm metal into a white outline',()=>{
+  const {Preview}=fixture(),image=pixels(3,1);color(image,1,0,[253,249,241,255]);color(image,2,0,[90,65,35,255]);
+  Preview.cleanFrameBackdrop(image,'gold');assert.equal(image.data[3],0);assert(image.data[7]>0);assert(image.data[4]>image.data[6]);assert(image.data[6]<241);assert.deepEqual([...image.data.slice(8,12)],[90,65,35,255]);
+});
+
+test('unusable model or scene photos are rejected by the preview loader before loading any image',async()=>{
+  const {Preview}=fixture();let loaded=false;const preview=new Preview({loadImage:async()=>{loaded=true;return {width:10,height:10};}});
+  await assert.rejects(preview.load({...product('1','glasses'),preview:{available:false,unavailableReason:'A frontal packshot is needed.'}}),/frontal packshot/);assert.equal(loaded,false);
+});
+
+test('lip balm and sweater use the same product-photo pipelines without generic assets',async()=>{
+  const {Preview}=fixture();const preview=new Preview({canvasFactory:canvasFactory(),loadImage:async()=>({width:10,height:10})});
+  assert.equal((await preview.load({...product('1','lipbalm'),preview:{color:'#c75a74'}})).kind,'lip');
+  assert.equal((await preview.load(product('2','sweater'))).kind,'garment');
+});
+
+test('white garment silhouette keeps the fabric and remaps source shoulder anchors after tight cropping',async()=>{
+  const {Preview}=fixture(),preview=new Preview({canvasFactory:canvasFactory(pixels(640,640)),loadImage:async()=>({width:640,height:640})});
+  const result=await preview.load({id:'7835573890',productType:'tshirt',image:'/products/7835573890.png',preview:{background:'white'}});
+  assert.equal(result.cleanSilhouette,true);assert.equal(result.backgroundRemoved,true);assert(result.width>400&&result.width<600);assert(result.height>450&&result.height<600);
+  assert(Math.abs(result.shoulderWidth-.5*640/result.width)<.0001);assert(result.shoulderY>.02&&result.shoulderY<.15);
+});

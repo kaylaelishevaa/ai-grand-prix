@@ -153,7 +153,7 @@
   bottom: calc(114px + env(safe-area-inset-bottom));
   gap: 9px;
 }
-.transcript {
+.live-caption {
   display: flex;
   flex-direction: column;
   align-items: stretch;
