@@ -1,77 +1,109 @@
-COUPI is a local Next.js app: real taste learning, scenes, shopping answers and photo inventory over a finite synthetic catalog. Free mode is the default at `/`; the optional day story is at `/guided`. The two video-call chapters and 2030 epilogue remain labeled concept simulations.
+# Nook — AI shopping companion
 
-Use Node.js 22 or newer. From this directory:
+Talk to Nori, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 18 sourced products across six categories.
 
-```sh
-npm install
+Each developer runs their own local server and supplies **their own OpenAI API key**. No usable API key is included in this repository.
+
+## Requirements
+
+- **Node.js 22.13.0 or newer**, with npm, and Git.
+- A browser with camera, microphone, and WebRTC support.
+- Internet access for OpenAI and the face/body tracking models downloaded on first use.
+- For the AI call: an OpenAI project with an API key, available API credits, and access to the configured Realtime model.
+
+Local development does not require a Cloudflare account, Sites account, database, or Coupang API key. Product names and images are bundled in the repository.
+
+## 1. Clone and install
+
+```bash
+git clone https://github.com/kaylaelishevaa/ai-grand-prix.git
+cd ai-grand-prix
+npm ci
+cp .env.example .env.local
+```
+
+In Windows PowerShell, replace the last command with `Copy-Item .env.example .env.local`. If you already cloned the repository, run `git pull` and `npm ci` from its root. Create `.env.local` only if you do not already have one; keep your existing secrets when updating.
+
+## 2. Add your own secrets
+
+Create an API key in your own [OpenAI project](https://platform.openai.com/api-keys). See the [official API quickstart](https://developers.openai.com/api/docs/quickstart) for account and key setup. API usage is charged to the project associated with your key.
+
+Open `.env.local` in your editor and replace the placeholder:
+
+```dotenv
+OPENAI_API_KEY=PASTE_YOUR_OWN_OPENAI_API_KEY_HERE
+OPENAI_REALTIME_MODEL=gpt-realtime-2.1
+```
+
+| Variable | Purpose |
+| --- | --- |
+| `OPENAI_API_KEY` | Your server-side API key. Required for Nori's live AI call. |
+| `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1`. Your project needs access to this Realtime model. |
+
+Keep the key in `.env.local`, never in browser JavaScript or a `NEXT_PUBLIC_` / `VITE_` variable. OpenAI keys belong on the server; see [API authentication guidance](https://developers.openai.com/api/reference/overview). Do not share keys in chat, screenshots, or commits. `.env.local`, `.dev.vars*`, `node_modules/`, and `dist/` are already ignored by Git; build output can contain local preview configuration, so keep it ignored.
+
+Restart the server whenever you change environment variables. If an older `.dev.vars` file exists, Wrangler uses it instead of `.env.local`; consolidate your local settings into one file so stale values do not override the new key.
+
+## 3. Run locally
+
+```bash
 npm run dev
 ```
 
-Open [http://127.0.0.1:3007](http://127.0.0.1:3007). COUPI uses port 3007 to avoid other apps running on 3000. This version needs its local server; double-clicking the old HTML does not launch the live app.
+Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. `/camera` opens the same call interface. Keep the terminal running; press **Ctrl+C** to stop the server.
 
-Copy `.env.example` to `.env.local` and set your own `OPENAI_API_KEY` there, server-side, with `OPENAI_MODEL=gpt-5-mini` and `DEMO_OFFLINE=0` for live use. Restart the server after changing these settings. Never prefix the key with `NEXT_PUBLIC_`, put it in browser code, or commit it. `.env*`, `.data/` and `.cache/` are ignored by Git. No key is needed for a fully cached offline replay, but the same model name is still required.
+This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
-Try the core loop:
+To check that the server loaded your configuration, open [the local voice status endpoint](http://127.0.0.1:5173/api/voice/status). With a nonempty key, it should report `ready: true` and `catalogCount: 18`. This check makes no OpenAI request: it confirms that a key is present, not that the key, credits, or model access are valid. Starting an actual call exercises those checks and incurs API usage.
 
-1. Make six choices in Taste. Attribute votes are calculated in code; one model call turns them into editable memory lines.
-2. Generate a scene, then enter your own “change the vibe” command.
-3. Ask a shopping question. Use the microphone in a supported browser, or type in the same box. Open citations, **Why**, and **Read all reviews** to inspect the seeded evidence.
-4. Delete a memory in Its Head, then ask again. Deletion removes its linked traits and historical vote contributions from future model context.
-5. Upload a JPG, PNG or WebP photo, up to 8 MB. Inventory gaps with catalog matches enter Decisions for your approval.
-6. Enable **pretend it’s 2am** in Its Head and add an item. The morning lock is enforced by the server. Ask to buy laundry detergent to see the owned-item refusal before any model call.
+## 4. Try the demo
 
-The app never places real orders or charges money. Approving records ownership locally; it does not contact Coupang. Approval never earns XP. XP comes only from swipes and answered questions. Night additions between 22:00 and 07:00 use the browser’s local timezone and lock until morning. Owned items and quarantined sensitive categories are excluded by code.
+1. Click **Answer video call** and allow camera and microphone access.
+2. Ask Nori, for example, “Show me glasses under 30,000 won.”
+3. Select **Try it** on a product. Cards and secondary controls minimize during try-on; **Products** or **More** restores them.
+4. Use **Flip** to switch between front and back cameras when the device has both.
+5. Swipe or ask Nori to skip/save a product. The bag is an in-memory demo; nothing is purchased.
+6. Click **End call** when finished.
 
-Product facts live in `data/catalog.json`; all reviews in `data/reviews.json` are synthetic and have stable IDs. There is no live product search, price feed, delivery promise or customer-review feed. A verdict’s pick and citations are validated; invalid model output gets one retry, then exposes the raw catalog and reviews. Missing information should produce a clarifying question.
+Without an API key, choose **Browse instead → 18 picks → a category → Try it** to test the catalog and local camera overlays. AI voice and AI camera understanding require your own working key.
 
-Profiles persist in `.data/profiles/`, identified by a local session cookie, with a browser `localStorage` mirror. Its Head can reset the current profile or export it. Resetting the profile preserves recorded model responses. This is a local demo with no account authentication, hosted deployment or production commerce integration.
+Camera snapshots are shared with OpenAI during an active call when **Let Nori see my camera** is enabled. The eye/Pause control stops that sharing while local try-on continues. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
 
-For a reliable offline presentation, first rehearse online from a reset profile. Record the exact choices, typed questions, scene commands and photo you intend to use. Reset the profile again, stop the server, and restart in cache-only mode:
+## Phone camera testing
 
-```sh
-DEMO_OFFLINE=1 npm run dev
-```
+`localhost` on a phone refers to the phone, not your laptop. The default development server listens on the laptop's loopback address. A plain LAN address such as `http://192.168.x.x:5173` is not a complete phone setup: camera/microphone access requires a [secure context](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#privacy_and_security).
 
-Repeat the same interactions, in the same mode and order. `.cache/responses/` stores validated outputs under hashes of the request, model, schema and instructions. Changed preferences, wording, mode/deck source or photo bytes can create a new request. A miss fails loudly with `OFFLINE_CACHE_MISS`; it never falls back to a model network call. Browser voice input is disabled in offline mode because browser speech recognition may use a network service. Type the rehearsed question instead. Photos are sent to vision during live use; the response cache stores the inventory and a hash-based filename, not the image bytes.
+For phone testing, use an HTTPS deployment or configure an authenticated HTTPS development tunnel to your local server. A tunnel also needs its exact hostname allowed by Vite and consistent forwarding of the request origin; this repository does not configure that tunnel for you. Anyone who can reach an unprotected copy can potentially use its server-side API key, so do not expose the development server publicly with your key. For the initial setup above, test in a browser on the same computer.
 
-There is also a repeatable terminal rehearsal that does not need a listening web server:
+## Checks and local build
 
-```sh
-npm run rehearse
-DEMO_OFFLINE=1 npm run rehearse
-```
-
-To include vision, append the same photo argument to both commands:
-
-```sh
-npm run rehearse -- --photo=/absolute/path/fridge.jpg
-DEMO_OFFLINE=1 npm run rehearse -- --photo=/absolute/path/fridge.jpg
-```
-
-The CLI warms its own fixed path; it does not automatically cover every browser interaction. Each call logs token counts, latency and cache status to the server console. Replayed calls report zero tokens.
-
-Validation commands:
-
-```sh
-npm test
-npm run typecheck
+```bash
+npm run check
 npm run build
 ```
 
-The test suite exercises real route handlers with a test-only model transport, guardrails, evidence validation, photo-to-decision mapping, cache replay and zero-fetch offline misses. Renderer tests cover bounded camera motion, spring assembly, semantic placement, sustained slow-frame detection and unavailable WebGL cleanup. Browser checks cover live scene generation, scene rebuilds, hotspot sheets and the 3D hatch. Production orders remain simulated.
+`npm run check` runs syntax checks and automated tests without a real API key or paid OpenAI calls. `npm run build` produces the Worker and browser assets under `dist/`.
 
-Scenes and the opening hatch use Three.js with an orthographic camera. Scene furniture and products are stylized low-poly meshes; product frames remain accessible HTML buttons projected through the same camera. Pointer movement is constrained, there are no camera controls, and a successful rebuild drops and reassembles the room over about 1.5 seconds. Hidden tabs pause rendering. WebGL errors, context loss or sustained rendering below 30 FPS fall back to the existing 2D interface. Reduced-motion preferences suppress orbit and assembly movement.
+## Troubleshooting
 
-Coupang currently denies access to the product photo pages from this environment. No real Coupang photos or exact product scans are bundled. Product frames use the existing illustrations as explicit placeholders. To add verified local photos later, place them in `public/products/` and map SKU IDs in `data/product-images.json`:
+| Problem | What to check |
+| --- | --- |
+| `ready: false` / voice waiting for a key | Put `.env.local` beside `package.json`, fill in `OPENAI_API_KEY`, and restart. Check for an overriding `.dev.vars` file. |
+| Invalid key, unavailable model, or exhausted credits | Check your own OpenAI project's key, model access, and API billing. Configuration status alone cannot validate them. |
+| Camera or microphone blocked | Allow both in browser site permissions and OS privacy settings. Use localhost or HTTPS and close other apps holding the camera. |
+| Voice connection times out | Check microphone permission and network/WebRTC access; retry on another network if a VPN or firewall blocks it. |
+| Flip reports no other camera | This is expected on a device with only one usable camera. Test front/back switching on a phone. |
+| Tracking or overlay fails to load | Allow downloads from `cdn.jsdelivr.net` and `storage.googleapis.com`; improve lighting and keep your face or torso visible. |
+| Port 5173 is in use | Stop the other development server, then run `npm run dev` again. |
+| Native dependency install fails | Check the Node version, then try `npm run install:ci`, which includes the project's native-dependency setup. |
 
-```json
-{
-  "kettle": {
-    "src": "/products/kettle.jpg",
-    "sourceUrl": "the verified source listing URL",
-    "alt": "An accurate description of the verified product photo"
-  }
-}
-```
+## Current scope and source files
 
-A missing or failed image returns to its illustrated placeholder. Image mappings never alter catalog prices, delivery claims or review evidence.
+Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clothing fit, colour, physical scale, and room perspective are approximate. There is no generated-photo workflow, checkout, live price/stock feed, or persistent shopping profile.
+
+- `site-pages/camera.html`, `public/mobile-call.*`: mobile call interface.
+- `public/camera-engine.js`, `public/product-preview.js`: local tracking and product rendering.
+- `public/voice-call.js`, `lib/nook-voice.mjs`, `worker/index.ts`: Realtime connection, catalog tools, and server routes.
+- `data/catalog.json`, `public/products/`, `public/product-catalog.csv`: 18 products and their images/links.
+- `VOICE-CATALOG-SOURCES.txt`: listing provenance and historical reference prices.
+- `tests/`: automated checks.
