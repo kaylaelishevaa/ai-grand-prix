@@ -32,13 +32,13 @@ Open `.env.local` in your editor and replace the placeholder:
 
 ```dotenv
 OPENAI_API_KEY=PASTE_YOUR_OWN_OPENAI_API_KEY_HERE
-OPENAI_REALTIME_MODEL=gpt-realtime-2.1
+OPENAI_REALTIME_MODEL=gpt-realtime-2.1-mini
 ```
 
 | Variable | Purpose |
 | --- | --- |
 | `OPENAI_API_KEY` | Your server-side API key. Required for Coupi's live AI call. |
-| `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1`. Your project needs access to this Realtime model. |
+| `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1-mini`. Your project needs access to this Realtime model. |
 
 Keep the key in `.env.local`, never in browser JavaScript or a `NEXT_PUBLIC_` / `VITE_` variable. OpenAI keys belong on the server; see [API authentication guidance](https://developers.openai.com/api/reference/overview). Do not share keys in chat, screenshots, or commits. `.env.local`, `.dev.vars*`, `node_modules/`, and `dist/` are already ignored by Git; build output can contain local preview configuration, so keep it ignored.
 

@@ -30,6 +30,7 @@
   function updateFocusUI(){
     const active=!!trying&&camera.running&&['active','browse'].includes(phase),focused=active&&!controlsExpanded;
     $('phone-app').dataset.focused=String(focused);
+    show('gesture-status',!!store.current&&!focused&&['connecting','active','browse'].includes(phase));
     show('focus-product',focused);show('focus-toggle',active);
     $('focus-toggle').setAttribute('aria-expanded',String(controlsExpanded));
     $('focus-toggle').setAttribute('aria-label',controlsExpanded?'Minimize product and controls':'Show product and controls');
@@ -45,10 +46,13 @@
     show('vision-strip',['connecting','active'].includes(phase));
     $('vision-toggle').setAttribute('aria-pressed',String(visionWanted));
     $('vision-toggle').setAttribute('aria-label',visionWanted?'Pause camera sharing with Coupi':'Resume camera sharing with Coupi');
-    $('vision-toggle').dataset.state=enabled?visionState:'paused';
     const age=visionLastAt?Date.now()-Date.parse(visionLastAt):Infinity;
-    const label=!visionWanted?'Coupi’s view is paused':!camera.running?'Camera off · Coupi can’t see':!enabled?'Camera sharing waiting':visionState==='error'?'Camera sharing delayed':visionState==='received'&&age<12000?'Coupi sees snapshots':visionState==='received'?'Refreshing Coupi’s view…':'Sharing camera…';
-    text('vision-status',label);text('vision-action',visionWanted?'Pause':'Resume');
+    const displayState=!enabled?'paused':visionState==='error'?'error':age<12000?'received':visionLastAt?'refreshing':'sent';
+    $('vision-toggle').dataset.state=displayState;
+    const label=!visionWanted?'':!camera.running?'Camera off · Coupi can’t see':!enabled?'Camera sharing waiting':displayState==='error'?'Camera sharing delayed':displayState==='received'?'Coupi sees snapshots':displayState==='refreshing'?'Refreshing Coupi’s view…':'Sharing camera…';
+    show('vision-status',visionWanted);
+    if($('vision-status').textContent!==label)text('vision-status',label);
+    text('vision-action',visionWanted?'Pause':'Resume');
   }
   function shareSnapshot(reason='interval'){if(!visionEnabled())return false;const frame=snapshots.capture(reason);return frame?voice.sendCameraSnapshot(frame):false;}
 
@@ -56,7 +60,19 @@
     onSwipe:direction=>decide(direction),onStatus:(message,kind)=>{text('gesture-status',kind==='error'?'Hand tracking unavailable · swipe the card':hands.running?'Wave or swipe: ← skip · save →':'Preparing hand swipes…');}});
   async function startHands(){if(!handsWanted||!camera.running||!store.current||phase!=='active'||hands.running||gestureStarting)return;gestureStarting=true;try{await hands.start();}finally{gestureStarting=false;}}
   function stopHands(){gestureStarting=false;hands.stop();text('gesture-status','Swipe: ← skip · save →');}
-  function transcript(entry){if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}store.message(entry);const root=$('transcript');root.replaceChildren();for(const item of store.messages){const bubble=document.createElement('div');bubble.className='bubble '+(item.role==='user'?'user':'assistant');const label=document.createElement('span');label.className='bubble-label';label.textContent=item.role==='user'?'You':'Coupi';const body=document.createElement('p');body.className='bubble-text';body.textContent=item.text; bubble.append(label,body);root.append(bubble);}}
+  function transcript(entry){
+    if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}
+    store.message(entry);
+    const current=store.messages.at(-1);
+    if(!current)return;
+    const body=$('caption-text');
+    text('caption-speaker',current.role==='user'?'You':'Coupi');
+    show('transcript',true);
+    if(body.textContent!==current.text){
+      body.textContent=current.text;
+      body.scrollTop=body.scrollHeight;
+    }
+  }
   voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:'Hi, I’m Coupi. How can I help you today?',getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
     onTranscript:transcript,onRecommendations:(list,message)=>recommend(list,message),
@@ -83,10 +99,26 @@
   });
   window.NookMobile={camera,voice,store};
   async function startCamera({strictFacing=false}={}){if(cameraBusy)return false;cameraBusy=true;cameraUI();const token=generation;try{const ok=await camera.start({facingMode,portrait:true,strictFacing});if(token!==generation)return false;if(ok){facingMode=camera.actualFacingMode||facingMode;camera.setOptions({mirror:facingMode==='user'});startHands();}else if(!strictFacing)notice(camera.lastCameraError?.message||'Allow Camera in browser settings, then tap Retry.',true);return ok;}finally{if(token===generation){cameraBusy=false;cameraUI();}}}
-  async function answer(){if(phase==='connecting'||voice.call)return;const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;screen('connecting');notice('');text('camera-fallback-text','Opening your camera…');$('answer-call').disabled=true;store.clearMessages();initialGreeting=true;transcript({role:'assistant',key:'opening',text:'How can I help you today?'});initialGreeting=true;
-    try{await startCamera();if(token!==generation||phase!=='connecting')return;await voice.start();}catch{notice('Could not start the call. Check Camera and Microphone permissions.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
+  async function answer(){if(phase==='connecting'||voice.call)return;const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;screen('connecting');notice('');text('camera-fallback-text',visionWanted?'Opening your camera…':'Camera off. Tap Camera to turn it on.');$('answer-call').disabled=true;store.clearMessages();initialGreeting=true;transcript({role:'assistant',key:'opening',text:'How can I help you today?'});initialGreeting=true;
+    try{
+      if(visionWanted)await startCamera();
+      else{stopHands();camera.stop(false);cameraBusy=false;cameraUI();}
+      if(token!==generation||phase!=='connecting')return;
+      await voice.start();
+    }catch{notice('Could not start the call. Check Camera and Microphone permissions.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
   }
-  function endCall(message='Call ended',allowHome=true){if(ending)return;const completed=allowHome&&phase==='active'&&!document.hidden;ending=true;generation++;previewEpoch++;trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;decisionBusy=false;stopHands();snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});loadingEpoch=0;$('product-try').disabled=false;show('tryon-chip',false);connectedAt=null;screen('ended');text('end-title','A little closer to your thing.');text('end-summary',store.cart.size?`${store.cart.size} ${store.cart.size===1?'pick':'picks'} saved in your demo bag.`:message==='Call ended'?'Your camera and microphone are off.':message);closeDialogs();ending=false;if(completed){let first=true;try{first=window.localStorage.getItem('coupi_first_call_done')!=='1';if(first)window.localStorage.setItem('coupi_first_call_done','1');}catch{/* Storage may be unavailable. */}if(first)window.location.href='/?state=first';}}
+  function endCall(message='Call ended',markCompleted=true){
+    if(ending)return;
+    const completed=markCompleted&&phase==='active'&&!document.hidden;
+    ending=true;generation++;previewEpoch++;trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;decisionBusy=false;
+    stopHands();snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});
+    loadingEpoch=0;$('product-try').disabled=false;$('answer-call').disabled=false;show('tryon-chip',false);connectedAt=null;
+    screen(message==='Call ended'?'incoming':'ended');
+    text('end-title','A little closer to your thing.');
+    text('end-summary',store.cart.size?`${store.cart.size} ${store.cart.size===1?'pick':'picks'} saved in your demo bag.`:message==='Call ended'?'Your camera and microphone are off.':message);
+    closeDialogs();ending=false;
+    if(completed){try{window.localStorage.setItem('coupi_first_call_done','1');}catch{/* Storage may be unavailable. */}}
+  }
   function previewLabel(){return trying?`${trying.preview?.shadeLabel||trying.brand||typeLabels[trying.productType]||'Product'} · ${trying.category==='makeup'?'shade estimate':'live placement guide'}`:'';}
   async function setMode(next){const token=generation;if(!Object.hasOwn(defaults,next))throw Error('Choose makeup, glasses, clothes, desk, or none.');if(next==='none'){previewEpoch++;trying=null;previewMeta=null;}const changed=mode!==next;mode=next;if(changed||next==='none')camera.setOptions(defaults[next]);await camera.setMode(next);if(token!==generation)return false;if(camera.errors[next])throw Error('Tracking is unavailable. Try again in good light or check your connection.');show('tryon-chip',next!=='none'&&!!trying);text('tryon-label',previewLabel());updateFocusUI();updateVisionUI();sync();return true;}
   async function tryOn(p=store.current){
@@ -108,7 +140,7 @@
     }catch(error){if(token===generation&&epoch===previewEpoch){trying=null;previewMeta=null;await setMode('none');}throw error;}
     finally{if(loadingEpoch===epoch){loadingEpoch=0;$('product-try').disabled=false;}}
   }
-  function renderCard(){const p=store.current;show('product-zone',!!p);if(!p){stopHands();sync();return;}
+  function renderCard(){const p=store.current;show('product-zone',!!p);updateFocusUI();if(!p){stopHands();sync();return;}
     const img=$('product-image');img.hidden=!p.image;img.removeAttribute('src');if(p.image){img.src=p.image;img.alt=p.name;img.onerror=()=>{img.hidden=true;};}text('product-title',p.name);text('product-category',typeLabels[p.productType]||({makeup:'Beauty',clothes:'Style',desk:'Your space'})[p.category]);text('product-price',p.price?'₩'+p.price.toLocaleString('en-US')+' · reference':'See price on Coupang');text('product-position',`${Math.max(1,displayedTotal-store.queue.length+1)} / ${displayedTotal}`);$('product-card').style.transform='';$('product-card').style.opacity='';$('product-card').classList.remove('accept','reject');text('swipe-feedback','');show('swipe-feedback',false);sync();startHands();}
   function recommend(list,message){if(!['connecting','active','browse'].includes(phase))return;store.recommend(list);displayedTotal=store.queue.length;hands.reset();renderCard();if(!store.current)toast('No match in this demo catalog. Ask Coupi for another idea.');}
   function updateBag(){text('cart-count',String(store.cart.size));$('cart-button').setAttribute('aria-label',`Open demo bag, ${store.cart.size} items`);sync();}

@@ -12,6 +12,7 @@ class Element {
   constructor(){this.hidden=false;this.disabled=false;this.open=false;this.dataset={};this.style={};this.children=[];this.attributes={};this.listeners=new Map();const classes=new Set();this.classList={add:(...c)=>c.forEach(x=>classes.add(x)),remove:(...c)=>c.forEach(x=>classes.delete(x)),toggle:(c,on)=>on?classes.add(c):classes.delete(c)};}
   setAttribute(k,v){this.attributes[k]=v;} removeAttribute(k){delete this.attributes[k];if(k==='src')delete this.src;}
   append(...nodes){this.children.push(...nodes);} replaceChildren(...nodes){this.children=nodes;}
+  removeChild(node){const index=this.children.indexOf(node);assert.notEqual(index,-1);this.children.splice(index,1);return node;}
   addEventListener(k,fn){if(!this.listeners.has(k))this.listeners.set(k,[]);this.listeners.get(k).push(fn);}
   emit(k,event={}){for(const fn of this.listeners.get(k)||[])fn(event);}
   showModal(){this.open=true;} close(){this.open=false;this.emit('close');}
@@ -54,17 +55,89 @@ test('camera sharing follows consent, pause/resume, camera-off and end while loc
   await f.nodes.get('answer-call').onclick();f.visionTick();assert.equal(f.voice.images.length,1);
   assert.equal(f.nodes.get('vision-status').textContent,'Coupi sees snapshots');
   f.nodes.get('vision-toggle').onclick();f.visionTick();assert.equal(f.voice.images.length,1);assert(f.voice.imageClears>0);assert.equal(f.camera.running,true);
+  assert.equal(f.nodes.get('vision-status').hidden,true);assert.equal(f.nodes.get('vision-status').textContent,'');
+  assert.equal(f.nodes.get('vision-action').textContent,'Resume');assert.equal(f.nodes.get('vision-toggle').attributes['aria-label'],'Resume camera sharing with Coupi');
   f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));await f.voice.opts.onTryon('desk',{x:.25});assert.equal(f.camera.options.x,.25);assert.equal(f.voice.opts.getCameraSnapshot('tool'),null);
   f.nodes.get('vision-toggle').onclick();assert.equal(f.voice.images.length,2);assert.equal(f.voice.images[1].metadata.reason,'resume');
+  assert.equal(f.nodes.get('vision-status').hidden,false);assert.equal(f.nodes.get('vision-status').textContent,'Coupi sees snapshots');
   await f.nodes.get('toggle-camera').onclick();f.visionTick();assert.equal(f.voice.images.length,2);
   f.nodes.get('end-call').onclick();f.visionTick();assert.equal(f.voice.images.length,2);
 });
 
+test('camera sharing indicator stays steady between snapshot sends and acknowledgements',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const status=f.nodes.get('vision-status'),toggle=f.nodes.get('vision-toggle'),emit=f.voice.opts.onVisionState;
+  emit({state:'sent'});assert.equal(status.textContent,'Sharing camera…');
+  emit({state:'received',capturedAt:new Date().toISOString()});
+  assert.equal(status.textContent,'Coupi sees snapshots');assert.equal(toggle.dataset.state,'received');
+  let writes=0,value=status.textContent;
+  Object.defineProperty(status,'textContent',{get:()=>value,set:next=>{writes++;value=next;}});
+  for(let i=0;i<3;i++){
+    emit({state:'sent'});
+    assert.equal(status.textContent,'Coupi sees snapshots');assert.equal(toggle.dataset.state,'received');
+    emit({state:'received',capturedAt:new Date().toISOString()});
+  }
+  assert.equal(writes,0);
+  emit({state:'received',capturedAt:new Date(Date.now()-15000).toISOString()});
+  emit({state:'sent'});assert.equal(status.textContent,'Refreshing Coupi’s view…');assert.equal(toggle.dataset.state,'refreshing');
+  emit({state:'error'});assert.equal(status.textContent,'Camera sharing delayed');assert.equal(toggle.dataset.state,'error');
+  emit({state:'received',capturedAt:new Date().toISOString()});assert.equal(status.textContent,'Coupi sees snapshots');
+  toggle.onclick();assert.equal(status.hidden,true);assert.equal(toggle.dataset.state,'paused');
+  toggle.onclick();assert.equal(status.hidden,false);assert.equal(status.textContent,'Coupi sees snapshots');
+  await f.nodes.get('toggle-camera').onclick();assert.equal(status.textContent,'Camera off · Coupi can’t see');assert.equal(toggle.dataset.state,'paused');
+});
+
+test('swipe hint appears only while a product card is available',async t=>{
+  const f=fixture(t);assert.equal(f.nodes.get('gesture-status').hidden,true);
+  f.nodes.get('vision-consent').checked=false;await f.nodes.get('answer-call').onclick();
+  assert.equal(f.nodes.get('gesture-status').hidden,true);
+  f.voice.opts.onRecommendations([catalog[0]]);
+  assert.equal(f.nodes.get('gesture-status').hidden,false);
+  await f.nodes.get('product-skip').onclick();
+  assert.equal(f.nodes.get('gesture-status').hidden,true);
+  f.voice.opts.onRecommendations([catalog[0]]);
+  assert.equal(f.nodes.get('gesture-status').hidden,false);
+  f.nodes.get('end-call').onclick();assert.equal(f.nodes.get('gesture-status').hidden,true);
+});
+
 test('camera opt-out and hidden page never share a frame',async t=>{
   const f=fixture(t);f.nodes.get('vision-consent').checked=false;await f.nodes.get('answer-call').onclick();
-  f.visionTick();assert.equal(f.camera.running,true);assert.equal(f.voice.images.length,0);
+  f.visionTick();assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,0);assert.equal(f.voice.images.length,0);
+  assert.equal(f.nodes.get('vision-status').hidden,true);assert.equal(f.nodes.get('vision-action').textContent,'Resume');
+  assert.deepEqual(f.sequence,['voice']);assert.equal(f.nodes.get('phone-app').dataset.phase,'active');
+  assert.equal(f.nodes.get('camera-fallback').hidden,false);assert.equal(f.nodes.get('toggle-camera').attributes['aria-label'],'Turn camera on');
+  assert.equal(f.nodes.get('camera-fallback-text').textContent,'Camera off. Tap Camera to turn it on.');
+  await f.nodes.get('toggle-camera').onclick();f.visionTick();
+  assert.equal(f.camera.running,true);assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,1);assert.equal(f.voice.images.length,0);
   f.context.document.hidden=true;f.nodes.get('vision-toggle').onclick();f.visionTick();assert.equal(f.voice.images.length,0);
   f.docEvents.emit('visibilitychange');assert.equal(f.voice.call,null);assert.equal(f.camera.running,false);
+});
+
+test('starting a call with camera opt-out closes a camera opened while browsing',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;f.nodes.get('decline-call').onclick();
+  await f.nodes.get('product-try').onclick();assert.equal(f.camera.running,true);
+  await f.nodes.get('retry-call').onclick();await tick();
+  assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,1);assert.equal(f.voice.call.ready,true);
+  f.visionTick();assert.equal(f.voice.images.length,0);
+});
+
+test('camera opt-out cancels a pending browse camera request and still allows manual activation',async t=>{
+  const permission=deferred();const f=fixture(t,{cameraPermission:n=>n===1?permission.promise:Promise.resolve()});
+  f.nodes.get('vision-consent').checked=false;f.nodes.get('decline-call').onclick();
+  const opening=f.nodes.get('toggle-camera').onclick();
+  await f.nodes.get('retry-call').onclick();await tick();
+  assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,1);
+  permission.resolve();await opening;assert.equal(f.camera.running,false);
+  await f.nodes.get('toggle-camera').onclick();assert.equal(f.camera.running,true);assert.equal(f.cameraStarts,2);
+  f.visionTick();assert.equal(f.voice.images.length,0);
+});
+
+test('calling again preserves camera opt-out after manually turning the camera on',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await f.nodes.get('answer-call').onclick();
+  await f.nodes.get('toggle-camera').onclick();f.nodes.get('end-call').onclick();
+  f.nodes.get('call-again').onclick();await tick();
+  assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,2);
+  assert.equal(f.voice.call.ready,true);f.visionTick();assert.equal(f.voice.images.length,0);
 });
 
 test('mobile entry boots against real HTML IDs, and Browse requests no camera or voice',t=>{
@@ -74,19 +147,49 @@ test('mobile entry boots against real HTML IDs, and Browse requests no camera or
   assert.equal(f.store.queue.length,new Set(catalog.map(p=>p.category)).size);assert.equal(f.nodes.get('product-zone').hidden,false);
 });
 
-test('Answer starts camera then real-call adapter; End closes both and shows ended screen',async t=>{
+test('Answer starts camera then real-call adapter; End closes both and returns to the start screen',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();
   assert.deepEqual(f.sequence,['camera','voice']);assert.equal(f.nodes.get('phone-app').dataset.phase,'active');
-  f.nodes.get('end-call').onclick();assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');
+  f.nodes.get('end-call').onclick();assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
 });
 
-test('two bubble limit preserves a user who speaks before the first assistant transcript',async t=>{
+test('captions show the latest speaker while preserving conversation state',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();
   const emit=e=>f.voice.opts.onTranscript(e);
-  emit({role:'user',key:'early-user',text:'I want a shirt'});emit({role:'assistant',key:'reply',delta:'What colour?'});
+  emit({role:'user',key:'early-user',text:'I want a shirt'});
+  assert.equal(f.nodes.get('caption-speaker').textContent,'You');assert.equal(f.nodes.get('caption-text').textContent,'I want a shirt');
+  emit({role:'assistant',key:'reply',delta:'What colour?'});
   assert.equal(f.store.messages.length,2);assert.equal(f.store.messages[0].key,'early-user');
-  emit({role:'user',key:'next-user',text:'Blue'});emit({role:'assistant',key:'next-reply',text:'Here are your picks'});
-  assert.equal(f.nodes.get('transcript').children.length,2);assert.deepEqual(Array.from(f.store.messages,m=>m.key),['next-user','next-reply']);
+  assert.equal(f.nodes.get('caption-speaker').textContent,'Coupi');assert.equal(f.nodes.get('caption-text').textContent,'What colour?');
+  assert.equal(f.nodes.get('transcript').hidden,false);
+});
+
+test('streaming captions reuse the text box, follow new text and skip unchanged final writes',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const emit=e=>f.voice.opts.onTranscript(e);
+  emit({role:'user',key:'question',text:'A lamp'});emit({role:'assistant',key:'reply',delta:'Here'});
+  const body=f.nodes.get('caption-text');body.scrollHeight=220;
+  emit({role:'assistant',key:'reply',delta:' is a lamp'});
+  assert.equal(f.nodes.get('caption-text'),body);assert.equal(body.textContent,'Here is a lamp');assert.equal(body.scrollTop,220);
+  let writes=0,value=body.textContent;
+  Object.defineProperty(body,'textContent',{get:()=>value,set:next=>{writes++;value=next;}});
+  emit({role:'assistant',key:'reply',text:'Here is a lamp',final:true});
+  assert.equal(writes,0);
+  emit({role:'assistant',key:'reply',text:'Here is the lamp.',final:true});
+  assert.equal(writes,1);assert.equal(body.textContent,'Here is the lamp.');
+});
+
+test('late transcripts cannot replace the current caption and a new call resets it',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const emit=e=>f.voice.opts.onTranscript(e),body=f.nodes.get('caption-text');
+  emit({role:'user',key:'question',text:'A lamp'});emit({role:'assistant',key:'reply',text:'Here is one'});
+  emit({role:'user',key:'next-question',text:'Another one'});
+  emit({role:'assistant',key:'reply',text:'Late final reply'});
+  emit({role:'user',key:'question',text:'Late update'});
+  assert.equal(body.textContent,'Another one');assert.equal(f.nodes.get('caption-speaker').textContent,'You');
+  emit({role:'assistant',key:'next-reply',delta:'Another lamp'});
+  assert.equal(body.textContent,'Another lamp');
+  f.nodes.get('end-call').onclick();f.nodes.get('call-again').onclick();await tick();
+  assert.equal(f.nodes.get('caption-text'),body);assert.equal(body.textContent,'How can I help you today?');
+  assert.equal(f.nodes.get('caption-speaker').textContent,'Coupi');
 });
 
 test('spoken partial overlay updates preserve existing settings and none fully clears',async t=>{
@@ -116,7 +219,7 @@ test('catalog exposes all six groups and selecting a row tries its exact product
 test('ending while a product image loads cannot restore try-on UI',async t=>{
   const wait=deferred();const f=fixture(t,{productLoad:()=>wait.promise});await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));
   const loading=f.nodes.get('product-try').onclick();await tick();f.nodes.get('end-call').onclick();wait.resolve();await loading;
-  assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('tryon-chip').hidden,true);assert.equal(f.voice.opts.getContext().tried_product,null);
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('tryon-chip').hidden,true);assert.equal(f.voice.opts.getContext().tried_product,null);
 });
 
 test('camera-off during product loading clears a stale product claim',async t=>{
@@ -143,7 +246,7 @@ test('browse card action opens grounded details; saving only adds to local bag',
 
 test('ending during swipe animation prevents late bag mutation',async t=>{
   const f=fixture(t);f.nodes.get('decline-call').onclick();const pending=f.nodes.get('product-save').onclick();f.nodes.get('end-call').onclick();await pending;
-  assert.equal(f.store.cart.size,0);assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');
+  assert.equal(f.store.cart.size,0);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
 });
 
 test('old camera-permission completion cannot start voice inside a newer pending call',async t=>{
@@ -232,15 +335,18 @@ test('ending while a physical-camera switch is pending cannot restart either cam
   const wait=deferred();const f=fixture(t,{cameraStart:settings=>settings.strictFacing?wait.promise:true});await f.nodes.get('answer-call').onclick();
   const switching=f.nodes.get('flip-camera').onclick();await tick();f.nodes.get('end-call').onclick();wait.resolve(false);await switching;
   assert.equal(f.camera.starts.length,2);assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
-  assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
 });
 
-test('first completed call closes media then returns to Home once',async t=>{
+test('first and returning calls close media and stay on the start screen',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();f.nodes.get('end-call').onclick();
   assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
-  assert.equal(f.storage.get('coupi_first_call_done'),'1');assert.equal(f.context.window.location.href,'/?state=first');
+  assert.equal(f.storage.get('coupi_first_call_done'),'1');assert.equal(f.context.window.location.href,'/call');
+  assert.equal(f.nodes.get('incoming-screen').hidden,false);assert.equal(f.nodes.get('end-screen').hidden,true);assert.equal(f.nodes.get('call-screen').hidden,true);
+  assert.equal(f.nodes.get('answer-call').disabled,false);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);assert.equal(f.voiceStarts,2);
   const returning=fixture(t,{storage:f.storage});await returning.nodes.get('answer-call').onclick();returning.nodes.get('end-call').onclick();
-  assert.equal(returning.context.window.location.href,'/call');
+  assert.equal(returning.context.window.location.href,'/call');assert.equal(returning.nodes.get('incoming-screen').hidden,false);assert.equal(returning.nodes.get('end-screen').hidden,true);
 });
 
 test('browsing, a cancelled connection, and leaving the page do not complete the first call',async t=>{
@@ -248,14 +354,14 @@ test('browsing, a cancelled connection, and leaving the page do not complete the
   assert.equal(browsing.storage.has('coupi_first_call_done'),false);
   const wait=deferred(),connecting=fixture(t,{cameraPermission:()=>wait.promise});
   const answering=connecting.nodes.get('answer-call').onclick();connecting.nodes.get('end-call').onclick();wait.resolve();await answering;
-  assert.equal(connecting.storage.has('coupi_first_call_done'),false);
+  assert.equal(connecting.storage.has('coupi_first_call_done'),false);assert.equal(connecting.nodes.get('answer-call').disabled,false);assert.equal(connecting.nodes.get('incoming-screen').hidden,false);
   const leaving=fixture(t);await leaving.nodes.get('answer-call').onclick();leaving.events.emit('pagehide');
   assert.equal(leaving.storage.has('coupi_first_call_done'),false);assert.equal(leaving.context.window.location.href,'/call');
   const hidden=fixture(t);await hidden.nodes.get('answer-call').onclick();hidden.context.document.hidden=true;hidden.docEvents.emit('visibilitychange');
   assert.equal(hidden.storage.has('coupi_first_call_done'),false);
 });
 
-test('first-call Home handoff still works if browser storage is blocked',async t=>{
+test('ending returns to the start screen even if browser storage is blocked',async t=>{
   const f=fixture(t,{blockStorage:true});await f.nodes.get('answer-call').onclick();f.nodes.get('end-call').onclick();
-  assert.equal(f.context.window.location.href,'/?state=first');assert.equal(f.camera.running,false);
+  assert.equal(f.context.window.location.href,'/call');assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.nodes.get('incoming-screen').hidden,false);assert.equal(f.nodes.get('end-screen').hidden,true);
 });

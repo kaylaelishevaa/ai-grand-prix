@@ -148,14 +148,37 @@
 .swipe-feedback.reject,
 .product-card.reject .swipe-feedback { color: #ae514a; background: #fff0ecf2; }
 .product-empty { color: #3c737b; background: var(--call-glass); }
-.bubble {
-  color: var(--call-ink);
-  background: #fbfffff0;
-  border: 1px solid #ffffffa6;
-  box-shadow: 0 5px 18px #123f4514;
+/* One stable caption panel; streaming text follows the latest two lines. */
+.phone-app[data-focused] .conversation-area {
+  bottom: calc(114px + env(safe-area-inset-bottom));
+  gap: 9px;
 }
-.bubble.user { color: #184b52; background: #d5f0f3f0; border-color: #c5e8ed; }
-.bubble-label { color: #426f75; opacity: 1; }
+.transcript {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+  height: 88px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: #fff;
+  background: rgb(19 42 46 / 85%);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+.caption-speaker { font-size: 10px; line-height: 15px; font-weight: 650; color: #cce9e9; }
+.caption-text {
+  height: 44px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  line-height: 22px;
+  scrollbar-width: none;
+}
+.caption-text::-webkit-scrollbar { display: none; }
+.caption-text:focus-visible { outline: 2px solid #b6eeee; outline-offset: 2px; }
+.conversation-area .text-form { position: absolute; bottom: calc(100% + 9px); left: 0; right: 0; }
 .tryon-chip { color: #245f66; background: var(--call-glass); border-color: #cde5e8; }
 .tryon-chip button { color: #316c73; background: #deeff2; }
 .text-form { background: #fbfffff5; box-shadow: 0 5px 18px #123f4514; }
@@ -172,12 +195,9 @@
 .end-control { color: white; background: #db7772; border-color: #dd817a; box-shadow: 0 4px 15px #71363316; }
 .end-control:hover { background: #c76360; }
 
-/* Keep the existing small try-on controls and two-bubble conversation layout. */
+/* Keep the small try-on controls while captions retain their fixed size. */
 .phone-app[data-focused=true] .call-person { min-height: 35px; padding: 3px 8px 3px 3px; gap: 6px; }
 .phone-app[data-focused=true] .mini-nori { width: 27px; height: 27px; }
-.phone-app[data-focused=true] .bubble { color: var(--call-ink); background: #fbffffed; }
-.phone-app[data-focused=true] .bubble.user { color: #184b52; background: #d5f0f3ed; }
-.phone-app[data-focused=true] .bubble-label { color: #426f75; }
 .phone-app[data-focused=true] .call-control { color: var(--call-ink); background: #f5ffffe8; }
 .phone-app[data-focused=true] .call-control[aria-pressed=true] { color: white; background: var(--call-teal); }
 .phone-app[data-focused=true] .end-control { color: white; background: #db7772; }

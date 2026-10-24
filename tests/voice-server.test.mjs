@@ -92,7 +92,7 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.equal(sent.options.headers.Authorization,'Bearer test-only-private-key');
   assert.equal(sent.options.body.get('sdp'),offer);
   const config=JSON.parse(sent.options.body.get('session'));
-  assert.equal(config.model,'gpt-realtime-2.1');
+  assert.equal(config.model,'gpt-realtime-2.1-mini');
   assert.equal(config.audio.input.transcription.model,'gpt-4o-mini-transcribe');
   assert.equal(config.audio.output.voice,'marin');
   assert.equal(config.audio.input.turn_detection.interrupt_response,true);
@@ -110,6 +110,31 @@ test('upstream errors, invalid answers, and network exceptions never expose raw 
     const response=await createVoiceHandler({fetchImpl})(makeRequest('/api/voice/session',offer,'application/sdp'),{OPENAI_API_KEY:'test-only-private-key'});
     assert.equal(response.status,502);
     assert.doesNotMatch(await response.text(),/secret detail/);
+  }
+});
+
+test('voice status and the session handshake honor the server model override', async () => {
+  let sentModel;
+  const handler=createVoiceHandler({fetchImpl:async(url,options)=>{
+    sentModel=JSON.parse(options.body.get('session')).model;
+    return new Response(answer);
+  }});
+  const env={OPENAI_API_KEY:'test-only-private-key',OPENAI_REALTIME_MODEL:'gpt-realtime-2.1'};
+  const status=await (await handler(new Request(origin+'/api/voice/status'),env)).json();
+  const response=await handler(makeRequest('/api/voice/session',offer,'application/sdp'),env);
+  assert.equal(response.status,200);
+  assert.equal(status.model,env.OPENAI_REALTIME_MODEL);
+  assert.equal(sentModel,env.OPENAI_REALTIME_MODEL);
+});
+
+test('voice distinguishes a rejected key from project access errors without exposing upstream details', async () => {
+  for(const [status,expected] of [[401,/rejected the configured API key/],[403,/model access and key permissions/]]){
+    const handler=createVoiceHandler({fetchImpl:async()=>Response.json({error:{message:'private-provider-detail'}},{status})});
+    const response=await handler(makeRequest('/api/voice/session',offer,'application/sdp'),{OPENAI_API_KEY:'test-only-private-key'});
+    assert.equal(response.status,503);
+    const body=await response.text();
+    assert.match(body,expected);
+    assert.doesNotMatch(body,/private-provider-detail|test-only-private-key/);
   }
 });
 

@@ -73,11 +73,14 @@
 
       <div class="conversation-area">
         <div id="tryon-chip" class="tryon-chip" hidden><svg><use href="#i-spark"/></svg><span id="tryon-label">Trying it on</span><button id="clear-tryon" aria-label="Remove try-on overlay"><svg><use href="#i-close"/></svg></button></div>
-        <div id="transcript" class="transcript" role="log" aria-live="polite" aria-relevant="additions text"></div>
+        <div id="transcript" class="transcript" role="status" aria-live="polite" aria-atomic="true" hidden>
+          <span id="caption-speaker" class="caption-speaker"></span>
+          <p id="caption-text" class="caption-text" tabindex="0" aria-label="Live captions"></p>
+        </div>
         <form id="text-form" class="text-form" hidden><input id="text-input" type="text" maxlength="1000" autocomplete="off" placeholder="Tell Coupi…" aria-label="Message Coupi"><button type="submit" aria-label="Send message"><svg><use href="#i-arrow"/></svg></button></form>
       </div>
       <footer class="call-footer">
-        <p id="gesture-status" class="gesture-status">Talk naturally. Try something new.</p>
+        <p id="gesture-status" class="gesture-status" hidden>Swipe: ← skip · save →</p>
         <div class="call-controls">
           <button id="mute-call" class="call-control" aria-label="Mute microphone" aria-pressed="false" title="Mute"><svg><use href="#i-mic"/></svg></button>
           <button id="toggle-camera" class="call-control" aria-label="Turn camera off" aria-pressed="false" title="Camera"><svg><use href="#i-video"/></svg></button>
