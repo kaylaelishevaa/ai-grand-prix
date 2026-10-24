@@ -103,3 +103,39 @@ test('negative eyewear requests never reintroduce sunglasses while switching sty
   const d=setup();d.recommend([],{query:'Can you show me glasses without sunglasses',maxPrice:20000});assert.deepEqual(ids(d.products),['optic']);
   assert.equal(d.nextTheme().theme,'optical');assert.deepEqual(ids(d.products),['optic']);assert.equal(d.nextTheme().changed,false);
 });
+
+const relatedCatalog=[...catalog,
+  ...Array.from({length:10},(_,i)=>({id:`balm-${i}`,name:`Lip balm ${i}`,productType:'lipbalm',category:'makeup',brand:i%2?'Alpha':'Beta',price:6000+i*100,tags:['lipbalm']})),
+  ...['basic','branded'].flatMap(style=>Array.from({length:6},(_,i)=>({id:`shirt-${style}-${i}`,name:`${style} T-shirt ${i}`,productType:'tshirt',category:'clothes',collectionStyle:style,price:15000,tags:['tshirt',style]}))),
+  ...['hoodie','sweater'].flatMap(type=>Array.from({length:6},(_,i)=>({id:`${type}-${i}`,name:`${type} ${i}`,productType:type,category:'clothes',price:18000,tags:[type]}))),
+];
+test('next collection changes lipstick to lip balm, shows six then ten, and restores the exact saved group',()=>{
+  const saved=storage(),d=setup(saved,relatedCatalog);d.recommend([],{query:'pink lipstick',maxPrice:10000});const pink=d.saveCollection();
+  const next=d.nextCollection();assert.equal(next.productType,'lipbalm');assert.equal(next.label,'Lip balms');assert.equal(next.visible.length,6);assert(next.products.every(p=>p.price<=10000));
+  d.viewMore();assert.equal(d.visible.length,10);d.select('balm-8');const balm=d.saveCollection();
+  d.nextCollection();assert.notEqual(d.productType,'lipbalm');
+  const restored=setup(saved,relatedCatalog);restored.restoreCollection(balm.id);assert.equal(restored.productType,'lipbalm');assert.equal(restored.current.id,'balm-8');assert.equal(restored.visible.length,10);
+  restored.restoreCollection(pink.id);assert.equal(restored.theme,'pink');assert.equal(restored.productType,'lipstick');assert(restored.products.every(p=>p.tags.includes('pink')));
+});
+test('related collections preserve exclusions and budget, with no padding using unrelated products',()=>{
+  const d=setup(storage(),relatedCatalog);d.recommend([],{query:'lipstick not pink',maxPrice:6500});
+  assert.equal(d.total,0);assert.equal(d.nextCollection().productType,'lipbalm');assert.equal(d.visible.length,6);assert(d.products.every(p=>p.price<=6500&&!p.tags.includes('pink')));
+  d.recommend([],{query:'glasses without sunglasses',maxPrice:20000});d.nextCollection();assert(d.products.every(p=>p.id==='optic'));
+  d.recommend([],{query:'Alpha pink lipstick',maxPrice:10000});d.nextCollection();assert.equal(d.productType,'lipbalm');assert(d.products.every(p=>p.brand==='Alpha'));
+});
+test('basic shirts lead to branded shirts; hoodies lead to sweaters; saved style survives reload',()=>{
+  const saved=storage(),d=setup(saved,relatedCatalog);d.recommend([],{query:'basic t-shirts'});assert.equal(d.collectionStyle,'basic');assert.equal(d.visible.length,6);
+  d.nextCollection();assert.equal(d.collectionStyle,'branded');assert.equal(d.visible.length,6);assert(d.visible.every(p=>p.collectionStyle==='branded'));const branded=d.saveCollection();
+  const restored=setup(saved,relatedCatalog);restored.restoreCollection(branded.id);assert.equal(restored.label,'Branded T-shirts');assert.equal(restored.collectionStyle,'branded');
+  d.recommend([],{query:'hoodies'});assert.equal(d.nextCollection().productType,'sweater');assert.equal(d.visible.length,6);
+});
+
+test('related browsing retains explicit brands from ranked voice results and excludes refused product types',()=>{
+  const saved=storage(),d=setup(saved,relatedCatalog);
+  d.recommend(catalog.slice(0,4),{query:'Find me Alpha pink lipstick for my next big date',sourceOnly:true});
+  d.nextCollection();assert.equal(d.productType,'lipbalm');assert(d.products.every(p=>p.brand==='Alpha'));
+  const record=d.saveCollection(),restored=setup(saved,relatedCatalog);restored.restoreCollection(record.id);restored.nextCollection();assert(restored.products.every(p=>p.brand==='Alpha'));
+  d.recommend(catalog.slice(0,4),{query:'pink lipstick, not lip balm',productType:'lipstick',sourceOnly:true});
+  for(let i=0;i<5;i++){d.nextCollection();assert.notEqual(d.productType,'lipbalm');}
+  d.recommend([],{query:'hoodies without sweaters'});assert.equal(d.productType,'hoodie');d.nextCollection();assert.notEqual(d.productType,'sweater');
+});

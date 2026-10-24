@@ -38,16 +38,16 @@ function fixture(t,options={}){
     async setProduct(product){const token=++this.productGen;if(product&&options.productLoad)await options.productLoad(product);if(token!==this.productGen)return {ok:false,stale:true};this.product=product;return product?{ok:true,productId:product.id,kind:product.category==='makeup'?'lip':product.category==='clothes'?'garment':product.category==='glasses'?'glasses':'object',shadeColor:product.category==='makeup'?'#bc3c57':undefined,shadeEstimated:product.category==='makeup'}:{ok:true};}
   }
   class Voice {
-    constructor(opts){this.opts=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;this.uploads=[];this.sentTexts=[];}
+    constructor(opts){this.opts=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;this.uploads=[];this.sentTexts=[];this.mutes=0;}
     async start(){sequence.push('voice');voiceStarts++;this.call={ready:true};this.opts.onState({state:'connected',muted:false,connectedAt:Date.now()});return true;}
     end(){this.ends++;this.call=null;this.opts.onState({state:'idle',muted:false,connectedAt:null});}
-    updateContext(value){this.contexts.push(value);} mute(){} sendText(value){this.sentTexts.push(value);return options.textSend?options.textSend(value):!!this.call;} async sendImage(value){this.uploads.push(value);return options.imageSend?await options.imageSend(value):!!this.call;} async resumeAudio(){}
+    updateContext(value){this.contexts.push(value);} mute(){this.mutes++;if(this.call){this.call.muted=!this.call.muted;this.opts.onState({state:'connected',muted:this.call.muted,connectedAt:Date.now()});}} sendText(value){this.sentTexts.push(value);return options.textSend?options.textSend(value):!!this.call;} async sendImage(value){this.uploads.push(value);return options.imageSend?await options.imageSend(value):!!this.call;} async resumeAudio(){}
     sendCameraSnapshot(frame){if(!this.opts.getVisionEnabled())return false;this.images.push(frame);this.opts.onVisionState({state:'received',capturedAt:frame.metadata.capturedAt});return true;}
     clearCameraSnapshots(){this.imageClears++;this.opts.onVisionState({state:'paused'});return true;}
   }
   class Snapshots {constructor(opts){this.opts=opts;}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
   class Hands {constructor(opts){gestureInstance=this;this.opts=opts;this.running=false;}async start(){this.running=true;}stop(){this.running=false;}reset(){}}
-  const context={window:{COUPANG_PRODUCTS:catalog,localStorage:options.storage||{getItem(){return null;},setItem(){}},requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,requestAnimationFrame:fn=>{fn();return 1;}};
+  const context={window:{COUPANG_PRODUCTS:options.catalog||catalog,localStorage:options.storage||{getItem(){return null;},setItem(){}},requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,requestAnimationFrame:fn=>{fn();return 1;}};
   vm.createContext(context);vm.runInContext(stateSource,context);for(const moduleSource of moduleSources)vm.runInContext(moduleSource,context);vm.runInContext(source,context);
   const mobile=context.window.NookMobile;
   t.after(()=>nodes.get('end-call').onclick());
@@ -111,11 +111,19 @@ test('selecting two products in one category changes the actual photo source and
   const current=f.voice.opts.getContext();assert.equal(current.tried_product.id,products[1].id);assert.equal(current.tried_product.preview_kind,'garment');
 });
 
-test('catalog exposes all six groups and selecting a row tries its exact product',async t=>{
+test('inline catalog exposes all product groups and selecting a row tries its exact product',async t=>{
   const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('catalog-button').onclick();
-  for(const type of ['lipstick','chair','lamp','tshirt','hoodie','glasses']){f.nodes.get('type-'+type).onclick();assert.equal(f.nodes.get('catalog-items').children.length,Math.min(6,catalog.filter(p=>p.productType===type).length));}
-  const row=f.nodes.get('catalog-items').children[0];await row.children[1].children.find(button=>button.textContent==='Try it').onclick();
-  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.camera.product.productType,'glasses');assert.equal(f.camera.product.id,f.store.current.id);assert.equal(f.voiceStarts,0);
+  for(const type of ['lipstick','lipbalm','chair','lamp','tshirt','hoodie','sweater','glasses']){
+    f.nodes.get('inline-type-'+type).onclick();assert.equal(f.discovery.productType,type);
+    assert.equal(f.nodes.get('catalog-dialog').open,false);
+    assert.equal(f.voice.opts.getContext().visible_panel,'catalog');
+    assert.equal(f.nodes.get('inline-items').children.filter(row=>row.dataset.id).length,Math.min(6,f.discovery.total));
+  }
+  const row=f.nodes.get('inline-items').children.find(row=>row.children[1]?.children.some(button=>button.textContent==='Try on'));
+  assert(row,'An available optical glasses preview must be present');
+  const productId=row.dataset.id;await row.children[1].children.find(button=>button.textContent==='Try on').onclick();
+  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.camera.product.productType,'glasses');assert.equal(f.camera.product.id,productId);assert.equal(f.store.current.id,productId);assert.equal(f.voiceStarts,0);
+  assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.opts.getContext().visible_panel,'call');
 });
 
 test('ending while a product image loads cannot restore try-on UI',async t=>{
@@ -160,23 +168,26 @@ test('old camera-permission completion cannot start voice inside a newer pending
   second.resolve();await tick();await tick();assert.equal(f.voiceStarts,1);
 });
 
-test('try-on minimizes product controls and More, Less, and product bubble restore them',async t=>{
+test('try-on minimizes controls while Controls/Hide toggles them and Products opens the inline collection',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();
   f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='hoodie'));
   assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
   await f.nodes.get('product-try').onclick();
   assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
   assert.equal(f.nodes.get('focus-product').hidden,false);
-  assert.equal(f.nodes.get('focus-toggle-label').textContent,'More');
+  assert.equal(f.nodes.get('focus-toggle-label').textContent,'Controls');
   f.nodes.get('focus-toggle').onclick();
   assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
-  assert.equal(f.nodes.get('focus-toggle-label').textContent,'Less');
+  assert.equal(f.nodes.get('focus-toggle-label').textContent,'Hide');
   assert.equal(f.nodes.get('focus-toggle').attributes['aria-expanded'],'true');
   f.nodes.get('focus-toggle').onclick();
   assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
   f.nodes.get('focus-product').onclick();
-  assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
-  assert.equal(f.nodes.get('focus-toggle-label').textContent,'Less');
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
+  assert.equal(f.nodes.get('focus-toggle-label').textContent,'Controls');
+  assert.equal(f.voice.opts.getContext().visible_panel,'catalog');
+  assert(f.nodes.get('call-screen').scrollTop>0);
+  assert.equal(f.nodes.get('catalog-dialog').open,false);
   assert.equal(f.camera.running,true);assert.equal(f.voice.call.ready,true);
   assert.equal(f.nodes.has('render-generate'),false);
   assert.equal(f.voice.opts.onRealisticPreviewRequested,undefined);
@@ -257,7 +268,7 @@ test('a saved result group returns after switching styles with selected product 
   f.nodes.get('save-group').onclick();assert.equal(f.discovery.collections.length,1);
   await f.nodes.get('product-skip').onclick();assert.equal(f.discovery.theme,'sunglasses');assert.notEqual(f.store.current.id,selected);
   f.nodes.get('collections-button').onclick();const collection=f.nodes.get('collection-items').children[0];collection.children[3].children[0].onclick();
-  assert.equal(f.nodes.get('collections-dialog').open,false);assert.equal(f.nodes.get('catalog-dialog').open,true);
+  assert.equal(f.nodes.get('collections-dialog').open,false);assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.voice.opts.getContext().visible_panel,'catalog');
   assert.deepEqual(Array.from(f.discovery.products,p=>p.id),original);assert.equal(f.store.current.id,selected);assert.equal(f.store.cart.size,0);
 });
 
@@ -431,4 +442,78 @@ test('empty bag and fully deselected checkout cannot proceed to payment',async t
   assert.equal(f.nodes.get('checkout-next').disabled,true);assert.equal(f.checkout.current.referenceTotal,0);
   f.nodes.get('checkout-next').onclick();assert.equal(f.checkout.current.step,'review');assert.equal(f.nodes.get('checkout-error').hidden,false);
   assert.equal(f.checkout.current.receipt,null);assert.equal(f.store.cart.size,0);
+});
+
+function inlineCatalog(){
+  const make=(type,category,count,tags=[],collectionStyle='')=>Array.from({length:count},(_,i)=>({...catalog[0],id:`inline_${type}_${collectionStyle||tags.join('_')}_${i}`,name:`${type} option ${i+1}`,brand:`Demo brand ${i%6+1}`,productType:type,category,collectionStyle,tags,aliases:[],verifiedAttributes:[],price:5000+i*100,preview:{available:true}}));
+  return [...make('lipstick','makeup',10,['pink']),...make('lipbalm','makeup',6),...make('glasses','glasses',6,['optical']),...make('glasses','glasses',6,['sunglasses']),...make('tshirt','clothes',6,[],'basic'),...make('tshirt','clothes',6,[],'branded'),...make('hoodie','clothes',6),...make('sweater','clothes',6)];
+}
+const inlineRows=f=>f.nodes.get('inline-items').children.filter(row=>row.dataset.id);
+const inlineAction=(row,name)=>row.children[1].children.find(button=>button.textContent===name);
+
+test('inline collection starts with six picks, expands to ten, and keeps the live call while returning to camera',async t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations([...f.store.catalog.values()].filter(p=>p.productType==='lipstick'),'',{query:'pink lipstick',category:'makeup'});
+  assert.equal(inlineRows(f).length,6);assert.equal(f.nodes.get('inline-more').hidden,false);
+  assert.match(f.nodes.get('inline-description').textContent,/6 brands/);
+  f.nodes.get('inline-peek').onclick();assert.equal(f.nodes.get('call-screen').scrollTop,500);
+  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.voice.opts.getContext().visible_panel,'catalog');
+  assert.equal(f.hands.opts.isEnabled(),false);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
+  f.nodes.get('inline-more').onclick();assert.equal(inlineRows(f).length,10);assert.equal(f.nodes.get('inline-more').hidden,true);
+  assert.equal(f.nodes.get('call-screen').scrollTop,500,'Expanding the grid must not jump back to video');
+  f.nodes.get('back-camera').onclick();assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.opts.getContext().visible_panel,'call');
+  assert.equal(f.hands.opts.isEnabled(),true);assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,1);
+});
+
+test('scrolling into collections gates gestures and does not interrupt the camera or call',async t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations([...f.store.catalog.values()].filter(p=>p.productType==='lipstick'));
+  const scroller=f.nodes.get('call-screen');f.nodes.get('call-stage').offsetHeight=600;
+  scroller.scrollTop=510;scroller.emit('scroll');assert.equal(f.voice.opts.getContext().visible_panel,'catalog');assert.equal(f.hands.opts.isEnabled(),false);
+  f.voice.opts.onTranscript({key:'while-browsing',role:'assistant',text:'Here are a few options.',final:true});
+  assert.equal(scroller.scrollTop,510);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
+  scroller.scrollTop=80;scroller.emit('scroll');assert.equal(f.voice.opts.getContext().visible_panel,'catalog');assert.equal(f.hands.opts.isEnabled(),false,'Partial scrolling must also pause hand decisions');
+  scroller.scrollTop=0;scroller.emit('scroll');assert.equal(f.voice.opts.getContext().visible_panel,'call');assert.equal(f.hands.opts.isEnabled(),true);
+});
+
+test('Try on from an inline row returns the chosen product to the camera and only its Add action affects the bag',async t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
+  f.nodes.get('inline-type-tshirt').onclick();const target=inlineRows(f)[3],id=target.dataset.id;
+  inlineAction(target,'Add to bag').onclick();assert.deepEqual(Array.from(f.store.cart.keys()),[id]);
+  await inlineAction(target,'Try on').onclick();
+  assert.equal(f.camera.product.id,id);assert.equal(f.store.current.id,id);assert.equal(f.camera.mode,'clothes');
+  assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.opts.getContext().visible_panel,'call');
+  assert.equal(f.voice.call.ready,true);assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,1);
+});
+
+test('Save collection retains all ten picks and selected item across a six-item related collection',async t=>{
+  const memory=new Map(),storage={getItem:key=>memory.get(key)||null,setItem:(key,value)=>memory.set(key,value)};
+  const f=fixture(t,{catalog:inlineCatalog(),storage});f.nodes.get('decline-call').onclick();f.nodes.get('inline-type-lipstick').onclick();
+  const selected=inlineRows(f)[2];selected.children[0].onclick();const selectedId=selected.dataset.id;
+  f.nodes.get('inline-save').onclick();assert.equal(f.discovery.collections.length,1);assert.equal(f.discovery.collections[0].productCount,10);assert.equal(memory.size,1);
+  f.nodes.get('inline-next').onclick();assert.equal(f.discovery.productType,'lipbalm');assert.equal(inlineRows(f).length,6);assert.equal(f.store.cart.size,0);
+  f.nodes.get('inline-saved').onclick();const saved=f.nodes.get('collection-items').children[0];saved.children[3].children[0].onclick();
+  assert.equal(f.nodes.get('collections-dialog').open,false);assert.equal(f.nodes.get('catalog-dialog').open,false);
+  assert.equal(f.discovery.productType,'lipstick');assert.equal(f.store.current.id,selectedId);assert.equal(inlineRows(f).length,6);
+  assert.equal(f.voice.opts.getContext().visible_panel,'catalog');assert.equal(f.nodes.get('call-screen').scrollTop,500);
+  f.nodes.get('inline-more').onclick();assert.equal(inlineRows(f).length,10);assert.equal(f.store.cart.size,0);
+});
+
+test('Next collection presents related eyewear, branded shirts and sweaters as separate six-item groups',t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});f.nodes.get('decline-call').onclick();
+  for(const [type,expected,theme,style] of [['glasses','glasses','sunglasses',''],['tshirt','tshirt','','branded'],['hoodie','sweater','','']]){
+    f.nodes.get('inline-type-'+type).onclick();const before=inlineRows(f).map(row=>row.dataset.id);assert.equal(before.length,6);
+    f.nodes.get('inline-next').onclick();assert.equal(f.discovery.productType,expected);assert.equal(f.discovery.theme,theme);assert.equal(f.discovery.collectionStyle,style);
+    const after=inlineRows(f).map(row=>row.dataset.id);assert.equal(after.length,6);assert(after.every(id=>!before.includes(id)));assert.equal(f.store.cart.size,0);
+  }
+});
+
+test('inline call bar keeps mute and end usable while the collection is visible',async t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();f.nodes.get('inline-type-lipstick').onclick();
+  assert.equal(f.nodes.get('inline-mute').disabled,false);assert.equal(f.nodes.get('inline-mute').attributes['aria-label'],'Mute microphone');
+  f.nodes.get('inline-mute').onclick();assert.equal(f.voice.mutes,1);assert.equal(f.nodes.get('inline-mute').attributes['aria-label'],'Unmute microphone');
+  assert.equal(f.nodes.get('inline-mute').attributes['aria-pressed'],'true');assert.equal(f.nodes.get('mute-call').attributes['aria-pressed'],'true');
+  assert.match(f.nodes.get('inline-call-status').textContent,/mic muted/);assert.equal(f.voice.opts.getContext().visible_panel,'catalog');
+  f.nodes.get('inline-end').onclick();assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.nodes.get('inline-mute').disabled,true);
 });

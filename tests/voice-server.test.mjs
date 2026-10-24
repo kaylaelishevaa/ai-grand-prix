@@ -93,10 +93,57 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.equal(sent.options.body.get('sdp'),offer);
   const config=JSON.parse(sent.options.body.get('session'));
   assert.equal(config.model,'gpt-realtime-2.1');
-  assert.equal(config.audio.input.transcription.model,'gpt-4o-mini-transcribe');
+  assert.equal(config.audio.input.transcription.model,'gpt-4o-transcribe');
+  assert.match(config.audio.input.transcription.prompt,/English, Korean/);
+  assert.match(config.audio.input.transcription.prompt,/Coupi, Coupang/);
+  assert.equal(config.audio.input.transcription.language,undefined);
+  assert.equal(config.audio.input.turn_detection.prefix_padding_ms,500);
+  assert.equal(config.audio.input.turn_detection.silence_duration_ms,850);
   assert.equal(config.audio.output.voice,'marin');
   assert.equal(config.audio.input.turn_detection.interrupt_response,true);
   assert.deepEqual(config.tools.map(t=>t.name),['search_products','set_tryon','product_action','start_checkout','look_at_camera']);
+});
+
+test('caption configuration keeps automatic language detection unless explicitly configured',()=>{
+  const english=sessionConfiguration({OPENAI_TRANSCRIPTION_LANGUAGE:'en'}).audio.input.transcription;
+  assert.equal(english.language,'en');
+  assert.equal(english.model,'gpt-4o-transcribe');
+  const invalid=sessionConfiguration({OPENAI_TRANSCRIPTION_LANGUAGE:'English',OPENAI_TRANSCRIPTION_MODEL:'invented-model'}).audio.input.transcription;
+  assert.equal(invalid.language,undefined);assert.equal(invalid.model,'gpt-4o-transcribe');
+  assert.equal(sessionConfiguration({OPENAI_TRANSCRIPTION_MODEL:'gpt-4o-mini-transcribe'}).audio.input.transcription.model,'gpt-4o-mini-transcribe');
+});
+
+test('only an explicit unsupported caption model rejection falls back once without ending the audio handshake',async()=>{
+  const attempts=[];
+  const handler=createVoiceHandler({fetchImpl:async(_url,options)=>{
+    attempts.push(JSON.parse(options.body.get('session')).audio.input.transcription);
+    return attempts.length===1?Response.json({error:{code:'invalid_value',param:'session.audio.input.transcription.model',message:'private upstream details'}},{status:400}):new Response(answer);
+  }});
+  const response=await handler(makeRequest('/api/voice/session',offer,'application/sdp'),{OPENAI_API_KEY:'test-only-private-key'});
+  assert.equal(response.status,200);assert.equal(await response.text(),answer);
+  assert.deepEqual(attempts.map(c=>c.model),['gpt-4o-transcribe','gpt-4o-mini-transcribe']);
+  assert.equal(attempts[0].prompt,attempts[1].prompt);
+  assert.equal(response.headers.get('x-coupi-transcription-model'),'gpt-4o-mini-transcribe');
+});
+
+test('caption compatibility does not retry unrelated errors or repeatedly retry unsupported models',async()=>{
+  for(const [code,param,status,count] of [['credit_balance_exhausted','session.audio.input.transcription.model',429,1],['invalid_value','session.model',400,1],['model_not_found','session.audio.input.transcription.model',404,2]]){
+    let calls=0;
+    const handler=createVoiceHandler({fetchImpl:async()=>{calls++;return Response.json({error:{code,param,message:'do not expose'}},{status});}});
+    const response=await handler(makeRequest('/api/voice/session',offer,'application/sdp'),{OPENAI_API_KEY:'test-only-private-key'});
+    assert.equal(calls,count);assert.notEqual(response.status,200);assert.doesNotMatch(await response.text(),/do not expose/);
+  }
+});
+
+test('related collections keep balm, knitwear and explicit shirt style separate',()=>{
+  const product=(id,productType,name,category,collectionStyle)=>({...catalog[0],id,name,productType,category,collectionStyle,tags:[],aliases:[],verifiedAttributes:[]});
+  const products=[product('1','lipstick','Lipstick','makeup'),product('2','lipbalm','립밤 lip balm','makeup'),product('3','hoodie','Hoodie 후드티','clothes'),product('4','sweater','Knitted sweater 니트 스웨터','clothes'),product('5','tshirt','Basic T-shirt','clothes','basic'),product('6','tshirt','Brand logo T-shirt','clothes','branded')];
+  for(const query of ['lip balm','립밤'])assert.deepEqual(searchProducts({query},products).products.map(p=>p.id),['2']);
+  for(const query of ['sweater','knit pullover','니트'])assert.deepEqual(searchProducts({query},products).products.map(p=>p.id),['4']);
+  assert.deepEqual(searchProducts({query:'hoodie'},products).products.map(p=>p.id),['3']);
+  assert.deepEqual(searchProducts({query:'basic t-shirts'},products).products.map(p=>p.id),['5']);
+  assert.deepEqual(searchProducts({query:'branded t-shirts'},products).products.map(p=>p.id),['6']);
+  assert.deepEqual(searchProducts({query:'t-shirts not branded'},products).products.map(p=>p.id),['5']);
 });
 
 test('upstream errors, invalid answers, and network exceptions never expose raw details', async () => {
@@ -256,7 +303,7 @@ test('shopping prompt grounds comparisons and review summaries while allowing ex
   const config=sessionConfiguration();
   assert.match(config.instructions,/fixed-height, scrollable panel/);
   assert.doesNotMatch(config.instructions,/at most two chat bubbles/);
-  assert.match(config.instructions,/swiping right adds ONLY that selected product/);
+  assert.match(config.instructions,/swiping right adds ONLY that selected product/i);
   assert.match(config.instructions,/comparison_ids/);assert.match(config.instructions,/reviewEvidence/);
   assert.match(config.instructions,/Never invent reviews/);assert.match(config.instructions,/missing rating into zero stars/);
   assert.match(config.instructions,/uploaded photo even when camera sharing is off/);

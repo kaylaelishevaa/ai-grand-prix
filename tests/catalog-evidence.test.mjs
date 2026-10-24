@@ -30,6 +30,28 @@ test('demo has ten sourced pink options, optical alternatives, sunglasses and al
  for(const p of pink){assert.equal(p.preview.available,true);assert.match(p.preview.color,/^#[a-f0-9]{6}$/);assert.equal(p.preview.shadeVerified,false);assert.equal(p.preview.sampleRegionPixels.length,4);}
 });
 
+test('related collections each have six distinct sourced options and lip balm supports view more',()=>{
+ const groups={
+  redLipstick:catalog.filter(p=>p.productType==='lipstick'&&p.tags.includes('red')),
+  lipbalm:catalog.filter(p=>p.productType==='lipbalm'),
+  optical:catalog.filter(p=>p.productType==='glasses'&&p.tags.includes('optical')),
+  sunglasses:catalog.filter(p=>p.productType==='glasses'&&p.tags.includes('sunglasses')),
+  basicTshirts:catalog.filter(p=>p.productType==='tshirt'&&p.collectionStyle==='basic'),
+  brandedTshirts:catalog.filter(p=>p.productType==='tshirt'&&p.collectionStyle==='branded'),
+  hoodies:catalog.filter(p=>p.productType==='hoodie'),
+  sweaters:catalog.filter(p=>p.productType==='sweater'),
+  chairs:catalog.filter(p=>p.productType==='chair'),
+  lamps:catalog.filter(p=>p.productType==='lamp'),
+ };
+ for(const [name,products] of Object.entries(groups)){
+  assert(new Set(products.map(p=>p.id)).size>=6,`${name} needs six distinct options`);
+  assert(new Set(products.map(p=>p.imageSha256)).size>=6,`${name} needs six distinct source photos`);
+ }
+ assert(groups.lipbalm.length>=10);
+ for(const p of groups.brandedTshirts)assert(p.brand,`Branded collection needs an identified brand: ${p.id}`);
+ for(const p of catalog.filter(p=>p.productType==='tshirt'))assert(['basic','branded'].includes(p.collectionStyle));
+});
+
 test('review summaries require sourced samples; unavailable evidence stays empty and unusable preview photos are explicit',()=>{
  const sourced=catalog.filter(p=>p.reviewEvidence.reviews.length);
  assert.equal(sourced.length,2);

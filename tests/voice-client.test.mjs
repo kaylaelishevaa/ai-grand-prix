@@ -72,7 +72,7 @@ function fixture(t, options = {}) {
   }
   const mic = microphone();
   const audio = {srcObject: null, play: async () => {}, pause() {this.paused = true;}};
-  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], checkouts = [], visionStates = [], captures = [];
+  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], checkouts = [], visionStates = [], captures = [], transcriptionStates = [];
   let permissions = 0;
   const voice = new context.window.NookVoiceSession({
     audio, PeerConnection: Peer, greeting: options.greeting,
@@ -80,6 +80,7 @@ function fixture(t, options = {}) {
       permissions++;
       assert.equal(constraints.video, false);
       assert.equal(constraints.audio.echoCancellation, true);
+      assert.equal(constraints.audio.channelCount.ideal, 1);
       return options.getUserMedia ? options.getUserMedia(permissions) : mic;
     }},
     fetch: async (url, params = {}) => {
@@ -100,6 +101,7 @@ function fixture(t, options = {}) {
     onVisionState: value => visionStates.push(value),
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
+    onTranscriptionState: value => transcriptionStates.push(value),
     onRecommendations: (products, message, metadata) => recommendations.push({products, message, metadata}),
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return {ok:true,action,product_id:product_id || "324548922",purchased:false};},
@@ -107,7 +109,7 @@ function fixture(t, options = {}) {
   });
   t.after(() => voice.end());
   return {
-    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, checkouts, timerDelays, visionStates, captures,
+    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, checkouts, timerDelays, visionStates, captures, transcriptionStates,
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
@@ -867,4 +869,36 @@ test('oversized checkout context stays bounded without changing any exact produc
   assert.equal(decoded.checkout.demo,true);assert.equal(decoded.checkout.reference_total,900000);
   assert(decoded.cart_ids_truncated || decoded.comparison_ids_truncated || decoded.checkout.item_ids_truncated);
   assert([...decoded.cart_ids,...decoded.comparison_ids,...decoded.checkout.item_ids].every(id=>ids.includes(id)));
+});
+
+test('final ASR wording survives late item snapshots and transient failure events',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'conversation.item.created',item:{id:'u-caption',type:'message',role:'user',content:[{type:'input_audio',transcript:'Coupon lip steak'}]}});
+  f.emit({type:'conversation.item.input_audio_transcription.delta',item_id:'u-caption',delta:'Coupang '});
+  f.emit({type:'conversation.item.input_audio_transcription.delta',item_id:'u-caption',delta:'lipstick'});
+  assert.equal(f.transcripts.at(-1).text,'Coupang lipstick');
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u-caption',transcript:'Coupang lipstick under 10,000 won.'});
+  f.emit({type:'conversation.item.done',item:{id:'u-caption',type:'message',role:'user',content:[{type:'input_audio',transcript:'Coupon lip steak'}]}});
+  f.emit({type:'conversation.item.input_audio_transcription.failed',item_id:'u-caption'});
+  assert.equal(f.transcripts.at(-1).text,'Coupang lipstick under 10,000 won.');
+  assert.equal(f.transcripts.at(-1).error,false);
+  assert.equal(f.transcripts.at(-1).final,true);
+});
+
+test('a recovered ASR completion clears the failed-caption marker without inventing a correction',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'conversation.item.input_audio_transcription.failed',item_id:'u-caption'});
+  assert.equal(f.transcripts.at(-1).error,true);
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u-caption',transcript:'이 립밤 보여 주세요.'});
+  assert.equal(f.transcripts.at(-1).text,'이 립밤 보여 주세요.');
+  assert.equal(f.transcripts.at(-1).error,false);
+});
+
+test('a compatible-caption fallback is observable without disconnecting the call',async t=>{
+  const f=fixture(t,{sessionResponse:response('v=0\no=answer',200,{'x-coupi-transcription-model':'gpt-4o-mini-transcribe'})});
+  await connect(f);
+  assert.equal(f.voice.call.ready,true);
+  assert.equal(f.transcriptionStates.length,1);
+  assert.equal(f.transcriptionStates[0].model,'gpt-4o-mini-transcribe');
+  assert.equal(f.transcriptionStates[0].compatibilityMode,true);
 });

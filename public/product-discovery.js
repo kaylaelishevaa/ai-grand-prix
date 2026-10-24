@@ -1,7 +1,7 @@
 /* Browser-local browsing groups. Listing facts always come from the trusted catalog. */
 (() => {
   'use strict';
-  const TYPES = {lipstick:'Lipsticks',glasses:'Glasses',chair:'Chairs',lamp:'Desk lamps',tshirt:'T-shirts',hoodie:'Hoodies'};
+  const TYPES = {lipstick:'Lipsticks',lipbalm:'Lip balms',sweater:'Sweaters',glasses:'Glasses',chair:'Chairs',lamp:'Desk lamps',tshirt:'T-shirts',hoodie:'Hoodies'};
   const COLORS = {
     pink:['pink','핑크','분홍'],red:['red','레드','빨강','빨간'],purple:['purple','plum','violet','lilac','퍼플','보라','바이올렛'],
     nude:['nude','누드'],peach:['peach','피치','복숭아'],coral:['coral','코랄'],brown:['brown','브라운','갈색'],
@@ -9,6 +9,8 @@
     blue:['blue','블루','파랑','파란'],green:['green','olive','그린','녹색','초록'],yellow:['yellow','옐로','노랑','노란'],beige:['beige','베이지'],silver:['silver','실버'],gold:['gold','골드'],
   };
   const STYLE = {sunglasses:['sunglasses','선글라스'],optical:['optical','eyeglasses','spectacles','clear lenses','normal glasses','regular glasses','일반 안경','투명 렌즈']};
+  const APPAREL={basic:['basic','plain','solid','unbranded','무지','베이직'],branded:['branded','logo','브랜드','로고']};
+  const TYPE_FACETS={lipbalm:['lip balm','lip balms','lipbalm','립밤'],lipstick:['lipstick','lipsticks','lip tint','립스틱','립틴트','틴트'],sweater:['sweater','sweaters','knit','pullover','니트','스웨터'],hoodie:['hoodie','hoodies','후드','후드티'],tshirt:['t-shirt','t-shirts','tshirt','tshirts','tee','티셔츠','반팔'],glasses:['glasses','eyeglasses','eyewear','안경'],chair:['chair','chairs','의자'],lamp:['lamp','lamps','스탠드','조명']};
   const clean = value => typeof value === 'string' ? value.trim().slice(0,300) : '';
   const unique = values => [...new Set(values)];
   const has = (text,term) => /[a-z]/i.test(term) ? new RegExp(`(?:^|[^a-z])${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?:$|[^a-z])`,'i').test(text) : text.includes(term);
@@ -27,7 +29,7 @@
     return {include:unique(include).filter(key=>!exclude.includes(key)),exclude:unique(exclude)};
   }
   function constraintsFor(query,supplied) {
-    const result={};for(const [key,map] of [['colors',COLORS],['eyewear',STYLE]]){
+    const result={};for(const [key,map] of [['colors',COLORS],['eyewear',STYLE],['apparel',APPAREL],['types',TYPE_FACETS]]){
       const provided=supplied?.[key];result[key]=provided&&Array.isArray(provided.include)&&Array.isArray(provided.exclude)?{include:unique(provided.include.filter(value=>Object.hasOwn(map,value))),exclude:unique(provided.exclude.filter(value=>Object.hasOwn(map,value)))}:requested(query,map);
     }return result;
   }
@@ -35,16 +37,12 @@
     const text=[...(product.tags||[]),product.color,product.colour,product.style].filter(x=>typeof x==='string').join(' ').toLowerCase();
     const values=themes(text);
     if(product.productType==='glasses')values.unshift(themes(text,STYLE).includes('sunglasses')?'sunglasses':'optical');
+    if(product.collectionStyle&&Object.hasOwn(APPAREL,product.collectionStyle))values.push(product.collectionStyle);
     return values;
   }
   function typeFrom(query) {
-    if(/lipstick|lip tint|립스틱|립틴트|틴트/.test(query))return 'lipstick';
-    if(/sunglasses|eyeglasses|glasses|선글라스|안경/.test(query))return 'glasses';
-    if(/hoodie|후드/.test(query))return 'hoodie';
-    if(/t-?shirts?|\btee\b|티셔츠|반팔/.test(query))return 'tshirt';
-    if(/chair|의자/.test(query))return 'chair';
-    if(/lamp|스탠드|조명/.test(query))return 'lamp';
-    return '';
+    const rule=requested(query,TYPE_FACETS);
+    return rule.include[0]||(/sunglasses|선글라스/.test(query)?'glasses':'');
   }
   function queryTheme(constraints,type) {
     if(type==='glasses'&&constraints.eyewear.include.length===1)return constraints.eyewear.include[0];
@@ -55,10 +53,10 @@
     // Retain brands and requested attributes; only discard navigation words and explicit budgets.
     let value=query.toLowerCase().replace(/(?:under|below|less than|up to|max(?:imum)?|budget(?: of)?)\s*[₩$]?\s*[\d,.]+\s*(?:won|krw)?/g,' ')
       .replace(/[\d,.]+\s*(?:원|won|krw)?\s*(?:이하|미만)/g,' ')
-      .replace(/\b(show|find|me|my|some|a|an|the|i|want|like|please|recommend|looking|for|can|could|would|you|need|trying|try|to|buy|not|no|except|excluding|without|don|do|t|products?|options?|different|normal|everyday|brands?|sellers?|and|or|of|with)\b/g,' ')
+      .replace(/\b(show|find|me|my|some|a|an|the|i|want|like|please|recommend|looking|for|can|could|would|you|need|trying|try|to|buy|not|no|except|excluding|without|don|do|products?|options?|different|normal|everyday|brands?|sellers?|and|or|of|with)\b/g,' ')
       .replace(/추천|찾아|보여|주세요|제품|상품|일반|말고|제외|빼고/g,' ');
-    for(const words of [...Object.values(COLORS),...Object.values(STYLE)])for(const word of words)value=/[a-z]/i.test(word)?value.replace(new RegExp(`\\b${word}\\b`,'g'),' '):value.replaceAll(word,' ');
-    value=value.replace(/lipsticks?|lip tints?|t-?shirts?|hoodies?|chairs?|desk lamps?|table lamps?|lamps?|glasses|립스틱|립틴트|틴트|티셔츠|반팔|후드티?|의자|스탠드|조명|안경|선글라스/g,' ');
+    for(const words of [...Object.values(COLORS),...Object.values(STYLE),...Object.values(APPAREL)])for(const word of words)value=/[a-z]/i.test(word)?value.replace(new RegExp(`\\b${word}\\b`,'g'),' '):value.replaceAll(word,' ');
+    value=value.replace(/lip balms?|lipbalms?|sweaters?|knit|pullovers?|립밤|스웨터|니트|lipsticks?|lip tints?|t-?shirts?|hoodies?|chairs?|desk lamps?|table lamps?|lamps?|glasses|립스틱|립틴트|틴트|티셔츠|반팔|후드티?|의자|스탠드|조명|안경|선글라스/g,' ');
     return value.split(/[^\p{L}\p{N}-]+/u).filter(word=>word.length>1).slice(0,12);
   }
   function limitFrom(options,query) {
@@ -67,7 +65,8 @@
     const match=query.match(/(?:under|below|less than|up to|max(?:imum)?|budget(?: of)?)\s*₩?\s*([\d,.]+)/i)||query.match(/([\d,.]+)\s*(?:원|won|krw)?\s*(?:이하|미만)/i);
     return match ? Number(match[1].replaceAll(',','')) : null;
   }
-  function labelFor(type,theme) {
+  function labelFor(type,theme,style='') {
+    if(type==='tshirt'&&style)return style==='branded'?'Branded T-shirts':'Everyday T-shirts';
     if(theme==='sunglasses')return 'Sunglasses';
     if(theme==='optical')return 'Everyday glasses';
     const label=TYPES[type]||'Your picks';
@@ -79,23 +78,27 @@
       this.storageKey=options.storageKey||'coupi.collections.v1';
       try {this.storage=Object.prototype.hasOwnProperty.call(options,'storage')?options.storage:window.localStorage;} catch {this.storage=null;}
       this.products=[];this.selectedId=null;this.limit=6;this.query='';this.productType='';this.category='';this.theme='';this.maxPrice=null;this.terms=[];this.constraints=constraintsFor('');this.sourceOnly=false;this.themeChanged=false;
-      this.compareIds=[];this._collections=[];this.sequence=0;this.persistenceAvailable=Boolean(this.storage);this._load();
+      this.collectionStyle='';this.collectionTrail=[];this.compareIds=[];this._collections=[];this.sequence=0;this.persistenceAvailable=Boolean(this.storage);this._load();
     }
     get current() {return this.catalog.get(this.selectedId)||null;}
     get visible() {return this.products.slice(0,this.limit);}
     get total() {return this.products.length;}
     get hasMore() {return this.limit<Math.min(10,this.total);}
-    get label() {return labelFor(this.productType,this.theme);}
+    get label() {return labelFor(this.productType,this.theme,this.collectionStyle);}
     get comparison() {return this.compareIds.map(id=>this.catalog.get(id)).filter(Boolean);}
     get collections() {return this._collections.map(item=>({...item,ids:[...item.ids],products:item.ids.map(id=>this.catalog.get(id)).filter(Boolean),productCount:item.ids.length}));}
-    snapshot() {return {label:this.label,query:this.query,theme:this.theme,productType:this.productType,category:this.category,maxPrice:this.maxPrice,total:this.total,hasMore:this.hasMore,limit:this.limit,products:[...this.products],visible:this.visible,current:this.current,selectedId:this.selectedId};}
+    snapshot() {return {label:this.label,query:this.query,theme:this.theme,productType:this.productType,collectionStyle:this.collectionStyle,category:this.category,maxPrice:this.maxPrice,total:this.total,hasMore:this.hasMore,limit:this.limit,products:[...this.products],visible:this.visible,current:this.current,selectedId:this.selectedId};}
     _matches(product,theme=this.theme,ignoreIncludes=this.themeChanged) {
+      if(this.constraints.types.exclude.includes(product.productType))return false;
+      if(this.collectionStyle&&product.collectionStyle!==this.collectionStyle)return false;
       if(this.productType && product.productType!==this.productType)return false;
       if(this.category && this.category!=='all' && product.category!==this.category)return false;
       if(this.maxPrice!==null && (!Number.isFinite(product.price)||product.price>this.maxPrice))return false;
       const values=facets(product);
       if(theme && !values.includes(theme))return false;
       for(const [kind,rule] of Object.entries(this.constraints)){
+        if(kind==='types')continue;
+        if(kind==='apparel'&&product.productType!=='tshirt')continue;
         if(kind==='eyewear'&&product.productType!=='glasses')continue;
         if(rule.exclude.some(value=>values.includes(value)))return false;
         if(!ignoreIncludes&&rule.include.length&&!rule.include.some(value=>values.includes(value)))return false;
@@ -110,6 +113,7 @@
       this.category=clean(options.category)||seeds[0]?.category||'';
       this.constraints=constraintsFor(this.query,options.constraints);this.sourceOnly=options.sourceOnly===true;this.themeChanged=false;
       this.theme=clean(options.theme)||queryTheme(this.constraints,this.productType);
+      this.collectionStyle=clean(options.collectionStyle)||(this.productType==='tshirt'&&this.constraints.apparel.include.length===1?this.constraints.apparel.include[0]:'');this.collectionTrail=[];
       this.maxPrice=limitFrom(options,this.query);this.terms=this.sourceOnly?[]:queryTerms(this.query);
       // Empty results stay empty when no trustworthy category can be inferred.
       const eligible=[...seeds,...(!this.sourceOnly&&this.productType?[...this.catalog.values()]:[])].filter(p=>this._matches(p));
@@ -136,6 +140,42 @@
       this.limit=6;this.selectedId=this.products[0]?String(this.products[0].id):null;
       return {...this.snapshot(),changed:true};
     }
+    nextCollection() {
+      // A deliberate skip broadens positive style choices, while retaining the
+      // budget, exclusions and explicit brand/attribute terms from the request.
+      if(this.sourceOnly){
+        const brands=new Set([...this.catalog.values()].flatMap(p=>[...queryTerms(p.brand||''),...(p.aliases||[]).map(alias=>queryTerms(alias)[0]).filter(Boolean)]));
+        this.terms=queryTerms(this.query).filter(term=>brands.has(term));
+      }
+      const group=(productType,theme='',collectionStyle='')=>({productType,theme,collectionStyle});
+      const family=['lipstick','lipbalm'].includes(this.productType)?[group('lipstick','pink'),group('lipbalm'),group('lipstick','red'),group('lipstick','nude')]:
+        this.productType==='glasses'?[group('glasses','optical'),group('glasses','sunglasses')]:
+        this.productType==='tshirt'?[group('tshirt','','basic'),group('tshirt','','branded'),group('hoodie'),group('sweater')]:
+        ['hoodie','sweater'].includes(this.productType)?[group('hoodie'),group('sweater'),group('tshirt','','basic'),group('tshirt','','branded')]:
+        ['chair','lamp'].includes(this.productType)?[group('chair'),group('lamp')]:[];
+      const key=value=>[value.productType,value.theme,value.collectionStyle].join(':');
+      const current=key(this),seen=new Set([...this.collectionTrail,current]);
+      const exact=family.findIndex(value=>key(value)===current);
+      const sameType=family.findIndex(value=>value.productType===this.productType);
+      const index=exact>=0?exact:sameType;
+      const ordered=[...family.slice(index+1),...family.slice(0,index+1)];
+      const previous={productType:this.productType,theme:this.theme,category:this.category,collectionStyle:this.collectionStyle,themeChanged:this.themeChanged};
+      const candidates=[];
+      for(const candidate of ordered){
+        if(key(candidate)===current)continue;
+        Object.assign(this,candidate,{category:({lipstick:'makeup',lipbalm:'makeup',glasses:'glasses',hoodie:'clothes',sweater:'clothes',tshirt:'clothes',chair:'desk',lamp:'desk'})[candidate.productType],themeChanged:true});
+        const products=[...this.catalog.values()].filter(p=>this._matches(p));
+        if(products.length)candidates.push({...candidate,category:this.category,products});
+      }
+      Object.assign(this,previous);
+      const next=candidates.find(candidate=>!seen.has(key(candidate)))||candidates[0];
+      if(!next)return {...this.snapshot(),changed:false};
+      if(seen.has(key(next)))this.collectionTrail=[];
+      this.collectionTrail.push(current);
+      Object.assign(this,next,{themeChanged:true,sourceOnly:false,limit:6});
+      this.selectedId=this.products[0]?String(this.products[0].id):null;
+      return {...this.snapshot(),changed:true};
+    }
     toggleCompare(id) {
       id=String(id);const existing=this.compareIds.indexOf(id);
       if(existing>=0){this.compareIds.splice(existing,1);return {ok:true,selected:false,products:this.comparison};}
@@ -150,13 +190,13 @@
       if(!this.products.length)return null;
       const ids=this.products.slice(0,10).map(p=>String(p.id));
       const existing=this._collections.find(item=>item.name===(clean(name)||this.label) && item.ids.join('|')===ids.join('|'));
-      const record={id:existing?.id||`collection_${Date.now()}_${++this.sequence}`,name:(clean(name)||this.label).slice(0,80),ids,selectedId:this.selectedId,query:this.query,productType:this.productType,category:this.category,theme:this.theme,maxPrice:this.maxPrice,limit:this.limit,constraints:this.constraints,sourceOnly:this.sourceOnly,themeChanged:this.themeChanged,createdAt:existing?.createdAt||new Date().toISOString()};
+      const record={id:existing?.id||`collection_${Date.now()}_${++this.sequence}`,name:(clean(name)||this.label).slice(0,80),ids,selectedId:this.selectedId,query:this.query,productType:this.productType,category:this.category,theme:this.theme,collectionStyle:this.collectionStyle,maxPrice:this.maxPrice,limit:this.limit,constraints:this.constraints,sourceOnly:this.sourceOnly,themeChanged:this.themeChanged,terms:[...this.terms],createdAt:existing?.createdAt||new Date().toISOString()};
       this._collections=[record,...this._collections.filter(item=>item.id!==record.id)].slice(0,24);
       return {...record,persisted:this._persist()};
     }
     restoreCollection(id) {
       const item=this._collections.find(entry=>entry.id===String(id));if(!item)return null;
-      this.query=item.query;this.productType=item.productType;this.category=item.category;this.theme=item.theme;this.maxPrice=item.maxPrice;this.sourceOnly=item.sourceOnly===true;this.themeChanged=item.themeChanged===true;this.constraints=constraintsFor(this.query,item.constraints);this.terms=this.sourceOnly?[]:queryTerms(this.query);
+      this.query=item.query;this.productType=item.productType;this.category=item.category;this.theme=item.theme;this.collectionStyle=item.collectionStyle||'';this.collectionTrail=[];this.maxPrice=item.maxPrice;this.sourceOnly=item.sourceOnly===true;this.themeChanged=item.themeChanged===true;this.constraints=constraintsFor(this.query,item.constraints);this.terms=Array.isArray(item.terms)?item.terms.filter(term=>typeof term==='string').slice(0,12):this.sourceOnly?[]:queryTerms(this.query);
       this.products=item.ids.map(productId=>this.catalog.get(productId)).filter(Boolean);
       this.limit=item.limit===10?10:6;this.selectedId=this.products.some(p=>String(p.id)===item.selectedId)?item.selectedId:this.products[0]?String(this.products[0].id):null;
       return this.snapshot();
@@ -178,7 +218,7 @@
           const productType=clean(item.productType)||first.productType;
           const safeIds=ids.filter(id=>this.catalog.get(id).productType===productType);if(!safeIds.length)continue;
           seen.add(item.id);
-          this._collections.push({id:clean(item.id),name:clean(item.name).slice(0,80)||'Saved picks',ids:safeIds,selectedId:safeIds.includes(item.selectedId)?item.selectedId:safeIds[0],query:clean(item.query),productType,category:clean(item.category)||first.category,theme:clean(item.theme),maxPrice:typeof item.maxPrice==='number'&&Number.isFinite(item.maxPrice)&&item.maxPrice>=0?item.maxPrice:null,limit:item.limit===10?10:6,constraints:constraintsFor(clean(item.query),item.constraints),sourceOnly:item.sourceOnly===true,themeChanged:item.themeChanged===true,createdAt:clean(item.createdAt)});
+          this._collections.push({id:clean(item.id),name:clean(item.name).slice(0,80)||'Saved picks',ids:safeIds,selectedId:safeIds.includes(item.selectedId)?item.selectedId:safeIds[0],query:clean(item.query),productType,category:clean(item.category)||first.category,theme:clean(item.theme),collectionStyle:clean(item.collectionStyle),maxPrice:typeof item.maxPrice==='number'&&Number.isFinite(item.maxPrice)&&item.maxPrice>=0?item.maxPrice:null,limit:item.limit===10?10:6,constraints:constraintsFor(clean(item.query),item.constraints),sourceOnly:item.sourceOnly===true,themeChanged:item.themeChanged===true,terms:Array.isArray(item.terms)?item.terms.filter(term=>typeof term==='string'&&term.length<80).slice(0,12):undefined,createdAt:clean(item.createdAt)});
         }
       } catch {this.persistenceAvailable=false;}
     }

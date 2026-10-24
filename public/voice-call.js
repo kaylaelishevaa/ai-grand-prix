@@ -115,11 +115,15 @@
       let row=c.transcripts.get(key);
       if(!row){row={key,role:entry.role,text:'',order,pending:true,final:false};c.transcripts.set(key,row);}
       const channel=event.type?.includes('output_text')?'text':event.type?.includes('transcript')?'audio':null;
+      if(row.role==='user' && event.type?.startsWith('conversation.item.input_audio_transcription.')) {
+        if(!row.asr && typeof entry.delta==='string')row.text='';
+        row.asr=true;
+      }
       if(row.role==='assistant'&&channel) {
         if(row.channel&&row.channel!==channel)return;
         row.channel=channel;
       }
-      if(row.final && (entry.delta || entry.final===false))return;
+      if(row.final && (entry.delta || entry.final===false || (entry.error===true && !row.error)))return;
       if(typeof entry.text==='string')row.text=entry.text;
       else if(typeof entry.delta==='string')row.text+=entry.delta;
       for(const name of ['image','delivery','error'])if(entry[name]!==undefined)row[name]=entry[name];
@@ -137,7 +141,11 @@
       const content=item.content || [];
       if(item.role==='user'&&content.some(part=>part.type==='input_audio')) {
         const transcript=content.find(part=>typeof part.transcript==='string')?.transcript;
-        this._transcript(c,{key:item.id,role:'user',...(transcript?{text:transcript}:{}),...(c.transcripts.get(item.id)?.final?{}:{pending:true})},event);
+        const row=c.transcripts.get(item.id);
+        // Item snapshots can arrive after a corrected final ASR event. They
+        // must not replace it, or duplicate a partial followed by ASR deltas.
+        const useSnapshot=transcript && !row?.final && !row?.asr;
+        this._transcript(c,{key:item.id,role:'user',...(useSnapshot?{text:transcript}:{}),...(row?.final?{}:{pending:true})},event);
       } else if(item.role==='assistant') {
         this._transcript(c,{key:item.id,role:'assistant'},event);
       }
@@ -250,7 +258,7 @@
         if(!this._current(c)) return false;
         if(!config.ready) throw new Error(config.reason || 'Voice is not configured yet. The Site owner must connect an OpenAI API key on the server.');
         this._state('connecting','Allow microphone access to start your AI voice call.');
-        const microphone = await this.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
+        const microphone = await this.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:{ideal:1}},video:false});
         if(!this._current(c)){microphone.getTracks().forEach(track=>track.stop());return false;}
         c.microphone = microphone;
         clearTimeout(c.setupTimer);
@@ -284,6 +292,7 @@
         this._state('connecting','Connecting to Coupi…');
         const response=await this.fetch('/api/voice/session',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/sdp'},body:offer.sdp,signal:c.abort.signal});
         c.callId=response.headers?.get('x-nook-call-id') || null;
+        c.transcriptionModel=response.headers?.get('x-coupi-transcription-model') || null;
         if(!this._current(c)){this._finishRemote(c.callId);return false;}
         if(!response.ok) {
           let message='The voice service could not start this call.';
@@ -306,7 +315,9 @@
       if(c.ready)return;
       c.ready=true;c.connectedAt=Date.now();clearTimeout(c.setupTimer);
       c.callTimer=setTimeout(()=>{if(this._current(c))this.end('This 10-minute demo call has ended. Start another call to continue.');},MAX_CALL_MS);
-      this._state('connected','Connected. Tell Coupi what you’re looking for.');this._greet(c);
+      this._state('connected','Connected. Tell Coupi what you’re looking for.');
+      if(c.transcriptionModel)this.options.onTranscriptionState?.({model:c.transcriptionModel,compatibilityMode:c.transcriptionModel!=='gpt-4o-transcribe'});
+      this._greet(c);
     }
     _greet(c) {
       if(c.greeted || !c.ready || c.channel?.readyState!=='open')return;
@@ -352,8 +363,9 @@
         case 'conversation.item.input_audio_transcription.delta':
           if(event.item_id)this._transcript(c,{role:'user',key:event.item_id,delta:event.delta || '',final:false},event);break;
         case 'conversation.item.input_audio_transcription.completed':
-          if(event.item_id)this._transcript(c,{role:'user',key:event.item_id,text:event.transcript || '',final:true},event);break;
+          if(event.item_id)this._transcript(c,{role:'user',key:event.item_id,text:event.transcript || '',final:true,error:false},event);break;
         case 'conversation.item.input_audio_transcription.failed':
+          if(c.transcripts.get(event.item_id)?.final&&!c.transcripts.get(event.item_id)?.error)break;
           if(event.item_id)this._transcript(c,{role:'user',key:event.item_id,text:'Transcript unavailable',final:true,error:true},event);
           this._state('connected','Audio is connected, but this turn’s transcript is unavailable.');break;
         case 'response.output_audio_transcript.delta': case 'response.audio_transcript.delta': case 'response.output_text.delta':
