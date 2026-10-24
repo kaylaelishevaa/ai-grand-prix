@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#e7f6f8">
   <meta name="description" content="A little call. A new way to shop. Try things on and find your next favourite with Coupi.">
-  <title>Coupi — Video call</title>
+  <title>Coupi — Call or chat</title>
   <link rel="icon" type="image/png" href="/assets/coupi.png">
   <link rel="stylesheet" href="/mobile-call.css">
   <link rel="stylesheet" href="/coupi-shell.css">
@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="/reviews-detail.css">
   <link rel="stylesheet" href="/call-personalization.css">
   <link rel="stylesheet" href="/final-polish.css">
+  <link rel="stylesheet" href="/flexible-call.css">
 </head>
 <body class="coupi-call-page">
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -31,7 +32,6 @@
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/></symbol>
     <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 3H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4l4 3 4-3h4a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z"/><path d="M7 8h10M7 13h7"/></symbol>
-    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 12V5a1.5 1.5 0 0 1 3 0v6-8a1.5 1.5 0 0 1 3 0v8-6a1.5 1.5 0 0 1 3 0v7-3a1.5 1.5 0 0 1 3 0v5c0 5-3 8-7 8-3 0-5-2-7-5l-3-4a1.5 1.5 0 0 1 2-2l3 3"/></symbol>
     <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
     <symbol id="i-speaker" viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
@@ -50,13 +50,14 @@
       <div class="incoming-bottom">
         <p id="incoming-promise" class="incoming-promise">Let’s find your<br>kind of thing.</p>
         <p id="incoming-status" class="incoming-status" role="status" hidden></p>
-        <button id="answer-call" class="answer-call"><span class="answer-icon"><svg><use href="#i-video"/></svg></span><span>Start video call</span><svg class="answer-arrow"><use href="#i-arrow"/></svg></button>
-        <button id="incoming-skip-personalization" class="decline-call" hidden>Skip to shopping</button>
-        <label class="vision-consent"><input id="vision-consent" type="checkbox" checked> Let Coupi see my camera</label><p class="privacy-note">Mic + camera snapshots go to OpenAI during the call.</p>
+        <div class="entry-formats" role="group" aria-label="Choose how to connect"><button id="entry-video" aria-pressed="true"><svg><use href="#i-video"/></svg>Video</button><button id="entry-voice" aria-pressed="false"><svg><use href="#i-mic"/></svg>Voice</button><button id="entry-chat" aria-pressed="false"><svg><use href="#i-chat"/></svg>Chat</button></div>
+        <button id="answer-call" class="answer-call"><span class="answer-icon"><svg><use id="answer-call-icon" href="#i-video"/></svg></span><span id="answer-call-label">Start video call</span><svg class="answer-arrow"><use href="#i-arrow"/></svg></button>
+        <button id="update-preferences" class="decline-call" hidden>Update preferences</button>
+        <label id="entry-vision-consent" class="vision-consent"><input id="vision-consent" type="checkbox" checked> Let Coupi see my camera</label><p id="entry-privacy" class="privacy-note">Mic + camera snapshots go to OpenAI during the call.</p>
       </div>
     </section>
 
-    <section id="call-screen" class="call-screen" aria-label="Video call with Coupi" hidden>
+    <section id="call-screen" class="call-screen" aria-label="Call or chat with Coupi" hidden>
       <div id="call-stage" class="call-stage">
       <video id="live-video" autoplay muted playsinline hidden></video>
       <canvas id="live-canvas" width="720" height="960" aria-label="Your live camera and try-on preview"></canvas>
@@ -68,17 +69,17 @@
         <button id="collections-button" class="cart-button" aria-label="Saved collections"><svg><use href="#i-bookmark"/></svg></button>
         <button id="cart-button" class="cart-button" aria-label="View your bag"><svg><use href="#i-bag"/></svg><span id="cart-count">0</span></button>
       </header>
+      <nav class="format-tabs" aria-label="Conversation format"><button id="format-video" aria-pressed="true">Video</button><button id="format-voice" aria-pressed="false">Voice</button><button id="format-chat" aria-pressed="false">Chat</button></nav>
       <div id="vision-strip" class="vision-strip" hidden><button id="vision-toggle" class="vision-toggle" aria-pressed="true" aria-label="Pause camera sharing with Coupi"><svg><use href="#i-eye"/></svg><span id="vision-status">Camera sharing ready</span><span id="vision-action">Pause</span></button></div>
       <div class="call-feedback"><p id="call-notice" role="status" hidden></p><button id="retry-call" class="inline-retry" hidden>Reconnect</button><button id="play-audio" class="inline-retry" hidden><svg><use href="#i-speaker"/></svg> Enable sound</button></div>
 
       <section id="product-zone" class="product-zone" aria-label="Product recommendations" data-collection="false" hidden>
         <div class="deck-label"><button id="group-open" aria-label="Browse this product group"><span id="product-category">Picked for you</span> <span id="product-position"></span> <span aria-hidden="true">⌄</span></button><button id="save-group" aria-label="Save this collection"><svg><use href="#i-bookmark"/></svg> Save collection</button></div>
         <article id="product-card" class="product-card">
-          <div id="swipe-feedback" class="swipe-feedback" aria-hidden="true"></div>
           <p id="product-price" class="card-price"></p><div class="product-main"><div class="product-picture"><span class="product-picture-fallback" aria-hidden="true">✳</span><img id="product-image" alt="" referrerpolicy="no-referrer"></div><div class="product-copy"><p class="product-retailer">COUPANG</p><h2 id="product-title"></h2><p id="product-selected-note">Selected product</p></div></div>
           <div class="product-actions"><button id="product-details"><svg><use href="#i-info"/></svg> Details</button><button id="product-try" class="try-button"><svg><use href="#i-spark"/></svg> Try it</button><button id="product-buy">Buy this</button></div>
         </article>
-        <div class="swipe-actions"><button id="product-skip" aria-label="Explore a related collection"><span>←</span> Next collection</button><p>Selected item</p><button id="product-save" aria-label="Add this product to your bag">Add this <span>→</span></button></div>
+        <div class="product-decisions"><button id="product-skip" aria-label="Explore a related collection">Next collection</button><p>Selected item</p><button id="product-save" aria-label="Add this product to your bag">Add to bag</button></div>
         <section id="inline-products" class="inline-products" aria-labelledby="inline-title" data-theme="pink" hidden>
           <header class="inline-collection-heading"><div><h2 id="inline-title">Your picks</h2><p id="inline-scroll-hint" class="inline-scroll-hint">Scroll picks ↓</p></div><button id="inline-save" class="inline-save" aria-label="Save this collection"><svg><use href="#i-bookmark"/></svg> Save</button><button id="back-camera" class="back-camera" aria-label="Focus selected product" title="Focus selected product">⌃</button></header>
           <div id="product-panel-scroll" class="inline-collection-body" tabindex="0" role="region" aria-label="Scroll product recommendations">
@@ -111,12 +112,10 @@
         </section>
       </div>
       <footer class="call-footer">
-        <p id="gesture-status" class="gesture-status">Talk naturally. Try something new.</p>
         <div class="call-controls">
           <button id="mute-call" class="call-control" aria-label="Mute microphone" aria-pressed="false" title="Mute"><svg><use href="#i-mic"/></svg></button>
           <button id="toggle-camera" class="call-control" aria-label="Turn camera off" aria-pressed="false" title="Camera"><svg><use href="#i-video"/></svg></button>
           <button id="flip-camera" class="call-control flip-control" aria-label="Flip to back camera" title="Flip to back camera"><svg><use href="#i-flip"/></svg><span>Flip</span></button>
-          <button id="gesture-toggle" class="call-control" aria-label="Enable hand swipes" aria-pressed="false" title="Hand swipes"><svg><use href="#i-hand"/></svg></button>
           <button id="text-toggle" class="call-control" aria-label="Type a message" aria-expanded="false" title="Message"><svg><use href="#i-chat"/></svg></button>
           <button id="focus-toggle" class="call-control focus-toggle" aria-label="Show call controls" aria-expanded="false" hidden><span aria-hidden="true">•••</span><span id="focus-toggle-label">Controls</span></button>
           <button id="end-call" class="call-control end-control" aria-label="End call" title="End call"><svg><use href="#i-hangup"/></svg></button>
@@ -129,11 +128,11 @@
     <section id="end-screen" class="end-screen" aria-label="Call ended" hidden>
       <a class="wordmark" href="/" aria-label="Coupi home">coupi<span class="brand-dot">.</span></a>
       <div class="end-message"><div class="end-orb" aria-hidden="true"><img class="coupi-avatar" src="/assets/coupi.png" alt=""></div><p class="incoming-kicker">UNTIL NEXT TIME</p><h1 id="end-title">A little less<br>scrolling.</h1><p id="end-summary">Your call has ended.</p></div>
-      <div class="end-bottom"><button id="call-again" class="answer-call"><svg><use href="#i-video"/></svg> Call Coupi again <svg class="answer-arrow"><use href="#i-arrow"/></svg></button><p class="privacy-note">Camera and microphone are off.</p></div>
+      <div class="end-bottom"><button id="call-again" class="answer-call"><svg><use href="#i-video"/></svg> Back to Coupi <svg class="answer-arrow"><use href="#i-arrow"/></svg></button><p class="privacy-note">Camera and microphone are off.</p></div>
     </section>
     <nav class="app-nav" aria-label="Main navigation">
       <a href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg><span>Main</span></a>
-      <a href="/call" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Video call</span></a>
+      <a href="/call" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Call or chat</span></a>
       <a href="/explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c5 4 5 12 0 16-5-4-5-12 0-16Z"/></svg><span>Explore worlds</span></a>
     </nav>
     <div id="toast" class="toast" role="status" hidden></div>
@@ -180,7 +179,6 @@
   <script src="/coupang-products.js" defer></script>
   <script src="/product-preview.js" defer></script>
   <script src="/camera-engine.js" defer></script>
-  <script src="/hand-gestures.js" defer></script>
   <script src="/camera-snapshots.js" defer></script>
   <script src="/voice-call.js" defer></script>
   <script src="/mobile-call-state.js" defer></script>

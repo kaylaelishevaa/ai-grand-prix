@@ -141,12 +141,10 @@
 .product-actions { border-top-color: #dcecee; }
 .product-actions button { color: #356e74; background: #e7f5f7; }
 .product-actions .try-button { color: white; background: var(--call-teal); }
-.swipe-actions button { color: var(--call-ink); background: var(--call-glass); }
-.swipe-actions p { color: var(--call-ink); background: var(--call-glass); padding: 4px 7px; border-radius: 12px; }
-.swipe-feedback,
-.swipe-feedback:not(:empty) { color: #296e70; background: #dff5f3f2; }
-.swipe-feedback.reject,
-.product-card.reject .swipe-feedback { color: #ae514a; background: #fff0ecf2; }
+.product-decisions button { color: var(--call-ink); background: var(--call-glass); }
+.product-decisions p { color: var(--call-ink); background: var(--call-glass); padding: 4px 7px; border-radius: 12px; }
+
+
 .product-empty { color: #3c737b; background: var(--call-glass); }
 .bubble {
   color: var(--call-ink);
@@ -162,7 +160,7 @@
 .text-form input { color: var(--call-ink); }
 .text-form input::placeholder { color: #729096; }
 .text-form button { color: white; background: var(--call-teal); }
-.gesture-status { color: var(--call-ink); background: var(--call-glass); padding: 4px 8px; border-radius: 12px; }
+
 .call-control { color: var(--call-ink); background: #f5ffffe8; border-color: #ffffff91; box-shadow: 0 3px 10px #123f4510; }
 .call-control:hover { background: #e4f5f8; }
 .call-control[aria-pressed=true],

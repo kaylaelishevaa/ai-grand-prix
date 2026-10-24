@@ -53,7 +53,7 @@ Restart the server whenever you change environment variables. If an older `.dev.
 npm run dev
 ```
 
-Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers **Video call** (`/call`) for shopping and its optional first-call interview, and **Explore worlds** (`/explore`) for worlds built from confirmed preferences. The bottom navigation connects all three pages. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
+Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers **Call or chat** (`/call`) for shopping and its optional first-call interview, and **Explore worlds** (`/explore`) for worlds built from confirmed preferences. The bottom navigation connects all three pages. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
 
 This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
@@ -61,14 +61,14 @@ To check that the server loaded your configuration, open [the local voice status
 
 ## 4. Try the demo
 
-1. Open **Video call**, click **Start video call** and allow camera and microphone access.
+1. Open **Call**, choose **Video**, **Voice**, or **Chat**, and start the session. Video uses your camera and microphone; Voice uses only the microphone; Chat works with typed messages and image uploads without asking for either permission.
 2. New shoppers hear a short welcome and can answer a few lifestyle questions in the same call. Tap **Skip to shopping**, say “skip,” or ask directly for something such as “Show me glasses under 30,000 won.”
 3. Scroll recommendations inside the fixed product window at the top of the call. Select **Try on** on a product. The window and secondary controls minimize during try-on; **Products** reopens the window and **Controls** restores controls.
 4. Use **Flip** to switch between front and back cameras when the device has both.
-5. Tap the top window’s chevron to focus the selected product and use hand swipes: left for the next related collection, right to add only that item. Each list row also has its own **Add to bag** action. The bag is an in-memory demo; nothing is purchased.
+5. Use **Next collection** for related options, and each product’s **Add to bag** action to add that exact item. The bag is an in-memory demo; nothing is purchased.
 6. Click **End call** when finished.
 
-The entry flow is a video call; there is no separate Browse mode or onboarding questionnaire. AI voice and AI camera understanding require your own working API key. The automated checks below run without a key.
+Video, voice, and text with images share the same shopping session. There is no separate Browse mode or onboarding questionnaire. All AI conversation and image understanding require your own working API key. The automated checks below run without a key.
 
 Camera snapshots are shared with OpenAI during an active call when **Let Coupi see my camera** is enabled. The eye/Pause control stops that sharing while local try-on continues. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
 
@@ -78,11 +78,11 @@ The current work is on `feat/coupi-call-discovery`; `main` keeps the three-page 
 
 - **Conversation:** a fixed-height, scrollable panel keeps the camera visible. Tap Conversation for the full call history, or the chevron to minimize it. Speech turns are ordered before asynchronous transcription finishes, with streamed updates applied to the same turn.
 - **Photo chat:** tap the message icon, then the image icon next to Send. JPG, PNG and WebP files up to 10 MB are resized locally; the photo is sent to OpenAI only when you press Send during a connected call. A failed send keeps the draft ready to retry. Photos and transcripts are not stored in collections.
-- **Scrollable collections:** recommendations open inside a fixed window at the top of the video call. Scroll inside that window; the camera, conversation and call controls stay in place, with no section below the call. Each themed collection starts with six matching products; View more adds up to ten inside the same window. Next collection moves to related options: lipstick → lip balm, everyday glasses → sunglasses, basic → branded T-shirts, hoodies → sweaters. Budget and explicit exclusions remain in effect. Restrictive preferences can return fewer than six actual matches. Tap Try on to preview that exact item and minimize the window. Hand swipes pause while the list is open; focus the selected product to use them.
+- **Scrollable collections:** recommendations open inside a fixed window at the top of the video call. Scroll inside that window; the camera, conversation and call controls stay in place, with no section below the call. Each themed collection starts with six matching products; View more adds up to ten inside the same window. Next collection moves to related options: lipstick → lip balm, everyday glasses → sunglasses, basic → branded T-shirts, hoodies → sweaters. Budget and explicit exclusions remain in effect. Restrictive preferences can return fewer than six actual matches. Tap Try on to preview that exact item and minimize the window. Use each row’s actions for that exact product, and Next collection to change the themed group.
 - **Collections:** Save collection keeps up to ten products in that group and the selected item in this browser. The bookmark button restores saved groups, even after exploring a different style.
 - **Compare:** choose two or three products of the same type, then Compare. The table shows sourced prices, variants, attributes and available review evidence. Ask Coupi to discuss the selection during a call.
 - **Reviews:** ratings, a precomputed AI summary, pros/cons and translated review samples are available for 19 product options across 10 families, including the first Romand, MAC and Kate lipsticks and EYELAB glasses. Other products explicitly show missing evidence. These are historical samples from linked public mirrors, not a live Coupang review feed or a summary of every review.
-- **Hand swipes:** shorter gestures now register. The neutral reset and cooldown prevent repeated actions from one motion; the hand button turns tracking off.
+- **Camera-off mode:** a clean conversation background keeps voice, typed messages, image uploads, and product actions available when the camera is off. Product selection uses explicit buttons; gesture controls have been removed.
 
 For a quick review demo, open **Details** on the first Romand lipstick. For more, ask for **pink lipsticks**, scroll within the top product window and tap **View more**. Review evidence can span multiple shades or options; this is labeled in the UI. The catalog includes pink/red lipsticks, lip balms, optical glasses, sunglasses, basic/branded T-shirts, hoodies, sweaters, chairs and desk lamps. Sourced brands are shown; seller identities are not inferred. Product-family links may require selecting the pictured option on Coupang. Photos with people, multiple products, or unsuitable scenes are marked **No preview** unless a faithful cutout is available. Prices are historical reference values, and seller/stock details are not invented.
 
@@ -94,11 +94,11 @@ Live previews preserve the original product pixels. Exact-photo silhouette masks
 
 ## Optional personalized start
 
-New shoppers enter the interview directly through **Start video call**. Coupi says “Welcome new user! We want to learn more about you to personalize your experience,” then asks one easy question at a time about interests, everyday activities or style. There is no separate onboarding page, quick-pick exercise or story form. **Skip to shopping** is available before and during the call; saying “skip” or asking for a specific product also exits the interview.
+The entry screen stays neutral. After a new shopper starts a video, voice, or chat session, Coupi says “Welcome new user! We want to learn more about you to personalize your experience,” then asks one easy question at a time about interests, everyday activities or style. There is no separate onboarding page, quick-pick exercise or story form. **Skip to shopping** appears only inside the active session; saying “skip” or asking for a specific product also exits the interview.
 
 After a few useful answers, `draft_preferences` opens a short read-only summary of what the shopper volunteered. Only **Save preferences** stores the confirmed interests, style, optional per-item budget and conversation summary in this browser. **Keep talking** dismisses the draft so corrections can be made conversationally. Saving keeps the camera and voice call connected and continues shopping. No camera images or full conversation transcripts are saved to the profile.
 
-**Explore worlds** displays real catalog products grouped from saved preferences. Interest choices determine the worlds, style prioritizes matching catalog color tags, and the budget filters prices. Before preferences are saved, Explore only offers **Talk with Coupi**. Returning shoppers go straight to shopping; **Talk to update** uses `/call?intent=personalize` to revise preferences through a call. World cards use `/call?world=<id>` and seed their matching collection without automatically starting the camera or microphone. Preferences can be reset in Explore. Saved preferences are soft defaults; an explicit current request takes priority.
+**Explore worlds** displays real catalog products grouped from saved preferences. Interest choices determine the worlds, style prioritizes matching catalog color tags, and the budget filters prices. Before preferences are saved, Explore only offers **Talk with Coupi**. Returning shoppers go straight to shopping. After a profile has been confirmed and saved, a small **Update preferences** button appears on the call entry screen; it starts another interview in the selected format. **Talk to update** in Explore also uses `/call?intent=personalize` to revise preferences in the same session. World cards use `/call?world=<id>` and seed their matching collection without automatically starting the camera or microphone. Preferences can be reset in Explore. Saved preferences are soft defaults; an explicit current request takes priority.
 
 ## Demo checkout
 
