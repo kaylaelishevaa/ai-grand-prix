@@ -5,7 +5,7 @@ import {getReview, getSku} from '@/lib/catalog';
 import type {CallResponse} from '@/lib/journey-types';
 import type {Profile, Verdict} from '@/lib/types';
 import {Glyph} from './Glyph';
-import {productArt} from './art';
+import {ProductVisual,ProductEvidence} from './ProductEvidence';
 import VerdictComparison from './VerdictComparison';
 import SellerQA from './SellerQA';
 import './companion-call.css';
@@ -14,7 +14,7 @@ interface CompanionCallProps {
   profile: Profile;
   offline?: boolean;
   onProfile(profile: Profile): void;
-  onComplete(): void;
+  onComplete(profile?: Profile): void;
   onOpenProduct(skuId: string, verdict?: Verdict): void;
   onClose(): void;
 }
@@ -74,7 +74,6 @@ export default function CompanionCall(props: CompanionCallProps) {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraPending, setCameraPending] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const beganAsInterview = useRef(!props.profile.journey?.interviewComplete);
   const mounted = useRef(false), busyRef = useRef(false), voiceOnRef = useRef(true), draftRef = useRef('');
   const request = useRef<AbortController | null>(null);
   const recognition = useRef<BrowserRecognition | null>(null);
@@ -82,12 +81,15 @@ export default function CompanionCall(props: CompanionCallProps) {
   const video = useRef<HTMLVideoElement | null>(null), fileInput = useRef<HTMLInputElement>(null);
   const transcript = useRef<HTMLDivElement>(null), composer = useRef<HTMLTextAreaElement>(null);
   const attempt = useRef<{fingerprint: string; id: string} | null>(null);
+  const interviewAttempt = useRef<{action:'resumeInterview'|'finishInterview';id:string}|null>(null);
   const voiceEpoch = useRef(0);
   draftRef.current = draft;
   voiceOnRef.current = voiceOn;
   const count = latest?.interviewCount ?? props.profile.journey?.interviewCount ?? 0;
   const complete = latest?.interviewComplete ?? props.profile.journey?.interviewComplete ?? false;
-  const finishedFirstCall = complete && (beganAsInterview.current || !props.profile.journey?.districts.length);
+  const paused = !complete&&(latest?.profile.journey?.interviewPaused??props.profile.journey?.interviewPaused??false);
+  const mode = latest?.conversationMode ?? (complete||paused?'conversation':'interview');
+  const worldReady = latest?.worldReady ?? false;
   const rememberedIds = new Set(props.profile.memoryLines.map(line => line.id));
   const newMemories = turns.flatMap(turn => turn.response?.memories || []).filter((line, index, all) => rememberedIds.has(line.id) && all.findIndex(other => other.id === line.id) === index);
 
@@ -177,6 +179,22 @@ export default function CompanionCall(props: CompanionCallProps) {
       if (mounted.current && !(failure instanceof DOMException && failure.name === 'AbortError')) setError(failure instanceof Error ? failure.message : 'The call could not start. Try again.');
     } finally {busyRef.current = false; if (mounted.current) setBusy(false);}
   }
+  async function changeInterview(action:'resumeInterview'|'finishInterview') {
+    if(busyRef.current||comparisonPending.current||!started)return;
+    stopSpeech();stopRecognition();
+    if(!interviewAttempt.current||interviewAttempt.current.action!==action)interviewAttempt.current={action,id:crypto.randomUUID()};
+    const id=interviewAttempt.current.id;
+    busyRef.current=true;setBusy(true);setError('');
+    try{
+      const data=await sendRequest({action,requestId:id});
+      if(!mounted.current)return;
+      acceptResponse(data,id);interviewAttempt.current=null;
+      if(action==='finishInterview'&&data.status==='ok'&&data.interviewComplete&&data.worldReady)leave(()=>callbacks.current.onComplete(data.profile));
+      else requestAnimationFrame(()=>composer.current?.focus());
+    }catch(failure){
+      if(mounted.current&&!(failure instanceof DOMException&&failure.name==='AbortError'))setError(failure instanceof Error?failure.message:'That change didn’t save. You can keep talking or try again.');
+    }finally{busyRef.current=false;if(mounted.current)setBusy(false);}
+  }
 
   useEffect(() => {
     mounted.current = true;
@@ -235,7 +253,7 @@ export default function CompanionCall(props: CompanionCallProps) {
         setError(data.message);
         // A rejected/uncertain answer is not a completed turn: keep the question,
         // draft, attachment and request id so the user can edit or retry it.
-        setLatest(current => current ? {...current, profile:data.profile, interviewCount:data.interviewCount, interviewComplete:data.interviewComplete} : data);
+        setLatest(data);
         speak(data.message);
         requestAnimationFrame(() => composer.current?.focus());
         return;
@@ -244,7 +262,9 @@ export default function CompanionCall(props: CompanionCallProps) {
       acceptResponse(data, id);
       setDraft(''); setPhoto(null); attempt.current = null;
       if (fileInput.current) fileInput.current.value = '';
-      if (!data.interviewComplete || !beganAsInterview.current) requestAnimationFrame(() => composer.current?.focus());
+      const finishedFive=data.status==='ok'&&!complete&&data.interviewComplete&&data.interviewCount>=5&&data.conversationMode==='conversation';
+      if(finishedFive&&data.worldReady)leave(()=>callbacks.current.onComplete(data.profile));
+      else requestAnimationFrame(() => composer.current?.focus());
     } catch (failure) {
       if (mounted.current && !(failure instanceof DOMException && failure.name === 'AbortError')) setError(failure instanceof Error ? failure.message : 'That connection slipped. Your answer is still here.');
     } finally {busyRef.current = false; if (mounted.current) setBusy(false);}
@@ -302,34 +322,41 @@ export default function CompanionCall(props: CompanionCallProps) {
   function leave(callback: () => void) {stopSpeech(); stopRecognition(); stopCamera(); callback();}
 
   return <section className="companion-call" aria-label={complete ? 'Call Coopy' : 'Your first call with Coopy'}>
-    <div className="call-topline"><span className="call-live"><i/>{complete ? 'YOUR OPEN LINE' : 'OUR FIRST CALL'} <span>· {Math.floor(elapsed / 60).toString().padStart(2, '0')}:{(elapsed % 60).toString().padStart(2, '0')}</span></span><div className="call-top-actions">{speechSupported && !props.offline && <button className="call-icon-button" onClick={toggleVoice} aria-label={voiceOn ? 'Mute Coopy’s spoken voice' : 'Enable Coopy’s spoken voice'} aria-pressed={voiceOn}><VoiceGlyph muted={!voiceOn}/><span>{voiceOn ? 'voice on' : 'voice off'}</span></button>}<button className="call-icon-button" onClick={() => leave(props.onClose)} aria-label="Leave call"><Glyph name="close"/><span>leave call</span></button></div></div>
+    <div className="call-topline"><span className="call-live"><i/>{mode==='request'?'YOUR NEED / FIRST':paused?'QUESTIONS PAUSED':complete?'YOUR OPEN LINE':'GETTING TO KNOW YOU'} <span>· {Math.floor(elapsed / 60).toString().padStart(2, '0')}:{(elapsed % 60).toString().padStart(2, '0')}</span></span><div className="call-top-actions">{speechSupported && !props.offline && <button className="call-icon-button" onClick={toggleVoice} aria-label={voiceOn ? 'Mute Coopy’s spoken voice' : 'Enable Coopy’s spoken voice'} aria-pressed={voiceOn}><VoiceGlyph muted={!voiceOn}/><span>{voiceOn ? 'voice on' : 'voice off'}</span></button>}<button className="call-icon-button" onClick={() => leave(props.onClose)} aria-label="Leave call"><Glyph name="close"/><span>leave call</span></button></div></div>
     <div className="call-body">
       <aside className="call-company">
         <div className="call-face-stage"><div className="call-face-light"/><CallPet speaking={speaking} listening={listening}/><div className={`call-wave ${busy || speaking || listening ? 'active' : ''}`} aria-hidden="true">{Array.from({length: 9}, (_, i) => <i key={i} style={{animationDelay: `${i * -0.14}s`}}/>)}</div><span className="call-presence-label">{listening ? 'I’M LISTENING' : busy ? started ? 'TAKING IT IN' : 'CONNECTING' : speaking ? 'COOPY IS SPEAKING' : 'RIGHT HERE WITH YOU'}</span></div>
-        {!complete && <div className="call-question-progress"><div aria-label={`${count} of 5 answers shared`}>{Array.from({length: 5}, (_, i) => <i className={i < count ? 'done' : i === count ? 'current' : ''} key={i}/>)}</div><span>{count} / 5 little stories</span></div>}
-        <h2 className="call-invitation">{finishedFirstCall ? 'a little world,\nfrom your words.' : complete ? 'show me.\ntell me.' : 'your life,\nin your words.'}</h2>
-        <p className="call-company-note">{complete ? 'A shelf, two things you’re choosing between, something you need. I’ll follow your lead.' : 'No right answers. Tell me a little about the day you actually live.'}</p>
-        <section className="call-memory-trace" aria-label="Memories from this call"><span className="eyebrow">{newMemories.length ? 'WRITING INTO MY HEAD' : 'NOTHING ASSUMED'}</span>{newMemories.length ? newMemories.slice(-5).map(line => <div className="call-memory-line" key={line.id}><Glyph name="spark"/><div><p>{line.text}</p><small>{line.source}<br/>{Math.round(line.confidence * 100)}% confidence</small></div></div>) : <p className="call-memory-empty">You’ll see what I remember, as we talk.</p>}</section>
+        {!complete && <div className="call-question-progress"><div aria-label={`${count} of up to 5 optional stories shared`}>{Array.from({length: 5}, (_, i) => <i className={i < count ? 'done' : mode==='interview'&&i === count ? 'current' : ''} key={i}/>)}</div><span>{count} / up to 5 · optional{paused?' · paused':''}</span></div>}
+        <h2 className="call-invitation">{mode==='interview'?'your life,\nin your words.':'show me.\ntell me.'}</h2>
+        <p className="call-company-note">{complete||paused?'A shelf, two things you’re choosing between, something you need. I’ll follow your lead.':'Tell me a little, or ask for what you need right now. The questions can wait.'}</p>
+        <section className="call-memory-trace" aria-label="Memories from this call"><span className="eyebrow">{newMemories.length ? 'WRITING INTO MY HEAD' : 'NOTHING ASSUMED'}</span>{newMemories.length ? newMemories.slice(-5).map(line => <div className="call-memory-line" key={line.id}><Glyph name="spark"/><div><p>{line.text}</p><small>{line.source}<br/>{line.kind==='inventory'?(line.confidence>=.6?'visible in your frame':'tentative observation'):line.kind==='decision'?'recorded action':line.confidence>=.8?'said by you':'tentative · you can correct this'}</small></div></div>) : <p className="call-memory-empty">You’ll see what I remember, as we talk.</p>}</section>
       </aside>
       <div className="call-conversation">
         <div ref={transcript} className="call-transcript" role="log" aria-label="Your conversation" aria-live="polite" aria-relevant="additions">
           {turns.map(turn => <article className={`call-turn from-${turn.role}`} key={turn.id}><span className="call-speaker">{turn.role === 'you' ? 'YOU' : 'COOPY'}</span>{turn.text && <p className="call-turn-text">{turn.text}</p>}{turn.photo && <span className="call-photo-receipt"><Glyph name="image"/> one frame shared</span>}
             {turn.response?.inventory && <div className="call-inventory"><span className="eyebrow">WHAT I CAN SEE</span>{turn.response.inventory.items.map((item, i) => <div key={i}><Glyph name={item.status === 'present' ? 'check' : item.status === 'low' ? 'minus' : 'help'}/><b>{item.name}</b><span>{item.quantity || item.status}</span></div>)}{turn.response.inventory.uncertainties.map((line, i) => <p className="call-uncertainty" key={i}>{line}</p>)}</div>}
-            {turn.response?.verdict?.pickSkuId && (() => {const verdict = turn.response.verdict, sku = getSku(verdict.pickSkuId!); return sku ? <section className="call-verdict"><div className="call-verdict-art" dangerouslySetInnerHTML={{__html: productArt(sku.type, sku.color)}}/><div className="call-verdict-content"><span className="eyebrow">MY PICK FOR YOU</span><h3>{sku.name}</h3><strong>{money(sku.price)}</strong><span className="delivery-pill"><Glyph name="rocket"/>{sku.delivery} · demo</span><SellerQA skuId={sku.id}/><p>{verdict.reason}</p>{verdict.dissent && <p className="call-verdict-dissent">{verdict.dissent}</p>}<div className="call-citations">{verdict.citations.map(id => {const review = getReview(id); return review ? <details key={id}><summary>{id} <Glyph name="arrow-up"/></summary><div><b>{review.stars} / 5 · {review.title}</b><p>{review.text}</p><small>{review.author} · {review.date} · seeded review</small></div></details> : null;})}</div><VerdictComparison profile={props.profile} pickSkuId={sku.id} verdict={verdict} origin="call" disabled={busy||comparisonBusy||props.profile.owned.some(item=>item.skuId===sku.id)} onBusyChange={comparisonWorking} onChange={(next,profile)=>replaceVerdict(turn.id,verdict,next,profile)}/><button className="text-button" disabled={comparisonBusy} onClick={() => leave(() => props.onOpenProduct(sku.id, verdict))}>Look closer & delegate <Glyph name="arrow-right"/></button></div></section> : null;})()}
-            {(turn.response?.proposedSkuIds || []).filter(id => id !== turn.response?.verdict?.pickSkuId).map(id => {const sku = getSku(id); return sku ? <button className="call-filler-card" disabled={comparisonBusy} key={id} onClick={() => leave(() => props.onOpenProduct(id))}><span className="call-filler-art" dangerouslySetInnerHTML={{__html: productArt(sku.type, sku.color)}}/><span><b>{sku.name}</b><small>pending your approval · open to review</small></span><strong>{money(sku.price)}</strong><Glyph name="arrow-up"/></button> : null;})}
+            {turn.response?.verdict?.pickSkuId && (() => {const verdict = turn.response.verdict, sku = getSku(verdict.pickSkuId!); return sku ? <section className="call-verdict"><ProductVisual sku={sku} className="call-verdict-art"/><div className="call-verdict-content"><span className="eyebrow">MY PICK FOR YOU</span><h3>{sku.name}</h3><strong>{money(sku.price)}</strong><span className="delivery-pill"><Glyph name={/rocket/i.test(sku.delivery)?'rocket':'help'}/>{sku.delivery}{sku.origin==='coupang-reference'?'':' · demo'}</span><ProductEvidence sku={sku}/><SellerQA skuId={sku.id}/><p>{verdict.reason}</p>{verdict.dissent && <p className="call-verdict-dissent">{verdict.dissent}</p>}<div className="call-citations">{verdict.citations.map(id => {const review = getReview(id); return review ? <details key={id}><summary>{id} <Glyph name="arrow-up"/></summary><div><b>{review.stars} / 5 · {review.title}</b><p>{review.text}</p><small>{review.author} · {review.date} · seeded review</small></div></details> : null;})}</div><VerdictComparison profile={props.profile} pickSkuId={sku.id} verdict={verdict} origin="call" disabled={busy||comparisonBusy||props.profile.owned.some(item=>item.skuId===sku.id)} onBusyChange={comparisonWorking} onChange={(next,profile)=>replaceVerdict(turn.id,verdict,next,profile)}/><button className="text-button" disabled={comparisonBusy} onClick={() => leave(() => props.onOpenProduct(sku.id, verdict))}>Look closer & delegate <Glyph name="arrow-right"/></button></div></section> : null;})()}
+            {(turn.response?.proposedSkuIds || []).filter(id => id !== turn.response?.verdict?.pickSkuId).map(id => {const sku = getSku(id); return sku ? <button className="call-filler-card" disabled={comparisonBusy} key={id} onClick={() => leave(() => props.onOpenProduct(id))}><ProductVisual sku={sku} className="call-filler-art"/><span><b>{sku.name}</b><small>{sku.origin==='coupang-reference'?'historical reference price · review before approval':'pending your approval · open to review'}</small></span><strong>{money(sku.price)}</strong><Glyph name="arrow-up"/></button> : null;})}
             {turn.response?.meta && <small className="call-response-meta">{turn.response.meta.offline ? 'CACHED REPLAY' : turn.response.meta.cached ? 'FROM CACHE' : 'LIVE RESPONSE'} · {(turn.response.meta.latencyMs / 1000).toFixed(1)}S</small>}
           </article>)}
           {busy && <div className="call-thinking" role="status"><i/><i/><i/><span>{started ? 'a second, I’m with you…' : 'pulling up a chair…'}</span></div>}
         </div>
         {error && <div className="call-error" role="alert"><Glyph name="help"/><span>{error}</span>{!started && <button className="text-button" onClick={() => void begin()} disabled={busy||comparisonBusy}>Try again</button>}</div>}
         {cameraOpen && <section className="call-camera-preview" aria-label="Your camera preview"><video ref={video} autoPlay muted playsInline/><div><span>PREVIEW · ONLY A CAPTURED FRAME IS SENT</span><button className="call-capture" onClick={() => void capture()} aria-label="Capture this frame"><Glyph name="camera"/> Capture frame</button><button className="call-icon-button" onClick={stopCamera} aria-label="Close camera"><Glyph name="close"/></button></div></section>}
-        {finishedFirstCall ? <div className="call-complete"><p>five stories. the beginning of something that feels like you.</p><button className="button" onClick={() => leave(props.onComplete)}>Build my world <Glyph name="arrow-right"/></button><small>Every district starts with what you shared.</small></div> : <form className="call-composer" onSubmit={submit}>
+        {!complete&&started&&(paused||worldReady)&&<div className="call-complete" aria-label="Optional getting-to-know-you questions">
+          <p>{paused?'the questions can wait. we’ll take care of what you need first.':'a little context is enough to begin. keep talking, or start with what you’ve shared.'}</p>
+          {paused&&<button className="text-button" disabled={busy||comparisonBusy} onClick={()=>void changeInterview('resumeInterview')}>Back to our questions <Glyph name="arrow-right"/></button>}
+          {worldReady&&<button className="text-button" disabled={busy||comparisonBusy} onClick={()=>void changeInterview('finishInterview')}>Build from what I’ve shared <Glyph name="scene"/></button>}
+          {!worldReady&&<small>No need to finish five questions. One useful story or request gives us a beginning.</small>}
+        </div>}
+        {complete&&worldReady&&!props.profile.journey?.districts.length&&<button className="text-button" disabled={busy||comparisonBusy} onClick={()=>void changeInterview('finishInterview')}>Build my world <Glyph name="scene"/></button>}
+        <form className="call-composer" onSubmit={submit}>
           {photoUrl && <div className="call-attached-photo"><img src={photoUrl} alt="The frame you are about to share with Coopy"/><div><b>A little context.</b><small>Sent only when you send your message.</small></div><button type="button" onClick={() => {setPhoto(null); if (fileInput.current) fileInput.current.value = '';}} aria-label="Remove attached photo" disabled={busy||comparisonBusy}><Glyph name="close"/></button></div>}
-          <label className="sr-only" htmlFor="coopy-call-answer">{complete ? 'Tell or ask Coopy something' : 'Your answer to Coopy'}</label><textarea id="coopy-call-answer" ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} disabled={!started || busy || comparisonBusy} rows={3} placeholder={listening ? 'listening…' : complete ? 'tell me what’s on your mind…' : 'tell me a little…'} onKeyDown={event => {if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {event.preventDefault(); event.currentTarget.form?.requestSubmit();}}}/>
+          <label className="sr-only" htmlFor="coopy-call-answer">Tell or ask Coopy something</label><textarea id="coopy-call-answer" ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} disabled={!started || busy || comparisonBusy} rows={3} placeholder={listening ? 'listening…' : mode==='interview'?'your story, or something you need…':'tell me what’s on your mind…'} onKeyDown={event => {if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {event.preventDefault(); event.currentTarget.form?.requestSubmit();}}}/>
           <div className="call-composer-tools"><div><button type="button" className={`call-icon-button ${listening ? 'mic-listening' : ''}`} disabled={props.offline || !voiceSupported || busy || comparisonBusy || !started} onClick={toggleMicrophone} aria-label={listening ? 'Stop voice input' : 'Speak your answer'} aria-pressed={listening} title={props.offline ? 'Offline rehearsal uses typing' : voiceSupported ? 'Speak your answer' : 'Voice input unavailable; type your answer'}><Glyph name={listening ? 'stop' : 'mic'}/></button><button type="button" className="call-icon-button" disabled={busy || comparisonBusy || !started} onClick={() => fileInput.current?.click()} aria-label="Attach a photo"><Glyph name="image"/></button><button type="button" className={`call-icon-button ${cameraOpen ? 'camera-is-open' : ''}`} disabled={busy || comparisonBusy || !started} onClick={() => void openCamera()} aria-label={cameraOpen ? 'Close camera' : cameraPending ? 'Cancel opening camera' : 'Open your camera'} aria-pressed={cameraOpen}><Glyph name="camera"/></button></div><button className="button call-send" type="submit" disabled={busy || comparisonBusy || !started || (!draft.trim() && !photo)}>Send <Glyph name="arrow-up"/></button></div>
           <input ref={fileInput} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" tabIndex={-1} onChange={event => selectPhoto(event.target.files?.[0])}/>
           <p className="call-input-note">{props.offline ? 'Offline rehearsal · type your answer. Browser voice is off.' : listening ? 'Voice fills this box. Read it, then send.' : !voiceSupported ? 'Voice input isn’t available in this browser. Typing works.' : 'Speak, type, or share a frame. No need to choose a mode.'}</p>
-        </form>}
+        </form>
       </div>
     </div>
   </section>;

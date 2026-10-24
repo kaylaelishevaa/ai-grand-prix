@@ -3,10 +3,12 @@ import reviewData from '../data/reviews.json';
 import comparisonCatalogData from '../data/comparison-catalog.json';
 import comparisonReviewData from '../data/comparison-reviews.json';
 import { samePurpose } from './comparison-groups';
+import {pricedReferenceSkus} from './reference-catalog';
 import type { Review, SKU } from './types';
 
-/** These checked-in synthetic records are the only product/review facts supplied to the model. */
-export const catalog = [...catalogData, ...comparisonCatalogData] as unknown as SKU[];
+/** Original synthetic evidence stays intact; sourced references carry their own explicit provenance. */
+export const syntheticCatalog = [...catalogData, ...comparisonCatalogData] as unknown as SKU[];
+export const catalog:SKU[] = [...syntheticCatalog, ...pricedReferenceSkus];
 export const reviews = [...reviewData, ...comparisonReviewData] as Review[];
 const skuById = new Map(catalog.map((sku) => [sku.id, sku]));
 const reviewById = new Map(reviews.map((review) => [review.id, review]));
@@ -17,7 +19,7 @@ export const reviewsForSku = (id: string): Review[] => reviews.filter((review) =
 /** Only direct functional substitutes; excludes the selected item and quarantine/owned defaults. */
 export function comparisonCandidatesForSku(id: string, pool: SKU[] = catalog): SKU[] {
   const selected = getSku(id);
-  return selected ? pool.filter(sku => sku.id !== id && samePurpose(selected, sku)) : [];
+  return selected ? pool.filter(sku => sku.id !== id && (sku.origin||'synthetic')===(selected.origin||'synthetic') && samePurpose(selected, sku)) : [];
 }
 
 export function reviewStats(id: string) {

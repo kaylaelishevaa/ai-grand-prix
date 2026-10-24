@@ -59,7 +59,7 @@
       <div id="vision-strip" class="vision-strip" hidden><button id="vision-toggle" class="vision-toggle" aria-pressed="true" aria-label="Pause camera sharing with Coopy"><svg><use href="#i-eye"/></svg><span id="vision-status">Camera sharing ready</span><span id="vision-action">Pause</span></button></div>
       <div class="call-feedback"><p id="call-notice" role="status" hidden></p><button id="retry-call" class="inline-retry" hidden>Reconnect</button><button id="play-audio" class="inline-retry" hidden><svg><use href="#i-speaker"/></svg> Enable sound</button></div>
 
-      <aside class="call-side-panel" aria-label="Your conversation and finds"><section id="product-zone" class="product-zone" aria-label="Recommended product" hidden>
+      <aside class="call-side-panel" aria-label="Your conversation and finds"><section id="product-zone" class="product-zone" aria-label="Product preview" hidden>
         <div class="deck-label"><span id="product-category">Picked for you</span><span id="product-position">1 / 3</span></div>
         <article id="product-card" class="product-card">
           <div id="swipe-feedback" class="swipe-feedback" aria-hidden="true"></div>
@@ -69,7 +69,9 @@
         <div class="swipe-actions"><button id="product-skip" aria-label="Skip this product"><span>←</span> Skip</button><p>Swipe to choose</p><button id="product-save" aria-label="Save this product for this call">Save this call <span>→</span></button></div>
       </section>
       <div id="product-empty" class="product-empty" hidden>Ask Coopy for a few more ideas.</div>
-      <section id="world-picks" class="world-picks" aria-label="Products from your worlds" hidden><p class="world-picks-kicker">FROM YOUR WORLDS · SIMULATION</p><div id="world-picks-list"></div><p class="world-picks-note">The same products, reviews and approval controls as your world. Details pauses this call.</p></section>
+      <section id="world-picks" class="world-picks" aria-label="Products from your worlds" hidden><p class="world-picks-kicker">IN-APP CANDIDATES · PREVIEW</p><div id="world-picks-list"></div><p class="world-picks-note">Preview candidates keep their own evidence. Details pauses this call.</p></section>
+
+      <section id="validated-call" class="validated-call" aria-label="Checked call answer" hidden><p id="validated-call-status" class="checked-status" role="status"></p><div id="validated-call-content"></div></section>
 
       <div class="conversation-area">
         <div id="tryon-chip" class="tryon-chip" hidden><svg><use href="#i-spark"/></svg><span id="tryon-label">Trying it on</span><button id="clear-tryon" aria-label="Remove try-on overlay"><svg><use href="#i-close"/></svg></button></div>

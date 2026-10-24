@@ -4,7 +4,7 @@ import type {SceneKind} from './scenes';
 import type {SceneContext} from './world-context';
 import type {WorldBlueprint} from './scene-blueprint';
 export type PriceBand = 'under-10k' | 'under-30k' | 'under-70k' | 'premium';
-export interface SKU {id:string;name:string;type:string;color?:string;price:number;category:string;vibeTags:string[];palette:string[];priceBand:PriceBand;ownedByDefault?:boolean;sensitive?:boolean;aliases:string[];description:string;facts:Record<string,string|number|boolean>;reviewIds:string[];delivery:string;}
+export interface SKU {origin?:'synthetic'|'coupang-reference';sourceUrl?:string;sourceNote?:string;image?:string;checkedAt?:string;priceBasis?:'historical-reference';id:string;name:string;type:string;color?:string;price:number;category:string;vibeTags:string[];palette:string[];priceBand:PriceBand;ownedByDefault?:boolean;sensitive?:boolean;aliases:string[];description:string;facts:Record<string,string|number|boolean>;reviewIds:string[];delivery:string;}
 export interface Review {id:string;skuId:string;stars:number;date:string;author:string;title:string;text:string;helpful:number;photo:boolean;tags:string[];relevant?:boolean;}
 export type SwipeAction='ooh'|'skip'|'nah';
 export type SwipeReason='too pricey'|'not my style'|'have one';

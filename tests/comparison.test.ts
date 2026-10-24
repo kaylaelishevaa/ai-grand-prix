@@ -19,9 +19,9 @@ const now=new Date();
 const swap={fromSkuId:'kettle',skuId:'kettleAlt',requestId:'swap-1',origin:'ask' as const};
 const avg=(id:string)=>{const rows=reviewsForSku(id);return rows.length?rows.reduce((sum,row)=>sum+row.stars,0)/rows.length:-Infinity;};
 
-test('every fresh eligible catalog pick has 2–4 same-purpose contenders with one earned badge',()=>{
+test('every fresh eligible synthetic catalog pick has 2–4 same-purpose contenders with one earned badge',()=>{
   const profile=createProfile('badge-test',now);
-  for(const sku of eligibleCatalog(profile,'ask')){
+  for(const sku of eligibleCatalog(profile,'ask').filter(item=>item.origin!=='coupang-reference')){
     const result=buildComparison(profile,sku.id),pool=[sku,...comparisonCandidatesForSku(sku.id,eligibleCatalog(profile))];
     assert(result.contenders.length>=2&&result.contenders.length<=4,`${sku.id} needs 2–4 contenders`);
     for(const option of [result.main,...result.contenders]){

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { catalog, reviews, getSku, reviewStats, reviewsForSku } from '../lib/catalog';
+import { catalog, syntheticCatalog, reviews, getSku, reviewStats, reviewsForSku } from '../lib/catalog';
 import { applySwipe, createProfile, deleteMemory, eligibleCatalog, installMemoryLines, markQuestionAnswered, sanitizeProfileForAI, scoreSku } from '../lib/profile';
 import { addDecision, approveDecisions, detectOwnedRequest, effectiveNow, isDecisionLocked, localClock, lockUntilMorning, ownedMessage } from '../lib/guardrails';
 import originalCatalog from '../data/catalog.json';
@@ -16,7 +16,8 @@ function swipe(id: string, skuId: string, action: 'ooh' | 'skip' | 'nah', reason
 test('catalog owns all original review IDs; exact complaint math remains visible', () => {
   assert.equal(originalCatalog.length, 43);
   assert.equal(originalReviews.length, 498);
-  assert.equal(catalog.length, originalCatalog.length + comparisonCatalog.length);
+  assert.equal(syntheticCatalog.length, originalCatalog.length + comparisonCatalog.length);
+  assert.equal(catalog.length, syntheticCatalog.length + 17);
   assert.equal(reviews.length, originalReviews.length + comparisonReviews.length);
   assert.deepEqual(catalog.slice(0, originalCatalog.length), originalCatalog);
   assert.deepEqual(reviews.slice(0, originalReviews.length), originalReviews);

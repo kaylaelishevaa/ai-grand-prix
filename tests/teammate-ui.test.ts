@@ -73,11 +73,11 @@ test('world product open rechecks the server and stops camera/microphone before 
   assert.equal(f.store.cart.size,0);assert(!f.store.catalog.has('socks'));
 });
 
-test('excluded world products do not navigate or stop the active call, and numeric source IDs never bridge',async t=>{
+test('excluded and unknown products do not navigate or stop the active call, including numeric source IDs',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();let requests=0;
   f.context.fetch=async()=>{requests++;return{ok:true,json:async()=>({ok:false,error:'Already owned or excluded.'})};};
   assert.equal((await f.voice.opts.onWorldProduct('detergent')).ok,false);assert.equal(f.camera.running,true);assert(f.voice.call);
-  assert.equal((await f.voice.opts.onWorldProduct('1814412512')).ok,false);assert.equal(requests,1);
+  assert.equal((await f.voice.opts.onWorldProduct('9999999999')).ok,false);assert.equal(requests,2);
   assert(!f.messages.some(message=>message.data.type==='coupi-live-call-product'));
 });
 
@@ -310,3 +310,69 @@ test('generated product-explanation prompt never becomes a user memory; referenc
 
 
 test('media toggles begin off, and fonts load only after an online status check',async t=>{const f=fixture(t);assert.equal(f.nodes.get('toggle-camera').attributes['aria-pressed'],'false');assert.equal(f.nodes.get('gesture-toggle').attributes['aria-pressed'],'false');assert.equal(f.context.document.head.children.length,0);await tick();assert.equal(f.context.document.head.children[0].href,'/fonts/fonts.css');});
+
+const descendants=node=>[node,...(node.children||[]).flatMap(descendants)];
+function parentResult(f,id,result,type='coupi-call-result'){f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type,id,result}});}
+const checkedResult=()=>({status:'ok',message:'one considered pick.',conversationMode:'request',interviewCount:0,interviewComplete:false,worldReady:false,verdict:{pickSkuId:'socks',reason:'Red, under your stated budget.',dissent:'Two seeded reviews describe pilling.',citations:['socks-r-15','socks-r-16'],runnerUpSkuId:null,whyRunnerUpLost:'',clarifyingQuestion:null},proposedSkuIds:['socks'],products:[{id:'socks',name:'Red training socks',price:6900,delivery:'Demo delivery tomorrow',image:null}]});
+
+test('final actual turns attach one consented raw frame; periodic, partial and assistant snapshots never trigger requests',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.visionTick();f.voice.opts.onTranscript({role:'assistant',key:'a1',text:'which one?',final:true});f.voice.opts.onTranscript({role:'user',key:'u1',text:'this',final:false});
+  assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,0);
+  for(const [i,text] of ['which one?','what do I need?','what’s missing?','this or that?'].entries())f.voice.opts.onTranscript({role:'user',key:'camera-'+i,text,final:true});
+  const entries=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');assert.equal(entries.length,4);
+  for(const {data} of entries){assert.equal(data.photo.mime,'image/jpeg');assert.equal(data.photo.dataUrl,'data:image/jpeg;base64,AQID');assert(Number.isFinite(Date.parse(data.photo.capturedAt)));assert.equal(data.role,'user');}
+  f.nodes.get('vision-toggle').onclick();f.voice.opts.onTranscript({role:'user',key:'private',text:'my mornings are busy',final:true});
+  const privateTurn=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1);assert(!('photo' in privateTurn.data));
+  f.voice.opts.onTranscript({role:'user',key:'synthetic',text:'invented prompt',final:true,synthetic:true});assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,5);
+});
+
+test('checked call cards use returned exact products, citations and safe fields without another request',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onTranscript({role:'user',key:'shop',text:'red socks tomorrow',final:true});
+  const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
+  assert.equal(f.nodes.get('validated-call').dataset.state,'pending');assert.equal(f.nodes.get('validated-call').hidden,false);
+  let resolved=false;const waiting=f.voice.opts.onResolveCall().then(result=>{resolved=true;return result;});
+  const result=checkedResult();result.profile={secret:'PRIVATE_PROFILE'};result.diary='PRIVATE_DIARY';result.products.push({id:'rogue',name:'UNVALIDATED_PRODUCT',price:1});
+  f.events.emit('message',{origin:'https://attacker.test',source:f.context.window.parent,data:{type:'coupi-call-result',id,result}});await tick();assert.equal(resolved,false);
+  parentResult(f,id,result);const safe=await waiting;const serialized=JSON.stringify(safe);assert(!serialized.includes('PRIVATE_'));assert(!serialized.includes('UNVALIDATED_PRODUCT'));
+  const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='Red training socks'));assert(nodes.some(n=>n.textContent==='PENDING YOUR APPROVAL · nothing ordered'));assert(nodes.some(n=>n.textContent==='Two seeded reviews describe pilling.'));
+  f.context.fetch=async(_url,init)=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:JSON.parse(init.body).skuId})});
+  await nodes.find(n=>n.textContent==='review 1 ↗').onclick();
+  const opened=f.messages.find(row=>row.data.type==='coupi-live-call-product').data;assert.equal(opened.skuId,'socks');assert.equal(opened.callId,id);assert.equal(opened.reviewId,'socks-r-15');
+  assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,1);
+});
+
+test('checked inventories keep uncertainty, proposed cards and exact numeric sourced identities',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'scan',text:'what is missing?',final:true});
+  const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
+  parentResult(f,id,{...checkedResult(),verdict:undefined,inventory:{items:[{name:'milk',quantity:'one carton',status:'low'}],lowOrMissing:[{name:'greens',reason:'not visible',confidence:'low'}],uncertainties:['The back shelf is obscured.']},proposedSkuIds:['1814412512'],products:[{id:'1814412512',name:'Sourced reference',price:10000,priceBasis:'historical-reference',image:'/live-call/products/example.jpg',delivery:'Current delivery unknown'}]});
+  const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='milk · one carton — low'));assert(nodes.some(n=>n.textContent==='The back shelf is obscured.'));assert(nodes.some(n=>n.textContent==='REFERENCE PRICE · confirm current price on Coupang'));
+  f.context.fetch=async()=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'1814412512'})});
+  await nodes.find(n=>n.textContent==='Details & approval').onclick();assert.equal(f.messages.find(row=>row.data.type==='coupi-live-call-product').data.skuId,'1814412512');
+});
+
+test('retry reopens the same checked turn while unknown or stale results cannot replace the latest card',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'retry',text:'socks',final:true});const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
+  const emit=data=>f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data});
+  emit({type:'coupi-call-error',id,error:'Connection paused.'});assert.equal(f.nodes.get('validated-call').dataset.state,'error');
+  let retries=0;f.voice.resolveAppTurn=()=>{retries++;};emit({type:'coupi-call-pending',id});emit({type:'coupi-call-pending',id});assert.equal(retries,1);
+  const waiting=f.voice.opts.onResolveCall();parentResult(f,'unknown',checkedResult());assert.equal(f.nodes.get('validated-call').dataset.state,'pending');
+  parentResult(f,id,checkedResult());assert.equal((await waiting).status,'ok');
+  f.voice.opts.onTranscript({role:'user',key:'next',text:'something else',final:true});parentResult(f,id,{...checkedResult(),message:'OLD ANSWER'});assert.equal(f.nodes.get('validated-call').dataset.state,'pending');assert(!descendants(f.nodes.get('validated-call-content')).some(n=>n.textContent==='OLD ANSWER'));
+});
+
+test('bridge drops oversized frames and only eligible result products can carry local images',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const bridge=f.context.window.CoupiCallBridge;
+  const id=bridge.transcript({role:'user',key:'image-bound',text:'this one',final:true},{dataUrl:'data:image/jpeg;base64,'+'A'.repeat(22001),mime:'image/jpeg',capturedAt:new Date().toISOString()});
+  assert(!('photo' in f.messages.find(row=>row.data.id===id).data));
+  const result=checkedResult();result.products[0].image='https://untrusted.example/pixel';parentResult(f,id,result);const safe=await bridge.resolveLatest();assert.equal(safe.products[0].image,null);
+});
+
+test('late prior transcripts persist their actual words without replacing the current checked turn',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onUserTurnStart();
+  f.voice.opts.onTranscript({role:'user',key:'current',text:'red socks',final:true});const current=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data;
+  f.voice.opts.onTranscript({role:'user',key:'older',text:'a kettle',final:true,superseded:true});const older=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data;assert(!('photo' in older));assert.equal(older.text,'a kettle');
+  let resolved=false;const waiting=f.voice.opts.onResolveCall().then(value=>{resolved=true;return value;});parentResult(f,older.id,{...checkedResult(),message:'OLD ANSWER'});await tick();assert.equal(resolved,false);assert.equal(f.nodes.get('validated-call').dataset.state,'pending');
+  parentResult(f,current.id,checkedResult());assert.equal((await waiting).verdict.pickSkuId,'socks');assert(!descendants(f.nodes.get('validated-call-content')).some(n=>n.textContent==='OLD ANSWER'));
+});

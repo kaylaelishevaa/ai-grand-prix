@@ -87,3 +87,5 @@
 .call-memory-form{display:flex;flex-wrap:wrap;gap:15px;padding:24px 0}.call-memory-form label{width:100%;font-size:13px}.call-memory-form input{flex:1;min-width:180px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink)}.cancel-decision{font-size:11px;margin-left:8px}
 @media(max-width:760px){.decision-item{flex-wrap:wrap}.cancel-decision{margin-left:auto}.confidence-label{flex-wrap:wrap;gap:4px}.life-chapter-card{padding:20px}.memory-row>div{min-width:0}.view-head .page-heading h1{font-size:32px}}
 @media(prefers-reduced-motion:reduce){.memory-evidence{transition:none}}
+
+.product-evidence-note{font:9px/1.7 var(--mono);color:var(--muted);margin:14px 0;overflow-wrap:anywhere}.product-evidence-note span{letter-spacing:.04em}.product-evidence-note a{color:var(--teal);text-decoration:underline;text-underline-offset:3px}.product-evidence-note svg{width:12px;height:12px;vertical-align:middle}

@@ -16,7 +16,7 @@ export function permittedVoiceWorlds(profile:Profile){
 }
 function productFacts(sku:SKU){
   const evidence=reviewsForSku(sku.id).slice().sort((a,b)=>a.stars-b.stars||b.helpful-a.helpful).slice(0,3);
-  return{skuId:sku.id,name:sku.name,category:sku.category,price:sku.price,description:sku.description,facts:sku.facts,vibeTags:sku.vibeTags,palette:sku.palette,delivery:sku.delivery,reviewStats:reviewStats(sku.id),reviewIds:sku.reviewIds,reviews:evidence.map(review=>({id:review.id,stars:review.stars,text:review.text,helpful:review.helpful})),catalog_namespace:WORLD_CATALOG_NAMESPACE};
+  return{skuId:sku.id,name:sku.name,origin:sku.origin||'synthetic',sourceUrl:sku.sourceUrl||null,image:sku.image||null,priceBasis:sku.priceBasis||'synthetic',sourceNote:sku.sourceNote||null,category:sku.category,price:sku.price,description:sku.description,facts:sku.facts,vibeTags:sku.vibeTags,palette:sku.palette,delivery:sku.delivery,reviewStats:reviewStats(sku.id),reviewIds:sku.reviewIds,reviews:evidence.map(review=>({id:review.id,stars:review.stars,text:review.text,helpful:review.helpful})),catalog_namespace:WORLD_CATALOG_NAMESPACE};
 }
 export function searchVoiceWorldProducts(profile:Profile,input:{query:string;max_price?:number|null}){
   const query=normalize(input.query),tokens=[...new Set(query.split(' ').filter(token=>token.length>1&&!ignored.has(token)))];
@@ -26,7 +26,7 @@ export function searchVoiceWorldProducts(profile:Profile,input:{query:string;max
     const score=(districtIds.has(sku.id)?100:0)+tokens.reduce((sum,token)=>sum+(identity.includes(token)?8:attributes.includes(token)?1:0),0);
     return{sku,score};
   }).filter(row=>row.score>0).sort((a,b)=>b.score-a.score||scoreSku(profile,b.sku)-scoreSku(profile,a.sku)||a.sku.price-b.sku.price||a.sku.id.localeCompare(b.sku.id)).slice(0,4).map(row=>productFacts(row.sku));
-  return{ok:true,catalog_namespace:WORLD_CATALOG_NAMESPACE,products,message:products.length?'These are the same synthetic catalog products used in your worlds. Open one for its seeded review evidence and approval-only Decisions.':'No eligible match in the world catalog. Ask one short clarification; do not invent a matching product.',purchased:false};
+  return{ok:true,catalog_namespace:WORLD_CATALOG_NAMESPACE,products,message:products.length?'These are eligible products from the app catalog. Each row identifies synthetic demo data or a sourced Coupang listing with a historical reference price. Sourced rows have no seeded reviews; unknown delivery remains unknown. Open the exact SKU for its evidence and approval controls.':'No eligible match in the world catalog. Ask one short clarification; do not invent a matching product.',purchased:false};
 }
 export function openVoiceWorldProduct(profile:Profile,skuId:string){
   const sku=eligibleCatalog(profile).find(product=>product.id===skuId);

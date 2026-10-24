@@ -20,8 +20,10 @@ export const originalComparisonGroups: Record<string, string> = {
 };
 
 const knownGroups = new Set(Object.values(originalComparisonGroups));
+const referenceGroups = new Set(['lipstick','chair','lamp','tshirt','hoodie','eyeglasses','sunglasses'].map(type=>'reference:'+type));
 
 export function comparisonGroupForSku(sku: SKU): string {
+  if(sku.origin==='coupang-reference')return typeof sku.facts.comparisonGroup==='string'&&referenceGroups.has(sku.facts.comparisonGroup)?sku.facts.comparisonGroup:`unmatched:${sku.id}`;
   if (originalComparisonGroups[sku.id]) return originalComparisonGroups[sku.id];
   const group = sku.facts.comparisonGroup;
   if (typeof group === 'string' && knownGroups.has(group)) return group;
@@ -31,5 +33,6 @@ export function comparisonGroupForSku(sku: SKU): string {
 
 export function samePurpose(a: SKU, b: SKU): boolean {
   if (a.sensitive || b.sensitive || a.ownedByDefault || b.ownedByDefault) return false;
+  if((a.origin||'synthetic')!==(b.origin||'synthetic'))return false;
   return comparisonGroupForSku(a) === comparisonGroupForSku(b);
 }

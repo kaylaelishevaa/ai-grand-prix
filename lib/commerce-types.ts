@@ -7,7 +7,7 @@ export interface CommerceAddress {id:string;label:string;line:string;postcode:st
 export interface CommercePayment {id:string;label:string;last4:string;sample:true;}
 export interface DeliveryPromise {kind:DeliveryKind;label:string;promisedAt:string|null;basis:string;simulation:true;}
 export interface DeliveryOption extends DeliveryPromise {available:boolean;unavailableReason:string|null;}
-export interface OrderLine {id:string;decisionId:string;skuId:string;name:string;category:string;quantity:1;catalogPrice:number;unitPrice:number;discount:number;total:number;deliveryFact:string;}
+export interface OrderLine {origin?:'synthetic'|'coupang-reference';priceBasis?:'historical-reference';sourceUrl?:string;sourceNote?:string;checkedAt?:string;id:string;decisionId:string;skuId:string;name:string;category:string;quantity:1;catalogPrice:number;unitPrice:number;discount:number;total:number;deliveryFact:string;}
 export interface CheckoutInput {decisionIds:string[];addressId:string;paymentMethodId:string;deliveryKind:DeliveryKind;deliveryInstruction:string;}
 export interface CheckoutQuote {id:string;lines:OrderLine[];subtotal:number;discount:number;shippingFee:0;total:number;currency:'KRW';budgetRemaining:number;address:CommerceAddress;payment:CommercePayment;delivery:DeliveryPromise;deliveryOptions:DeliveryOption[];deliveryInstruction:string;simulation:true;}
 export interface TrackingEvent {id:string;step:TrackingStep;label:string;at:string;simulation:true;}

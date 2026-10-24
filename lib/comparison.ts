@@ -111,6 +111,7 @@ function fitFor(profile:Profile,sku:SKU,pool:SKU[]):Fit {
 
 /** Hours are used only when explicitly recorded. A delivery slogan is not converted into an invented duration. */
 function deliveryFacts(sku:SKU):{hours:number|null;window:string;day:number|null} {
+  if(sku.facts.deliveryStatus==='unknown'||/\b(?:unknown|unverified)\b/i.test(sku.delivery))return {hours:null,window:'',day:null};
   const hours=sku.facts.deliveryHours;
   const window=normal(sku.delivery).replace(/\bsimulation\b/g,'').replace(/\s+/g,' ').trim();
   const days=window.match(/\bin (\d+) days?\b/);
@@ -125,7 +126,7 @@ function earnedBadges(profile:Profile,sku:SKU,pool:SKU[]):ComparisonBadge[] {
   const badges:ComparisonBadge[]=[];
   const make=(kind:ComparisonBadge['kind'],label:string,basis:string,tied=false,reviewIds:string[]=[],memoryIds:string[]=[])=>badges.push({kind,label,basis,tied,reviewIds,memoryIds});
   const cheapest=Math.min(...pool.map(item=>item.price));
-  if(sku.price===cheapest)make('cheapest','cheapest',`${won(sku.price)} is the lowest listed price among ${pool.length} eligible ${comparisonGroupForSku(sku).replace(/-/g,' ')} options.`,pool.filter(item=>item.price===cheapest).length>1);
+  if(sku.price===cheapest&&(pool.length>1||sku.origin!=='coupang-reference'))make('cheapest',sku.origin==='coupang-reference'?'lowest reference price':'cheapest',`${won(sku.price)} is the lowest ${sku.origin==='coupang-reference'?'historical reference':'listed'} price among ${pool.length} eligible ${comparisonGroupForSku(sku).replace(/-/g,' ')} options.${sku.origin==='coupang-reference'?' Current retailer prices are unverified.':''}`,pool.filter(item=>item.price===cheapest).length>1);
   const ownRows=reviewsForSku(sku.id),average=rawAverage(ownRows);
   const bestAverage=Math.max(...pool.map(item=>rawAverage(reviewsForSku(item.id))??-Infinity));
   if(average!==null&&average===bestAverage)make('most-loved','most loved',`${displayAverage(ownRows)}★ from ${ownRows.length} seeded reviews: the highest raw average in this ${pool.length}-item comparison.`,pool.filter(item=>rawAverage(reviewsForSku(item.id))===average).length>1,ownRows.map(row=>row.id));
@@ -154,7 +155,7 @@ function option(profile:Profile,sku:SKU,pool:SKU[],badge:ComparisonBadge):Compar
   const rows=reviewsForSku(sku.id);
   return {skuId:sku.id,badge,fitReasons:fitFor(profile,sku,pool).positive.map(line=>({memoryId:line.id,text:line.text,source:line.source})),reviewSummary:{count:rows.length,average:displayAverage(rows),criticalIds:rows.filter(row=>row.stars<=2).sort((a,b)=>b.helpful-a.helpful).map(row=>row.id)},delivery:sku.delivery};
 }
-const awardOrder:ComparisonBadge['kind'][]=['best-for-you','cheapest','most-loved','best-value','fastest'];
+const awardOrder:ComparisonBadge['kind'][]=['best-for-you','cheapest','most-loved','best-value','fastest','your-choice'];
 export function buildComparison(profile:Profile,pickSkuId:string):ComparisonResult {
   const pick=getSku(pickSkuId);
   if(!pick)throw new ComparisonError('UNKNOWN_SKU','That item is not in the demo catalog.');
@@ -164,6 +165,8 @@ export function buildComparison(profile:Profile,pickSkuId:string):ComparisonResu
   }
   const pool=purposePool(profile,pick);
   const awards=new Map(pool.map(sku=>[sku.id,earnedBadges(profile,sku,pool)]));
+  // Missing merchant evidence is not a reason to invent an award or hide a legitimate alternative.
+  if(pick.origin==='coupang-reference')for(const sku of pool)if(!awards.get(sku.id)!.length)awards.get(sku.id)!.push({kind:'your-choice',label:sku.id===pick.id?'your reference pick':'reference option',basis:'Same-purpose sourced listing. Historical price only; reviews, delivery, durability and physical fit are unknown. No performance award is claimed.',tied:false,reviewIds:[],memoryIds:[]});
   const sortAwards=(a:ComparisonBadge,b:ComparisonBadge)=>awardOrder.indexOf(a.kind)-awardOrder.indexOf(b.kind);
   const mainBadge=awards.get(pick.id)!.sort(sortAwards)[0]||{kind:'your-choice' as const,label:'your choice',basis:'Your selected item. It does not win a comparison award from the available facts.',tied:false,reviewIds:[],memoryIds:[]};
   const used=new Set([mainBadge.kind]);
@@ -176,7 +179,8 @@ export function buildComparison(profile:Profile,pickSkuId:string):ComparisonResu
     const badges=awards.get(sku.id)!.sort(sortAwards),badge=badges.find(item=>!used.has(item.kind))||badges[0];
     used.add(badge.kind);contenders.push(option(profile,sku,pool,badge));
   }
-  return {main:option(profile,pick,pool,mainBadge),contenders,groupId:comparisonGroupForSku(pick),scope:`${pool.length} eligible ${comparisonGroupForSku(pick).replace(/-/g,' ')} options in the seeded demo catalog`,limits:['Prices, reviews and delivery estimates are seeded demo facts, not live merchant data.','Fit uses only active, sourced memory; an unmatched preference stays unknown.',...(contenders.length<pool.length-1?['Only alternatives earning a comparison badge are shown. The full catalog remains available.']:[])]};
+  const reference=pick.origin==='coupang-reference';
+  return {main:option(profile,pick,pool,mainBadge),contenders,groupId:comparisonGroupForSku(pick),scope:`${pool.length} eligible ${comparisonGroupForSku(pick).replace(/^reference:/,'').replace(/-/g,' ')} options in the ${reference?'sourced reference':'seeded demo'} catalog`,limits:[reference?'Historical reference prices only. Current stock, delivery, reviews, durability and physical fit are unverified; fictional products are not mixed into this comparison.':'Prices, reviews and delivery estimates are seeded demo facts, not live merchant data.','Fit uses only active, sourced memory; an unmatched preference stays unknown.',...(contenders.length<pool.length-1?['Only alternatives earning a comparison badge are shown. The full catalog remains available.']:[])]};
 }
 
 const durabilityTags=new Set(['pilling','wash','wash-test','wear','daily-use','in-use','repeat-order','repeat-buy','repeat-purchase','loose-lid','seam-fault','charging-fault','button-fault','stitching','construction','zipper','clasp','leak','fragile','latch','cap-fit','sprayer','bristle-shedding','ferrule-fit','fill-support','connection-drop','strap-adjustment','handle-fastener','zipper-jam','keep-warm-drying','spray-nozzle','closure-fit','seam-finish','buttonhole-finish','strap-finish','handle-finish','base-rock','pour-control']);
@@ -191,13 +195,13 @@ export function compareProducts(profile:Profile,leftId:string,rightId:string):Pr
   const fitA=fitFor(profile,left,pool),fitB=fitFor(profile,right,pool),deliveryA=deliveryFacts(left),deliveryB=deliveryFacts(right),durabilityA=durability(a),durabilityB=durability(b);
   const fitText=(fit:Fit)=>[...fit.positive.map(line=>`Matches: “${line.text}” · ${line.source}`),...fit.negative.map(line=>`Conflicts with: “${line.text}” · ${line.source}`)].join('\n')||'No active memory explicitly matches these listed attributes.';
   const deliveryDelta=deliveryA.hours!==null&&deliveryB.hours!==null?deliveryB.hours-deliveryA.hours:undefined;
-  const empty={leftReviewIds:[] as string[],rightReviewIds:[] as string[],memoryIds:[] as string[]};
+  const empty={leftReviewIds:[] as string[],rightReviewIds:[] as string[],memoryIds:[] as string[]},reference=left.origin==='coupang-reference';
   return {leftSkuId:left.id,rightSkuId:right.id,dimensions:[
-    {...empty,key:'price',label:'price',left:won(left.price),right:won(right.price),delta:right.price-left.price,note:left.price===right.price?'Same listed price.':`${right.name} is ${won(Math.abs(right.price-left.price))} ${right.price<left.price?'less':'more'}.`},
+    {...empty,key:'price',label:'price',left:won(left.price),right:won(right.price),delta:right.price-left.price,note:(left.price===right.price?'Same listed price.':`${right.name} is ${won(Math.abs(right.price-left.price))} ${right.price<left.price?'less':'more'}.`)+(reference?' Historical reference amounts, not live retailer offers.':'')},
     {...empty,key:'fit',label:'fit for you',left:fitText(fitA),right:fitText(fitB),memoryIds:unique([...fitA.positive,...fitA.negative,...fitB.positive,...fitB.negative].map(line=>line.id)),note:'Exact catalog attributes and explicit constraints matched to the memory shown. No inferred personality or health claim.'},
-    {...empty,key:'quality',label:'review evidence',left:a.length?`${displayAverage(a)}★ · ${a.length} seeded reviews`:'No seeded reviews',right:b.length?`${displayAverage(b)}★ · ${b.length} seeded reviews`:'No seeded reviews',leftReviewIds:a.map(row=>row.id),rightReviewIds:b.map(row=>row.id),note:'Raw averages include delivery praise, irrelevant gifts and angry reviews. They are not a product-quality score.'},
-    {...empty,key:'delivery',label:'delivery',left:left.delivery,right:right.delivery,...(deliveryDelta===undefined?{}:{delta:deliveryDelta}),note:deliveryDelta===0?'Same explicit delivery estimate; tied.':deliveryDelta!==undefined?`${right.name} lists ${Math.abs(deliveryDelta)}h ${deliveryDelta<0?'sooner':'later'}. Simulated estimate, not a live booking.`:deliveryA.window===deliveryB.window?'Same listed delivery window; tied.':'No common delivery duration is recorded, so a speed difference cannot be calculated.'},
-    {...empty,key:'durability',label:'durability · reported use',left:durabilityA.text,right:durabilityB.text,leftReviewIds:durabilityA.ids,rightReviewIds:durabilityB.ids,note:'Individual reports, quoted directly. No lifetime score or failure probability is inferred.'},
+    {...empty,key:'quality',label:'review evidence',left:a.length?`${displayAverage(a)}★ · ${a.length} seeded reviews`:reference?'No sourced review evidence':'No seeded reviews',right:b.length?`${displayAverage(b)}★ · ${b.length} seeded reviews`:reference?'No sourced review evidence':'No seeded reviews',leftReviewIds:a.map(row=>row.id),rightReviewIds:b.map(row=>row.id),note:reference?'No review average or quality award can be inferred. Synthetic reviews are never assigned to these sourced listings.':'Raw averages include delivery praise, irrelevant gifts and angry reviews. They are not a product-quality score.'},
+    {...empty,key:'delivery',label:'delivery',left:left.delivery,right:right.delivery,...(deliveryDelta===undefined?{}:{delta:deliveryDelta}),note:deliveryDelta===0?'Same explicit delivery estimate; tied.':deliveryDelta!==undefined?`${right.name} lists ${Math.abs(deliveryDelta)}h ${deliveryDelta<0?'sooner':'later'}. Simulated estimate, not a live booking.`:deliveryA.window.length>0&&deliveryA.window===deliveryB.window?'Same listed delivery window; tied.':'No common delivery duration is recorded, so a speed difference cannot be calculated.'},
+    {...empty,key:'durability',label:'durability · reported use',left:reference?'Durability unknown; no sourced use-over-time evidence.':durabilityA.text,right:reference?'Durability unknown; no sourced use-over-time evidence.':durabilityB.text,leftReviewIds:durabilityA.ids,rightReviewIds:durabilityB.ids,note:'Individual reports, quoted directly. No lifetime score or failure probability is inferred.'},
   ]};
 }
 
@@ -215,7 +219,7 @@ function choiceVerdict(profile:Profile,chosen:SKU,previous:SKU):Verdict {
   const runner=pool.find(sku=>sku.id===previous.id)||pool.find(sku=>sku.id!==chosen.id);
   const priceComparison=runner?(runner.price===chosen.price?'the listed price is the same':`${runner.price>chosen.price?'costs':'saves'} ${won(Math.abs(runner.price-chosen.price))}`):'';
   const tradeoff=chosen.price===previous.price?'Same listed price as your previous pick.':`${won(Math.abs(chosen.price-previous.price))} ${chosen.price<previous.price?'less':'more'} than your previous pick.`;
-  return {pickSkuId:chosen.id,reason:`Your choice: ${chosen.name}, ${won(chosen.price)}. The review evidence below belongs to this item.`,dissent:`${tradeoff} ${dissent.text}`,citations:dissent.ids,runnerUpSkuId:runner?.id||null,whyRunnerUpLost:runner?`You chose ${chosen.name}. ${runner.name} ${priceComparison}; no hidden quality tradeoff is assumed.`:'No other eligible same-purpose item is recorded.',clarifyingQuestion:null};
+  return {pickSkuId:chosen.id,reason:chosen.origin==='coupang-reference'?`Your choice: ${chosen.name}, ${won(chosen.price)} historical reference price. Check the source listing for the current offer.`:`Your choice: ${chosen.name}, ${won(chosen.price)}. The review evidence below belongs to this item.`,dissent:chosen.origin==='coupang-reference'?`${tradeoff} These are historical prices; reviews, delivery and physical fit are unverified.`:`${tradeoff} ${dissent.text}`,citations:dissent.ids,runnerUpSkuId:runner?.id||null,whyRunnerUpLost:runner?`You chose ${chosen.name}. ${runner.name} ${priceComparison}; no hidden quality tradeoff is assumed.`:'No other eligible same-purpose item is recorded.',clarifyingQuestion:null};
 }
 
 /** The swap is observed preference, never a purchase. Every effect is code-enforced and needs no provider. */

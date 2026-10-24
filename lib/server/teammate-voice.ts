@@ -18,7 +18,7 @@ export function eligibleTeammateProducts(profile:Profile){
 }
 export function teammateProfileContext(profile:Profile){
   const safe=sanitizeProfileForAI(profile);
-  return {traits:safe.traits,memoryLines:safe.memoryLines.slice(-32),budget:safe.budget,worlds:permittedVoiceWorlds(profile),interview:{active:!profile.journey?.interviewComplete,answeredCount:profile.journey?.interviewCount||0,question:FIRST_CALL_QUESTIONS[Math.min(profile.journey?.interviewCount||0,4)],questions:[...FIRST_CALL_QUESTIONS]}};
+  return {traits:safe.traits,memoryLines:safe.memoryLines.slice(-32),budget:safe.budget,worlds:permittedVoiceWorlds(profile),interview:{active:!profile.journey?.interviewComplete&&!profile.journey?.interviewPaused,answeredCount:profile.journey?.interviewCount||0,question:FIRST_CALL_QUESTIONS[Math.min(profile.journey?.interviewCount||0,4)],questions:[...FIRST_CALL_QUESTIONS]}};
 }
 /** Preserve the teammate's raw-SDP protocol while using the app's latest HttpOnly profile session. */
 export async function teammateVoiceRoute(request:Request):Promise<Response>{

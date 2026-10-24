@@ -10,9 +10,10 @@
   let visionWanted=false,visionWasActive=false,visionState='paused',visionLastAt=null;
   let previewEpoch=0,previewMeta=null,catalogType='lipstick',loadingEpoch=0;
   let controlsExpanded=false;
-  let voice=null, suppressMemory=false, availabilityChecking=false, networkAllowed=false;
+  let voice=null, availabilityChecking=false, networkAllowed=false, checkedTurnId="", interviewContext=null;
   const bridge=window.CoupiCallBridge;
   const firstInterview=new URLSearchParams(location.search).get('interview')==='1';
+  $('validated-call').hidden=true;
   if(firstInterview)$('phone-app').dataset.interview='true';
   function reportMedia(){bridge.state({phase,cameraActive:camera.running,microphoneActive:!!voice?.call?.microphone?.getAudioTracks().some(track=>track.readyState==='live'&&track.enabled)});}
   const trusted=p=>p&&store.catalog.get(String(p.id));
@@ -21,7 +22,7 @@
   function toast(value){clearTimeout(toastTimer);text('toast',value);show('toast',true);toastTimer=setTimeout(()=>show('toast',false),2400);}
   function notice(message, retry=false){text('call-notice',message||'');show('call-notice',!!message);show('retry-call',retry);}
   function screen(next){phase=next;show('incoming-screen',next==='incoming');show('call-screen',['connecting','active','browse'].includes(next));show('end-screen',next==='ended');$('phone-app').dataset.phase=next;updateVisionUI();updateFocusUI();if(voice)reportMedia();}
-  function context(){const p=store.current;return {mode,cameraRunning:camera.running,screen:phase,facing_mode:facingMode,vision:{enabled:visionEnabled(),last_image_at:visionLastAt,state:visionState},tried_product:trying?{id:trying.id,title:trying.name,productType:trying.productType,preview_kind:previewMeta?.kind,shade_color:previewMeta?.shadeColor,shade_estimated:previewMeta?.shadeEstimated}:null,overlay:{...camera.options},visible_product:p?{id:p.id,title:p.name,category:p.category,productType:p.productType,price:p.price,price_is_historical:true,verifiedAttributes:(p.verifiedAttributes||[]).slice(0,2)}:null,cart_ids:[...store.cart.keys()],tried_product_id:trying?.id||null,recent_skipped:store.skipped.slice(-5)};}
+  function context(){const p=store.current;return {...(interviewContext?{interview:interviewContext}:{}),mode,cameraRunning:camera.running,screen:phase,facing_mode:facingMode,vision:{enabled:visionEnabled(),last_image_at:visionLastAt,state:visionState},tried_product:trying?{id:trying.id,title:trying.name,productType:trying.productType,preview_kind:previewMeta?.kind,shade_color:previewMeta?.shadeColor,shade_estimated:previewMeta?.shadeEstimated}:null,overlay:{...camera.options},visible_product:p?{id:p.id,title:p.name,category:p.category,productType:p.productType,price:p.price,price_is_historical:true,verifiedAttributes:(p.verifiedAttributes||[]).slice(0,2)}:null,cart_ids:[...store.cart.keys()],tried_product_id:trying?.id||null,recent_skipped:store.skipped.slice(-5)};}
   function sync(){voice?.updateContext(context());}
   function cameraUI(){show('camera-fallback',!camera.running);$('toggle-camera').setAttribute('aria-pressed',String(camera.running));$('toggle-camera').setAttribute('aria-label',camera.running?'Turn camera off':'Turn camera on');$('toggle-camera').classList.toggle('is-off',!camera.running);$('flip-camera').disabled=cameraBusy||!camera.running;$('flip-camera').setAttribute('aria-label',facingMode==='user'?'Flip to back camera':'Flip to front camera');$('flip-camera').title=facingMode==='user'?'Flip to back camera':'Flip to front camera';updateVisionUI();updateFocusUI();sync();reportMedia();}
   const camera=new window.NookCamera({video:$('live-video'),canvas:$('live-canvas'),onStatus:(message,kind)=>{
@@ -61,9 +62,16 @@
   async function startHands(){if(!handsWanted||!camera.running||!store.current||phase!=='active'||hands.running||gestureStarting)return;gestureStarting=true;try{await hands.start();}finally{gestureStarting=false;handUI();}}
   function handUI(){const active=hands.running&&handsWanted;$('gesture-toggle').setAttribute('aria-pressed',String(active));$('gesture-toggle').setAttribute('aria-label',active?'Disable hand swipes':'Enable hand swipes');$('gesture-toggle').classList.toggle('is-off',!active);}
   function stopHands(){gestureStarting=false;hands.stop();handUI();text('gesture-status','Swipe: ← skip · save →');}
-  function transcript(entry){if(!suppressMemory)bridge.transcript(entry);if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}store.message(entry);const root=$('transcript');root.replaceChildren();for(const item of store.messages){const bubble=document.createElement('div');bubble.className='bubble '+(item.role==='user'?'user':'assistant');const label=document.createElement('span');label.className='bubble-label';label.textContent=item.role==='user'?'You':'Coopy';const body=document.createElement('p');body.className='bubble-text';body.textContent=item.text; bubble.append(label,body);root.append(bubble);}}
+  function transcript(entry){
+    let photo;
+    if(entry?.role==='user'&&entry.final===true&&entry.synthetic!==true&&entry.superseded!==true&&visionEnabled()){
+      const frame=snapshots.capture('validated-turn'),image=frame?.images?.find(image=>image.kind==='camera');
+      if(image)photo={dataUrl:image.dataUrl,mime:'image/jpeg',capturedAt:frame.metadata.capturedAt};
+    }
+    bridge.transcript(entry,photo);if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}store.message(entry);const root=$('transcript');root.replaceChildren();for(const item of store.messages){const bubble=document.createElement('div');bubble.className='bubble '+(item.role==='user'?'user':'assistant');const label=document.createElement('span');label.className='bubble-label';label.textContent=item.role==='user'?'You':'Coopy';const body=document.createElement('p');body.className='bubble-text';body.textContent=item.text; bubble.append(label,body);root.append(bubble);}}
   voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:firstInterview?'Before we find anything, tell me: what do your mornings look like?':'Hi, I’m Coopy. How can I help you today?',getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
+    onUserTurnStart:()=>{checkedTurnId='';bridge.beginTurn();},onResolveCall:()=>bridge.resolveLatest(),
     onTranscript:transcript,onRecommendations:(list,message)=>recommend(list,message),
     onWorldRecommendations:(list,message)=>worldRecommendations(list,message),
     onWorldProduct:skuId=>bridge.openWorldProduct(skuId),
@@ -88,10 +96,56 @@
       else if(state==='idle'&&phase==='active'&&!ending){endCall(message);}
     }
   });
-  window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='coupi-interview-progress')return;const value=event.data;if(!Number.isInteger(value.count)||value.count<0||value.count>5)return;voice.updateContext({...context(),interview:{answeredCount:value.count,nextQuestion:String(value.question||'').slice(0,250),complete:value.complete===true}});});
+  window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='coupi-interview-progress')return;const value=event.data;if(!Number.isInteger(value.count)||value.count<0||value.count>5)return;interviewContext={answeredCount:value.count,nextQuestion:String(value.question||'').slice(0,250),complete:value.complete===true,paused:value.paused===true,conversationMode:value.conversationMode||'conversation',worldReady:value.worldReady===true};sync();});
+  function checkedNode(tag,className,value){const node=document.createElement(tag);node.className=className;if(value!==undefined)node.textContent=value;return node;}
+  function checkedOpen(skuId,callId,reviewId,label){
+    const button=checkedNode('button','checked-action',label||'Details & approval');
+    button.setAttribute('aria-label',reviewId?'Read review '+reviewId:'Details for '+skuId);
+    button.onclick=async()=>{button.disabled=true;try{const result=await bridge.openWorldProduct(skuId,{callId,reviewId});if(!result.ok)notice(result.error);}catch{notice('That checked product could not open. Please try again.');}finally{button.disabled=false;}};return button;
+  }
+  function checkedCard(product,result,id,primary){
+    const card=checkedNode('article','checked-product'+(primary?' checked-product-primary':''));
+    if(product.image){const image=checkedNode('img','checked-image');image.src=product.image;image.alt='';image.onerror=()=>{image.hidden=true;};card.append(image);}
+    card.append(checkedNode('h2','checked-name',product.name),checkedNode('p','checked-price',product.price===null?'Price unavailable':'₩'+product.price.toLocaleString('en-US')));
+    if(product.priceBasis==='historical-reference')card.append(checkedNode('p','checked-note','REFERENCE PRICE · confirm current price on Coupang'));
+    if(product.delivery)card.append(checkedNode('p','checked-note',product.delivery));
+    if(primary&&result.verdict){
+      card.append(checkedNode('p','checked-reason',result.verdict.reason));
+      if(result.verdict.dissent)card.append(checkedNode('p','checked-dissent',result.verdict.dissent));
+      const citations=checkedNode('div','checked-citations');
+      for(const [index,reviewId] of result.verdict.citations.entries())citations.append(checkedOpen(product.skuId,id,reviewId,'review '+(index+1)+' ↗'));
+      if(citations.children.length)card.append(citations);
+    }
+    if(result.proposedSkuIds.includes(product.skuId))card.append(checkedNode('p','checked-note','PENDING YOUR APPROVAL · nothing ordered'));
+    card.append(checkedOpen(product.skuId,id));return card;
+  }
+  bridge.subscribe(event=>{
+    if(!['active','connecting'].includes(phase))return;
+    const root=$('validated-call-content');
+    if(event.state==='pending'){
+      checkedTurnId=event.id;root.replaceChildren();show('validated-call',true);show('world-picks',false);show('product-zone',false);show('product-empty',false);
+      $('validated-call').dataset.state='pending';text('validated-call-status','CHECKING YOUR WORDS · catalog + your context');controlsExpanded=true;updateFocusUI();if(event.retry)voice.resolveAppTurn?.();return;
+    }
+    if(event.id!==checkedTurnId)return;
+    const result=event.result;root.replaceChildren();$('validated-call').dataset.state=event.state;
+    if(event.state==='error'){text('validated-call-status','COULDN’T CHECK THAT');root.append(checkedNode('p','checked-reason',event.error||result.message));return;}
+    interviewContext={answeredCount:result.interviewCount||0,nextQuestion:result.question||'',complete:result.interviewComplete===true,paused:result.conversationMode==='request',conversationMode:result.conversationMode,worldReady:result.worldReady===true};sync();
+    const substantive=result.conversationMode==='request'||result.verdict||result.inventory||result.status!=='ok'||result.proposedSkuIds.length;
+    show('validated-call',!!substantive);if(!substantive)return;
+    text('validated-call-status',result.status==='blocked'?'LOOKING OUT FOR YOU':result.status==='fallback'?'NOT ENOUGH EVIDENCE':'CHECKED FOR YOU');
+    if(result.message)root.append(checkedNode('p','checked-message',result.message));
+    if(result.inventory){
+      const list=checkedNode('ul','checked-inventory');for(const item of result.inventory.items)list.append(checkedNode('li','',item.name+(item.quantity?' · '+item.quantity:'')+' — '+item.status));root.append(list);
+      for(const gap of result.inventory.lowOrMissing)root.append(checkedNode('p','checked-gap',gap.name+' · '+gap.reason));
+      for(const uncertain of result.inventory.uncertainties)root.append(checkedNode('p','checked-note',uncertain));
+    }
+    const pick=result.verdict?.pickSkuId,products=[...result.products].sort((a,b)=>(b.skuId===pick?1:0)-(a.skuId===pick?1:0));
+    for(const product of products.filter(product=>product.skuId===pick||result.proposedSkuIds.includes(product.skuId)))root.append(checkedCard(product,result,event.id,product.skuId===pick));
+    if(result.question)root.append(checkedNode('p','checked-question',result.question));
+  });
   window.NookMobile={camera,voice,store,endCall,openCatalog};bridge.attach(()=>endCall());
   async function startCamera({strictFacing=false}={}){if(cameraBusy)return false;const preflight=generation;const status=await bridge.getAvailability();if(preflight!==generation)return false;if(status.offline){notice(status.reason||'Offline rehearsal: live camera and tracking are off. Browse the reference picks locally.');return false;}cameraBusy=true;cameraUI();const token=generation;try{const ok=await camera.start({facingMode,portrait:true,strictFacing});if(token!==generation)return false;if(ok){facingMode=camera.actualFacingMode||facingMode;camera.setOptions({mirror:facingMode==='user'});startHands();}else if(!strictFacing)notice(camera.lastCameraError?.message||'Allow Camera in browser settings, then tap Retry.',true);return ok;}finally{if(token===generation){cameraBusy=false;cameraUI();}}}
-  async function answer(){if(phase==='connecting'||voice.call||availabilityChecking)return;availabilityChecking=true;$('answer-call').disabled=true;const preflight=generation;const status=await bridge.getAvailability(true);availabilityChecking=false;if(preflight!==generation)return;if(!status.ready){text('incoming-status',status.reason||(status.offline?'Offline rehearsal: live calls are disabled.':'Live voice is not configured on this server.'));show('incoming-status',true);$('answer-call').disabled=false;return;}show('incoming-status',false);const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;screen('connecting');notice('');text('camera-fallback-text','Opening your camera…');$('answer-call').disabled=true;store.clearMessages();initialGreeting=true;transcript({role:'assistant',key:'opening',text:'How can I help you today?'});initialGreeting=true;
+  async function answer(){if(phase==='connecting'||voice.call||availabilityChecking)return;availabilityChecking=true;$('answer-call').disabled=true;const preflight=generation;const status=await bridge.getAvailability(true);availabilityChecking=false;if(preflight!==generation)return;if(!status.ready){text('incoming-status',status.reason||(status.offline?'Offline rehearsal: live calls are disabled.':'Live voice is not configured on this server.'));show('incoming-status',true);$('answer-call').disabled=false;return;}show('incoming-status',false);const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;screen('connecting');notice('');text('camera-fallback-text','Opening your camera…');$('answer-call').disabled=true;store.clearMessages();checkedTurnId='';show('validated-call',false);bridge.beginTurn();initialGreeting=true;transcript({role:'assistant',key:'opening',text:'How can I help you today?'});initialGreeting=true;
     try{await startCamera();if(token!==generation||phase!=='connecting')return;await voice.start();}catch{notice('Could not start the call. Check Camera and Microphone permissions.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
   }
   function endCall(message='Call ended'){if(ending)return;ending=true;generation++;previewEpoch++;trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;decisionBusy=false;stopHands();snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});loadingEpoch=0;$('product-try').disabled=false;show('tryon-chip',false);connectedAt=null;screen('ended');text('end-title','A little closer to your thing.');text('end-summary',store.cart.size?`${store.cart.size} ${store.cart.size===1?'pick':'picks'} saved for this call. Nothing ordered.`:message==='Call ended'?'Your camera and microphone are off.':message);closeDialogs();ending=false;}
@@ -118,7 +172,7 @@
   }
   function renderCard(){const p=store.current;show('product-zone',!!p);if(!p){stopHands();sync();return;}
     const img=$('product-image');img.hidden=!p.image;img.removeAttribute('src');if(p.image){img.src=p.image;img.alt=p.name;img.onerror=()=>{img.hidden=true;};}text('product-title',p.name);text('product-category',typeLabels[p.productType]||({makeup:'Beauty',clothes:'Style',desk:'Your space'})[p.category]);text('product-price',p.price?'₩'+p.price.toLocaleString('en-US')+' · reference':'See price on Coupang');text('product-position',`${Math.max(1,displayedTotal-store.queue.length+1)} / ${displayedTotal}`);$('product-card').style.transform='';$('product-card').style.opacity='';$('product-card').classList.remove('accept','reject');text('swipe-feedback','');show('swipe-feedback',false);sync();startHands();}
-  function recommend(list,message){if(!['connecting','active','browse'].includes(phase))return;show('world-picks',false);store.recommend(list);displayedTotal=store.queue.length;hands.reset();renderCard();if(!store.current)toast('No match in this demo catalog. Ask Coopy for another idea.');}
+  function recommend(list,message){if(!['connecting','active','browse'].includes(phase))return;show('world-picks',false);store.recommend(list);displayedTotal=store.queue.length;hands.reset();renderCard();if(!$('validated-call').hidden)show('product-zone',false);if(!store.current)toast('No match in this demo catalog. Ask Coopy for another idea.');}
   function worldRecommendations(list,message){
     if(!['connecting','active','browse'].includes(phase))return;
     const root=$('world-picks-list');root.replaceChildren();
@@ -130,7 +184,7 @@
       const button=document.createElement('button');button.textContent='Details ↗';button.onclick=async()=>{button.disabled=true;try{const result=await bridge.openWorldProduct(product.skuId);if(!result.ok)notice(result.error);}catch{notice('That product could not open. Please try again.');}finally{button.disabled=false;}};
       row.append(copy,button);root.append(row);
     }
-    show('world-picks',root.children.length>0);show('product-zone',false);show('product-empty',false);
+    show('world-picks',root.children.length>0&&$('validated-call').hidden);show('product-zone',false);show('product-empty',false);
     if(!root.children.length)toast(message||'No match in your world catalog.');
     hands.reset();
   }
@@ -166,7 +220,7 @@
   $('gesture-toggle').onclick=async()=>{if(!networkAllowed||!camera.running){toast('Turn on your camera to use hand swipes.');return;}handsWanted=!handsWanted;if(handsWanted)await startHands();else stopHands();handUI();toast(hands.running?'Hand swipes on':'Hand swipes off');};
   $('clear-tryon').onclick=()=>setMode('none');$('product-try').onclick=()=>tryOn().catch(e=>notice(e.message));$('product-details').onclick=()=>productDetails();$('product-skip').onclick=()=>decide('left');$('product-save').onclick=()=>decide('right');$('cart-button').onclick=openBag;$('close-cart').onclick=()=>$('cart-dialog').close();$('close-details').onclick=()=>$('details-dialog').close();
   $('catalog-button').onclick=()=>openCatalog();$('close-catalog').onclick=()=>$('catalog-dialog').close();for(const key of Object.keys(typeLabels))$('type-'+key).onclick=()=>openCatalog(key);text('catalog-button',store.catalog.size+' picks');
-  $('detail-ask').onclick=()=>{const p=store.detailProduct;$('details-dialog').close();if(voice.call?.ready&&p){suppressMemory=true;try{voice.sendText('Tell me briefly about this Coupang product: '+p.name+' (ID '+p.id+'). Use its verified details and explain why it might suit me.');}finally{suppressMemory=false;}}else toast('Start the call to ask Coopy.');};
+  $('detail-ask').onclick=async()=>{const p=store.detailProduct;if(!p)return;$('details-dialog').close();try{const result=await bridge.openWorldProduct(p.id);if(!result.ok)notice(result.error);}catch{notice('Details could not open. Please try again.');}};
   const card=$('product-card');card.addEventListener('pointerdown',e=>{if(e.target.closest('button,a')||decisionBusy)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,dx:0};card.setPointerCapture(e.pointerId);});
   card.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;drag.dx=e.clientX-drag.x;const dy=e.clientY-drag.y;if(Math.abs(dy)>90&&Math.abs(drag.dx)<40){drag=null;card.style.transform='';return;}card.style.transform=`translateX(${drag.dx}px) rotate(${drag.dx/22}deg)`;show('swipe-feedback',Math.abs(drag.dx)>35);text('swipe-feedback',drag.dx>0?'SAVE':'SKIP');});
   const finishDrag=e=>{if(!drag||drag.id!==e.pointerId)return;const dx=drag.dx;drag=null;if(Math.abs(dx)>65)decide(dx>0?'right':'left');else{card.style.transform='';show('swipe-feedback',false);}};card.addEventListener('pointerup',finishDrag);card.addEventListener('pointercancel',()=>{drag=null;card.style.transform='';show('swipe-feedback',false);});

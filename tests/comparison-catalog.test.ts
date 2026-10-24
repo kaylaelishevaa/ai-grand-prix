@@ -4,14 +4,15 @@ import originalCatalog from '../data/catalog.json';
 import originalReviews from '../data/reviews.json';
 import comparisonCatalog from '../data/comparison-catalog.json';
 import comparisonReviews from '../data/comparison-reviews.json';
-import { catalog, reviews, getSku, getReview, reviewsForSku, comparisonCandidatesForSku, reviewStats } from '../lib/catalog';
+import { catalog, syntheticCatalog, reviews, getSku, getReview, reviewsForSku, comparisonCandidatesForSku, reviewStats } from '../lib/catalog';
 import { comparisonGroupForSku, samePurpose } from '../lib/comparison-groups';
 import type { SKU } from '../lib/types';
 
 test('checked-in contenders extend the catalog without changing a single original record', () => {
   assert.equal(comparisonCatalog.length, 44);
   assert.equal(comparisonReviews.length, 704);
-  assert.equal(catalog.length, 87);
+  assert.equal(syntheticCatalog.length, 87);
+  assert.equal(catalog.length, 104);
   assert.equal(reviews.length, 1202);
   for (const original of originalCatalog) assert.deepEqual(getSku(original.id), original);
   for (const original of originalReviews) assert.deepEqual(getReview(original.id), original);
@@ -19,8 +20,8 @@ test('checked-in contenders extend the catalog without changing a single origina
   assert.equal(new Set(reviews.map(review => review.id)).size, reviews.length);
 });
 
-test('every eligible SKU has at least two actual substitutes, not unrelated category fillers', () => {
-  for (const sku of catalog.filter(item => !item.sensitive && !item.ownedByDefault)) {
+test('every eligible synthetic SKU has at least two actual substitutes, not unrelated category fillers', () => {
+  for (const sku of syntheticCatalog.filter(item => !item.sensitive && !item.ownedByDefault)) {
     const candidates = comparisonCandidatesForSku(sku.id);
     assert(candidates.length >= 2, `${sku.id} needs two substitutes`);
     assert(candidates.length <= 3, `${sku.id} has a deliberately compact contender set`);

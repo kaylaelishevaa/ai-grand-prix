@@ -35,9 +35,10 @@ test('world search returns the same catalog and exact seeded review facts withou
   assert.deepEqual(profile,before,'Search does not create memories, XP or decisions');
 });
 
-test('open checks exact current eligibility and never translates a sourced try-on listing into a seeded SKU',()=>{
+test('open keeps sourced identity and zero reviews while checking current eligibility',()=>{
   const profile=createProfile('voice-open');assert.equal(openVoiceWorldProduct(profile,'kettle').ok,true);
-  assert.equal(openVoiceWorldProduct(profile,'1814412512').ok,false);
+  const sourced=openVoiceWorldProduct(profile,'1814412512');assert.equal(sourced.ok,true);if('product' in sourced&&sourced.product){assert.equal(sourced.product.skuId,'1814412512');assert.equal(sourced.product.origin,'coupang-reference');assert.equal(sourced.product.priceBasis,'historical-reference');assert.match(sourced.product.sourceUrl!,/^https:\/\/www.coupang.com\/vp\/products\/1814412512/);assert.deepEqual(sourced.product.reviewIds,[]);assert.deepEqual(sourced.product.reviews,[]);}
+  assert.equal(openVoiceWorldProduct(profile,'9999999999').ok,false);
   assert.equal(openVoiceWorldProduct(profile,'detergent').ok,false);
   profile.owned.push({skuId:'kettle',source:'approved',acquiredAt:new Date().toISOString()});assert.equal(openVoiceWorldProduct(profile,'kettle').ok,false);
   profile.quarantine.push({category:'kitchen',sensitive:true,note:'private'});assert.equal(openVoiceWorldProduct(profile,'mugs').ok,false);

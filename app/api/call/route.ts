@@ -6,7 +6,7 @@ import {errorResponse,AppError} from '@/lib/server/errors';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
-const inputSchema=z.object({action:z.enum(['hatch','start','message']),requestId:z.string().trim().min(1).max(100),message:z.string().trim().max(3000).optional()});
+const inputSchema=z.object({action:z.enum(['hatch','start','message','resumeInterview','finishInterview']),requestId:z.string().trim().min(1).max(100),message:z.string().trim().max(3000).optional()});
 
 export async function POST(request:Request) {
   try {

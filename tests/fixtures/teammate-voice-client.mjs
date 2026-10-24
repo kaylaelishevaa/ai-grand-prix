@@ -101,6 +101,7 @@ function fixture(t, options = {}) {
     onVisionState: value => visionStates.push(value),
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
+    onResolveCall:options.onResolveCall,onUserTurnStart:options.onUserTurnStart,
     onRecommendations: (products, message) => recommendations.push({products, message}),
     onWorldRecommendations: (products, message) => worldRecommendations.push({products, message}),
     onWorldProduct: async skuId => {worldActions.push(skuId);return options.onWorldProduct?.(skuId) || {ok:true,skuId,purchased:false};},
@@ -222,8 +223,8 @@ test('world tools use a separate catalog namespace and exact SKU bridge instead 
   assert.equal(f.worldRecommendations.length,1);assert.equal(f.recommendations.length,0);assert.equal(f.tryons.length,0);
   assert.deepEqual(JSON.parse(toolOutputs(channel).find(event=>event.item.call_id==='world-search').item.output),result);
   tool(f,'world-open','open_world_product',{sku_id:'socks'},'r-world-open');await tick();assert.deepEqual(f.worldActions,['socks']);assert.equal(f.actions.length,0);
-  tool(f,'bad-world-open','open_world_product',{sku_id:'1814412512'},'r-invalid-world');await tick();assert.deepEqual(f.worldActions,['socks']);
-  const failed=JSON.parse(toolOutputs(channel).find(event=>event.item.call_id==='bad-world-open').item.output);assert.equal(failed.ok,false);assert.match(failed.error,/never a sourced listing ID/);
+  tool(f,'bad-world-open','open_world_product',{sku_id:'../not-a-sku'},'r-invalid-world');await tick();assert.deepEqual(f.worldActions,['socks']);
+  const failed=JSON.parse(toolOutputs(channel).find(event=>event.item.call_id==='bad-world-open').item.output);assert.equal(failed.ok,false);assert.match(failed.error,/exact catalog SKU/);
 });
 
 test('world search rejects a sourced result namespace and an excluded product open honestly fails',async t=>{
@@ -656,4 +657,40 @@ test('rejected camera create events free capacity without interrupting voice and
   acknowledgeImage(f,imageEvents(f.channel).at(-1));
   assert.equal(f.visionStates.at(-1).state,'received');
   assert.equal(call.visionSnapshots.size,1);
+});
+
+test('embedded voice waits for the same checked turn and strips private fields before speaking',async t=>{
+  const wait=deferred();let resolutions=0;
+  const f=fixture(t,{onResolveCall:()=>{resolutions++;return wait.promise;}});await connect(f);done(f,'greeting');await tick();
+  assert.equal(f.voice.sendText('red socks tomorrow'),true);await tick();assert.equal(countReplies(f.channel),1);assert.equal(resolutions,1);
+  wait.resolve({status:'ok',message:'One red pair.',conversationMode:'request',profile:{secret:'PRIVATE_PROFILE'},diary:'PRIVATE_DIARY',verdict:{pickSkuId:'socks',reason:'Under your budget',dissent:'Some pilling reported.',citations:['socks-r-15'],runnerUpSkuId:null,whyRunnerUpLost:'',clarifyingQuestion:null},products:[{skuId:'socks',name:'Red socks',price:6900,delivery:'Demo tomorrow'}],proposedSkuIds:['socks']});
+  await tick();await tick();assert.equal(countReplies(f.channel),2);
+  const context=f.channel.sent.find(event=>JSON.stringify(event).includes('Validated app result'));assert(context);assert(JSON.stringify(context).includes('socks-r-15'));assert(!JSON.stringify(context).includes('PRIVATE_'));assert.equal(f.calls.filter(([url])=>url==='/api/call').length,0);
+});
+
+test('actual audio transcriptions deduplicate checked resolution and an ended call never speaks late results',async t=>{
+  const wait=deferred();let started=0,resolutions=0;
+  const f=fixture(t,{onUserTurnStart:()=>started++,onResolveCall:()=>{resolutions++;return wait.promise;}});await connect(f);done(f,'greeting');
+  f.emit({type:'input_audio_buffer.speech_started'});f.emit({type:'input_audio_buffer.speech_stopped'});
+  const event={type:'conversation.item.input_audio_transcription.completed',item_id:'spoken-1',transcript:'which one?'};f.emit(event);f.emit(event);await tick();assert.equal(started,1);assert.equal(resolutions,1);
+  const channel=f.channel;f.voice.end();wait.resolve({status:'ok',message:'Here is the checked result.'});await tick();assert.equal(countReplies(channel),1);assert(!channel.sent.some(event=>JSON.stringify(event).includes('Validated app result')));
+});
+
+test('resolve_shopping_request waits for existing facts only and never sends profile or diary to the model',async t=>{
+  let resolutions=0;const f=fixture(t,{onResolveCall:async()=>{resolutions++;return {status:'blocked',message:'Already owned.',profile:{secret:'PRIVATE_PROFILE'},diary:'PRIVATE_DIARY',products:[],proposedSkuIds:[]};}});await connect(f);done(f,'greeting');
+  tool(f,'checked','resolve_shopping_request',{},'checked-response');done(f,'checked-response');await tick();
+  const output=toolOutputs(f.channel).find(event=>event.item.call_id==='checked').item.output;assert.equal(JSON.parse(output).status,'blocked');assert(!output.includes('PRIVATE_'));assert.equal(resolutions,1);
+  tool(f,'invalid-checked','resolve_shopping_request',{question:'a second invented request'},'invalid-response');await tick();assert.equal(resolutions,1);assert.equal(JSON.parse(toolOutputs(f.channel).find(event=>event.item.call_id==='invalid-checked').item.output).ok,false);
+});
+
+test('a delayed earlier transcript cannot resolve or speak over a newer spoken turn',async t=>{
+  let resolutions=0;const wait=deferred();const f=fixture(t,{onResolveCall:()=>{resolutions++;return wait.promise;}});await connect(f);done(f,'greeting');
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'old-a'});f.emit({type:'input_audio_buffer.speech_stopped'});
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'new-b'});
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'old-a',transcript:'show me a kettle'});
+  assert.equal(f.transcripts.at(-1).superseded,true);assert.equal(resolutions,0);
+  f.emit({type:'input_audio_buffer.speech_stopped'});await tick();assert.equal(countReplies(f.channel),1);
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'new-b',transcript:'actually red socks'});assert.equal(resolutions,1);
+  wait.resolve({status:'ok',message:'Red socks.',conversationMode:'request',proposedSkuIds:[],products:[]});await tick();await tick();assert.equal(countReplies(f.channel),2);
+  assert.equal(f.transcripts.at(-1).superseded,undefined);
 });

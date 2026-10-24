@@ -30,7 +30,9 @@ test('teammate sourced records retain their own provenance and never become synt
     assert.match(product.url,/^https:\/\/www\.coupang\.com\/vp\/products\/\d+/);
     assert.match(product.image,/^\/live-call\/products\//);
     assert(product.sourceNote&&product.sourceImageUrl&&product.checkedAt);
-    assert(!catalog.some(sku=>sku.id===product.id));
+    const sku=catalog.find(item=>item.id===product.id);
+    if(product.price===null)assert.equal(sku,undefined);
+    else{assert.equal(sku?.origin,'coupang-reference');assert.equal(sku?.sourceUrl,product.url);assert.deepEqual(sku?.reviewIds,[]);}
     assert(!reviews.some(review=>review.skuId===product.id));
   }
 });
@@ -60,20 +62,20 @@ test('realtime context contains only surviving allowed memories and quarantine a
   assert(!eligibleTeammateProducts(profile).some(product=>product.id===chosen.id));
 });
 
-test('first-interview Realtime config keeps the warm five-question flow and disables every shopping/camera tool',async()=>{
+test('first-interview Realtime config allows grounded shopping interruptions and waits for checked turns',async()=>{
   const profile=createProfile('first-voice-context');
   for(const count of [0,2,4]){
     profile.journey={hatched:true,interviewCount:count,interviewComplete:false,nextQuestion:FIRST_CALL_QUESTIONS[count],districts:[],processedCallIds:[]};
     const context=teammateProfileContext(profile),config=sessionConfiguration({OPENAI_REALTIME_MODEL:'test-realtime'},context);
-    assert.deepEqual(config.tools,[]);assert.equal(context.interview.answeredCount,count);assert.equal(context.interview.question,FIRST_CALL_QUESTIONS[count]);
-    assert.match(config.instructions,/warm reverse-onboarding interview/);assert.match(config.instructions,/ONE at a time/);assert.match(config.instructions,/do not sell or show products/);assert.match(config.instructions,/not your inferred facts/);assert.match(config.instructions,/Skipping a question is allowed/);
+    assert(config.tools.some(tool=>tool.name==='resolve_shopping_request'));assert(config.tools.some(tool=>tool.name==='look_at_camera'));assert.equal((config.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,false);assert.equal(context.interview.answeredCount,count);assert.equal(context.interview.question,FIRST_CALL_QUESTIONS[count]);
+    assert.match(config.instructions,/warm reverse-onboarding interview/);assert.match(config.instructions,/ONE at a time/);assert.match(config.instructions,/shopper may interrupt immediately/);assert.match(config.instructions,/not your inferred facts/);assert.match(config.instructions,/Skipping a question is allowed/);
     assert(config.instructions.includes(JSON.stringify({active:true,answeredCount:count,question:FIRST_CALL_QUESTIONS[count],questions:[...FIRST_CALL_QUESTIONS]})));
-    assert.match(config.instructions,/After the fifth answer say: Give me a second/);
+    assert.match(config.instructions,/do not resume interview questions/i);assert.match(config.instructions,/shopper may build their world now/);
   }
   let requests=0;
   const context=teammateProfileContext(profile),handler=createVoiceHandler({profileContext:context,fetchImpl:(async(_url,init)=>{
     requests++;const transmitted=JSON.parse(String((init!.body as FormData).get('session')));
-    assert.deepEqual(transmitted.tools,[]);assert(transmitted.instructions.includes(FIRST_CALL_QUESTIONS[4]));assert.match(transmitted.instructions,/Start with the current interview.question/);
+    assert(transmitted.tools.some((tool:{name:string})=>tool.name==='resolve_shopping_request'));assert.equal(transmitted.audio.input.turn_detection.create_response,false);assert(transmitted.instructions.includes(FIRST_CALL_QUESTIONS[4]));assert.match(transmitted.instructions,/Start with the current interview.question/);
     return new Response(answer,{headers:{'content-type':'application/sdp'}});
   }) as typeof fetch});
   assert.equal((await handler(post('/api/voice/session',offer),{OPENAI_API_KEY:'TEST_ONLY_FIRST_INTERVIEW',OPENAI_REALTIME_MODEL:'test-realtime'}))!.status,200);assert.equal(requests,1);
@@ -144,7 +146,7 @@ test('Next voice routes use server-only credentials, persist cookies, refresh de
     assert.equal(captured.length,1);assert.equal(captured[0].model,'realtime-test-model');
     assert.match(captured[0].instructions,/I prefer warm neutrals/);
     assert.doesNotMatch(captured[0].instructions,/fake-voice-server-only|acquiredAt|personal-care/);
-    assert.match(captured[0].instructions,/separate from the app’s synthetic scene catalog/);
+    assert.match(captured[0].instructions,/separate from synthetic evidence/);
     const memory=learned.profile.memoryLines.find(line=>line.id==='call:voice-memory')!;
     await send(profileRoute,'/api/profile',JSON.stringify({action:'deleteMemory',lineId:memory.id}));
     assert.equal((await send(sessionRoute,'/api/voice/session',offer,'application/sdp')).status,200);

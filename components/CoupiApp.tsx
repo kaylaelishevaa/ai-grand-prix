@@ -7,6 +7,7 @@ import {effectiveNow,isDecisionLocked} from '@/lib/guardrails';
 import {decisionApprovalIssue} from '@/lib/delegation-policy';
 import type {Profile,ProfileResponse,AskResponse,SceneResponse,ScanResponse,SceneResult,Verdict,CallMeta,SKU,Review} from '@/lib/types';
 import {productArt} from './art';
+import {ProductVisual} from './ProductEvidence';
 import {Glyph,type GlyphName} from './Glyph';
 import SceneDiorama from './SceneDiorama';
 import SceneFallback from './SceneFallback';
@@ -37,7 +38,7 @@ const GUIDE:{time:string;place:string;view:View;line:string}[]=[
 ];
 
 export function Pet({size='small',happy=false}:{size?:'tiny'|'small'|'large';happy?:boolean}){return <span className={`pet pet-${size}${happy?' pet-happy':''}`} role="img" aria-label="COUPI, your little teal companion"><span className="pet-eyes"><i/><i/></span><span className="pet-cheeks"/><span className="pet-mouth"/></span>;}
-export function Art({sku,className=''}:{sku:SKU;className?:string}){return <div className={`product-art ${className}`} dangerouslySetInnerHTML={{__html:productArt(sku.type,sku.color)}}/>;}
+export function Art({sku,className=''}:{sku:SKU;className?:string}){return <ProductVisual sku={sku} className={className}/>;}
 const ACTION_GLYPHS:Record<string,GlyphName>={'→':'arrow-right','←':'arrow-left','↗':'arrow-up','↻':'refresh','↺':'refresh','✧':'spark','✓':'check','↔':'swap','+':'plus'};
 function actionContent(value:ReactNode):ReactNode{if(Array.isArray(value))return value.map((item,index)=><span className="action-part" key={index}>{actionContent(item)}</span>);if(typeof value!=='string')return value;return value.split(/([→←↗↻↺✧✓↔+])/g).map((part,index)=>ACTION_GLYPHS[part]?<Glyph key={index} name={ACTION_GLYPHS[part]}/>:part);}
 export function Speech({children}:{children:ReactNode}){return <div className="companion"><Pet/><div className="speech">{typeof children==='string'?children.charAt(0).toLowerCase()+children.slice(1):children}</div></div>;}

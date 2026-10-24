@@ -23,12 +23,13 @@ export function commerceSpentThisMonth(profile:Profile,now=new Date()):number {
 function tomorrow(profile:Profile,now:Date,hour:number){const local=localClock(now,profile.timezone),next=new Date(Date.UTC(local.year,local.month-1,local.day+1));return fromLocalClock({...local,year:next.getUTCFullYear(),month:next.getUTCMonth()+1,day:next.getUTCDate(),hour,minute:0,second:0},profile.timezone).toISOString();}
 function deliveryOptions(profile:Profile,account:AccountState,lines:OrderLine[],addressId:string,now:Date):DeliveryOption[]{
   const settings=accountForCheckout(account,profile.id),address=settings.addresses.find(item=>item.id===addressId)!;
+  const unknownDelivery=lines.some(line=>/\b(?:unknown|unverified)\b/i.test(line.deliveryFact));
   const rocket=lines.every(line=>/^Rocket delivery/i.test(line.deliveryFact)&&/tomorrow/i.test(line.deliveryFact));
   const dawn=rocket&&lines.every(line=>/7\s*am/i.test(line.deliveryFact))&&settings.wowMember&&address.dawnEligible;
   return[
-    {kind:'rocket',label:'Rocket: tomorrow',promisedAt:rocket?tomorrow(profile,now,23):null,basis:'Prepared catalog Rocket eligibility. A local delivery simulation, not a carrier booking.',available:rocket,unavailableReason:rocket?null:'One or more selected products have a standard delivery fact.',simulation:true},
+    {kind:'rocket',label:'Rocket: tomorrow',promisedAt:rocket?tomorrow(profile,now,23):null,basis:'Prepared catalog Rocket eligibility. A local delivery simulation, not a carrier booking.',available:rocket,unavailableReason:rocket?null:unknownDelivery?'Delivery is unverified for one or more sourced listings. No Rocket arrival can be promised.':'One or more selected products have a standard delivery fact.',simulation:true},
     {kind:'dawn',label:'Dawn: before 7 AM if ordered by midnight',promisedAt:dawn?tomorrow(profile,now,7):null,basis:'WOW-style membership, a dawn-eligible sample address and every selected item’s explicit 7am catalog fact are required. Midnight uses your profile time zone.',available:dawn,unavailableReason:dawn?null:!settings.wowMember?'Turn on simulated WOW membership in Account.':!address.dawnEligible?'This sample address is outside the simulated dawn area.':'Every selected product must explicitly support tomorrow by 7am.',simulation:true},
-    {kind:'standard',label:rocket?'Standard: catalog delivery promise':'Standard: check each item’s listed delivery',promisedAt:null,basis:lines.map(line=>line.name+': '+line.deliveryFact).join(' · '),available:true,unavailableReason:null,simulation:true},
+    {kind:'standard',label:unknownDelivery?'Delivery timing unknown · local simulation only':rocket?'Standard: catalog delivery promise':'Standard: check each item’s listed delivery',promisedAt:null,basis:lines.map(line=>line.name+': '+line.deliveryFact).join(' · ')+(unknownDelivery?' No retailer delivery evidence is available; approving records a local mock order without a delivery promise.':''),available:true,unavailableReason:null,simulation:true},
   ];
 }
 export function quoteCheckout(profile:Profile,account:AccountState,input:CheckoutInput,now=new Date(),householdSpent=commerceSpentThisMonth(profile,now)):CheckoutQuote {
@@ -48,7 +49,7 @@ export function quoteCheckout(profile:Profile,account:AccountState,input:Checkou
     const price=decisionPrice(decision);
     if(decision.delegation){const license=categoryLicense(account,profile.id,sku.category);if(!license.enabled||price>license.cap)throw new AppError('CHECKOUT_LICENSE','This delegation exceeds your current category permission or cap. Update it in Account.',409);}
     if(!Number.isInteger(price)||price<0||price>sku.price)throw new AppError('CHECKOUT_PRICE','The saved quote has an invalid price.',409);
-    return{id:decision.id,decisionId:decision.id,skuId:sku.id,name:sku.name,category:sku.category,quantity:1,catalogPrice:sku.price,unitPrice:price,discount:sku.price-price,total:price,deliveryFact:sku.delivery};
+    return{id:decision.id,decisionId:decision.id,skuId:sku.id,name:sku.name,category:sku.category,quantity:1,catalogPrice:sku.price,unitPrice:price,discount:sku.price-price,total:price,deliveryFact:sku.delivery,...(sku.origin==='coupang-reference'?{origin:sku.origin,priceBasis:sku.priceBasis,sourceUrl:sku.sourceUrl,sourceNote:sku.sourceNote,checkedAt:sku.checkedAt}:{})};
   });
   if(new Set(lines.map(line=>line.skuId)).size!==lines.length)throw new AppError('CHECKOUT_DUPLICATE','The same product cannot be approved twice.',409);
   const subtotal=lines.reduce((sum,line)=>sum+line.catalogPrice,0),discount=lines.reduce((sum,line)=>sum+line.discount,0),total=subtotal-discount;

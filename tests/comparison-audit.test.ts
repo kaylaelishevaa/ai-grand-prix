@@ -43,9 +43,9 @@ test('durability shows the most helpful wash-related failure alongside positive 
   assert(dimension.right.includes(negative.text));
 });
 
-test('every fresh eligible product actually displays two or more earned same-purpose contenders', () => {
+test('every fresh eligible synthetic product actually displays two or more earned same-purpose contenders', () => {
   const profile = createProfile('audit-visible-coverage');
-  for (const sku of catalog.filter(item => !item.sensitive && !item.ownedByDefault)) {
+  for (const sku of catalog.filter(item => item.origin!=='coupang-reference' && !item.sensitive && !item.ownedByDefault)) {
     const comparison = buildComparison(profile, sku.id);
     assert(comparison.contenders.length >= 2, `${sku.id} needs visible alternatives, not only catalog siblings`);
     assert(comparison.contenders.length <= 4);
