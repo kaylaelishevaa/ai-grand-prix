@@ -1,6 +1,6 @@
 Nook catalog provenance — checked 2026-10-25 (Asia/Singapore)
 
-Scope: 18 actual Coupang products: three each of lipstick, chair, desk lamp, T-shirt, hoodie and glasses.
+Scope: 36 actual Coupang listings or named options: 14 lipstick options, 10 glasses options, and three each of chair, desk lamp, T-shirt and hoodie. The original 18 catalog IDs are preserved. Variant-suffixed IDs are local catalog keys; sourceProductId identifies the numeric Coupang listing family. Ten named pink lipstick options support 6-then-10 browsing across six brands; seven optical options and three sunglasses support adjacent-theme discovery. Seller identity is unverified, so different brands/options are not represented as different verified sellers.
 Direct automated Coupang page retrieval returned HTTP 403. No access-control bypass was attempted. Product titles/IDs were recovered from public indexed Coupang pages and public price-comparison indexes. Original images were downloaded unchanged from public Coupang CDN URLs surfaced by matching named listings on Fallcent, or directly from the indexed Coupang listing.
 
 All numeric prices are reference prices from the named indexed listing, not live offers. Tarnaby silver had no available price and has price=null. Stock, delivery, available colors/sizes and seller options must be checked on Coupang. Listing photos do not establish real-world dimensions, fit, material properties or calibrated cosmetic color.
@@ -176,3 +176,176 @@ Reference price (KRW): 18130
 Real Coupang listing ID/title verified from publicly indexed official Coupang pages. Original Coupang CDN photo and reference price were recovered from the matching named public Fallcent listing. Direct retrieval may be blocked; no access-control bypass was attempted. Price is a historical/indexed reference, not a live offer. Current stock, seller options and price are unverified. Live glasses preview uses the visible frame variant in this photo and is an approximate visual fit only; lens performance, prescription and physical fit are not verified.
 
 Glasses alignment metadata: E374 front-frame crop removes the long side temple; approximate ellipse masks clear folded temple pixels within lenses. BB557 source roll is compensated by -10 degrees. Its folded temple pixels inside lenses are cleared and replaced with approximate translucent green tint sampled from the source photo, not calibrated lens colour or transmission. EYELAB masks clear folded temples inside the clear lenses. The unaltered originals remain in product cards.
+
+
+Discovery catalog expansion — checked 2026-10-25
+
+The 18 additions include named options within shared Coupang listing families. Where an exact itemId is not verified, the link opens the family; users must select the named option and quantity. Seven new glasses photos contain models or backgrounds and are intentionally marked preview.available=false, rather than pasting a model/scene over a camera. The original three isolated glasses previews remain available. All lipstick sampling regions were visually inspected; no original image was edited. Color-changing Moodmatcher uses its displayed reference swatch and cannot predict an individual result.
+
+Review evidence: Two public Timing pages expose dated Korean customer-review text. The catalog includes short English paraphrases and AI-curated summaries of three reviews each, with dates, ratings, source links and mixed-variant limitations. No reviewer identity or full review is copied. Aggregate ratings/counts come from each mirror header, not the selected sample; they are historical and may differ from live Coupang. Other products deliberately have null ratings/counts and no review summary. Neither fake reviews nor fabricated seller information are included.
+Melacme review source: https://timing.im/product/5d10h6ILmZZpwD9TzTs63560xEh3I2169eBUqInEFBc
+Revlon mixed-shade review source: https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro
+Etude exact item ID corroboration: https://beautysale.kr/products/1368
+
+
+1814412512-pink-sand | lipstick | 롬앤 제로 매트 립스틱, 1개, 10 핑크 샌드
+Coupang listing: https://www.coupang.com/vp/products/1814412512?itemId=3063152898&vendorItemId=71051109185
+Image/price source page: https://fallcent.com/product/?item_id=3063152900&product_id=1814412512
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/179972684639393-7382e987-7be4-4f55-bd3a-82c633976988.jpg
+Local original: public/products/1814412512-pink-sand.jpg
+SHA-256: 56e9f1fa24c0a2ac3810f4449d457d5ccd51c6eb101fadf2c5093160afdd4a70
+Reference price (KRW): 7330
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+8248027642-pink-chuchu | lipstick | 미샤 글램 아트 루즈 립스틱, 1개, 핑크츄츄
+Coupang listing: https://www.coupang.com/vp/products/8248027642
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/a3b6/5d601c8fcf7fd2db8dc9c6e71807f4c3daf3ccafe8bc9981386c85a3789d.jpg
+Local original: public/products/8248027642-pink-chuchu.jpg
+SHA-256: ba142392c3961483afed51c0713ed58153682b4490dfe866b5c8d7afc970ed9f
+Reference price (KRW): 10890
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+8248027642-pink-rise | lipstick | 미샤 아트 루즈 글램 립스틱, 1개, 핑크라이즈
+Coupang listing: https://www.coupang.com/vp/products/8248027642
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/195302014893287-5d2cb11e-439a-4531-8596-2a89002f7034.jpg
+Local original: public/products/8248027642-pink-rise.jpg
+SHA-256: fa3233d1ae69c15df2c2e92e782c174666e78a4feb192fb3673c59a0156bf77f
+Reference price (KRW): 10340
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+1547725003-bitten-pink | lipstick | 미샤 데어 루즈 쉬어 슬릭 립스틱, 1개, 13호 비튼 핑크
+Coupang listing: https://www.coupang.com/vp/products/1547725003
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/190121944991043-ea7326da-36a8-4059-84dc-b7d805946d64.jpg
+Local original: public/products/1547725003-bitten-pink.jpg
+SHA-256: 8e53cfc144bba236a9388a0d63f1c5ce9253444997b10d5ddc37b0d6b1ebae34
+Reference price (KRW): 9450
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+8308780384-pink-wish | lipstick | 에뛰드 컬러 래스팅 글로우 스틱, 1개, 04핑크위시
+Coupang listing: https://www.coupang.com/vp/products/8308780384?itemId=23973498861&vendorItemId=91016346805
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%97%90%EB%9B%B0%EB%93%9C%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/213807253459011-d7cefdcc-de44-4eec-8b5e-a78fb59396c4.jpg
+Local original: public/products/8308780384-pink-wish.jpg
+SHA-256: e2057e3526413cdc735ae0d8a80d2b63d9f2886e943f5aea503c7d0675bdc028
+Reference price (KRW): 8000
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+1463552408-kinda-pink | lipstick | [비건뷰티] 에스쁘아 노웨어 립스틱 볼륨매트, 2개, 2호 카인다핑크
+Coupang listing: https://www.coupang.com/vp/products/1463552408
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%97%90%EC%8A%A4%EC%81%98%EC%95%84%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/25558953356416-99e8f41a-f484-42e6-975c-59f75774e49f.jpg
+Local original: public/products/1463552408-kinda-pink.jpg
+SHA-256: 641be234b32d73dfe0c61e50212eb4febfdb6e35ab42373a94f72b5300ec7fcc
+Reference price (KRW): 32200
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+7480503353-pink-afternoon | lipstick | 레브론 수퍼 러스트러스 크림 립스틱, Pink in the Afternoon, 4.2g, 1개
+Coupang listing: https://www.coupang.com/vp/products/7480503353?itemId=20467173&vendorItemId=3278911472
+Image/price source page: https://fallcent.com/product/?item_id=23454574889&product_id=7480503353
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/product/image/vendoritem/2016/06/01/3001314881/38f9980f-59fe-439c-9528-ee6f14cd68dd.jpg
+Local original: public/products/7480503353-pink-afternoon.jpg
+SHA-256: c3c9835f8e5a6e9d1d6c1f06214cf4245b8780c552fa7c2c6d3faac79909a65e
+Reference price (KRW): 12780
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+7480503353-pink-velvet | lipstick | 레브론 수퍼 러스트러스 크림 립스틱, Pink Velvet, 4.2g, 1개
+Coupang listing: https://www.coupang.com/vp/products/7480503353
+Image/price source page: https://fallcent.com/product/?item_id=23454574889&product_id=7480503353
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/product/image/vendoritem/2018/10/10/3278622898/378e52af-9865-4dab-a4ac-b2c0dc839f32.jpg
+Local original: public/products/7480503353-pink-velvet.jpg
+SHA-256: f978cd908ee93f1f22da93836683d30e6f455023d29a443f93881aad58eb628b
+Reference price (KRW): 13360
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+7480503353-love-pink | lipstick | 레브론 수퍼 러스트러스 크림 립스틱, Love That Pink, 4.2g, 1개
+Coupang listing: https://www.coupang.com/vp/products/7480503353
+Image/price source page: https://fallcent.com/product/?item_id=23454574889&product_id=7480503353
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/product/image/vendoritem/2018/09/27/3278586118/c7dfa7d5-5ba8-435f-93e2-ec40cbac15bc.jpg
+Local original: public/products/7480503353-love-pink.jpg
+SHA-256: 8e18b7d330dcb2be11d0ec926a0a4210079d78944dafdabc580ba6b8f607f434
+Reference price (KRW): 17330
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+72621661-pink | lipstick | 무드매쳐 반전 립스틱, 1개, 핑크
+Coupang listing: https://www.coupang.com/vp/products/72621661?itemId=3142416293
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AC%B4%EB%93%9C%EB%A7%A4%EC%B3%90%20%ED%95%91%ED%81%AC
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/88bf/6e0aac5da4d397e01076503fb6186273644edb1679de3adb669479d3b19e.jpg
+Local original: public/products/72621661-pink.jpg
+SHA-256: d4b909d5c3681892ec3a1542e62d8c3dba1c368698d55db19fcff0d9c4418650
+Reference price (KRW): 11290
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match. A color-changing formula cannot be predicted from this photo; this is only a reference-swatch preview.
+
+1547904141-purple | lipstick | 미샤 데어루즈 벨벳 립스틱, 1개, 왓 더 퍼플
+Coupang listing: https://www.coupang.com/vp/products/1547904141
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%EC%99%93%20%EB%8D%94%20%ED%8D%BC%ED%94%8C
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/148714893290365-683b0f25-063b-4eb8-8ec6-74ca94708639.jpg
+Local original: public/products/1547904141-purple.jpg
+SHA-256: d1f6ad64ba545e9b3f87a3026c6129df8311868372e1286d3db3219cb8bcaf72
+Reference price (KRW): 11340
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+7612276799-black | glasses | EYELAB 블루라이트 UV 차단 안경, 블랙
+Coupang listing: https://www.coupang.com/vp/products/7612276799
+Image/price source page: https://fallcent.com/product/?item_id=20163776919&product_id=7612276799
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/33e2/72b1065cbedd27b35ec0a6f79fc26bf3996a4745237b2cc7eebaabb0f5d2.png
+Local original: public/products/7612276799-black.png
+SHA-256: 72d6f766fc2641fd857fc329b525a6d17809caf33afada893d933e8c95ea4f66
+Reference price (KRW): 19900
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+7612276799-silver | glasses | EYELAB 블루라이트 UV 차단 안경, 실버
+Coupang listing: https://www.coupang.com/vp/products/7612276799
+Image/price source page: https://fallcent.com/product/?item_id=20163776919&product_id=7612276799
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/4807/fbcbc8b97192598fe20c88d584c01f5a820c924cc5a9946344698afdb259.jpg
+Local original: public/products/7612276799-silver.jpg
+SHA-256: 50d1c0a76a661a2780dcedea411bf0594838ee39c3f8c9dc8e2ee8f53aa1d5b8
+Reference price (KRW): 19900
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+7235424403-round | glasses | EYELAB 티타늄 5g 블루라이트 차단 안경, 라운드
+Coupang listing: https://www.coupang.com/vp/products/7235424403
+Image/price source page: https://fallcent.com/product/search/?keyword=EYELAB%20%EC%95%88%EA%B2%BD
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/323d/537322469e6f3756084f2d38690bf8cf173cb789f220e40b6f277e3ddb35.jpg
+Local original: public/products/7235424403-round.jpg
+SHA-256: b6468fd40fda8b2e623c39aa8d7d334db8049ebca230ec6eabf5703a180bf329
+Reference price (KRW): 24200
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+7235424403-square | glasses | EYELAB 티타늄 5g 블루라이트 차단 안경, 스퀘어
+Coupang listing: https://www.coupang.com/vp/products/7235424403
+Image/price source page: https://fallcent.com/product/search/?keyword=EYELAB%20%EC%95%88%EA%B2%BD
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/d53f/84c1004c10372b491df11c8a3d2efc0b810e3558ee5600a93823009549c3.jpg
+Local original: public/products/7235424403-square.jpg
+SHA-256: d76c42f44f359ac9621f27111c64eab55defc4e82218863bd7ea6897f56d4b19
+Reference price (KRW): 24200
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+6511312982 | glasses | GL1988 안경사가 만든 TR 블루라이트차단 안경 10g, 51 (초경량)
+Coupang listing: https://www.coupang.com/vp/products/6511312982
+Image/price source page: https://fallcent.com/product/search/?keyword=GL1988%20%EC%95%88%EA%B2%BD
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/03b3/e14b42c16c88feae632e47e4f14c92b42215279b1f0aa03bef79ff87863c.jpg
+Local original: public/products/6511312982.jpg
+SHA-256: fe62587fe4ab7d4d0b412248c6ddc0aaa52d94d8d67eea8ca066c8788f430fe5
+Reference price (KRW): 29900
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+2082223437 | glasses | 멜라크메 남여공용 빅 오버 캣츠 블랙 선글라스 + 케이스, 전체 가로길이 149mm x 세로 57mm
+Coupang listing: https://www.coupang.com/vp/products/2082223437?itemId=3537088872&vendorItemId=86213775191
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/164377599432787-db7dd246-fbc4-48e5-bc61-b26c39e331e9.jpg
+Local original: public/products/2082223437.jpg
+SHA-256: dd36600bb21c09a099fa5ea4cde320b30115b60fc1cb78917c657aca643f91a7
+Reference price (KRW): 12500
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+9461808186 | glasses | [비비PICK] 리에티 LUNO RT 4056 선글라스, 프레임정면 147mm x 렌즈세로 33mm x 템플길이 144mm
+Coupang listing: https://www.coupang.com/vp/products/9461808186?itemId=28155243954&vendorItemId=95110459068
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/1489989814231129-e62b85bd-35a8-4d34-a6d4-7846eee227cf.jpg
+Local original: public/products/9461808186.jpg
+SHA-256: c27068a71c5a3b38815e48745c9560195afd0b00c856720eaaa6b6b9434a74ce
+Reference price (KRW): 53600
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.

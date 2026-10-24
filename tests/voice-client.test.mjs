@@ -40,7 +40,7 @@ function fixture(t, options = {}) {
     window: {isSecureContext: true, fetch: () => {throw Error('Unexpected real network');}},
     navigator: {}, document: {readyState: 'loading', addEventListener() {}},
     setTimeout: (fn,ms)=>{timerDelays.push(ms);return setTimeout(fn,ms);}, clearTimeout, setInterval, clearInterval, AbortController,
-    MediaStream: class {}, Audio: class {}, console,
+    MediaStream: class {}, Audio: class {}, TextEncoder, console,
   };
   vm.createContext(context);
   vm.runInContext(source, context, {filename: 'public/voice-call.js'});
@@ -100,7 +100,7 @@ function fixture(t, options = {}) {
     onVisionState: value => visionStates.push(value),
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
-    onRecommendations: (products, message) => recommendations.push({products, message}),
+    onRecommendations: (products, message, metadata) => recommendations.push({products, message, metadata}),
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return {ok:true,action,product_id:product_id || "324548922",purchased:false};},
   });
@@ -196,6 +196,9 @@ test('multiple tools deduplicate across GA events and wait for response.done plu
   assert.equal(f.tryons.length, 1);
   assert.equal(f.recommendations.length, 1);
   assert.deepEqual(f.recommendations[0].products, catalogResult.products);
+  assert.equal(f.recommendations[0].metadata.sourceOnly,true);
+  assert.equal(f.recommendations[0].metadata.query,'rose lipstick');
+  assert.equal(f.recommendations[0].metadata.maxPrice,20000);
   assert.equal(toolOutputs(channel).length, 2);
   assert.equal(countReplies(channel), baseline + 1);
   const output = toolOutputs(channel).find(event => event.item.call_id === 'search-1');
@@ -255,7 +258,7 @@ test('GA transcript events pass literal text, and typed input works after muting
   f.emit({type: 'response.output_audio_transcript.delta', item_id: 'assistant-1', delta: 'A rose '});
   f.emit({type: 'response.output_audio_transcript.done', item_id: 'assistant-1', transcript: 'A rose lipstick.'});
   assert.equal(f.transcripts[0].text, '<img src=x onerror=alert(1)>');
-  assert.equal(f.transcripts[1].delta, 'A rose ');
+  assert.equal(f.transcripts[1].text, 'A rose ');
   assert.equal(f.transcripts[2].text, 'A rose lipstick.');
   f.emit({type: 'input_audio_buffer.speech_started'});
   f.voice.mute();
@@ -633,4 +636,138 @@ test('rejected camera create events free capacity without interrupting voice and
   acknowledgeImage(f,imageEvents(f.channel).at(-1));
   assert.equal(f.visionStates.at(-1).state,'received');
   assert.equal(call.visionSnapshots.size,1);
+});
+
+
+function latestTranscript(f) {
+  return [...new Map(f.transcripts.map(row=>[row.key,row])).values()].sort((a,b)=>a.order-b.order);
+}
+
+test('speech reserves its place before assistant output and late finals update the original turn',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u-first'});
+  assert.equal(f.transcripts.at(-1).pending,true);
+  f.emit({type:'conversation.item.input_audio_transcription.delta',event_id:'u-delta',item_id:'u-first',delta:'Find pink'});
+  assert.equal(f.transcripts.at(-1).text,'Find pink');
+  f.emit({type:'input_audio_buffer.committed',item_id:'u-first',previous_item_id:null});
+  f.emit({type:'response.created',response:{id:'r-first'}});
+  f.emit({type:'response.output_audio_transcript.delta',event_id:'a-delta',response_id:'r-first',item_id:'a-first',delta:'Here are pink options.'});
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u-second'});
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u-second',transcript:'Under 20000 won.'});
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u-first',transcript:'Find pink lipstick.'});
+  const rows=latestTranscript(f);
+  assert.deepEqual(rows.map(row=>row.key),['u-first','a-first','u-second']);
+  assert.equal(rows[0].text,'Find pink lipstick.');
+  assert.equal(rows[0].pending,false);
+});
+
+test('server predecessor repairs delayed committed ordering and duplicate or late deltas cannot repeat final text',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'response.output_audio_transcript.delta',event_id:'same-delta',item_id:'a',delta:'Hello'});
+  f.emit({type:'response.output_audio_transcript.delta',event_id:'same-delta',item_id:'a',delta:'Hello'});
+  f.emit({type:'conversation.item.added',previous_item_id:'u',item:{id:'a',type:'message',role:'assistant',content:[]}});
+  f.emit({type:'input_audio_buffer.committed',item_id:'u',previous_item_id:null});
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u',transcript:'Hi'});
+  f.emit({type:'response.output_audio_transcript.done',item_id:'a',transcript:'Hello there'});
+  f.emit({type:'response.output_audio_transcript.delta',event_id:'late-delta',item_id:'a',delta:' there'});
+  const rows=latestTranscript(f);
+  assert.deepEqual(rows.map(row=>row.key),['u','a']);
+  assert.equal(rows[1].text,'Hello there');assert.equal(rows[1].final,true);
+});
+
+test('response slots preserve an interrupted assistant turn even if its first transcript arrives after new speech',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u1'});
+  f.emit({type:'response.created',response:{id:'r1'}});
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u2'});
+  f.emit({type:'response.output_audio_transcript.delta',item_id:'a1',response_id:'r1',delta:'An option'});
+  assert.deepEqual(latestTranscript(f).map(row=>row.key),['u1','a1','u2']);
+});
+
+const uploadImage={dataUrl:'data:image/jpeg;base64,/9j/AA==',name:'desk.jpg',text:'Find a lamp for this desk'};
+test('explicit image waits for acknowledgement and enters the call independently of camera sharing',async t=>{
+  const f=fixture(t,{getVisionEnabled:()=>false});await connect(f);done(f,'greeting');await tick();
+  const baseline=countReplies(f.channel),sent=f.voice.sendImage(uploadImage);
+  const event=f.channel.sent.at(-1);
+  assert.equal(event.item.content[1].type,'input_image');
+  assert.equal(event.item.content[0].text,uploadImage.text);
+  assert.equal(f.transcripts.at(-1).delivery,'sending');
+  assert.equal(countReplies(f.channel),baseline);
+  f.emit({type:'conversation.item.added',item:event.item});
+  assert.equal(await sent,true);await tick();
+  assert.equal(f.transcripts.at(-1).delivery,'sent');
+  assert.equal(f.transcripts.at(-1).image.name,'desk.jpg');
+  assert.equal(countReplies(f.channel),baseline+1);
+  f.voice.clearCameraSnapshots();
+  assert.equal(f.channel.sent.some(item=>item.type==='conversation.item.delete'&&item.item_id===event.item.id),false);
+});
+
+test('invalid, oversized, disconnected, and congested image sends fail without a success row',async t=>{
+  const f=fixture(t);
+  await assert.rejects(f.voice.sendImage(uploadImage),/connected call/);
+  await connect(f);
+  const baseline=f.transcripts.length;
+  await assert.rejects(f.voice.sendImage({...uploadImage,dataUrl:'data:image/svg+xml;base64,PHN2Zz4='}),/JPEG or PNG/);
+  await assert.rejects(f.voice.sendImage({...uploadImage,dataUrl:'data:image/jpeg;base64,'+'A'.repeat(55000)}),/JPEG or PNG/);
+  f.channel.bufferedAmount=200000;await assert.rejects(f.voice.sendImage(uploadImage),/connection is busy/);
+  f.channel.bufferedAmount=0;f.peers[0].sctp={maxMessageSize:20};await assert.rejects(f.voice.sendImage(uploadImage),/too large/);
+  assert.equal(f.transcripts.length,baseline);
+});
+
+test('image rejection and disconnect reject pending uploads without requesting an invented reply',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const baseline=countReplies(f.channel),rejected=f.voice.sendImage(uploadImage),event=f.channel.sent.at(-1);
+  f.emit({type:'error',error:{event_id:event.event_id,message:'Invalid image'}});
+  await assert.rejects(rejected,/not accepted/);await tick();
+  assert.equal(f.transcripts.at(-1).delivery,'failed');
+  assert.equal(countReplies(f.channel),baseline);
+  const interrupted=f.voice.sendImage(uploadImage);const expected=assert.rejects(interrupted,/call ended/);
+  f.voice.end();await expected;
+});
+
+test('image acknowledgement queues one reply until an active model response completes',async t=>{
+  const f=fixture(t);await connect(f);f.emit({type:'response.created',response:{id:'active'}});
+  const baseline=countReplies(f.channel),sent=f.voice.sendImage(uploadImage),event=f.channel.sent.at(-1);
+  f.emit({type:'conversation.item.done',item:event.item});assert.equal(await sent,true);await tick();
+  assert.equal(countReplies(f.channel),baseline);
+  done(f,'active');await tick();assert.equal(countReplies(f.channel),baseline+1);
+  f.emit({type:'conversation.item.done',item:event.item});await tick();assert.equal(countReplies(f.channel),baseline+1);
+});
+
+
+test('long delayed hidden snapshot and tool predecessor chains preserve every visible turn',async t=>{
+  const f=fixture(t);await connect(f);
+  const ordered=['u1',...Array.from({length:10},(_,i)=>'hidden-'+(i+1)),'a1','u2',...Array.from({length:10},(_,i)=>'hidden-'+(i+11)),'a2'];
+  for(const key of ['u1','a1','u2','a2']) {
+    if(key.startsWith('u'))f.emit({type:'input_audio_buffer.speech_started',item_id:key});
+    else f.emit({type:'response.output_audio_transcript.delta',item_id:key,delta:key});
+    f.emit({type:key.startsWith('u')?'input_audio_buffer.committed':'conversation.item.added',item_id:key,previous_item_id:key==='u1'?null:ordered[ordered.indexOf(key)-1],...(key.startsWith('a')?{item:{id:key,type:'message',role:'assistant',content:[]}}:{})});
+  }
+  for(const [index,key] of ordered.filter(key=>key.startsWith('hidden-')).reverse().entries()) {
+    const item=index%2?{id:key,type:'function_call_output',call_id:'tool-'+index,output:'{}'}:{id:key,type:'message',role:'user',content:[{type:'input_image',image_url:'data:image/jpeg;base64,/9j/AA=='}]};
+    f.emit({type:'conversation.item.added',previous_item_id:ordered[ordered.indexOf(key)-1],item});
+  }
+  for(const key of ['u2','u1'])f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:key,transcript:key+' final'});
+  assert.deepEqual(latestTranscript(f).map(row=>row.key),['u1','a1','u2','a2']);
+  assert.deepEqual(Array.from(f.voice.call.timeline).filter(key=>ordered.includes(key)),ordered);
+});
+
+test('hidden frames and function output during interruption never displace a pending human transcript behind its reply',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u1'});
+  f.emit({type:'conversation.item.added',previous_item_id:null,item:{id:'frame1',type:'message',role:'user',content:[{type:'input_image'}]}});
+  f.emit({type:'input_audio_buffer.committed',item_id:'u1',previous_item_id:'frame1'});
+  f.emit({type:'response.created',response:{id:'r1'}});
+  f.emit({type:'conversation.item.added',previous_item_id:'u1',item:{id:'lookup',type:'function_call',name:'search_products'}});
+  f.emit({type:'conversation.item.added',previous_item_id:'lookup',item:{id:'result',type:'function_call_output',output:'{}'}});
+  f.emit({type:'response.created',response:{id:'r2'}});
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u2'});
+  f.emit({type:'response.output_audio_transcript.delta',response_id:'r2',item_id:'a1',delta:'Here are options'});
+  f.emit({type:'conversation.item.added',previous_item_id:'result',item:{id:'a1',type:'message',role:'assistant',content:[]}});
+  f.emit({type:'conversation.item.added',previous_item_id:'a1',item:{id:'frame2',type:'message',role:'user',content:[{type:'input_image'}]}});
+  f.emit({type:'input_audio_buffer.committed',item_id:'u2',previous_item_id:'frame2'});
+  f.emit({type:'response.created',response:{id:'r3'}});
+  f.emit({type:'response.output_audio_transcript.delta',response_id:'r3',item_id:'a2',delta:'A different style'});
+  assert.deepEqual(latestTranscript(f).map(row=>row.key),['u1','a1','u2','a2']);
+  assert.equal(latestTranscript(f).find(row=>row.key==='u2').pending,true);
 });

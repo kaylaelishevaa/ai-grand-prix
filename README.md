@@ -1,6 +1,6 @@
 # Coupi — AI shopping companion
 
-Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 18 sourced products across six categories.
+Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 36 sourced listings/options across six categories.
 
 Each developer runs their own local server and supplies **their own OpenAI API key**. No usable API key is included in this repository.
 
@@ -54,7 +54,7 @@ Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Use the bottom navigati
 
 This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
-To check that the server loaded your configuration, open [the local voice status endpoint](http://127.0.0.1:5173/api/voice/status). With a nonempty key, it should report `ready: true` and `catalogCount: 18`. This check makes no OpenAI request: it confirms that a key is present, not that the key, credits, or model access are valid. Starting an actual call exercises those checks and incurs API usage.
+To check that the server loaded your configuration, open [the local voice status endpoint](http://127.0.0.1:5173/api/voice/status). With a nonempty key, it should report `ready: true` and `catalogCount: 36`. This check makes no OpenAI request: it confirms that a key is present, not that the key, credits, or model access are valid. Starting an actual call exercises those checks and incurs API usage.
 
 ## 4. Try the demo
 
@@ -62,12 +62,28 @@ To check that the server loaded your configuration, open [the local voice status
 2. Ask Coupi, for example, “Show me glasses under 30,000 won.”
 3. Select **Try it** on a product. Cards and secondary controls minimize during try-on; **Products** or **More** restores them.
 4. Use **Flip** to switch between front and back cameras when the device has both.
-5. Swipe or ask Coupi to skip/save a product. The bag is an in-memory demo; nothing is purchased.
+5. Swipe left for another style; swipe right adds only the selected product. You can also ask Coupi to skip/save a product. The bag is an in-memory demo; nothing is purchased.
 6. Click **End call** when finished.
 
-Without an API key, choose **Browse instead → 18 picks → a category → Try it** to test the catalog and local camera overlays. AI voice and AI camera understanding require your own working key.
+Without an API key, choose **Browse instead → Picks → a category → Try it** to test the catalog and local camera overlays. AI voice and AI camera understanding require your own working key.
 
 Camera snapshots are shared with OpenAI during an active call when **Let Coupi see my camera** is enabled. The eye/Pause control stops that sharing while local try-on continues. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
+
+## Feature branch: call discovery
+
+The current work is on `feat/coupi-call-discovery`; `main` keeps the three-page shell until this branch is merged.
+
+- **Conversation:** a fixed-height, scrollable panel keeps the camera visible. Tap Conversation for the full call history, or the chevron to minimize it. Speech turns are ordered before asynchronous transcription finishes, with streamed updates applied to the same turn.
+- **Photo chat:** tap the message icon, then the image icon next to Send. JPG, PNG and WebP files up to 10 MB are resized locally; the photo is sent to OpenAI only when you press Send during a connected call. A failed send keeps the draft ready to retry. Photos and transcripts are not stored in collections.
+- **Product groups:** Picks opens six matching products; View more expands to ten when available. Tap a product to select it. Add to bag affects that item only; New style explores another group within the same category and budget.
+- **Collections:** Save group keeps the group and selected item in this browser. The bookmark button restores saved groups, even after exploring a different style.
+- **Compare:** choose two or three products of the same type, then Compare. The table shows sourced prices, variants, attributes and available review evidence. Ask Coupi to discuss the selection during a call.
+- **Reviews:** ratings, a precomputed AI summary, pros/cons and translated review samples are available for two sourced demo listings. Other products explicitly show missing evidence. These are historical samples from linked public mirrors, not a live Coupang review feed or a summary of every review.
+- **Hand swipes:** shorter gestures now register. The neutral reset and cooldown prevent repeated actions from one motion; the hand button turns tracking off.
+
+For the richest demo, ask for **pink lipsticks**, open **View more**, then inspect **Revlon Pink in the Afternoon**. Its review evidence spans multiple shades, which is labeled in the UI. There are ten pink options across six brands, seven optical glasses and three sunglasses. Seven newly sourced glasses photos contain models/backgrounds and are marked **Preview unavailable**; the original three glasses previews remain available. Prices are historical reference values, and seller/stock details are not invented.
+
+Design references: [NN/g comparison tables](https://www.nngroup.com/articles/comparison-tables/) and [Baymard comparison selection](https://baymard.com/research-articles/provide-comparison-features). The compact selection tray and explicit per-item actions adapt these patterns to the call interface.
 
 ## Phone camera testing
 
@@ -105,6 +121,8 @@ Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clo
 - `site-pages/camera.html`, `public/mobile-call.*`, `public/coupi-call.css`: mobile call interface and Coupi theme.
 - `public/camera-engine.js`, `public/product-preview.js`: local tracking and product rendering.
 - `public/voice-call.js`, `lib/nook-voice.mjs`, `worker/index.ts`: Realtime connection, catalog tools, and server routes.
-- `data/catalog.json`, `public/products/`, `public/product-catalog.csv`: 18 products and their images/links.
+- `data/catalog.json`, `public/products/`, `public/product-catalog.csv`: 36 listings/options and their images/links.
 - `VOICE-CATALOG-SOURCES.txt`: listing provenance and historical reference prices.
+- `public/product-discovery.js`, `public/product-evidence.js`: grouped browsing, collections, comparison and sourced review rendering.
+- `public/call-conversation.js`, `public/chat-images.js`: compact transcript rendering and local photo preparation.
 - `tests/`: automated checks.

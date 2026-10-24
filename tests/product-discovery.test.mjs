@@ -1,0 +1,105 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+
+const source=readFileSync(new URL('../public/product-discovery.js',import.meta.url),'utf8');
+const catalog=[
+  ...Array.from({length:12},(_,i)=>({id:`lip-${i}-pink`,name:`Pink lipstick ${i}`,productType:'lipstick',category:'makeup',brand:i%2?'Beta':'Alpha',price:i===11?20000:8000,tags:['pink','lipstick'],verifiedAttributes:['matte']})),
+  {id:'red-1',name:'Alpha Red',productType:'lipstick',category:'makeup',brand:'Alpha',price:9000,tags:['red','lipstick']},
+  {id:'red-expensive',name:'Red premium',productType:'lipstick',category:'makeup',price:40000,tags:['red','lipstick']},
+  {id:'purple-1',name:'Purple',productType:'lipstick',category:'makeup',price:9000,tags:['purple','lipstick']},
+  {id:'price-unknown',name:'Pink unknown price',productType:'lipstick',category:'makeup',tags:['pink','lipstick']},
+  {id:'optic',name:'Optical glasses',productType:'glasses',category:'glasses',price:12000,tags:['eyeglasses','clear lenses','black']},
+  {id:'sun',name:'Sunglasses',productType:'glasses',category:'glasses',price:15000,tags:['sunglasses','black']},
+  {id:'lamp',name:'Pink desk lamp',productType:'lamp',category:'desk',price:5000,tags:['pink','lamp']},
+];
+function storage(initial) {
+  const data=new Map(initial?[['coupi.collections.v1',JSON.stringify(initial)]]:[]);
+  return {getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value),data};
+}
+function setup(saved=storage(),products=catalog) {
+  const context={window:{}};vm.createContext(context);vm.runInContext(source,context);
+  return new context.window.CoupiDiscovery(products,{storage:saved});
+}
+const ids=products=>Array.from(products,p=>p.id);
+
+test('initial six and expanded ten retain explicit selection without duplicate or invented catalog items',()=>{
+  const d=setup();d.recommend([catalog[2],catalog[2],{id:'invented'}],{query:'show me pink lipsticks'});
+  assert.equal(d.visible.length,6);assert.equal(d.current.id,catalog[2].id);assert.equal(d.hasMore,true);
+  d.viewMore();assert.equal(d.visible.length,10);assert.equal(d.hasMore,false);
+  const chosen=d.visible[8];assert.equal(d.select(chosen.id),chosen);assert.equal(d.current,chosen);
+  assert.equal(d.select('invented'),null);assert.equal(d.current,chosen);
+  assert.equal(new Set(ids(d.products)).size,d.products.length);
+});
+test('six-to-ten expansion preserves exact requested color, budget, type and brand constraints',()=>{
+  const d=setup();d.recommend([catalog[11],catalog.at(-1)],{query:'Find me Alpha pink lipsticks under 10,000 won',category:'makeup',maxPrice:10000});
+  assert.equal(d.products.length,6);
+  for(const p of d.products){assert.equal(p.brand,'Alpha');assert(p.tags.includes('pink'));assert.equal(p.productType,'lipstick');assert(p.price<=10000);}
+  d.viewMore();assert.equal(d.visible.length,6);assert.equal(d.hasMore,false);
+  assert.equal(d.products.some(p=>p.id==='price-unknown'),false);
+});
+test('next theme changes color within product type and preserves budget and brand',()=>{
+  const d=setup();d.recommend(catalog.slice(0,3),{query:'Alpha pink lipstick under 10000',maxPrice:10000});
+  const next=d.nextTheme();assert.equal(next.changed,true);assert.equal(next.theme,'red');
+  assert.deepEqual(ids(d.products),['red-1']);assert.equal(d.current.id,'red-1');assert.equal(d.maxPrice,10000);
+  assert.equal(d.nextTheme().theme,'pink');
+});
+test('glasses can switch optical to sunglasses without leaving glasses or widening an unavailable budget',()=>{
+  const d=setup();d.recommend([catalog.find(p=>p.id==='optic')],{query:'normal glasses',maxPrice:13000});
+  assert.equal(d.theme,'optical');assert.deepEqual(ids(d.products),['optic']);assert.equal(d.nextTheme().changed,false);
+  d.recommend([],{query:'normal glasses',maxPrice:20000});assert.equal(d.nextTheme().theme,'sunglasses');assert.deepEqual(ids(d.products),['sun']);
+});
+test('collections preserve whole group, selected variant, and view-more state across reload and theme changes',()=>{
+  const saved=storage(),d=setup(saved);d.recommend([catalog[0]],{query:'pink lipstick',maxPrice:10000});d.viewMore();d.select('lip-8-pink');
+  const record=d.saveCollection();assert.equal(record.persisted,true);assert.equal(record.name,'Pink lipsticks');assert.equal(record.ids.length,10);
+  d.nextTheme();assert.equal(d.theme,'red');
+  const reloaded=setup(saved);assert.equal(reloaded.collections.length,1);assert.equal(reloaded.collections[0].productCount,10);
+  const restored=reloaded.restoreCollection(record.id);assert.equal(restored.theme,'pink');assert.equal(restored.current.id,'lip-8-pink');assert.equal(restored.visible.length,10);
+  assert.equal(reloaded.removeCollection(record.id),true);assert.equal(setup(saved).collections.length,0);
+});
+test('invalid collection schema and unknown IDs are ignored; removed catalog items never reappear',()=>{
+  const broken=storage({version:1,collections:[null,{id:'bad',ids:'not an array'},{id:'good',name:'Test',ids:['invented','lip-1-pink','lip-1-pink','lamp'],selectedId:'invented',productType:'lipstick',query:'pink lipstick',maxPrice:-5}]});
+  const d=setup(broken);assert.equal(d.collections.length,1);assert.deepEqual(ids(d.collections[0].products),['lip-1-pink']);
+  assert.equal(d.restoreCollection('good').current.id,'lip-1-pink');assert.equal(d.maxPrice,null);
+  const unsupported=setup(storage({version:999,collections:[{id:'x',ids:['lip-1-pink']}]}));assert.equal(unsupported.collections.length,0);
+  const malformed=storage();malformed.data.set('coupi.collections.v1','{broken');assert.equal(setup(malformed).collections.length,0);
+});
+test('blocked browser storage keeps collection usable in this session and reports persistence failure',()=>{
+  const d=setup({getItem(){throw Error('blocked');},setItem(){throw Error('blocked');}});
+  d.recommend([catalog[0]],{query:'pink lipstick'});const result=d.saveCollection();
+  assert.equal(result.persisted,false);assert.equal(d.collections.length,1);assert.equal(d.restoreCollection(result.id).current.id,catalog[0].id);
+});
+test('comparison is explicit, limited to three compatible products, and independent of current browsing group',()=>{
+  const d=setup();assert.equal(d.toggleCompare('lip-0-pink').ok,true);assert.equal(d.toggleCompare('optic').ok,false);
+  assert.equal(d.toggleCompare('lip-1-pink').ok,true);assert.equal(d.toggleCompare('red-1').ok,true);assert.equal(d.toggleCompare('purple-1').ok,false);
+  d.recommend([],{query:'sunglasses'});assert.equal(d.comparison.length,3);
+  assert.equal(d.toggleCompare('lip-1-pink').selected,false);assert.equal(d.comparison.length,2);assert.equal(d.toggleCompare('purple-1').ok,true);
+  d.clearCompare();assert.equal(d.comparison.length,0);assert.equal(d.toggleCompare('optic').ok,true);assert.equal(d.toggleCompare('invented').ok,false);
+});
+
+
+test('natural phrasing and explicit exclusions do not turn a negative color into a positive theme',()=>{
+  const d=setup();d.recommend([],{query:'Can you show me pink lipstick please',maxPrice:10000});assert.equal(d.products.length,11);assert.equal(d.theme,'pink');
+  d.recommend([],{query:'I need lipstick, not pink',maxPrice:10000});assert.equal(d.theme,'');assert(d.products.length>0);assert(d.products.every(p=>!p.tags.includes('pink')));
+  for(let i=0;i<6;i++){d.nextTheme();assert.notEqual(d.theme,'pink');assert(d.products.every(p=>!p.tags.includes('pink')));assert(d.products.every(p=>p.price<=10000));}
+});
+
+test('trusted server candidates retain ranking and known constraints without strict natural-language refiltering or catalog padding',()=>{
+  const d=setup();const seeds=[catalog[4],catalog[0],catalog[2]];
+  d.recommend(seeds,{query:'Can you help me find pink lipstick that suits my next big date',sourceOnly:true,maxPrice:10000,constraints:{colors:{include:['pink'],exclude:[]},eyewear:{include:[],exclude:[]}}});
+  assert.deepEqual(ids(d.products),ids(seeds));assert.equal(d.total,3);assert.equal(d.theme,'pink');
+  d.recommend([catalog[0],catalog.find(p=>p.id==='red-1')],{query:'lipstick but not pink',sourceOnly:true,maxPrice:10000,constraints:{colors:{include:[],exclude:['pink']},eyewear:{include:[],exclude:[]}}});
+  assert.deepEqual(ids(d.products),['red-1']);assert.equal(d.theme,'');d.nextTheme();assert(d.products.every(p=>!p.tags.includes('pink')));
+});
+
+test('collections retain exclusions across a reload and never save invisible products past the demo cap',()=>{
+  const saved=storage(),d=setup(saved);d.recommend([],{query:'not pink lipstick',maxPrice:10000});const group=d.saveCollection();
+  const reloaded=setup(saved);reloaded.restoreCollection(group.id);for(let i=0;i<5;i++){reloaded.nextTheme();assert(reloaded.products.every(p=>!p.tags.includes('pink')));}
+  d.recommend([],{query:'pink lipstick'});const pink=d.saveCollection();assert.equal(pink.ids.length,10);assert(pink.ids.every(id=>d.select(id)));
+});
+
+test('negative eyewear requests never reintroduce sunglasses while switching style groups',()=>{
+  const d=setup();d.recommend([],{query:'Can you show me glasses without sunglasses',maxPrice:20000});assert.deepEqual(ids(d.products),['optic']);
+  assert.equal(d.nextTheme().theme,'optical');assert.deepEqual(ids(d.products),['optic']);assert.equal(d.nextTheme().changed,false);
+});

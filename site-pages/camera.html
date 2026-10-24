@@ -10,9 +10,13 @@
   <link rel="stylesheet" href="/mobile-call.css">
   <link rel="stylesheet" href="/coupi-shell.css">
   <link rel="stylesheet" href="/coupi-call.css">
+  <link rel="stylesheet" href="/call-discovery.css">
 </head>
 <body class="coupi-call-page">
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3Z"/></symbol>
+    <symbol id="i-compare" viewBox="0 0 24 24"><rect x="2" y="4" width="8" height="16" rx="2"/><rect x="14" y="4" width="8" height="16" rx="2"/></symbol>
     <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="14" rx="3"/><path d="m15 9 6-3v12l-6-3"/></symbol>
     <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol>
     <symbol id="i-flip" viewBox="0 0 24 24"><path d="M8 5 9.5 3h5L16 5h4v15H4V5h4Z"/><path d="M8 12a4 4 0 0 1 7-2l1 1m0-3v3h-3M16 14a4 4 0 0 1-7 2l-1-1m0 3v-3h3"/></symbol>
@@ -54,27 +58,36 @@
       <div class="video-shade" aria-hidden="true"></div>
       <header class="call-header">
         <div class="call-person"><span class="mini-nori" aria-hidden="true"><img class="coupi-avatar" src="/assets/coupi.png" alt=""></span><div><strong>Coupi <span class="ai-tag">AI</span></strong><span id="call-status">Connecting…</span></div></div>
-        <button id="focus-product" class="focus-product" aria-label="Show product and controls" hidden><img id="focus-product-image" alt=""><span id="focus-product-label">Products</span><span aria-hidden="true">⌄</span></button><span id="call-timer" class="call-timer">00:00</span><button id="catalog-button" class="catalog-button" aria-label="Explore product previews">18 picks</button>
+        <button id="focus-product" class="focus-product" aria-label="Show product and controls" hidden><img id="focus-product-image" alt=""><span id="focus-product-label">Products</span><span aria-hidden="true">⌄</span></button><span id="call-timer" class="call-timer">00:00</span><button id="catalog-button" class="catalog-button" aria-label="Explore product previews">Picks</button>
+        <button id="collections-button" class="cart-button" aria-label="Saved collections"><svg><use href="#i-bookmark"/></svg></button>
         <button id="cart-button" class="cart-button" aria-label="View your bag"><svg><use href="#i-bag"/></svg><span id="cart-count">0</span></button>
       </header>
       <div id="vision-strip" class="vision-strip" hidden><button id="vision-toggle" class="vision-toggle" aria-pressed="true" aria-label="Pause camera sharing with Coupi"><svg><use href="#i-eye"/></svg><span id="vision-status">Camera sharing ready</span><span id="vision-action">Pause</span></button></div>
       <div class="call-feedback"><p id="call-notice" role="status" hidden></p><button id="retry-call" class="inline-retry" hidden>Reconnect</button><button id="play-audio" class="inline-retry" hidden><svg><use href="#i-speaker"/></svg> Enable sound</button></div>
 
       <section id="product-zone" class="product-zone" aria-label="Recommended product" hidden>
-        <div class="deck-label"><span id="product-category">Picked for you</span><span id="product-position">1 / 3</span></div>
+        <div class="deck-label"><button id="group-open" aria-label="Browse this product group"><span id="product-category">Picked for you</span> <span id="product-position"></span> <span aria-hidden="true">⌄</span></button><button id="save-group" aria-label="Save this product group to collections"><svg><use href="#i-bookmark"/></svg> Save group</button></div>
         <article id="product-card" class="product-card">
           <div id="swipe-feedback" class="swipe-feedback" aria-hidden="true"></div>
-          <div class="product-main"><div class="product-picture"><span class="product-picture-fallback" aria-hidden="true">✳</span><img id="product-image" alt="" referrerpolicy="no-referrer"></div><div class="product-copy"><p class="product-retailer">COUPANG</p><h2 id="product-title"></h2><p id="product-price"></p></div></div>
+          <p id="product-price" class="card-price"></p><div class="product-main"><div class="product-picture"><span class="product-picture-fallback" aria-hidden="true">✳</span><img id="product-image" alt="" referrerpolicy="no-referrer"></div><div class="product-copy"><p class="product-retailer">COUPANG</p><h2 id="product-title"></h2><p id="product-selected-note">Selected product</p></div></div>
           <div class="product-actions"><button id="product-details"><svg><use href="#i-info"/></svg> Details</button><button id="product-try" class="try-button"><svg><use href="#i-spark"/></svg> Try it</button></div>
         </article>
-        <div class="swipe-actions"><button id="product-skip" aria-label="Skip this product"><span>←</span> Skip</button><p>Swipe to choose</p><button id="product-save" aria-label="Add this product to your bag">Add to bag <span>→</span></button></div>
+        <div class="swipe-actions"><button id="product-skip" aria-label="Explore a different style"><span>←</span> New style</button><p>Selected item</p><button id="product-save" aria-label="Add this product to your bag">Add this <span>→</span></button></div>
       </section>
       <div id="product-empty" class="product-empty" hidden>Ask Coupi for a few more ideas.</div>
 
       <div class="conversation-area">
         <div id="tryon-chip" class="tryon-chip" hidden><svg><use href="#i-spark"/></svg><span id="tryon-label">Trying it on</span><button id="clear-tryon" aria-label="Remove try-on overlay"><svg><use href="#i-close"/></svg></button></div>
-        <div id="transcript" class="transcript" role="log" aria-live="polite" aria-relevant="additions text"></div>
-        <form id="text-form" class="text-form" hidden><input id="text-input" type="text" maxlength="1000" autocomplete="off" placeholder="Tell Coupi…" aria-label="Message Coupi"><button type="submit" aria-label="Send message"><svg><use href="#i-arrow"/></svg></button></form>
+        <section id="conversation-box" class="conversation-box" aria-label="Conversation">
+          <div class="conversation-heading"><button id="chat-history-open" aria-label="Open conversation history">Conversation <span id="chat-count">0</span><span aria-hidden="true">↗</span></button><button id="chat-minimize" aria-label="Minimize conversation" aria-expanded="true">⌄</button></div>
+          <div id="transcript" class="transcript" role="log" aria-live="polite" aria-relevant="additions text" tabindex="0" aria-label="Scrollable conversation"></div>
+          <button id="chat-latest" class="chat-latest" hidden>Latest ↓</button>
+          <form id="text-form" class="text-form" hidden>
+            <div id="attachment-preview" class="attachment-preview" hidden><img id="attachment-image" alt="Selected image"><span id="attachment-name"></span><button id="attachment-remove" type="button" aria-label="Remove attached image">×</button></div>
+            <div class="composer-row"><input id="text-input" type="text" maxlength="1000" autocomplete="off" placeholder="Ask Coupi…" aria-label="Message Coupi"><input id="chat-image-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><button id="chat-attach" type="button" aria-label="Attach an image" title="Attach an image"><svg><use href="#i-image"/></svg></button><button id="chat-send" type="submit" aria-label="Send message"><svg><use href="#i-arrow"/></svg></button></div>
+            <p id="attachment-status" class="attachment-status" role="status" hidden></p>
+          </form>
+        </section>
       </div>
       <footer class="call-footer">
         <p id="gesture-status" class="gesture-status">Talk naturally. Try something new.</p>
@@ -103,8 +116,11 @@
     <div id="toast" class="toast" role="status" hidden></div>
     <audio id="voice-audio" autoplay></audio>
     <dialog id="cart-dialog" class="sheet-dialog" aria-labelledby="cart-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">THE GOOD FINDS</p><h2 id="cart-title">Your bag</h2></div><button id="close-cart" class="sheet-close" aria-label="Close bag"><svg><use href="#i-close"/></svg></button></header><div id="cart-items" class="cart-items"></div><p class="sheet-note">Saved for this call. Nothing is ordered.</p></dialog>
-    <dialog id="details-dialog" class="sheet-dialog" aria-labelledby="detail-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><p class="sheet-kicker">A CLOSER LOOK</p><button id="close-details" class="sheet-close" aria-label="Close product details"><svg><use href="#i-close"/></svg></button></header><img id="detail-image" class="detail-image" alt=""><h2 id="detail-title"></h2><div id="detail-body" class="detail-body"></div><p id="detail-preview-note" class="sheet-note"></p><div class="detail-actions"><button id="detail-ask" class="sheet-primary"><svg><use href="#i-mic"/></svg> Ask Coupi about it</button><a id="detail-link" class="sheet-secondary" target="_blank" rel="noopener noreferrer">View on Coupang <span>↗</span></a></div><p class="sheet-note">Check current price and availability on Coupang.</p></dialog>
-    <dialog id="catalog-dialog" class="sheet-dialog catalog-dialog" aria-labelledby="catalog-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">REAL COUPANG PICKS</p><h2 id="catalog-title">Find your next thing.</h2></div><button id="close-catalog" class="sheet-close" aria-label="Close product catalog"><svg><use href="#i-close"/></svg></button></header><div class="catalog-tabs" role="group" aria-label="Product categories"><button id="type-lipstick">Lipstick</button><button id="type-chair">Chairs</button><button id="type-lamp">Lamps</button><button id="type-tshirt">T-shirts</button><button id="type-hoodie">Hoodies</button><button id="type-glasses">Glasses</button></div><div id="catalog-items" class="catalog-items"></div><p class="sheet-note">Original listing photos. Approximate previews, not a fit guarantee.</p><a class="catalog-download" href="/product-catalog.csv" download="coupi-18-coupang-products.csv">Download all 18 product names &amp; links</a></dialog>
+    <dialog id="details-dialog" class="sheet-dialog" aria-labelledby="detail-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><p class="sheet-kicker">A CLOSER LOOK</p><button id="close-details" class="sheet-close" aria-label="Close product details"><svg><use href="#i-close"/></svg></button></header><img id="detail-image" class="detail-image" alt=""><h2 id="detail-title"></h2><div id="detail-body" class="detail-body"></div><p id="detail-preview-note" class="sheet-note"></p><div id="detail-reviews" class="detail-reviews"></div><div class="detail-tools"><button id="detail-compare" class="sheet-secondary">Compare</button><button id="detail-try" class="sheet-primary">Try this product</button><button id="detail-add" class="sheet-secondary">Add to bag</button></div><div class="detail-actions"><button id="detail-ask" class="sheet-primary"><svg><use href="#i-mic"/></svg> Ask Coupi about it</button><a id="detail-link" class="sheet-secondary" target="_blank" rel="noopener noreferrer">View on Coupang <span>↗</span></a></div><p class="sheet-note">Check current price and availability on Coupang.</p></dialog>
+    <dialog id="catalog-dialog" class="sheet-dialog catalog-dialog" aria-labelledby="catalog-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">CURATED COUPANG PICKS</p><h2 id="catalog-title">Your picks.</h2></div><button id="close-catalog" class="sheet-close" aria-label="Close product catalog"><svg><use href="#i-close"/></svg></button></header><div class="catalog-tabs" role="group" aria-label="Product categories"><button id="type-lipstick">Lipstick</button><button id="type-chair">Chairs</button><button id="type-lamp">Lamps</button><button id="type-tshirt">T-shirts</button><button id="type-hoodie">Hoodies</button><button id="type-glasses">Glasses</button></div><div class="group-toolbar"><p id="catalog-group-label"></p><button id="catalog-save-group">Save group</button></div><div id="catalog-items" class="catalog-items"></div><button id="catalog-more" class="sheet-secondary load-more">View more</button><p id="catalog-availability" class="sheet-note"></p><div class="catalog-bottom"><button id="catalog-next-style" class="sheet-secondary">Explore another style →</button><button id="compare-open" class="sheet-primary" disabled>Compare <span id="compare-count">0</span></button></div><p class="sheet-note">Original listing photos. Approximate previews, not a fit guarantee.</p><a class="catalog-download" href="/product-catalog.csv" download="coupi-coupang-products.csv">Download product names &amp; links</a></dialog>
+    <dialog id="chat-history-dialog" class="sheet-dialog chat-history-dialog" aria-labelledby="chat-history-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">THIS CALL</p><h2 id="chat-history-title">Conversation</h2></div><button id="close-chat-history" class="sheet-close" aria-label="Close conversation history">×</button></header><div id="chat-history" class="chat-history" tabindex="0" aria-label="Conversation history"></div><p class="sheet-note">Kept for this call only. Uploaded images are shared when you press Send.</p></dialog>
+    <dialog id="collections-dialog" class="sheet-dialog" aria-labelledby="collections-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">COME BACK TO A GOOD FIND</p><h2 id="collections-title">Collections</h2></div><button id="close-collections" class="sheet-close" aria-label="Close collections">×</button></header><div id="collection-items"></div><p class="sheet-note">Product groups saved in this browser. Images and conversations aren't saved here.</p></dialog>
+    <dialog id="compare-dialog" class="sheet-dialog compare-dialog" aria-labelledby="compare-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">A CLOSER COMPARISON</p><h2 id="compare-title">Side by side</h2></div><button id="close-compare" class="sheet-close" aria-label="Close comparison">×</button></header><p class="compare-hint">Compare up to 3 products. Swipe the table sideways.</p><div id="compare-table" class="compare-table" tabindex="0" aria-label="Product comparison"></div><div class="detail-actions"><button id="compare-ask" class="sheet-primary">Ask Coupi to help me choose</button><button id="compare-clear" class="sheet-secondary">Clear comparison</button></div><p class="sheet-note">Reference prices. Missing details are marked unverified.</p></dialog>
   </main>
   <script src="/coupang-products.js" defer></script>
   <script src="/product-preview.js" defer></script>
@@ -113,6 +129,10 @@
   <script src="/camera-snapshots.js" defer></script>
   <script src="/voice-call.js" defer></script>
   <script src="/mobile-call-state.js" defer></script>
+  <script src="/product-discovery.js" defer></script>
+  <script src="/product-evidence.js" defer></script>
+  <script src="/call-conversation.js" defer></script>
+  <script src="/chat-images.js" defer></script>
   <script src="/mobile-call.js" defer></script>
 </body>
 </html>
