@@ -13,12 +13,16 @@ Copy `.env.example` to `.env.local` and set your own `OPENAI_API_KEY` there, ser
 
 Try the core loop:
 
-1. Make six choices in Taste. Attribute votes are calculated in code; one model call turns them into editable memory lines.
+1. Ask, scan, rebuild a scene, or use the optional Idle game. Every meaningful event immediately writes a memory with text, source, confidence (0–1), and createdAt. No swipe count or model summary is needed.
 2. Generate a scene, then enter your own “change the vibe” command.
 3. Ask a shopping question. Use the microphone in a supported browser, or type in the same box. Open citations, **Why**, and **Read all reviews** to inspect the seeded evidence.
-4. Delete a memory in Its Head, then ask again. Deletion removes its linked traits and historical vote contributions from future model context.
+4. Open Its Head to see confidence bars and provenance. Tentative evidence fades with a 14-day half-life (90 days for stronger evidence); **Still true** restores confidence. Correct or erase a line, then ask again. Erasure removes its linked traits and historical vote contributions from future model context.
 5. Upload a JPG, PNG or WebP photo, up to 8 MB. Inventory gaps with catalog matches enter Decisions for your approval.
-6. Enable **pretend it’s 2am** in Its Head and add an item. The morning lock is enforced by the server. Ask to buy laundry detergent to see the owned-item refusal before any model call.
+6. Enable **pretend it’s 2am** in Its Head and add an item. The morning lock is enforced by the server. Turn it off during local morning and cancel a held item. Three distinct mornings of cancellations teach “night adds often cancel.” Ask to buy laundry detergent to see the owned-item refusal before any model call.
+
+The critical feedback loop: ask for red socks, choose a pricier, better-reviewed runner-up, then ask for red socks again. The choice writes “weighs reviews over price — from your verdict choice” immediately. The next request gets explicit review/price weights; a deterministic comparison of the returned relevant pair applies them, and the reason names the local weekday you taught it. Current explicit price constraints still take precedence. Tied or absent review evidence records the product choice without inventing a review preference.
+
+Guided mode includes a labeled, scripted life-chapter card after the Head: “lots of baby items this week — new chapter? want me to set up for it?” Both answers persist, but scripted evidence stays out of actual recommendation context. Call chapters accept your own statements into the same memory pipeline.
 
 The app never places real orders or charges money. Approving records ownership locally; it does not contact Coupang. Approval never earns XP. XP comes only from swipes and answered questions. Night additions between 22:00 and 07:00 use the browser’s local timezone and lock until morning. Owned items and quarantined sensitive categories are excluded by code.
 
@@ -32,7 +36,7 @@ For a reliable offline presentation, first rehearse online from a reset profile.
 DEMO_OFFLINE=1 npm run dev
 ```
 
-Repeat the same interactions, in the same mode and order. `.cache/responses/` stores validated outputs under hashes of the request, model, schema and instructions. Changed preferences, wording, mode/deck source or photo bytes can create a new request. A miss fails loudly with `OFFLINE_CACHE_MISS`; it never falls back to a model network call. Browser voice input is disabled in offline mode because browser speech recognition may use a network service. Type the rehearsed question instead. Photos are sent to vision during live use; the response cache stores the inventory and a hash-based filename, not the image bytes.
+Repeat the same interactions, in the same mode and order. `.cache/responses/` stores validated outputs under hashes of the request, model, schema and instructions. Changed memories, confidence buckets, wording, mode/deck source or photo bytes can create a new request. Old recordings must be rehearsed again after this ambient-memory upgrade. A miss fails loudly with `OFFLINE_CACHE_MISS`; it never falls back to a model network call. Browser voice input is disabled in offline mode because browser speech recognition may use a network service. Type the rehearsed question instead. Photos are sent to vision during live use; the response cache stores the inventory and a hash-based filename, not the image bytes.
 
 There is also a repeatable terminal rehearsal that does not need a listening web server:
 

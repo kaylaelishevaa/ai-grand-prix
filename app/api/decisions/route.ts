@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import {addDecision,approveDecisions} from '@/lib/guardrails';
+import {addDecision,approveDecisions,removeDecision} from '@/lib/guardrails';
 import {withSession,sessionResponse} from '@/lib/server/store';
 import {readJson} from '@/lib/server/http';
 import {errorResponse} from '@/lib/server/errors';
@@ -9,5 +9,5 @@ export async function GET(request:Request){try{const result=await withSession(re
 export async function POST(request:Request){try{const body=schema.parse(await readJson(request));const result=await withSession(request,async session=>{
  if(body.action==='add'){const data=addDecision(session.profile,body.skuId,body.source);session.profile=data.profile;return data;}
  if(body.action==='approve'){const data=approveDecisions(session.profile,body.ids);session.profile=data.profile;return data;}
- session.profile={...session.profile,decisions:session.profile.decisions.filter(d=>d.id!==body.id||d.approvedAt!==null),revision:session.profile.revision+1,updatedAt:new Date().toISOString()};return{profile:session.profile};
+ session.profile=removeDecision(session.profile,body.id);return{profile:session.profile};
  });return sessionResponse(result.data,result.session);}catch(error){return errorResponse(error);}}

@@ -4,11 +4,11 @@ export interface Review {id:string;skuId:string;stars:number;date:string;author:
 export type SwipeAction='ooh'|'skip'|'nah';
 export type SwipeReason='too pricey'|'not my style'|'have one';
 export interface Swipe {id:string;skuId:string;action:SwipeAction;reason?:SwipeReason;source:string;at:string;contributions:Record<string,number>;}
-export interface MemoryLine {id:string;text:string;traitKeys:string[];source:string;batchId:string;}
+export interface MemoryLine {id:string;text:string;traitKeys:string[];source:string;batchId:string;confidence:number;createdAt:string;confirmedAt?:string;kind?:string;contributions?:Record<string,number>;excludedFromAI?:boolean;}
 export interface OwnedItem {skuId:string;acquiredAt:string;source:'seed'|'approved'|'have-one';}
 export interface Decision {id:string;skuId:string;source:string;addedAt:string;lockedUntil:string|null;approvedAt:string|null;}
 export interface Quarantine {category:string;sensitive:true;note:string;}
-export interface Profile {id:string;version:1;revision:number;traits:Record<string,number>;swipes:Swipe[];memoryLines:MemoryLine[];forgottenTraitKeys:string[];summarizedSwipeCount:number;owned:OwnedItem[];decisions:Decision[];quarantine:Quarantine[];xp:number;budget:number;pretend2am:boolean;timezone:string;answeredQuestionIds:string[];updatedAt:string;}
+export interface Profile {id:string;version:1;revision:number;traits:Record<string,number>;swipes:Swipe[];memoryLines:MemoryLine[];forgottenTraitKeys:string[];summarizedSwipeCount:number;owned:OwnedItem[];decisions:Decision[];quarantine:Quarantine[];xp:number;budget:number;pretend2am:boolean;timezone:string;answeredQuestionIds:string[];updatedAt:string;memoryEventIds?:string[];lastVerdict?:{requestId:string;pickSkuId:string;runnerUpSkuId:string|null};chapterAnswer?:'yes'|'not yet';}
 export interface SceneItem {skuId:string;oneLiner:string;}
 export interface SceneResult {name:string;explanation:string;items:SceneItem[];}
 export interface Verdict {pickSkuId:string|null;reason:string;dissent:string;citations:string[];runnerUpSkuId:string|null;whyRunnerUpLost:string;clarifyingQuestion:string|null;}

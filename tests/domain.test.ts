@@ -53,7 +53,7 @@ test('deleting memory removes its underlying evidence from the next AI input and
   assert.equal(profile.summarizedSwipeCount, 6);
   const before = JSON.stringify(sanitizeProfileForAI(profile));
   const scoreBefore = scoreSku(profile, getSku('apron')!);
-  const erased = deleteMemory(profile, profile.memoryLines[0].id, morning);
+  const erased = deleteMemory(profile, profile.memoryLines.find(line=>line.text==='Prefers warm neutrals')!.id, morning);
   const after = sanitizeProfileForAI(erased);
   assert.equal(erased.memoryLines.length, 0);
   assert.equal(erased.traits[key], undefined);
@@ -71,7 +71,7 @@ test('quarantine excludes both products and inferred traits from scenes, Today a
   const profile = createProfile('privacy', morning);
   profile.traits['personal-care:vibe:gentle'] = 8;
   profile.traits['category:personal-care'] = 4;
-  profile.memoryLines = [{ id: 'sensitive', text: 'Sensitive personal care preference', traitKeys: ['personal-care:vibe:gentle'], source: 'seeded', batchId: 'sensitive' }];
+  profile.memoryLines = [{ id: 'sensitive', text: 'Sensitive personal care preference', traitKeys: ['personal-care:vibe:gentle'], source: 'seeded', batchId: 'sensitive', confidence: 0.9, createdAt: morning.toISOString() }];
   for (const mode of ['scene', 'today', 'ask'] as const) assert(!eligibleCatalog(profile, mode).some((sku) => sku.id === 'skinCream'));
   const safe = sanitizeProfileForAI(profile);
   assert(!JSON.stringify(safe).includes('personal-care'));

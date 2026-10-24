@@ -3,6 +3,7 @@ import {mkdir,readFile,rename,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import type {Profile} from '../types';
 import {createProfile} from '../profile';
+import {migrateMemory} from '../memory';
 import {AppError} from './errors';
 const root=()=>process.env.COUPI_DATA_DIR||path.join(process.cwd(),'.data','profiles');
 const queues=new Map<string,Promise<unknown>>();
@@ -16,7 +17,7 @@ export async function loadSession(request:Request):Promise<ProfileSession>{
  const id=profileId(request);
  try{const profile=JSON.parse(await readFile(path.join(root(),id+'.json'),'utf8')) as Profile;
   if(profile.id!==id||profile.version!==1||!Array.isArray(profile.memoryLines))throw new Error('InvalidProfile');
-  return{id,profile,fresh:false};
+  return{id,profile:migrateMemory(profile),fresh:false};
  }catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw new AppError('PROFILE_READ_FAILED','Your saved profile could not be read. The server has not replaced it.',500);return{id,profile:createProfile(id),fresh:true};}
 }
 export async function saveProfile(profile:Profile){
@@ -31,6 +32,7 @@ export async function withSession<T>(request:Request,task:(session:ProfileSessio
  try{
   let session=initial;
   try{const latest=JSON.parse(await readFile(path.join(root(),initial.id+'.json'),'utf8')) as Profile;if(latest.id!==initial.id||latest.version!==1)throw new Error('InvalidProfile');session={id:initial.id,profile:latest,fresh:false};}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw new AppError('PROFILE_READ_FAILED','The saved profile could not be read.',500);}
+  session.profile=migrateMemory(session.profile);
   const data=await task(session);await saveProfile(session.profile);return{data,session};
  }finally{release();if(queues.get(initial.id)===tail)queues.delete(initial.id);}
 }

@@ -1,5 +1,6 @@
 import { catalog, getSku } from './catalog';
 import type { MemoryLine, PriceBand, Profile, SKU, SwipeAction, SwipeReason } from './types';
+import {remember, memoryConfidence, PRICE_TRAIT, REVIEW_TRAIT} from './memory';
 
 const DAY = 24 * 60 * 60 * 1000;
 const BANDS: PriceBand[] = ['under-10k', 'under-30k', 'under-70k', 'premium'];
@@ -28,6 +29,8 @@ function excludedCategories(profile: Profile) {
   ]);
 }
 function isSafeTrait(profile: Profile, key: string): boolean {
+  if([PRICE_TRAIT,REVIEW_TRAIT,'habit:night-cancellations'].includes(key))return true;
+  if(key.startsWith('choice:')){const sku=getSku(key.slice(7));return !!sku&&!sku.sensitive&&!excludedCategories(profile).has(sku.category);}
   const category = key.startsWith('category:') ? key.slice('category:'.length) : key.split(':')[0];
   return allKnownTraits.has(key) && !excludedCategories(profile).has(category);
 }
@@ -83,6 +86,7 @@ export function applySwipe(profile: Profile, input: SwipeInput, now: Date = new 
     // Ownership says nothing about whether the user likes an object's color or material.
   } else if (input.reason === 'too pricey') {
     const bandIndex = BANDS.indexOf(sku.priceBand);
+    contributions[PRICE_TRAIT] = 1;
     contributions[`${sku.category}:priceBand:${sku.priceBand}`] = -3;
     for (const band of BANDS.slice(0, bandIndex)) {
       const key = `${sku.category}:priceBand:${band}`;
@@ -94,15 +98,9 @@ export function applySwipe(profile: Profile, input: SwipeInput, now: Date = new 
     const weight = input.action === 'ooh' ? 2 : input.action === 'skip' ? -0.5 : -2;
     for (const key of keys) contributions[key] = weight;
   }
-  for (const [key, value] of Object.entries(contributions)) {
-    next.traits[key] = (next.traits[key] || 0) + value;
-    if (next.traits[key] === 0) delete next.traits[key];
-  }
-  // New explicit evidence may teach a previously forgotten trait again; old evidence never does.
-  next.forgottenTraitKeys = next.forgottenTraitKeys.filter((key) => !(key in contributions));
   next.swipes.push({ ...input, source: input.source.trim().slice(0, 100) || 'taste deck', at: iso(now), contributions });
   next.xp += 10;
-  return touch(next, now);
+  return remember(next,{id:'swipe:'+input.id,text:input.reason==='have one'?`already owns ${sku.name}`:input.reason==='too pricey'?`price-sensitive about ${sku.name}`:`${input.action==='ooh'?'likes':input.action==='skip'?'passed on':'dislikes'} ${sku.name}${input.reason?' — '+input.reason:''}`,source:`from your ${input.source.includes('stroll')?'stroll':input.source.includes('duel')?'duel':'day-0'} swipe${input.reason?' · '+input.reason:''}`,confidence:input.reason?0.9:input.action==='skip'?0.35:0.65,kind:'swipe',contributions},now);
 }
 
 export function deleteMemory(profile: Profile, lineId: string, now: Date = new Date()): Profile {
@@ -110,10 +108,14 @@ export function deleteMemory(profile: Profile, lineId: string, now: Date = new D
   if (!line) return profile;
   const next = clone(profile);
   const erased = new Set(line.traitKeys);
+  const removed=next.memoryLines.filter(memory=>memory.id===lineId||memory.traitKeys.some(key=>erased.has(key)));
+  for(const memory of removed)for(const [key,value] of Object.entries(memory.contributions||{})){next.traits[key]=(next.traits[key]||0)-value;if(Math.abs(next.traits[key])<0.00001)delete next.traits[key];}
+  for(const swipe of next.swipes)if(removed.some(memory=>memory.id==='swipe:'+swipe.id))swipe.contributions={};
   for (const key of erased) delete next.traits[key];
   for (const swipe of next.swipes) for (const key of erased) delete swipe.contributions[key];
   // Removing just the display sentence would leave the algorithm remembering it. Erase linked sentences too.
-  next.memoryLines = next.memoryLines.filter((memory) => !memory.traitKeys.some((key) => erased.has(key)));
+  next.memoryLines = next.memoryLines.filter((memory) => memory.id!==lineId&&!memory.traitKeys.some((key) => erased.has(key)));
+  if(removed.some(memory=>memory.id.startsWith('chapter:')))delete next.chapterAnswer;
   next.forgottenTraitKeys = [...new Set([...next.forgottenTraitKeys, ...erased])].sort();
   return touch(next, now);
 }
@@ -132,7 +134,7 @@ export function installMemoryLines(
   now: Date = new Date(),
 ): Profile {
   if (lines.length > 12) throw new Error('Too many memory lines.');
-  const next = clone(profile);
+  let next = clone(profile);
   const assigned = new Set<string>();
   const additions: MemoryLine[] = [];
   for (const line of lines) {
@@ -144,12 +146,9 @@ export function installMemoryLines(
     }
     if (keys.some((key) => assigned.has(key))) throw new Error('A trait must belong to only one new memory line.');
     keys.forEach((key) => assigned.add(key));
-    additions.push({ id: `memory-${stableId(batchId + ':' + keys.join('|') + ':' + text)}`, text, traitKeys: keys, source: source.slice(0, 140), batchId });
+    additions.push({ id: `memory-${stableId(batchId + ':' + keys.join('|') + ':' + text)}`, text, traitKeys: keys, source: source.slice(0, 140), batchId, confidence:0.8,createdAt:iso(now) });
   }
-  next.memoryLines = [
-    ...next.memoryLines.filter((line) => !line.traitKeys.some((key) => assigned.has(key))),
-    ...additions,
-  ].slice(-32);
+  for(const line of additions)next=remember(next,{...line,kind:'summary'},now);
   next.summarizedSwipeCount = next.swipes.length;
   return touch(next, now);
 }
@@ -169,10 +168,11 @@ export function sanitizeProfileForAI(profile: Profile) {
     .sort(([a], [b]) => a.localeCompare(b));
   const safeKeys = new Set(entries.map(([key]) => key));
   return {
-    traits: Object.fromEntries(entries),
-    memoryLines: profile.memoryLines
-      .filter((line) => line.traitKeys.length > 0 && line.traitKeys.every((key) => safeKeys.has(key)))
-      .map(({ text, traitKeys, source }) => ({ text, traitKeys: [...traitKeys].sort(), source })),
+    traits: Object.fromEntries(entries.map(([key,score])=>{const evidence=profile.memoryLines.filter(line=>line.traitKeys.includes(key));return[key,Math.round(score*(evidence.length?Math.max(...evidence.map(line=>memoryConfidence(line))):1)*100)/100];})),
+    memoryLines: [...new Map(profile.memoryLines
+      .filter((line) => line.traitKeys.every((key) => safeKeys.has(key))&&memoryConfidence(line)>=0.2&&line.kind!=='scripted'&&!line.excludedFromAI)
+      .map((line) => ({text:line.text,traitKeys:[...line.traitKeys].sort(),source:line.source,createdAt:line.createdAt?.slice(0,10),confidence:Math.round(memoryConfidence(line)*10)/10}))
+      .map(line=>[JSON.stringify([line.text,line.source,line.traitKeys]),line])).values()].sort((a,b)=>a.text.localeCompare(b.text)),
     budget: profile.budget,
   };
 }
@@ -185,5 +185,6 @@ export function eligibleCatalog(profile: Profile, _mode: 'scene' | 'today' | 'as
 
 export function scoreSku(profile: Profile, sku: SKU): number {
   if (!eligibleCatalog(profile).some((item) => item.id === sku.id)) return -Infinity;
-  return skuTraitKeys(sku).reduce((sum, key) => sum + (profile.traits[key] || 0), 0);
+  const traits=sanitizeProfileForAI(profile).traits;
+  return skuTraitKeys(sku).reduce((sum, key) => sum + (traits[key] || 0), 0)+(traits['choice:'+sku.id]||0)*3;
 }

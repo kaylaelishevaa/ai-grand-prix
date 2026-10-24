@@ -1,5 +1,6 @@
 import { getSku } from './catalog';
 import type { Decision, OwnedItem, Profile } from './types';
+import {remember} from './memory';
 
 export function validatedTimezone(timezone: string): string {
   try { new Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date(0)); return timezone; }
@@ -90,7 +91,7 @@ export function addDecision(profile: Profile, skuId: string, source: string, now
     lockedUntil: lockUntilMorning(profile, now), approvedAt: null,
   };
   next.decisions.push(decision);
-  return { profile: touched(next, now), decision };
+  return { profile: remember(next,{id:'decision-add:'+decision.id,text:`${decision.lockedUntil?'saved for morning':'proposed'}: ${sku.name}`,source:'from '+decision.source,confidence:0.95,kind:'decision'},now), decision };
 }
 
 export function approveDecisions(profile: Profile, ids: string[], now: Date = new Date()): { profile: Profile; approved: string[]; blocked: string[] } {
@@ -106,5 +107,19 @@ export function approveDecisions(profile: Profile, ids: string[], now: Date = ne
     approved.push(decision.id);
   }
   // This is a local approval ledger, not a payment or merchant transaction. Approval never earns XP.
-  return { profile: approved.length ? touched(next, now) : profile, approved, blocked };
+  let learned=next;
+  for(const id of approved){const decision=next.decisions.find(d=>d.id===id)!;learned=remember(learned,{id:'approval:'+id,text:`approved ${getSku(decision.skuId)?.name}`,source:'from your approval',confidence:1,kind:'decision'},now);}
+  return { profile: approved.length ? learned : profile, approved, blocked };
+}
+
+export function removeDecision(profile:Profile,id:string,now=new Date()):Profile {
+  const decision=profile.decisions.find(d=>d.id===id&&!d.approvedAt);
+  if(!decision)return profile;
+  const effective=effectiveNow(profile,now),wall=localClock(effective,profile.timezone);
+  const morning=!!decision.lockedUntil&&!isDecisionLocked(profile,decision,now)&&wall.hour>=7&&wall.hour<12;
+  let next=remember(profile,{id:'cancel:'+id,text:`${morning?'cancelled a night add in the morning':'cancelled'}: ${getSku(decision.skuId)?.name}`,source:morning?'from your morning sleep-on-it cancellation':'from your decision',confidence:0.95,kind:morning?'morning-cancel':'decision',traitKeys:morning?['habit:night-cancellations']:[]},effective);
+  next.decisions=next.decisions.filter(d=>d.id!==id);
+  const mornings=new Set(next.memoryLines.filter(line=>line.kind==='morning-cancel').map(line=>{const clock=localClock(new Date(line.createdAt),profile.timezone);return `${clock.year}-${clock.month}-${clock.day}`;}));
+  if(mornings.size>=3)next=remember(next,{id:'night-pattern:'+mornings.size,text:'night adds often cancel',source:`from ${mornings.size} mornings`,confidence:Math.min(0.9,0.5+mornings.size*0.08),kind:'pattern',contributions:{'habit:night-cancellations':1}},effective);
+  return next;
 }

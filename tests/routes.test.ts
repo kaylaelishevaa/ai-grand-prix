@@ -80,6 +80,7 @@ async function fixture(run: (context: { root: string; calls: CapturedCall[]; bro
         const invalid = askMode === 'always-invalid' || (askMode === 'invalid-once' && askAttempt === 1);
         output = { pickSkuId: pick, reason: warm ? 'Linen matches your kitchen palette preference.' : 'A clear cup duo without relying on a deleted preference.', dissent: warm ? 'Two seeded reviews mention creases after washing.' : 'Two seeded reviews describe fragile glass.', citations: invalid ? ['invented-review'] : [`${pick}-001`, `${pick}-013`], runnerUpSkuId: warm ? 'cottonApron' : 'mugs', whyRunnerUpLost: 'The other listed material is a weaker fit for this request.', clarifyingQuestion: null };
       }
+      if(input.question.includes('red socks'))output={pickSkuId:'socksBudget',runnerUpSkuId:'socksRunner',reason:'The budget red socks cost less.',dissent:'Two seeded reviews mention pilling.',citations:['B04','B14'],whyRunnerUpLost:'The runner socks cost more, though their average rating is higher.',clarifyingQuestion:null};
     } else if (operation === 'photo_inventory') {
       assert(body.input[0].content.some((part: Json) => part.type === 'input_image'));
       output = { items: [{ name: 'oat milk', quantity: 'a small amount visible', status: 'low' }], lowOrMissing: [{ name: 'oat milk', reason: 'Visible low quantity', confidence: 'high' }, { name: 'spinach', reason: 'Expected staple; visible greens drawer is empty', confidence: 'medium' }], uncertainties: [] };
@@ -121,18 +122,20 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       assert.equal(persisted.id, profile.id);
       await browser.send(postProfile, '/api/profile', { action: 'settings', timezone: daytimeZone() });
     });
-    await t.test('six route swipes trigger exactly one provider summary and persist real trait links', async () => {
+    await t.test('each swipe immediately persists sourced memory without a provider call', async () => {
       for (let i = 0; i < 6; i++) {
         const response = await browser.send(postProfile, '/api/profile', { action: 'swipe', swipe: { id: `route-swipe-${i}`, skuId: 'apron', action: 'ooh', source: 'bus deck' } });
         assert.equal(response.status, 200);
         profile = response.body.profile;
-        assert.equal(calls.length, i === 5 ? 1 : 0);
+        assert.equal(calls.length, 0);
+        assert.equal(profile.memoryLines.length, i+1);
+        assert.equal(profile.memoryLines.at(-1)!.confidence,0.65);
+        assert(profile.memoryLines.at(-1)!.createdAt);
       }
       assert.equal(profile!.xp, 60);
       assert.equal(profile!.traits['kitchen:vibe:warm-neutrals'], 12);
-      assert.equal(profile!.memoryLines[0].source, 'from 6 swipes, bus deck');
-      assert.equal(profile!.summarizedSwipeCount, 6);
-      assert.equal(calls[0].operation, 'taste_memory');
+      assert.equal(profile!.memoryLines[0].source, 'from your day-0 swipe');
+      assert.equal(profile!.summarizedSwipeCount, 0);
       const reloaded = await browser.send(getProfile, '/api/profile');
       assert.equal(reloaded.body.profile.memoryLines[0].id, profile!.memoryLines[0].id);
     });
@@ -143,7 +146,7 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       assert.equal(before.body.verdict.pickSkuId, 'apron');
       for (const id of before.body.verdict.citations) assert(getReview(id));
       const lastBefore = calls.at(-1)!;
-      assert.equal(lastBefore.input.profile.traits['kitchen:vibe:warm-neutrals'], 12);
+      assert.equal(lastBefore.input.profile.traits['kitchen:vibe:warm-neutrals'], 7.8);
       const deleted = await browser.send(postProfile, '/api/profile', { action: 'deleteMemory', lineId: before.body.profile.memoryLines[0].id });
       assert.equal(deleted.status, 200);
       assert.equal(deleted.body.profile.traits['kitchen:vibe:warm-neutrals'], undefined);
@@ -152,7 +155,7 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       assert.equal(after.status, 200);
       assert.equal(after.body.verdict.pickSkuId, 'glass');
       assert.equal(calls.at(-1)!.input.profile.traits['kitchen:vibe:warm-neutrals'], undefined);
-      assert.equal(calls.at(-1)!.input.profile.memoryLines.length, 0);
+      assert(!calls.at(-1)!.input.profile.memoryLines.some((line:Json)=>line.traitKeys.includes('kitchen:vibe:warm-neutrals')));
       assert(!calls.at(-1)!.input.catalog.some((sku: Json) => sku.id === 'skinCream' || sku.id === 'detergent'));
       profile = after.body.profile;
     });
@@ -207,6 +210,9 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       }
     });
     await t.test('offline mode replays Ask, scene and photo with zero network; cache misses fail loudly', async () => {
+      // Ambient context has changed since the original answers; rehearse the current context first.
+      await browser.send(scene, '/api/scene', { command,requestId:'warm-scene' });
+      await browser.send(ask, '/api/ask', { question, requestId: 'warm-current-context' });
       process.env.DEMO_OFFLINE = '1';
       const before = calls.length;
       const askReplay = await browser.send(ask, '/api/ask', { question, requestId: 'offline-after-delete' });
@@ -214,7 +220,7 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       assert.equal(askReplay.body.meta.cached, true);
       assert.equal(askReplay.body.meta.offline, true);
       assert.equal(askReplay.body.meta.inputTokens, 0);
-      const sceneReplay = await browser.send(scene, '/api/scene', { command });
+      const sceneReplay = await browser.send(scene, '/api/scene', { command,requestId:'warm-scene' });
       assert.equal(sceneReplay.status, 200);
       assert.equal(sceneReplay.body.meta.cached, true);
       const scanReplay = await browser.photo();
@@ -231,7 +237,7 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       assert.equal(status.reviewCount, 242);
       assert(!JSON.stringify(status).includes('sk-test'));
     });
-    await t.test('a second browser replays the six-swipe summary cache without inheriting the first profile', async () => {
+    await t.test('a second browser learns offline without inheriting the first profile', async () => {
       const second = new BrowserSession();
       const fresh = await second.send(getProfile, '/api/profile');
       assert.notEqual(second.cookie, browser.cookie);
@@ -241,18 +247,17 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       for (let i = 0; i < 6; i++) {
         result = (await second.send(postProfile, '/api/profile', { action: 'swipe', swipe: { id: `second-${i}`, skuId: 'apron', action: 'ooh', source: 'bus deck' } })).body;
       }
-      assert.equal(result.profile.memoryLines.length, 1);
-      assert.equal(result.summaryMeta.cached, true);
-      assert.equal(result.summaryMeta.offline, true);
+      assert.equal(result.profile.memoryLines.length, 6);
+      assert.equal(result.summaryMeta, undefined);
       assert.equal(calls.length, before);
-      assert.equal((await browser.send(getProfile, '/api/profile')).body.profile.memoryLines.length, 0);
+      assert((await browser.send(getProfile, '/api/profile')).body.profile.memoryLines.some((line:Json)=>line.kind==='inventory'));
     });
     await t.test('reset keeps the local timezone, clears the journey, and preserves deterministic offline replay', async () => {
       const before = calls.length;
       const configured = await browser.send(postProfile, '/api/profile', { action: 'settings', timezone: 'Asia/Singapore', pretend2am: true });
       assert.equal(configured.body.profile.timezone, 'Asia/Singapore');
       assert(configured.body.profile.swipes.length > 0);
-      assert(Object.keys(configured.body.profile.traits).length > 0);
+      assert(configured.body.profile.memoryLines.length > 0);
       assert(configured.body.profile.decisions.length > 0);
       const reset = await browser.send(postProfile, '/api/profile', { action: 'reset' });
       assert.equal(reset.status, 200);
@@ -270,10 +275,9 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       for (let i = 0; i < 6; i++) {
         replay = (await browser.send(postProfile, '/api/profile', { action: 'swipe', swipe: { id: `reset-${i}`, skuId: 'apron', action: 'ooh', source: 'bus deck' } })).body;
       }
-      assert.equal(replay.profile.memoryLines.length, 1);
+      assert.equal(replay.profile.memoryLines.length, 6);
       assert.equal(replay.profile.timezone, 'Asia/Singapore');
-      assert.equal(replay.summaryMeta.cached, true);
-      assert.equal(replay.summaryMeta.offline, true);
+      assert.equal(replay.summaryMeta, undefined);
       assert.equal(calls.length, before);
     });
   });
@@ -326,5 +330,75 @@ test('route evidence failures retry once, then expose raw evidence; malformed re
       assert.equal(image.body.code, 'INVALID_IMAGE');
       assert.equal(calls.length, before);
     });
+  });
+});
+
+test('one runner-up choice changes the very next ask, with dated provenance and reversible influence', {concurrency:false}, async()=>{
+  await fixture(async({browser,calls})=>{
+    await browser.send(getProfile,'/api/profile');
+    const question='Find red socks arriving tomorrow.';
+    const first=await browser.send(ask,'/api/ask',{question,requestId:'first-socks'});
+    assert.equal(first.body.verdict.pickSkuId,'socksBudget');
+    const invalid=await browser.send(postProfile,'/api/profile',{action:'verdictChoice',requestId:'first-socks',skuId:'kettle'});
+    assert.equal(invalid.status,400);
+    const choice=await browser.send(postProfile,'/api/profile',{action:'verdictChoice',requestId:'first-socks',skuId:'socksRunner'});
+    assert.equal(choice.status,200);
+    const learned=choice.body.profile.memoryLines.find((line:Json)=>line.kind==='verdict');
+    assert.equal(learned.text,'weighs reviews over price');
+    assert.equal(learned.source,'from your verdict choice');
+    assert(learned.confidence>0&&learned.confidence<0.8);
+    assert(learned.createdAt);
+    const again=await browser.send(postProfile,'/api/profile',{action:'verdictChoice',requestId:'first-socks',skuId:'socksRunner'});
+    assert.equal(again.body.profile.memoryLines.filter((line:Json)=>line.kind==='verdict').length,1);
+    const next=await browser.send(ask,'/api/ask',{question,requestId:'next-socks'});
+    assert.equal(next.body.verdict.pickSkuId,'socksRunner');
+    assert(calls.at(-1)!.input.profile.traits['priority:reviews-over-price']>0);
+    assert(calls.at(-1)!.input.rankingPolicy.reviewWeight>calls.at(-1)!.input.rankingPolicy.priceWeight);
+    const day=new Intl.DateTimeFormat('en-US',{weekday:'long',timeZone:choice.body.profile.timezone}).format(new Date(learned.createdAt));
+    assert(next.body.verdict.reason.includes('ranked reviews above price — you taught me that on '+day));
+    assert(next.body.verdict.citations.every((id:string)=>getReview(id)?.skuId==='socksRunner'));
+    // An exact retry remains cacheable despite continuously aging confidence.
+    const count=calls.length;
+    const replay=await browser.send(ask,'/api/ask',{question,requestId:'next-socks'});
+    assert.equal(replay.body.meta.cached,true);
+    assert.equal(calls.length,count);
+    const corrected=await browser.send(postProfile,'/api/profile',{action:'correctMemory',lineId:learned.id,text:'I prefer the lowest price.'});
+    assert.equal(corrected.status,200);
+    assert.equal(corrected.body.profile.traits['priority:reviews-over-price'],undefined);
+    const after=await browser.send(ask,'/api/ask',{question,requestId:'corrected-socks'});
+    assert.equal(after.body.verdict.pickSkuId,'socksBudget');
+    assert(!after.body.verdict.reason.includes('you taught me'));
+    assert(!JSON.stringify(calls.at(-1)!.input.profile).includes('weighs reviews over price'));
+    const fact=after.body.profile.memoryLines.find((line:Json)=>line.source==='from your correction');
+    await browser.send(postProfile,'/api/profile',{action:'deleteMemory',lineId:fact.id});
+    assert(!(await browser.send(getProfile,'/api/profile')).body.profile.memoryLines.some((line:Json)=>line.id===fact.id));
+  });
+});
+
+test('ask, swap, scene, scan, call and scripted chapter share immediately editable memory', {concurrency:false},async()=>{
+  await fixture(async({browser,calls})=>{
+    await browser.send(getProfile,'/api/profile');
+    const asked=await browser.send(ask,'/api/ask',{question:'A cheap kitchen choice under ₩30,000',requestId:'constraints'});
+    assert(asked.body.profile.memoryLines.some((line:Json)=>line.text.startsWith('price-sensitive')&&line.source==='from your words'));
+    const swapped=await browser.send(ask,'/api/ask',{question:'Another kitchen option',requestId:'swap',excludeSkuIds:['mugs'],swapDirection:'cheaper'});
+    assert(swapped.body.profile.memoryLines.some((line:Json)=>line.kind==='swap'&&line.text.includes('→ cheaper')));
+    const rebuilt=await browser.send(scene,'/api/scene',{command:'A quieter kitchen with five things'});
+    assert(rebuilt.body.profile.memoryLines.some((line:Json)=>line.kind==='scene'&&line.source==='from your scene rebuild'));
+    assert((await browser.send(getProfile,'/api/profile')).body.profile.memoryLines.some((line:Json)=>line.kind==='scene'));
+    const scanned=await browser.photo();
+    assert(scanned.body.profile.memoryLines.some((line:Json)=>line.kind==='inventory'&&line.text.includes('oat milk')));
+    const count=calls.length;
+    const call=await browser.send(postProfile,'/api/profile',{action:'callStatement',id:'small-counter',text:'I cook for one and have a small counter.'});
+    const line=call.body.profile.memoryLines.find((line:Json)=>line.kind==='call');
+    assert.equal(line.source,'from your call statement');
+    const confirmed=await browser.send(postProfile,'/api/profile',{action:'confirmMemory',lineId:line.id});
+    assert.equal(confirmed.body.profile.memoryLines.find((m:Json)=>m.id===line.id).confidence,0.98);
+    const scripted=await browser.send(postProfile,'/api/profile',{action:'guidedCall',id:'store-call-1',chapter:'store'});
+    assert(scripted.body.profile.memoryLines.some((line:Json)=>line.source==='from the scripted store call'));
+    const chapter=await browser.send(postProfile,'/api/profile',{action:'chapter',answer:'not yet'});
+    assert.equal(chapter.body.profile.chapterAnswer,'not yet');
+    assert(chapter.body.profile.memoryLines.some((line:Json)=>line.kind==='scripted'&&line.source.includes('scripted scenario')));
+    assert.equal(calls.length,count);
+    for(const memory of chapter.body.profile.memoryLines){assert(memory.text);assert(memory.source);assert(memory.createdAt);assert(memory.confidence>=0&&memory.confidence<=1);}
   });
 });

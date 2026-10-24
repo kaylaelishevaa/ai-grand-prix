@@ -1,15 +1,14 @@
 /** Records genuine model responses online; replays those exact requests offline. No production mocks. */
 import {readFile} from 'node:fs/promises';
 import {createProfile,applySwipe,deleteMemory} from '../lib/profile';
-import {summarizeTaste,generateScene,answerQuestion,scanPhoto} from '../lib/server/services';
+import {generateScene,answerQuestion,scanPhoto} from '../lib/server/services';
 import {addDecision,approveDecisions} from '../lib/guardrails';
 async function main(){
  const offline=process.env.DEMO_OFFLINE==='1';
  console.log(`COUPI rehearsal · ${offline?'CACHE ONLY — zero model network calls':'LIVE — records genuine model responses'}`);
  let profile=createProfile('rehearsal');
  for(const [i,skuId] of ['apron','matcha','lamp','mugs','kettle','tray'].entries())profile=applySwipe(profile,{id:'rehearsal-'+i,skuId,action:'ooh',source:'bus deck'});
- profile=(await summarizeTaste(profile)).profile;
- console.log('✓ Six swipes → real memory:',profile.memoryLines.map(m=>m.text));
+ console.log('✓ Each swipe → immediate ambient memory:',profile.memoryLines.map(m=>m.text));
  const scene=await generateScene(profile,'Sunday morning kitchen');
  console.log('✓ Scene:',scene.scene.name,scene.scene.items.map(x=>x.skuId).join(', '));
  const rebuilt=await generateScene(profile,'Minimalist kitchen, under ₩100000 total');
