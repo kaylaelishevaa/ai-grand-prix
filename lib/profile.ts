@@ -1,0 +1,189 @@
+import { catalog, getSku } from './catalog';
+import type { MemoryLine, PriceBand, Profile, SKU, SwipeAction, SwipeReason } from './types';
+
+const DAY = 24 * 60 * 60 * 1000;
+const BANDS: PriceBand[] = ['under-10k', 'under-30k', 'under-70k', 'premium'];
+const iso = (now: Date) => now.toISOString();
+const clone = (profile: Profile): Profile => structuredClone(profile);
+function touch(profile: Profile, now: Date): Profile {
+  profile.revision += 1;
+  profile.updatedAt = iso(now);
+  return profile;
+}
+
+export function skuTraitKeys(sku: SKU): string[] {
+  return [
+    `category:${sku.category}`,
+    ...sku.vibeTags.map((tag) => `${sku.category}:vibe:${tag}`),
+    ...sku.palette.map((color) => `${sku.category}:palette:${color}`),
+    `${sku.category}:priceBand:${sku.priceBand}`,
+  ];
+}
+
+const allKnownTraits = new Set(catalog.flatMap(skuTraitKeys));
+function excludedCategories(profile: Profile) {
+  return new Set([
+    ...profile.quarantine.filter((item) => item.sensitive).map((item) => item.category),
+    ...catalog.filter((sku) => sku.sensitive).map((sku) => sku.category),
+  ]);
+}
+function isSafeTrait(profile: Profile, key: string): boolean {
+  const category = key.startsWith('category:') ? key.slice('category:'.length) : key.split(':')[0];
+  return allKnownTraits.has(key) && !excludedCategories(profile).has(category);
+}
+
+export function createProfile(id: string, now: Date = new Date()): Profile {
+  return {
+    id,
+    version: 1,
+    revision: 0,
+    traits: {},
+    swipes: [],
+    memoryLines: [],
+    forgottenTraitKeys: [],
+    summarizedSwipeCount: 0,
+    owned: catalog.filter((sku) => sku.ownedByDefault).map((sku) => ({
+      skuId: sku.id, acquiredAt: iso(new Date(now.getTime() - 21 * DAY)), source: 'seed',
+    })),
+    decisions: [],
+    quarantine: [{ category: 'personal-care', sensitive: true, note: 'Sensitive category — excluded from scenes, Today, and AI taste memory by code.' }],
+    xp: 0,
+    budget: 150000,
+    pretend2am: false,
+    timezone: 'Asia/Seoul',
+    answeredQuestionIds: [],
+    updatedAt: iso(now),
+  };
+}
+
+export interface SwipeInput {
+  id: string;
+  skuId: string;
+  action: SwipeAction;
+  reason?: SwipeReason;
+  source: string;
+}
+
+/** All preference weights are code, not a model inference. Skip is weaker than an explicit dislike. */
+export function applySwipe(profile: Profile, input: SwipeInput, now: Date = new Date()): Profile {
+  if (profile.swipes.some((event) => event.id === input.id)) return profile;
+  if (!input.id || input.id.length > 160) throw new Error('A valid swipe id is required.');
+  if (!['ooh', 'skip', 'nah'].includes(input.action)) throw new Error('Invalid swipe action.');
+  if (input.reason && !['too pricey', 'not my style', 'have one'].includes(input.reason)) throw new Error('Invalid swipe reason.');
+  const sku = getSku(input.skuId);
+  if (!sku) throw new Error('Unknown catalog item.');
+  if (excludedCategories(profile).has(sku.category) || sku.sensitive) throw new Error('This sensitive category is quarantined.');
+  const next = clone(profile);
+  const contributions: Record<string, number> = {};
+  const keys = skuTraitKeys(sku);
+  if (input.reason === 'have one') {
+    if (!next.owned.some((item) => item.skuId === sku.id)) {
+      next.owned.push({ skuId: sku.id, acquiredAt: iso(now), source: 'have-one' });
+    }
+    // Ownership says nothing about whether the user likes an object's color or material.
+  } else if (input.reason === 'too pricey') {
+    const bandIndex = BANDS.indexOf(sku.priceBand);
+    contributions[`${sku.category}:priceBand:${sku.priceBand}`] = -3;
+    for (const band of BANDS.slice(0, bandIndex)) {
+      const key = `${sku.category}:priceBand:${band}`;
+      if (allKnownTraits.has(key)) contributions[key] = 2;
+    }
+  } else if (input.reason === 'not my style') {
+    for (const key of keys.filter((key) => key.includes(':vibe:') || key.includes(':palette:'))) contributions[key] = -3;
+  } else {
+    const weight = input.action === 'ooh' ? 2 : input.action === 'skip' ? -0.5 : -2;
+    for (const key of keys) contributions[key] = weight;
+  }
+  for (const [key, value] of Object.entries(contributions)) {
+    next.traits[key] = (next.traits[key] || 0) + value;
+    if (next.traits[key] === 0) delete next.traits[key];
+  }
+  // New explicit evidence may teach a previously forgotten trait again; old evidence never does.
+  next.forgottenTraitKeys = next.forgottenTraitKeys.filter((key) => !(key in contributions));
+  next.swipes.push({ ...input, source: input.source.trim().slice(0, 100) || 'taste deck', at: iso(now), contributions });
+  next.xp += 10;
+  return touch(next, now);
+}
+
+export function deleteMemory(profile: Profile, lineId: string, now: Date = new Date()): Profile {
+  const line = profile.memoryLines.find((memory) => memory.id === lineId);
+  if (!line) return profile;
+  const next = clone(profile);
+  const erased = new Set(line.traitKeys);
+  for (const key of erased) delete next.traits[key];
+  for (const swipe of next.swipes) for (const key of erased) delete swipe.contributions[key];
+  // Removing just the display sentence would leave the algorithm remembering it. Erase linked sentences too.
+  next.memoryLines = next.memoryLines.filter((memory) => !memory.traitKeys.some((key) => erased.has(key)));
+  next.forgottenTraitKeys = [...new Set([...next.forgottenTraitKeys, ...erased])].sort();
+  return touch(next, now);
+}
+
+function stableId(value: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) hash = Math.imul(hash ^ value.charCodeAt(i), 16777619);
+  return (hash >>> 0).toString(16);
+}
+
+export function installMemoryLines(
+  profile: Profile,
+  lines: { text: string; traitKeys: string[] }[],
+  source: string,
+  batchId: string,
+  now: Date = new Date(),
+): Profile {
+  if (lines.length > 12) throw new Error('Too many memory lines.');
+  const next = clone(profile);
+  const assigned = new Set<string>();
+  const additions: MemoryLine[] = [];
+  for (const line of lines) {
+    const text = line.text.trim();
+    const keys = [...new Set(line.traitKeys)];
+    if (!text || text.length > 240 || !keys.length || keys.length > 40) throw new Error('Invalid memory summary.');
+    if (keys.some((key) => !profile.traits[key] || !isSafeTrait(profile, key) || profile.forgottenTraitKeys.includes(key))) {
+      throw new Error('A memory line refers to an unknown, forgotten, or quarantined trait.');
+    }
+    if (keys.some((key) => assigned.has(key))) throw new Error('A trait must belong to only one new memory line.');
+    keys.forEach((key) => assigned.add(key));
+    additions.push({ id: `memory-${stableId(batchId + ':' + keys.join('|') + ':' + text)}`, text, traitKeys: keys, source: source.slice(0, 140), batchId });
+  }
+  next.memoryLines = [
+    ...next.memoryLines.filter((line) => !line.traitKeys.some((key) => assigned.has(key))),
+    ...additions,
+  ].slice(-32);
+  next.summarizedSwipeCount = next.swipes.length;
+  return touch(next, now);
+}
+
+export function markQuestionAnswered(profile: Profile, requestId: string, now: Date = new Date()): Profile {
+  if (!requestId || profile.answeredQuestionIds.includes(requestId)) return profile;
+  const next = clone(profile);
+  next.answeredQuestionIds.push(requestId);
+  next.xp += 5;
+  return touch(next, now);
+}
+
+/** Never send the swipe log, sensitive records, ownership dates, or erased evidence to the model. */
+export function sanitizeProfileForAI(profile: Profile) {
+  const entries = Object.entries(profile.traits)
+    .filter(([key, score]) => Number.isFinite(score) && score !== 0 && isSafeTrait(profile, key) && !profile.forgottenTraitKeys.includes(key))
+    .sort(([a], [b]) => a.localeCompare(b));
+  const safeKeys = new Set(entries.map(([key]) => key));
+  return {
+    traits: Object.fromEntries(entries),
+    memoryLines: profile.memoryLines
+      .filter((line) => line.traitKeys.length > 0 && line.traitKeys.every((key) => safeKeys.has(key)))
+      .map(({ text, traitKeys, source }) => ({ text, traitKeys: [...traitKeys].sort(), source })),
+    budget: profile.budget,
+  };
+}
+
+export function eligibleCatalog(profile: Profile, _mode: 'scene' | 'today' | 'ask' = 'scene'): SKU[] {
+  const owned = new Set(profile.owned.map((item) => item.skuId));
+  const excluded = excludedCategories(profile);
+  return catalog.filter((sku) => !owned.has(sku.id) && !sku.sensitive && !excluded.has(sku.category));
+}
+
+export function scoreSku(profile: Profile, sku: SKU): number {
+  if (!eligibleCatalog(profile).some((item) => item.id === sku.id)) return -Infinity;
+  return skuTraitKeys(sku).reduce((sum, key) => sum + (profile.traits[key] || 0), 0);
+}

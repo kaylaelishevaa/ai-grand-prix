@@ -1,0 +1,1283 @@
+[
+  {
+    "id": "kettle",
+    "name": "Sunday pour-over kettle",
+    "type": "kettle",
+    "price": 39000,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "slow-mornings",
+      "minimal"
+    ],
+    "palette": [
+      "cream",
+      "sand"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "kettle",
+      "pour over kettle",
+      "주전자"
+    ],
+    "description": "A compact cream kettle for a slower morning.",
+    "facts": {
+      "capacityLiters": 0.8,
+      "material": "stainless steel with cream enamel finish",
+      "previousPrice": 47600,
+      "style": "gooseneck"
+    },
+    "reviewIds": [
+      "kettle-001",
+      "kettle-002",
+      "kettle-003",
+      "kettle-004",
+      "kettle-005",
+      "kettle-006",
+      "kettle-007",
+      "kettle-008",
+      "kettle-009",
+      "kettle-010",
+      "kettle-011",
+      "kettle-012",
+      "kettle-013",
+      "kettle-014",
+      "kettle-015",
+      "kettle-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "kettleAlt",
+    "name": "Everyday enamel kettle",
+    "type": "kettle",
+    "price": 29900,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "practical",
+      "natural"
+    ],
+    "palette": [
+      "sage",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "enamel kettle",
+      "sage kettle"
+    ],
+    "description": "Sage enamel kettle with a simple everyday shape.",
+    "facts": {
+      "capacityLiters": 0.8,
+      "material": "enamel-coated steel"
+    },
+    "reviewIds": [
+      "kettleAlt-001",
+      "kettleAlt-002",
+      "kettleAlt-003",
+      "kettleAlt-004",
+      "kettleAlt-005",
+      "kettleAlt-006",
+      "kettleAlt-007",
+      "kettleAlt-008",
+      "kettleAlt-009",
+      "kettleAlt-010",
+      "kettleAlt-011",
+      "kettleAlt-012",
+      "kettleAlt-013",
+      "kettleAlt-014",
+      "kettleAlt-015",
+      "kettleAlt-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "color": "#789784"
+  },
+  {
+    "id": "cooker",
+    "name": "Compact rice cooker · 3 cups",
+    "type": "cooker",
+    "price": 69000,
+    "category": "kitchen",
+    "vibeTags": [
+      "compact",
+      "practical",
+      "minimal"
+    ],
+    "palette": [
+      "cream",
+      "sage"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "rice cooker",
+      "small rice cooker",
+      "밥솥"
+    ],
+    "description": "Compact three-cup rice cooker for a small kitchen.",
+    "facts": {
+      "capacityCups": 3,
+      "widthCm": 22,
+      "storeShelfPrice": 99000,
+      "idealHousehold": "one or two people"
+    },
+    "reviewIds": [
+      "cooker-001",
+      "cooker-002",
+      "cooker-003",
+      "cooker-004",
+      "cooker-005",
+      "cooker-006",
+      "cooker-007",
+      "cooker-008",
+      "cooker-009",
+      "cooker-010",
+      "cooker-011",
+      "cooker-012",
+      "cooker-013",
+      "cooker-014",
+      "cooker-015",
+      "cooker-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "mugs",
+    "name": "Two slow-morning mugs",
+    "type": "mugs",
+    "price": 18900,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "slow-mornings",
+      "natural"
+    ],
+    "palette": [
+      "terracotta",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "mug",
+      "mugs",
+      "ceramic mugs",
+      "머그컵"
+    ],
+    "description": "A pair of earthy ceramic mugs.",
+    "facts": {
+      "quantity": 2,
+      "capacityMl": 280,
+      "material": "ceramic"
+    },
+    "reviewIds": [
+      "mugs-001",
+      "mugs-002",
+      "mugs-003",
+      "mugs-004",
+      "mugs-005",
+      "mugs-006",
+      "mugs-007",
+      "mugs-008",
+      "mugs-009",
+      "mugs-010",
+      "mugs-011",
+      "mugs-012",
+      "mugs-013",
+      "mugs-014",
+      "mugs-015",
+      "mugs-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "apron",
+    "name": "Everyday linen apron",
+    "type": "apron",
+    "price": 24900,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "natural",
+      "slow-mornings"
+    ],
+    "palette": [
+      "sand",
+      "oat"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "apron",
+      "linen apron",
+      "앞치마"
+    ],
+    "description": "A soft linen apron in warm sand.",
+    "facts": {
+      "material": "linen",
+      "lengthCm": 82,
+      "adjustableNeck": true
+    },
+    "reviewIds": [
+      "apron-001",
+      "apron-002",
+      "apron-003",
+      "apron-004",
+      "apron-005",
+      "apron-006",
+      "apron-007",
+      "apron-008",
+      "apron-009",
+      "apron-010",
+      "apron-011",
+      "apron-012",
+      "apron-013",
+      "apron-014",
+      "apron-015",
+      "apron-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "tray",
+    "name": "Little oak breakfast tray",
+    "type": "tray",
+    "price": 16800,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "natural",
+      "slow-mornings"
+    ],
+    "palette": [
+      "oak",
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "tray",
+      "oak tray",
+      "breakfast tray",
+      "트레이"
+    ],
+    "description": "A compact oak tray for breakfast or coffee.",
+    "facts": {
+      "material": "oak",
+      "widthCm": 28,
+      "depthCm": 20
+    },
+    "reviewIds": [
+      "tray-001",
+      "tray-002",
+      "tray-003",
+      "tray-004",
+      "tray-005",
+      "tray-006",
+      "tray-007",
+      "tray-008",
+      "tray-009",
+      "tray-010",
+      "tray-011",
+      "tray-012",
+      "tray-013",
+      "tray-014",
+      "tray-015",
+      "tray-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "speaker",
+    "name": "Pocket Sunday speaker",
+    "type": "speaker",
+    "price": 29900,
+    "category": "electronics",
+    "vibeTags": [
+      "compact",
+      "slow-mornings",
+      "natural"
+    ],
+    "palette": [
+      "sage",
+      "linen"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "speaker",
+      "small speaker",
+      "블루투스 스피커"
+    ],
+    "description": "Small portable speaker with a fabric front.",
+    "facts": {
+      "connectivity": "Bluetooth",
+      "widthCm": 12,
+      "charging": "USB-C"
+    },
+    "reviewIds": [
+      "speaker-001",
+      "speaker-002",
+      "speaker-003",
+      "speaker-004",
+      "speaker-005",
+      "speaker-006",
+      "speaker-007",
+      "speaker-008",
+      "speaker-009",
+      "speaker-010",
+      "speaker-011",
+      "speaker-012",
+      "speaker-013",
+      "speaker-014",
+      "speaker-015",
+      "speaker-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "glass",
+    "name": "Light glass cup duo",
+    "type": "glass",
+    "price": 14900,
+    "category": "kitchen",
+    "vibeTags": [
+      "minimal",
+      "light",
+      "clean-lines"
+    ],
+    "palette": [
+      "clear"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "glass cups",
+      "clear cups",
+      "유리컵"
+    ],
+    "description": "Two clear glass cups for an uncluttered table.",
+    "facts": {
+      "material": "glass",
+      "quantity": 2,
+      "capacityMl": 240
+    },
+    "reviewIds": [
+      "glass-001",
+      "glass-002",
+      "glass-003",
+      "glass-004",
+      "glass-005",
+      "glass-006",
+      "glass-007",
+      "glass-008",
+      "glass-009",
+      "glass-010",
+      "glass-011",
+      "glass-012",
+      "glass-013",
+      "glass-014",
+      "glass-015",
+      "glass-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "cottonApron",
+    "name": "Easy cotton apron",
+    "type": "apron",
+    "price": 16900,
+    "category": "kitchen",
+    "vibeTags": [
+      "practical",
+      "natural",
+      "minimal"
+    ],
+    "palette": [
+      "sage"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "cotton apron",
+      "green apron"
+    ],
+    "description": "A relaxed cotton apron in muted sage.",
+    "facts": {
+      "material": "cotton",
+      "adjustableNeck": true
+    },
+    "reviewIds": [
+      "cottonApron-001",
+      "cottonApron-002",
+      "cottonApron-003",
+      "cottonApron-004",
+      "cottonApron-005",
+      "cottonApron-006",
+      "cottonApron-007",
+      "cottonApron-008",
+      "cottonApron-009",
+      "cottonApron-010",
+      "cottonApron-011",
+      "cottonApron-012",
+      "cottonApron-013",
+      "cottonApron-014",
+      "cottonApron-015",
+      "cottonApron-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "color": "#829a85"
+  },
+  {
+    "id": "bambooTray",
+    "name": "Simple bamboo tray",
+    "type": "tray",
+    "price": 11900,
+    "category": "kitchen",
+    "vibeTags": [
+      "natural",
+      "warm-neutrals",
+      "practical"
+    ],
+    "palette": [
+      "bamboo",
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "bamboo tray",
+      "wooden tray"
+    ],
+    "description": "A small bamboo serving tray.",
+    "facts": {
+      "material": "bamboo",
+      "widthCm": 28,
+      "depthCm": 18,
+      "care": "hand wash only"
+    },
+    "reviewIds": [
+      "bambooTray-001",
+      "bambooTray-002",
+      "bambooTray-003",
+      "bambooTray-004",
+      "bambooTray-005",
+      "bambooTray-006",
+      "bambooTray-007",
+      "bambooTray-008",
+      "bambooTray-009",
+      "bambooTray-010",
+      "bambooTray-011",
+      "bambooTray-012",
+      "bambooTray-013",
+      "bambooTray-014",
+      "bambooTray-015",
+      "bambooTray-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "miniSpeaker",
+    "name": "Mini bedside speaker",
+    "type": "speaker",
+    "price": 21900,
+    "category": "electronics",
+    "vibeTags": [
+      "compact",
+      "minimal",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "sage"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "mini speaker",
+      "bedside speaker"
+    ],
+    "description": "A little Bluetooth speaker for a bedside table.",
+    "facts": {
+      "connectivity": "Bluetooth",
+      "widthCm": 8,
+      "charging": "USB-C"
+    },
+    "reviewIds": [
+      "miniSpeaker-001",
+      "miniSpeaker-002",
+      "miniSpeaker-003",
+      "miniSpeaker-004",
+      "miniSpeaker-005",
+      "miniSpeaker-006",
+      "miniSpeaker-007",
+      "miniSpeaker-008",
+      "miniSpeaker-009",
+      "miniSpeaker-010",
+      "miniSpeaker-011",
+      "miniSpeaker-012",
+      "miniSpeaker-013",
+      "miniSpeaker-014",
+      "miniSpeaker-015",
+      "miniSpeaker-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "color": "#9daa8d"
+  },
+  {
+    "id": "socks",
+    "name": "Sprint red crew socks",
+    "type": "socks",
+    "price": 6900,
+    "category": "sportswear",
+    "vibeTags": [
+      "sporty",
+      "practical",
+      "bold"
+    ],
+    "palette": [
+      "red"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "red socks",
+      "socks",
+      "superfly socks",
+      "Nike Superfly",
+      "빨간 양말"
+    ],
+    "description": "Red crew sports socks; the lowest-priced non-fragranced pair in this catalog.",
+    "facts": {
+      "sizes": "230–280 mm",
+      "color": "red",
+      "fragrancedFinish": false,
+      "packPairs": 1,
+      "pricePerWearAt30Uses": 230
+    },
+    "reviewIds": [
+      "M01",
+      "M02",
+      "M03",
+      "M04",
+      "M05",
+      "M06",
+      "M07",
+      "M08",
+      "M09",
+      "M10",
+      "M11",
+      "M12",
+      "M13",
+      "M14",
+      "M15",
+      "M16",
+      "M17"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "color": "#ce4e3d"
+  },
+  {
+    "id": "socksBudget",
+    "name": "Budget red sport socks",
+    "type": "socks",
+    "price": 5900,
+    "category": "sportswear",
+    "vibeTags": [
+      "sporty",
+      "practical",
+      "bold"
+    ],
+    "palette": [
+      "red"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "budget red socks",
+      "cheap socks"
+    ],
+    "description": "A budget pair of red sports socks with a fragranced finishing treatment.",
+    "facts": {
+      "sizes": "230–280 mm",
+      "color": "red",
+      "fragrancedFinish": true,
+      "packPairs": 1
+    },
+    "reviewIds": [
+      "B01",
+      "B02",
+      "B03",
+      "B04",
+      "B05",
+      "B06",
+      "B07",
+      "B08",
+      "B09",
+      "B10",
+      "B11",
+      "B12",
+      "B13",
+      "B14",
+      "B15",
+      "B16",
+      "B17"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "color": "#d25743"
+  },
+  {
+    "id": "socksRunner",
+    "name": "Stride performance crew socks",
+    "type": "socks",
+    "price": 8400,
+    "category": "sportswear",
+    "vibeTags": [
+      "sporty",
+      "comfortable",
+      "practical"
+    ],
+    "palette": [
+      "red"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "performance socks",
+      "cushioned socks",
+      "stride socks"
+    ],
+    "description": "Red crew socks with a cushioned sole.",
+    "facts": {
+      "sizes": "230–280 mm",
+      "color": "red",
+      "fragrancedFinish": false,
+      "cushionedSole": true,
+      "packPairs": 1,
+      "pricePerWearAt30Uses": 280
+    },
+    "reviewIds": [
+      "R01",
+      "R02",
+      "R03",
+      "R04",
+      "R05",
+      "R06",
+      "R07",
+      "R08",
+      "R09",
+      "R10",
+      "R11",
+      "R12",
+      "R13",
+      "R14",
+      "R15",
+      "R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "color": "#b34538"
+  },
+  {
+    "id": "socksFragrance",
+    "name": "Fresh-step red crew socks",
+    "type": "socks",
+    "price": 4900,
+    "category": "sportswear",
+    "vibeTags": [
+      "sporty",
+      "bold",
+      "practical"
+    ],
+    "palette": [
+      "red"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "fresh-step socks",
+      "fragranced socks"
+    ],
+    "description": "Red socks with a fragranced fabric finish.",
+    "facts": {
+      "sizes": "230–280 mm",
+      "color": "red",
+      "fragrancedFinish": true,
+      "packPairs": 1
+    },
+    "reviewIds": [
+      "F01",
+      "F02",
+      "F03",
+      "F04",
+      "F05",
+      "F06",
+      "F07",
+      "F08",
+      "F09",
+      "F10",
+      "F11",
+      "F12",
+      "F13",
+      "F14",
+      "F15",
+      "F16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "color": "#bf493b"
+  },
+  {
+    "id": "organizer",
+    "name": "Neon desktop organizer",
+    "type": "organizer",
+    "price": 12900,
+    "category": "home",
+    "vibeTags": [
+      "playful",
+      "bold",
+      "organized"
+    ],
+    "palette": [
+      "lime",
+      "neon"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "organizer",
+      "neon organizer"
+    ],
+    "description": "A bright lime organizer with three shallow drawers.",
+    "facts": {
+      "drawers": 3,
+      "widthCm": 24
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "matcha",
+    "name": "Matcha morning set",
+    "type": "matcha",
+    "price": 27900,
+    "category": "kitchen",
+    "vibeTags": [
+      "slow-mornings",
+      "natural",
+      "tea-ritual"
+    ],
+    "palette": [
+      "sage",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "matcha",
+      "matcha set",
+      "말차"
+    ],
+    "description": "Ceramic matcha bowl and bamboo whisk.",
+    "facts": {
+      "includes": "ceramic bowl, bamboo whisk",
+      "bowlCapacityMl": 450
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "espresso",
+    "name": "Stovetop espresso kit",
+    "type": "espresso",
+    "price": 45000,
+    "category": "kitchen",
+    "vibeTags": [
+      "coffee-ritual",
+      "practical",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "brown",
+      "steel"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "espresso",
+      "coffee maker",
+      "moka pot"
+    ],
+    "description": "A small stovetop coffee pot and cup.",
+    "facts": {
+      "capacityCups": 3,
+      "includes": "stovetop coffee pot, cup",
+      "requires": "compatible stovetop"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "lamp",
+    "name": "A little sculptural light",
+    "type": "lamp",
+    "price": 58000,
+    "category": "home",
+    "vibeTags": [
+      "warm-neutrals",
+      "minimal",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "ochre",
+      "sage"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "lamp",
+      "minimal lamp",
+      "table lamp"
+    ],
+    "description": "A mushroom-shaped table lamp in muted ochre.",
+    "facts": {
+      "heightCm": 31,
+      "light": "warm white",
+      "power": "plug-in"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "smallLamp",
+    "name": "The smaller sunset lamp",
+    "type": "lamp",
+    "price": 24900,
+    "category": "home",
+    "vibeTags": [
+      "warm-neutrals",
+      "compact",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "ochre",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "small lamp",
+      "sunset lamp",
+      "budget lamp"
+    ],
+    "description": "A smaller warm-light lamp for a bedside table.",
+    "facts": {
+      "heightCm": 22,
+      "light": "warm white",
+      "power": "USB"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "rattan",
+    "name": "Woven rattan lamp",
+    "type": "rattan",
+    "price": 38900,
+    "category": "home",
+    "vibeTags": [
+      "natural",
+      "textured",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "rattan",
+      "sand"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "rattan lamp",
+      "woven lamp"
+    ],
+    "description": "Woven rattan shade with a wood-colored base.",
+    "facts": {
+      "heightCm": 30,
+      "shadeMaterial": "rattan",
+      "light": "warm white"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "vase",
+    "name": "A vase for one good stem",
+    "type": "vase",
+    "price": 36000,
+    "category": "home",
+    "vibeTags": [
+      "natural",
+      "minimal",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "terracotta"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "vase",
+      "ceramic vase"
+    ],
+    "description": "A sculptural stoneware vase for a few stems.",
+    "facts": {
+      "material": "stoneware",
+      "heightCm": 18
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "smallVase",
+    "name": "Little stoneware bud vase",
+    "type": "vase",
+    "price": 18900,
+    "category": "home",
+    "vibeTags": [
+      "natural",
+      "compact",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "terracotta",
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "small vase",
+      "bud vase"
+    ],
+    "description": "A compact stoneware vase for a single stem.",
+    "facts": {
+      "material": "stoneware",
+      "heightCm": 10
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "candle",
+    "name": "A quieter kind of candle",
+    "type": "candle",
+    "price": 34000,
+    "category": "home",
+    "vibeTags": [
+      "quiet-evenings",
+      "warm-neutrals",
+      "slow-living"
+    ],
+    "palette": [
+      "cream",
+      "oat"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "candle",
+      "cedar candle"
+    ],
+    "description": "Cedar and tea scented candle in a reusable jar.",
+    "facts": {
+      "scent": "cedar and tea",
+      "waxGrams": 180
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "smallCandle",
+    "name": "Cedar tea-light set",
+    "type": "candle",
+    "price": 12900,
+    "category": "home",
+    "vibeTags": [
+      "quiet-evenings",
+      "compact",
+      "slow-living"
+    ],
+    "palette": [
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "tea lights",
+      "small candle"
+    ],
+    "description": "Six cedar scented tea lights.",
+    "facts": {
+      "scent": "cedar",
+      "quantity": 6
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "cushion",
+    "name": "Sunday, in cushion form",
+    "type": "cushion",
+    "price": 42000,
+    "category": "home",
+    "vibeTags": [
+      "warm-neutrals",
+      "soft",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "sand",
+      "terracotta"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "cushion",
+      "cotton cushion"
+    ],
+    "description": "Washed cotton cushion with an included insert.",
+    "facts": {
+      "material": "cotton",
+      "widthCm": 45,
+      "heightCm": 45,
+      "insertIncluded": true
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "cushionCover",
+    "name": "Soft cotton cushion cover",
+    "type": "cushion",
+    "price": 22900,
+    "category": "home",
+    "vibeTags": [
+      "warm-neutrals",
+      "soft",
+      "practical"
+    ],
+    "palette": [
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "cushion cover",
+      "pillow cover"
+    ],
+    "description": "Soft cotton cover for an existing cushion.",
+    "facts": {
+      "material": "cotton",
+      "widthCm": 45,
+      "heightCm": 45,
+      "insertIncluded": false
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "milk",
+    "name": "Oat milk, 1 L",
+    "type": "milk",
+    "price": 3900,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "natural"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "oat milk",
+      "milk",
+      "우유",
+      "오트밀크"
+    ],
+    "description": "Oat milk, 1 L. A small grocery refill.",
+    "facts": {
+      "pack": "1 L"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "greens",
+    "name": "Baby spinach, 150 g",
+    "type": "greens",
+    "price": 2900,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "natural"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "greens",
+      "spinach",
+      "lettuce",
+      "vegetables",
+      "채소",
+      "시금치"
+    ],
+    "description": "Baby spinach, 150 g. A small grocery refill.",
+    "facts": {
+      "pack": "150 g"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "tomato",
+    "name": "Cherry tomatoes, 500 g",
+    "type": "tomato",
+    "price": 4500,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "natural"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "tomato",
+      "tomatoes",
+      "토마토"
+    ],
+    "description": "Cherry tomatoes, 500 g. A small grocery refill.",
+    "facts": {
+      "pack": "500 g"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "mushrooms",
+    "name": "Enoki mushrooms, 2 packs",
+    "type": "greens",
+    "price": 1800,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "natural"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "mushrooms",
+      "enoki",
+      "버섯"
+    ],
+    "description": "Enoki mushrooms, 2 packs. A small grocery refill.",
+    "facts": {
+      "pack": "2 packs"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "tofu",
+    "name": "Soft tofu, 2 packs",
+    "type": "tofu",
+    "price": 2600,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "natural"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "tofu",
+      "soft tofu",
+      "sundubu",
+      "순두부",
+      "두부"
+    ],
+    "description": "Soft tofu, 2 packs. A small grocery refill.",
+    "facts": {
+      "pack": "2 packs"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "detergent",
+    "name": "Everyday laundry detergent, 2 L",
+    "type": "milk",
+    "price": 12900,
+    "category": "household",
+    "vibeTags": [
+      "practical",
+      "everyday"
+    ],
+    "palette": [
+      "sage"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "detergent",
+      "laundry detergent",
+      "washing detergent",
+      "laundry soap",
+      "세제",
+      "洗衣液"
+    ],
+    "description": "Two-liter laundry detergent. Seeded as already owned three weeks ago.",
+    "facts": {
+      "volumeLiters": 2
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "ownedByDefault": true
+  },
+  {
+    "id": "bigCooker",
+    "name": "Family rice cooker · 10 cups",
+    "type": "cooker",
+    "price": 129000,
+    "category": "kitchen",
+    "vibeTags": [
+      "family-size",
+      "practical"
+    ],
+    "palette": [
+      "steel",
+      "sage"
+    ],
+    "priceBand": "premium",
+    "aliases": [
+      "large rice cooker",
+      "family rice cooker",
+      "ten cup rice cooker"
+    ],
+    "description": "A larger cooker for a family counter.",
+    "facts": {
+      "capacityCups": 10,
+      "widthCm": 34,
+      "idealHousehold": "four or more people"
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "color": "#aab6ad"
+  },
+  {
+    "id": "skinCream",
+    "name": "Quiet personal-care cream",
+    "type": "candle",
+    "price": 19900,
+    "category": "personal-care",
+    "vibeTags": [
+      "gentle",
+      "minimal"
+    ],
+    "palette": [
+      "white"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "skin cream",
+      "personal care",
+      "face cream"
+    ],
+    "description": "A personal-care SKU held in the sensitive-category quarantine.",
+    "facts": {
+      "volumeMl": 50
+    },
+    "reviewIds": [],
+    "delivery": "Rocket delivery · tomorrow by 7am",
+    "sensitive": true
+  }
+]
