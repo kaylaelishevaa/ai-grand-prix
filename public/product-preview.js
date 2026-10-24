@@ -8,6 +8,7 @@
   function assetPath(value,origin=window.location?.origin || 'http://localhost') {
     if(typeof value!=='string'||!value)throw Error('This product has no preview image.');
     let url;try{url=new URL(value,origin);}catch{throw Error('This product image is unavailable.');}
+    if(url.origin===origin&&url.pathname==='/api/products/image'&&!url.hash&&[...url.searchParams.keys()].join(',')==='url')return url.pathname+url.search;
     if(url.origin!==origin||!/^\/products\/[a-z0-9][a-z0-9._-]*\.(?:png|jpe?g|webp)$/i.test(url.pathname)||url.search||url.hash)throw Error('Only verified local product images can be previewed.');
     return url.pathname;
   }

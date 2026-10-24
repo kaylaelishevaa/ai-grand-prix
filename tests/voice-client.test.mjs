@@ -37,7 +37,7 @@ function response(body, status = 200, headers = {}) {
 function fixture(t, options = {}) {
   const timerDelays = [];
   const context = {
-    window: {isSecureContext: true, fetch: () => {throw Error('Unexpected real network');}},
+    window: {isSecureContext: true, fetch: () => {throw Error('Unexpected real network');}, localStorage: options.storage},
     navigator: {}, document: {readyState: 'loading', addEventListener() {}},
     setTimeout: (fn,ms)=>{timerDelays.push(ms);return setTimeout(fn,ms);}, clearTimeout, setInterval, clearInterval, AbortController,
     MediaStream: class {}, Audio: class {}, console,
@@ -71,8 +71,8 @@ function fixture(t, options = {}) {
     close() {this.connectionState = 'closed'; this.emit('connectionstatechange');}
   }
   const mic = microphone();
-  const audio = {srcObject: null, play: async () => {}, pause() {this.paused = true;}};
-  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], visionStates = [], captures = [];
+  const audio = {srcObject: null, muted:false, plays:0, play: async () => {audio.plays++;return options.play?.();}, pause() {this.paused = true;}};
+  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], visionStates = [], captures = [], playbackBlocked = [];
   let permissions = 0;
   const voice = new context.window.NookVoiceSession({
     audio, PeerConnection: Peer, greeting: options.greeting,
@@ -98,6 +98,7 @@ function fixture(t, options = {}) {
     getVisionEnabled: options.getVisionEnabled,
     getCameraSnapshot: reason => {captures.push(reason);return options.getCameraSnapshot?.(reason);},
     onVisionState: value => visionStates.push(value),
+    onPlaybackBlocked: value => playbackBlocked.push(value),
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
     onRecommendations: (products, message) => recommendations.push({products, message}),
@@ -106,7 +107,7 @@ function fixture(t, options = {}) {
   });
   t.after(() => voice.end());
   return {
-    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, timerDelays, visionStates, captures,
+    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, timerDelays, visionStates, captures, playbackBlocked,
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
@@ -114,6 +115,20 @@ function fixture(t, options = {}) {
 }
 const countReplies = channel => channel.sent.filter(event => event.type === 'response.create').length;
 const toolOutputs = channel => channel.sent.filter(event => event.item?.type === 'function_call_output');
+const memoryContexts = channel => channel.sent.flatMap(event => {
+  const text = event.item?.content?.[0]?.text || '';
+  const prefix = 'Saved shopping preferences (not a spoken request): ';
+  return text.startsWith(prefix) ? [JSON.parse(text.slice(prefix.length))] : [];
+});
+
+test('voice product search sends active memories and requests ten results',async t=>{
+  let body;
+  const f=fixture(t,{storage:{getItem:key=>key==='coupi_memory'?JSON.stringify([{text:'I like neutral frames'}]):null},search:params=>{body=JSON.parse(params.body);return response({products:[],message:'No matches'});}});
+  await connect(f);
+  const item=tool(f,'memory-search','search_products',{query:'glasses',category:'glasses',max_price:30000},'r-memory-search');
+  done(f,'r-memory-search',[item]);await tick();await tick();
+  assert.deepEqual(body,{query:'glasses',category:'glasses',max_price:30000,memories:['I like neutral frames'],limit:10});
+});
 async function connect(f) {assert.equal(await f.voice.start(), true); await tick();}
 function done(f, id, output = []) {f.emit({type: 'response.done', response: {id, status: 'completed', output}});}
 function tool(f, callId, name, args, responseId) {
@@ -121,6 +136,61 @@ function tool(f, callId, name, args, responseId) {
   f.emit(event);
   return {type: 'function_call', call_id: callId, name, arguments: event.arguments};
 }
+
+test('saved preferences reach the AI before its first response even with large camera context', async t => {
+  const memories = [{text: 'I prefer cotton T-shirts under ₩30,000.', source: 'you told me'}, {text: 'I like neutral colors.', source: 'you saved a suggestion'}];
+  const values = new Map([['coupi_memory', JSON.stringify(memories)]]);
+  const f = fixture(t, {storage: {getItem: key => values.get(key) || null}, getContext: () => ({mode:'clothes', unused:'x'.repeat(6000)})});
+  await connect(f);
+  assert.deepEqual(memoryContexts(f.channel), [{memory_paused:false, saved_memories:memories.map(m => m.text)}]);
+  const preferenceIndex = f.channel.sent.findIndex(event => event.item?.content?.[0]?.text?.startsWith('Saved shopping preferences'));
+  assert(preferenceIndex < f.channel.sent.findIndex(event => event.type === 'response.create'));
+  f.voice.updateContext({mode:'clothes'});
+  assert.equal(memoryContexts(f.channel).length, 1);
+});
+
+test('active calls refresh saved preferences and stop using paused or forgotten memories', async t => {
+  const values = new Map([['coupi_memory', JSON.stringify([{text:'Cotton',source:'you told me'}])]]);
+  const f = fixture(t, {storage:{getItem:key => values.get(key) || null}});
+  await connect(f);
+  const replies = countReplies(f.channel);
+  values.set('coupi_memory', JSON.stringify([{text:'Linen',source:'you told me'}]));
+  f.emit({type:'input_audio_buffer.speech_started'});
+  assert.deepEqual(memoryContexts(f.channel).at(-1).saved_memories, ['Linen']);
+  values.set('coupi_memory_paused', '1');
+  f.voice.updateContext({mode:'makeup'});
+  assert.deepEqual(memoryContexts(f.channel).at(-1), {memory_paused:true,saved_memories:[]});
+  assert.equal(countReplies(f.channel), replies);
+  values.set('coupi_memory_paused', '0');
+  f.voice.sendText('Recommend a T-shirt');
+  assert.deepEqual(memoryContexts(f.channel).at(-1).saved_memories, ['Linen']);
+  values.set('coupi_memory', '[]');
+  tool(f, 'after-forget', 'search_products', {query:'T-shirt',category:'clothes',max_price:null}, 'search-response');
+  await tick();
+  assert.deepEqual(memoryContexts(f.channel).at(-1), {memory_paused:false,saved_memories:[]});
+});
+
+test('paused, corrupt and unavailable memory storage supply no preferences', async t => {
+  const stores = [
+    {getItem:key => key === 'coupi_memory_paused' ? '1' : JSON.stringify([{text:'Private preference'}])},
+    {getItem:key => key === 'coupi_memory' ? '{bad json' : null},
+    {getItem() { throw Error('Storage blocked'); }},
+  ];
+  for (const storage of stores) {
+    const f = fixture(t, {storage});
+    await connect(f);
+    assert.deepEqual(memoryContexts(f.channel)[0].saved_memories, []);
+  }
+});
+
+test('stored preferences are bounded and malformed entries cannot break a call', async t => {
+  const memories = [null, {}, {text:7}, {text:'  '}, ...Array.from({length:25}, (_, i) => ({text:String(i) + 'x'.repeat(500)}))];
+  const f = fixture(t, {storage:{getItem:key => key === 'coupi_memory' ? JSON.stringify(memories) : null}});
+  await connect(f);
+  const preferences = memoryContexts(f.channel)[0].saved_memories;
+  assert.equal(preferences.length, 20);
+  assert(preferences.every(text => text.length === 400));
+});
 
 test('explicit audio-only start, one greeting, mute, and end release all call resources', async t => {
   const f = fixture(t);
@@ -140,6 +210,46 @@ test('explicit audio-only start, one greeting, mute, and end release all call re
   assert.equal(f.audio.srcObject, null);
   const end = f.calls.find(([url]) => url.endsWith('/end'));
   assert.deepEqual(JSON.parse(end[1].body), {call_id: 'call_mock'});
+});
+
+test('text mode mutes both directions without ending the connection or blocking typed replies',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const call=f.voice.call,channel=f.channel,replies=countReplies(channel);
+  f.emit({type:'input_audio_buffer.speech_started'});
+  assert.equal(f.voice.setTextMode(true),true);
+  assert.equal(f.mic.track.enabled,false);assert.equal(f.audio.muted,true);assert.equal(call.muted,true);
+  assert.equal(call.speaking,false);assert.equal(call.awaitingVad,false);assert.equal(f.voice.call,call);assert.equal(channel.readyState,'open');assert.equal(f.mic.track.stops,0);
+  assert.equal(f.voice.mute(),true);assert.equal(f.mic.track.enabled,false);
+  f.emit({type:'input_audio_buffer.speech_started'});assert.equal(call.speaking,false);
+  await tick();assert.equal(countReplies(channel),replies,'Switching input mode does not generate a new greeting');
+  assert.equal(f.voice.sendText('Show black glasses'),true);await tick();assert.equal(countReplies(channel),replies+1);
+  f.emit({type:'response.output_audio_transcript.delta',item_id:'text-reply',delta:'Here are black frames.'});
+  assert.equal(f.transcripts.at(-1).delta,'Here are black frames.');assert.equal(f.audio.muted,true);
+  assert.equal(f.voice.setTextMode(false),false);assert.equal(f.mic.track.enabled,true);assert.equal(f.audio.muted,false);assert.equal(call.muted,false);
+});
+
+test('leaving text mode restores an existing microphone and speaker mute preference',async t=>{
+  const f=fixture(t);await connect(f);f.voice.mute();f.audio.muted=true;
+  f.voice.setTextMode(true);f.voice.setTextMode(true);f.voice.setTextMode(false);
+  assert.equal(f.mic.track.enabled,false);assert.equal(f.voice.call.muted,true);assert.equal(f.audio.muted,true);
+});
+
+test('text mode stays silent when a new call starts or microphone permission resolves later',async t=>{
+  const permission=deferred();const f=fixture(t,{getUserMedia:()=>permission.promise});
+  const starting=f.voice.start();await tick();assert.equal(f.permissions,1);
+  f.voice.setTextMode(true);permission.resolve(f.mic);assert.equal(await starting,true);await tick();
+  assert.equal(f.voice.call.muted,true);assert.equal(f.mic.track.enabled,false);assert.equal(f.audio.muted,true);
+  f.voice.end();await connect(f);
+  assert.equal(f.voice.textMode,true);assert.equal(f.voice.call.muted,true);assert.equal(f.mic.track.enabled,false);assert.equal(f.audio.muted,true);
+  f.voice.setTextMode(false);assert.equal(f.mic.track.enabled,true);assert.equal(f.audio.muted,false);
+});
+
+test('late playback errors cannot offer speaker activation while text mode is enabled',async t=>{
+  const playback=deferred();const f=fixture(t,{play:()=>playback.promise});await connect(f);
+  f.peers[0].emit('track',{streams:[{}]});f.voice.setTextMode(true);
+  playback.reject(Error('Playback blocked'));await tick();
+  assert.equal(f.playbackBlocked.at(-1),false);assert.equal(f.audio.muted,true);
+  const plays=f.audio.plays;assert.equal(await f.voice.resumeAudio(),false);assert.equal(f.audio.plays,plays);
 });
 
 test('missing server configuration never prompts for a microphone', async t => {

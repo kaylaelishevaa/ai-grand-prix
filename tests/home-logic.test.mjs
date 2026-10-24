@@ -174,7 +174,7 @@ test('every page uses the team shell navigation and current routes', () => {
   assert.match(main, /<main class="shell-content"[^>]*>\s*<div id="coupi-home"/);
   assert.match(main, /<h1 class="home-sr-only">Home<\/h1>/);
   const routes = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
-  assert.match(routes, /pagePath === '\/settings' \? settingsPage/);
+  assert.match(routes, /\['\/setting', '\/settings'\]\.includes\(pagePath\) \? settingsPage/);
 });
 
 test('forgotten memories remain empty and settings survive reload without reseeding', () => {
@@ -353,7 +353,7 @@ test('Home and sheet copy contain none of the prohibited customer words', () => 
   }
 });
 
-function settingsFixture(values = new Map()) {
+function settingsFixture(values = new Map(), options = {}) {
   const html = readFileSync(new URL('../site-pages/settings.html', import.meta.url), 'utf8');
   class Element {
     constructor() { this.children = []; this.attributes = {}; this.listeners = new Map(); this.textContent = ''; }
@@ -361,14 +361,14 @@ function settingsFixture(values = new Map()) {
     replaceChildren(...items) { this.children = items; }
     setAttribute(key, value) { this.attributes[key] = value; }
     addEventListener(event, fn) { this.listeners.set(event, fn); }
-    emit(event) { this.listeners.get(event)?.(); }
+    emit(event, value = {}) { this.listeners.get(event)?.(value); }
     querySelectorAll() { return this.children.flatMap(row => row.children.filter(child => child.textContent === 'Forget')); }
     focus() { this.focused = true; }
     showModal() { this.open = true; }
     close() { this.open = false; this.emit('close'); }
   }
   const nodes = new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m => [m[1], new Element()]));
-  const context = { window: { localStorage: { getItem: k => values.get(k) || null, setItem: (k, v) => values.set(k, v) } }, document: { getElementById: id => nodes.get(id), createElement: () => new Element() }, coupiSVG };
+  const context = { window: { localStorage: { getItem: k => values.get(k) || null, setItem: (k, v) => { if (options.blockStorage) throw Error('Storage blocked'); values.set(k, v); } } }, document: { getElementById: id => nodes.get(id), createElement: () => new Element() }, coupiSVG };
   vm.createContext(context);
   vm.runInContext(readFileSync(new URL('../public/home-demo-data.js', import.meta.url), 'utf8'), context);
   vm.runInContext(readFileSync(new URL('../public/settings.js', import.meta.url), 'utf8').replace(/^import .+;\n/gm, '').replace(/^export /gm, ''), context);
@@ -401,4 +401,87 @@ test('Settings uses calm COUPI, labelled switches and individual Forget controls
   const forgotten = settingsFixture(f.values);
   assert.equal(forgotten.nodes.get('settings-memories').children[0].textContent, 'No memories saved.');
   assert.equal(forgotten.nodes.get('hold-late-night').checked, false);
+});
+
+test('empty memory settings offer suggestions that are saved only when selected', () => {
+  const values = new Map([['coupi_memory', '[]']]);
+  const f = settingsFixture(values);
+  const root = f.nodes.get('settings-memories');
+  assert.equal(root.children[1].textContent, 'Suggested memories');
+  const suggestions = root.children.slice(3);
+  assert.equal(suggestions.length, 3);
+  assert.equal(values.get('coupi_memory'), '[]');
+  const [copy, save] = suggestions[1].children;
+  assert.equal(save.attributes['aria-label'], 'Save memory: ' + copy.textContent);
+  save.emit('click');
+  assert.deepEqual(JSON.parse(values.get('coupi_memory')), [{ text: copy.textContent, source: 'you saved a suggestion' }]);
+  assert.match(f.nodes.get('memory-status').textContent, /^Memory saved\./);
+  assert.equal(root.querySelectorAll()[0].focused, true);
+  const reload = settingsFixture(values);
+  assert.equal(reload.nodes.get('settings-memories').children.length, 1);
+  assert.equal(reload.nodes.get('settings-memories').children[0].children[0].textContent, copy.textContent);
+  reload.nodes.get('settings-memories').querySelectorAll()[0].emit('click');
+  assert.equal(values.get('coupi_memory'), '[]');
+  assert.equal(reload.nodes.get('settings-memories').children[1].textContent, 'Suggested memories');
+});
+
+test('custom memories trim input, persist on reload, and can be forgotten', () => {
+  const f = settingsFixture(new Map([['coupi_memory', '[]']]));
+  const input = f.nodes.get('memory-input');
+  input.value = '  I prefer cotton T-shirts under ₩30,000.  ';
+  let prevented = false;
+  f.nodes.get('memory-form').emit('submit', { preventDefault() { prevented = true; } });
+  assert.equal(prevented, true);
+  assert.equal(input.value, '');
+  assert.equal(input.focused, true);
+  assert.deepEqual(JSON.parse(f.values.get('coupi_memory')), [{ text: 'I prefer cotton T-shirts under ₩30,000.', source: 'you told me' }]);
+  const reload = settingsFixture(f.values);
+  assert.equal(reload.nodes.get('settings-memories').children[0].children[0].textContent, 'I prefer cotton T-shirts under ₩30,000.');
+  reload.nodes.get('settings-memories').querySelectorAll()[0].emit('click');
+  assert.equal(f.values.get('coupi_memory'), '[]');
+});
+
+test('custom memory rejects blank, oversized, duplicate and excess entries without losing the input', () => {
+  const values = new Map([['coupi_memory', JSON.stringify([{text: 'Cotton', source: 'you told me'}])]]);
+  const f = settingsFixture(values), input = f.nodes.get('memory-input');
+  for (const value of ['   ', 'x'.repeat(401), ' cotton ']) {
+    input.value = value;
+    f.nodes.get('memory-form').emit('submit', { preventDefault() {} });
+    assert.equal(input.value, value);
+    assert.equal(JSON.parse(values.get('coupi_memory')).length, 1);
+  }
+  values.set('coupi_memory', JSON.stringify(Array.from({length: 20}, (_, i) => ({text: 'Memory ' + i, source: 'you told me'}))));
+  const full = settingsFixture(values);
+  full.nodes.get('memory-input').value = 'One more';
+  full.nodes.get('memory-form').emit('submit', { preventDefault() {} });
+  assert.equal(JSON.parse(values.get('coupi_memory')).length, 20);
+  assert.match(full.nodes.get('memory-status').textContent, /Forget one/);
+});
+
+test('storage failure keeps a custom memory draft and does not report it saved', () => {
+  const f = settingsFixture(new Map([['coupi_memory', '[]']]), {blockStorage: true});
+  f.nodes.get('memory-input').value = 'I like cotton';
+  f.nodes.get('memory-form').emit('submit', { preventDefault() {} });
+  assert.equal(f.nodes.get('memory-input').value, 'I like cotton');
+  assert.equal(f.values.get('coupi_memory'), '[]');
+  assert.match(f.nodes.get('memory-status').textContent, /Could not save/);
+});
+
+test('failed persistence cannot falsely pause or forget memories still used by calls', () => {
+  const values = new Map([['coupi_memory', JSON.stringify([{text:'Cotton',source:'you told me'}])]]);
+  const f = settingsFixture(values, {blockStorage:true});
+  f.nodes.get('pause-memory').emit('click');
+  assert.equal(f.nodes.get('pause-memory').attributes['aria-pressed'],'false');
+  f.nodes.get('settings-memories').querySelectorAll()[0].emit('click');
+  assert.equal(f.nodes.get('settings-memories').children.length,1);
+  f.nodes.get('forget-everything').emit('click');f.nodes.get('forget-confirm').emit('click');
+  assert.equal(JSON.parse(values.get('coupi_memory')).length,1);
+  assert.equal(f.nodes.get('settings-memories').children.length,1);
+  assert.match(f.nodes.get('memory-status').textContent,/could not save this change/);
+});
+
+test('corrupt memories do not reset paused memory or permission settings', () => {
+  const values = new Map([['coupi_memory','{bad json'],['coupi_memory_paused','1'],['coupi_permissions','{"holdLateNight":false}']]);
+  const settings = readMemorySettings({getItem:key=>values.get(key) || null});
+  assert.equal(settings.paused,true);assert.equal(settings.permissions.holdLateNight,false);
 });

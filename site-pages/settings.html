@@ -17,7 +17,16 @@
     </header>
     <main id="coupi-settings" class="shell-content settings-content" aria-label="Settings">
       <div class="settings-intro"><span id="settings-avatar"></span><p>You're in charge of what I remember.</p></div>
-      <section class="settings-panel" aria-labelledby="memory-heading"><h2 id="memory-heading">What I remember</h2><div id="settings-memories"></div></section>
+      <section class="settings-panel" aria-labelledby="memory-heading">
+        <h2 id="memory-heading">What I remember</h2>
+        <form id="memory-form" class="settings-memory-form">
+          <label for="memory-input">What would you like me to remember?</label>
+          <textarea id="memory-input" rows="3" maxlength="400" required aria-describedby="memory-help" placeholder="For example: I prefer cotton T-shirts under ₩30,000."></textarea>
+          <p id="memory-help" class="settings-note">Save your style, budget, or shopping preferences on this device. Coupi uses them for recommendations during AI calls while memory is on. Up to 20 memories, 400 characters each.</p>
+          <button type="submit" class="home-action">Save memory</button>
+        </form>
+        <div id="settings-memories"></div>
+      </section>
       <section class="settings-panel" aria-labelledby="permission-heading">
         <h2 id="permission-heading">What I’m allowed to do</h2>
         <label class="settings-permission"><span>Ask me before buying anything</span><input id="ask-before-buying" type="checkbox" role="switch" checked></label>
