@@ -1,3 +1,4 @@
+import {fixtureBlueprint} from './fixtures/blueprint';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -76,7 +77,7 @@ test('forgetting a source archives manual snapshots idempotently without preserv
   let modelInput='';
   const call=(async(request:Parameters<typeof structuredCall>[0])=>{
     modelInput=JSON.stringify(request.input);
-    const district=(name:string)=>({name,explanation:'For your writing.',sourceMemoryIds:['memory-1'],items:[{skuId:'organizer',oneLiner:'For pencils.'},{skuId:'smallLamp',oneLiner:'A little light.'}]});
+    const district=(name:string)=>({blueprint:fixtureBlueprint(['organizer','smallLamp']),name,explanation:'For your writing.',sourceMemoryIds:['memory-1'],items:[{skuId:'organizer',oneLiner:'For pencils.'},{skuId:'smallLamp',oneLiner:'A little light.'}]});
     return{data:request.validate({districts:[district('Your Desk'),district('Your Ideas')]}),meta:{cached:false,offline:false,model:'fixture',inputTokens:0,outputTokens:0,latencyMs:1,cacheKey:'fixture'}};
   }) as typeof structuredCall;
   const next=await generateWorld(forgotten,{requestId:'after-forgetting'},{call});
@@ -104,7 +105,7 @@ test('district rebuild preserves creation date and independent historical scene 
   let actualInput='';
   const call=(async(request:Parameters<typeof structuredCall>[0])=>{
     actualInput=JSON.stringify(request.input);
-    const output={districts:[{name:'Your Quieter Mornings',explanation:'A little simpler.',sourceMemoryIds:['memory-1'],items:[{skuId:'matcha',oneLiner:'Tea for the morning.'},{skuId:'glass',oneLiner:'Clear cups.'}]}]};
+    const output={districts:[{blueprint:fixtureBlueprint(['matcha','glass']),name:'Your Quieter Mornings',explanation:'A little simpler.',sourceMemoryIds:['memory-1'],items:[{skuId:'matcha',oneLiner:'Tea for the morning.'},{skuId:'glass',oneLiner:'Clear cups.'}]}]};
     return{data:request.validate(output),meta:{cached:false,offline:false,model:'fixture',inputTokens:0,outputTokens:0,latencyMs:1,cacheKey:'fixture'}};
   }) as typeof structuredCall;
   const rebuilt=await generateWorld(saved.profile,{requestId:'new-room',districtId:'morning-room',command:'Make this morning corner simpler'},{call});

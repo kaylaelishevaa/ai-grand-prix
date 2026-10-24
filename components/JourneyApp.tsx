@@ -5,6 +5,7 @@ import Link from 'next/link';
 import CoupiApp, {Art, Button, Meta, Modal, Pet, ReviewRow, Speech, SystemClock, TypedDissent} from './CoupiApp';
 import CompanionCall from './CompanionCall';
 import LiveCallExperience from './LiveCallExperience';
+import CompanionHome from './CompanionHome';
 import VerdictComparison from './VerdictComparison';
 import HatchDiorama from './HatchDiorama';
 import SceneDiorama from './SceneDiorama';
@@ -20,15 +21,16 @@ import {resolveSceneContext} from '@/lib/world-context';
 import {getSceneMood} from '@/lib/scene-moods';
 import {isDecisionLocked} from '@/lib/guardrails';
 import {decisionApprovalIssue} from '@/lib/delegation-policy';
+import {HOME_SCENARIOS,type HomeScenario} from '@/lib/home-feed';
 import type {AskResponse, Profile, SceneResult, Verdict} from '@/lib/types';
 import type {CallResponse, District, WorldResponse} from '@/lib/journey-types';
 import './journey.css';
 
-type View = 'hatch' | 'call' | 'world' | 'district' | 'preview' | 'archive' | 'stroll';
+type View = 'hatch' | 'home' | 'call' | 'world' | 'district' | 'preview' | 'archive' | 'stroll';
 type Panel = 'verdict' | 'why' | 'review' | 'reviews' | 'delegate' | 'everything';
 const money = (value:number) => '₩' + value.toLocaleString('en-US');
 const uid = () => crypto.randomUUID();
-const captions:Record<View,string> = {hatch:'replaces onboarding',call:'replaces a search box',world:'replaces the homepage',district:'replaces categories',preview:'replaces trend feeds',archive:'replaces a forgotten browsing history',stroll:'replaces endless scrolling'};
+const captions:Record<View,string> = {hatch:'replaces onboarding',home:'replaces the homepage',call:'replaces a search box',world:'replaces browsing',district:'replaces categories',preview:'replaces trend feeds',archive:'replaces a forgotten browsing history',stroll:'replaces endless scrolling'};
 
 async function api<T>(url:string, body?:unknown):Promise<T> {
   const response = await fetch(url, {method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
@@ -47,7 +49,10 @@ export default function JourneyApp() {
   const [status,setStatus] = useState<{offline:boolean;configured:boolean}|null>(null);
   const [hatched,setHatched] = useState(false);
   const [typedCall,setTypedCall] = useState(false);
+  const [presenter,setPresenter] = useState(false);
+  const [homeScenario,setHomeScenario] = useState<HomeScenario>();
   const [busy,setBusy] = useState('Waking up your companion');
+  const [busySeconds,setBusySeconds] = useState(0);
   const [error,setError] = useState('');
   const [notice,setNotice] = useState('');
   const [districtId,setDistrictId] = useState('');
@@ -69,7 +74,7 @@ export default function JourneyApp() {
   const [cap,setCap] = useState(30000);
   const [options,setOptions] = useState({watchPrice:true,haggle:false,bundle:true,scheduleDelivery:true});
   const [delegating,setDelegating] = useState(false);
-  const lastView = useRef<View>('world');
+  const lastView = useRef<View>('home');
   const productRequest = useRef(0);
   const worldRequest = useRef<{key:string;id:string}|null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout>|null>(null);
@@ -83,6 +88,7 @@ export default function JourneyApp() {
     setBusy(label);setError('');
     try {await work();} catch(e) {setError(e instanceof Error?e.message:'Please try again.');} finally {setBusy('');}
   },[]);
+  useEffect(()=>{setBusySeconds(0);if(!busy)return;const started=Date.now();const timer=setInterval(()=>setBusySeconds(Math.floor((Date.now()-started)/1000)),1000);return()=>clearInterval(timer);},[busy]);
 
   useEffect(()=>{
     if(initial.current)return; initial.current=true;
@@ -92,8 +98,12 @@ export default function JourneyApp() {
       const timezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
       if(timezone&&timezone!==p.timezone)p=(await api<{profile:Profile}>('/api/profile',{action:'settings',timezone})).profile;
       storeProfile(p);setStatus(connection);setHatched(!!p.journey?.hatched);
-      const utility=new URLSearchParams(location.search).get('utility');
-      setView(utility==='call'?'call':p.journey?.interviewComplete?'world':p.journey?.hatched?'call':'hatch');
+      const query=new URLSearchParams(location.search),utility=query.get('utility');
+      const scenario=HOME_SCENARIOS.find(item=>item.id===query.get('state'))?.id;
+      const presenting=query.get('presenter')==='1'||!!scenario;
+      setPresenter(presenting);setHomeScenario(scenario||(presenting?'normal':undefined));
+      if(utility==='hatch')setHatched(false);
+      setView(utility==='hatch'?'hatch':utility==='call'?'call':utility==='world'&&(p.journey?.interviewComplete||presenting)?'world':presenting||p.journey?.interviewComplete?'home':p.journey?.hatched?'call':'hatch');
     });
   },[storeProfile,task]);
   useEffect(()=>()=>{if(noticeTimer.current)clearTimeout(noticeTimer.current);},[]);
@@ -117,15 +127,17 @@ export default function JourneyApp() {
   const productDecision=sku?profile?.decisions.find(item=>item.skuId===sku.id&&!item.approvedAt):undefined;
   const approvedDecision=sku?profile?.decisions.find(item=>item.skuId===sku.id&&!!item.approvedAt):undefined;
   const productOwned=!!sku&&!!profile?.owned.some(item=>item.skuId===sku.id);
+  const hasMainNavigation=!!profile&&(!!profile.journey?.interviewComplete||presenter);
   const step=productId&&(panel==='delegate'||productDecision||approvedDecision)?4:view==='hatch'?0:view==='call'&&!profile?.journey?.interviewComplete?1:view==='world'?2:['district','preview','stroll'].includes(view)?3:2;
 
   function changeView(next:View) {setView(next);setError('');window.scrollTo({top:0,behavior:'instant'});}
   function openUtility(next:'call') {setTypedCall(false);if(view!==next){lastView.current=view;changeView(next);}}
-  function closeUtility() {changeView(lastView.current==='call'?'world':lastView.current);}
+  function closeUtility() {changeView(lastView.current==='call'?'home':lastView.current);}
   function closeProduct() {productRequest.current++;setProductId(null);setProductError('');setProductBusy(false);setComparisonBusy(false);}
   async function hatch() {
     if(busy||hatched)return;
     setHatched(true);
+    if(profile?.journey?.hatched)return;
     await task('A little hello',async()=>{const result=await api<CallResponse>('/api/call',{action:'hatch',requestId:uid()});storeProfile(result.profile);});
   }
   async function makeWorld(text?:string,rebuildId?:string,enterNew=false) {
@@ -139,7 +151,7 @@ export default function JourneyApp() {
       if(enterNew){const added=result.districts.at(-1);if(added){setDistrictId(added.id);setPersonalWords('');changeView('district');}}
     });
   }
-  function completeCall() {changeView('world');if(!districts.length)void makeWorld();}
+  function completeCall() {changeView('home');if(!districts.length)void makeWorld();}
   function enterDistrict(d:District) {setDistrictId(d.id);setRebuild('');setMomentId('');changeView('district');}
   function previewWorld(t:WorldTemplate) {setTemplateId(t.id);setPersonalWords('');changeView('preview');}
   const nextDistrict=district?districts[districts.findIndex(item=>item.id===district.id)+1]:undefined;
@@ -148,7 +160,7 @@ export default function JourneyApp() {
   async function openProduct(id:string,existing?:Verdict) {
     const item=getSku(id);if(!item)return;
     const sequence=++productRequest.current;
-    setComparisonBusy(false);setProductOrigin(existing?'call':'scene');setProductId(id);setPanel('verdict');setReviewId('');setVerdict(existing||null);setProductError('');setCap(item.price);setOptions({watchPrice:true,haggle:false,bundle:true,scheduleDelivery:true});
+    setComparisonBusy(false);setProductOrigin(existing||view==='call'?'call':'scene');setProductId(id);setPanel('verdict');setReviewId('');setVerdict(existing||null);setProductError('');setCap(item.price);setOptions({watchPrice:true,haggle:false,bundle:true,scheduleDelivery:true});
     const savedPlan=profile?.decisions.find(decision=>decision.skuId===id&&!decision.approvedAt)?.delegation;
     if(savedPlan){setCap(savedPlan.budgetCap);setOptions({watchPrice:savedPlan.watchPrice,haggle:savedPlan.haggle,bundle:savedPlan.bundle,scheduleDelivery:savedPlan.scheduleDelivery});}
     if(existing||profile?.owned.some(owned=>owned.skuId===id)){setProductBusy(false);return;}
@@ -196,21 +208,21 @@ export default function JourneyApp() {
   }
 
 
-  return <div className="app-shell journey-shell" data-view={view} data-phase={phase} data-scene-kind={scenicKind} data-scene-setting={scenicContext?.setting} data-modal={productId?'open':'closed'}>
+  return <div className="app-shell journey-shell" data-view={view} data-phase={phase} data-scene-kind={scenicKind} data-scene-setting={scenicContext?.setting} data-modal={productId?'open':'closed'} data-navigation={hasMainNavigation?'main':'onboarding'}>
     <div className="ambient-field" aria-hidden="true"><span className="ambient-orb orb-one"/><span className="ambient-orb orb-two"/><span className="ambient-orb orb-three"/></div><div className="film-grain" aria-hidden="true"/>
     <header className="journey-header">
-      <button className="wordmark" aria-label="Your world" onClick={()=>changeView(profile?.journey?.interviewComplete?'world':'hatch')}><span className="brand-flower"><Glyph name="flower"/></span>COUPI<span className="brand-dot">.</span></button>
+      <button className="wordmark" aria-label="Coopy home" onClick={()=>changeView(hasMainNavigation?'home':'hatch')}><span className="brand-flower"><Glyph name="flower"/></span>COUPI<span className="brand-dot">.</span></button>
       <span className="journey-brand-note">a little someone.<br/>a world that feels like you.</span>
-      <div className="journey-utilities">
-        {profile?.journey?.interviewComplete&&<button aria-label="Your world" className={view==='world'?'current':''} onClick={()=>changeView('world')}><Glyph name="scene"/><span>Your world</span></button>}
+      {!hasMainNavigation&&<div className="journey-utilities">
         <button className={view==='call'?'current':''} onClick={()=>openUtility('call')} aria-label="Call Coopy"><Glyph name="mic"/><span>Call</span><b className="call-presence"/></button>
-      </div>
+      </div>}
+      {hasMainNavigation&&<span className="journey-home-note">your little someone</span>}
     </header>
     <div className="journey-system"><span><i/>{status?.offline?'OFFLINE REPLAY':'COOPY IS HERE'}</span><SystemClock/><span>{profile?.pretend2am?'NIGHT REHEARSAL':'ON YOUR SIDE'}</span></div>
-    <nav className="journey-trail" aria-label="Your journey">{['Meet','Tell your story','Your world','Wander','Your word'].map((label,index)=><span key={label} className={index===step?'active':index<step?'done':''} aria-current={index===step?'step':undefined}><b>{String(index+1).padStart(2,'0')}</b>{label}</span>)}</nav>
+    {!hasMainNavigation&&<nav className="journey-trail" aria-label="Your journey">{['Meet','Tell your story','Your world','Wander','Your word'].map((label,index)=><span key={label} className={index===step?'active':index<step?'done':''} aria-current={index===step?'step':undefined}><b>{String(index+1).padStart(2,'0')}</b>{label}</span>)}</nav>}
 
     <main className={`journey-main journey-${view}`}>
-      {busy&&<div className="busy-banner" role="status"><span className="busy-dot"/>{busy}<span className="shimmer"/></div>}
+      {busy&&<div className="busy-banner" role="status"><span className="busy-dot"/>{busy}{busySeconds>=5&&<span aria-hidden="true"> · {Math.floor(busySeconds/60)}:{String(busySeconds%60).padStart(2,'0')}</span>}<span className="shimmer"/></div>}
       {error&&<div className="error-banner" role="alert"><b>one little pause.</b><p>{error}</p><button aria-label="Dismiss error" onClick={()=>setError('')}><Glyph name="close"/></button></div>}
       {!profile&&!busy&&<div className="empty-state"><Pet/><h2>Let’s reconnect.</h2><Button secondary onClick={()=>location.reload()}>Try again</Button></div>}
 
@@ -221,7 +233,9 @@ export default function JourneyApp() {
         <div className="hatch-world"><span className="hatch-orbit orbit-a"/><span className="hatch-orbit orbit-b"/><HatchDiorama hatched={hatched} onHatch={()=>void hatch()} phase="dawn" fallback={<button className="intro-egg" disabled={hatched||!!busy} onClick={()=>void hatch()} aria-label="Tap to hatch Coopy">{hatched?<Pet size="large"/>:<span className="egg-shape"/>}</button>}/><span className="hatch-coordinates">YOUR WORLD / NOT YET WRITTEN</span></div>
       </section>}
 
-      {profile&&view==='call'&&(profile.journey?.interviewComplete&&!typedCall&&!status?.offline?<LiveCallExperience profile={profile} onProfile={storeProfile} onClose={closeUtility} onType={()=>setTypedCall(true)}/>:<CompanionCall profile={profile} offline={status?.offline} onProfile={storeProfile} onComplete={completeCall} onOpenProduct={(id,v)=>void openProduct(id,v)} onClose={closeUtility}/>)}
+      {profile&&view==='call'&&(profile.journey?.interviewComplete&&!typedCall&&!status?.offline?<LiveCallExperience profile={profile} onProfile={storeProfile} onClose={closeUtility} onType={()=>setTypedCall(true)} onOpenProduct={id=>void openProduct(id)}/>:<CompanionCall profile={profile} offline={status?.offline} onProfile={storeProfile} onComplete={completeCall} onOpenProduct={(id,v)=>void openProduct(id,v)} onClose={closeUtility}/>)}
+
+      {profile&&view==='home'&&<CompanionHome profile={profile} offline={status?.offline} presenter={presenter} initialScenario={homeScenario} onCall={()=>openUtility('call')} onExplore={()=>changeView('world')} onOpenProduct={id=>void openProduct(id)}/>}
 
       {profile&&view==='world'&&<WorldHome districts={districts} archives={archives} phase={phase} busy={!!busy} complete={!!profile.journey?.interviewComplete} command={command} onCommand={setCommand} onCreate={text=>void makeWorld(text,undefined,!!text)} onEnter={enterDistrict} onPreview={previewWorld} onCall={()=>changeView('call')} onArchive={(id,entryId)=>{setArchiveId(id);setArchivedMomentId(entryId);changeView('archive');}}/>}
 
@@ -237,9 +251,9 @@ export default function JourneyApp() {
 
       {profile&&view==='district'&&(district?<section className="district-detail screen-surface">
         <button className="text-button" onClick={()=>changeView('world')}><Glyph name="arrow-left"/> Your world</button>
-        <div className="district-heading"><div><p className="eyebrow orange">{scenicMood?.time} / {scenicMood?.label}</p><h1>{moment?.districtName||district.name}</h1><p>{moment?`a moment kept on ${new Date(moment.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:district.provenance}</p></div><button className="quiet-pill" onClick={()=>changeView('stroll')}><Glyph name="heart"/> walk around <span>optional</span></button></div>
+        <div className="district-heading"><div><p className="eyebrow orange">{districtScene?.blueprint?.atmosphere.timeLabel||scenicMood?.time} / {districtScene?.blueprint?'IMAGINED FROM YOUR STORY':scenicMood?.label}</p><h1>{moment?.districtName||district.name}</h1><p>{moment?`a moment kept on ${new Date(moment.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:district.provenance}</p></div><button className="quiet-pill" onClick={()=>changeView('stroll')}><Glyph name="heart"/> walk around <span>optional</span></button></div>
         {moment&&<div className="moment-return"><span>THEN / YOUR SAVED ROOM<br/>Product details still show the current demo catalog.</span><button onClick={()=>setMomentId('')}>Back to now <Glyph name="arrow-right"/></button></div>}
-        <div className="full-district"><SceneDiorama scene={districtScene!} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={districtScene!} onSelect={id=>void openProduct(id)}/>}/><div className="district-scene-note"><span>Follow a little light. Stay as long as you like.</span><span>{districtScene!.items.length} things to discover · your pace</span></div></div>
+        <div className="full-district"><SceneDiorama scene={districtScene!} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={districtScene!} onSelect={id=>void openProduct(id)}/>}/><div className="district-scene-note"><span>{districtScene!.blueprint?'A place imagined from your words. Follow a light to look closer.':'Follow a little light. Stay as long as you like.'}</span><span>{districtScene!.items.length} things to discover · your pace</span></div></div>
         {moment&&<p className="moment-note">{moment.text}</p>}
         {!moment&&<form className="district-rebuild" onSubmit={e=>{e.preventDefault();void makeWorld(rebuild,district.id);}}><Glyph name="spark"/><input aria-label="Change this district" value={rebuild} onChange={e=>setRebuild(e.target.value)} maxLength={1000} placeholder="Change the feeling. Or tell me what’s missing…"/><Button secondary type="submit" disabled={!!busy||!rebuild.trim()}>Reimagine <Glyph name="arrow-up"/></Button></form>}
         <p className="district-explanation">{districtScene!.explanation}</p>
@@ -252,6 +266,11 @@ export default function JourneyApp() {
       {view!=='stroll'&&<p className="screen-caption"><span className="caption-mark"/>{captions[view]}</p>}
     </main>
     <footer className="journey-footer"><span>COOPY / ON YOUR SIDE</span><Link href="/guided">take the guided day <Glyph name="arrow-up"/></Link><span>SIMULATION — SYNTHETIC CATALOG & ORDERS</span></footer>
+    {hasMainNavigation&&<nav className="journey-bottom-nav" aria-label="Main navigation">
+      <button aria-current={view==='home'?'page':undefined} onClick={()=>changeView('home')}><Glyph name="home"/><span>Home</span></button>
+      <button aria-current={view==='call'?'page':undefined} onClick={()=>openUtility('call')}><Glyph name="mic"/><span>Call</span><i aria-hidden="true"/></button>
+      <button aria-current={['world','district','preview','archive','stroll'].includes(view)?'page':undefined} onClick={()=>changeView('world')}><Glyph name="scene"/><span>Explore</span></button>
+    </nav>}
     {notice&&<div className="toast" role="status">{notice}</div>}
 
     {sku&&profile&&<Modal title={panel==='delegate'?'ASSIGN COOPY':panel==='why'?'HOW I DECIDED':panel==='reviews'?'RAW EVIDENCE · UNFILTERED':panel==='review'?'THE ORIGINAL REVIEW':'A LITTLE CLOSER'} onClose={closeProduct}>

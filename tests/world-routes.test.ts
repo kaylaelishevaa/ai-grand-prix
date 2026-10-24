@@ -1,3 +1,4 @@
+import {fixtureBlueprint} from './fixtures/blueprint';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
@@ -25,7 +26,7 @@ test('world and delegation routes persist, guard approvals, and replay cached ge
       calls++;
       const payload=JSON.parse(String(init?.body)),input=JSON.parse(payload.input[0].content[0].text);
       assert(!input.catalog.some((sku:Json)=>['skinCream','detergent'].includes(sku.id)));
-      const district=(name:string)=>({name,explanation:'For the mornings you described.',sourceMemoryIds:[input.memories[0].id],items:[{skuId:'matcha',oneLiner:'For your matcha.'},{skuId:'mugs',oneLiner:'For your tea.'}]});
+      const district=(name:string)=>({blueprint:fixtureBlueprint(['matcha','mugs']),name,explanation:'For the mornings you described.',sourceMemoryIds:[input.memories[0].id],items:[{skuId:'matcha',oneLiner:'For your matcha.'},{skuId:'mugs',oneLiner:'For your tea.'}]});
       const text=JSON.stringify({districts:[district('Your Mornings'),district('Your Kitchen')]});
       return Response.json({status:'completed',output:[{content:[{type:'output_text',text}]}],usage:{input_tokens:10,output_tokens:10}});
     };

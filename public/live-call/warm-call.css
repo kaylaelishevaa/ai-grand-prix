@@ -29,3 +29,36 @@ body{display:block;padding:0;min-height:100dvh}button,input,a{font-family:var(--
 @keyframes ambient-drift{0%,100%{transform:translate(-2%,-1%) scale(1)}50%{transform:translate(3%,2%) scale(1.06)}}@keyframes coopy-breathe{0%,100%{transform:scale(1,1)}50%{transform:translateY(-3px) scale(1.025,.975)}}@keyframes coopy-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 .catalog-item-actions{display:flex!important;flex-direction:column;gap:7px;flex:0 0 auto!important}.catalog-item-actions>button:last-child{background:none;color:var(--ink);padding:7px 10px}.catalog-item>div:not(.catalog-item-actions){min-width:0}
+/* The shared world catalog keeps its own provenance, outside sourced try-on cards. */
+.world-picks{margin:12px 0;padding:18px 20px;background:#fff8f0;border:1px solid rgba(22,66,74,.08);border-radius:26px;color:#16424a}
+.world-picks[hidden]{display:none}
+.world-picks-kicker,.world-picks-note{font-family:"Space Mono",monospace;font-size:9px;line-height:1.7;letter-spacing:.05em;color:#70817e}
+.world-picks-kicker{margin:0 0 9px}.world-picks-note{margin:10px 0 0}
+#world-picks-list{max-height:260px;overflow:auto}
+.world-pick{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid rgba(22,66,74,.08)}
+.world-pick>div{flex:1;min-width:0}.world-pick strong{display:block;font-weight:500;font-size:14px;line-height:1.35}
+.world-pick span{display:block;margin-top:4px;font-family:Fraunces,serif;font-size:19px}
+.world-pick button{border:0;background:transparent;color:#16424a;font:inherit;font-size:12px;cursor:pointer;white-space:nowrap;padding:10px 0 10px 8px}
+@media(max-width:760px){.phone-app{min-height:0}}
+/* Embedded phone view: the call action and consent fit without a second page of onboarding. */
+@media(max-width:760px) and (max-height:560px){
+  .incoming-screen,.end-screen{padding:12px 20px 14px}
+  .incoming-top .world-return{min-height:32px;font-size:11px}.incoming-tag{font-size:7px}
+  .incoming-person{padding:8px 0;flex:1;justify-content:center}
+  .nori-orbit{width:68px;height:62px;margin:3px 0 10px;padding:0}
+  .incoming-kicker{font-size:7px;line-height:1.4;margin-bottom:6px}
+  .incoming-person h1{font-size:40px;line-height:.98}
+  .incoming-subtitle,.incoming-promise,.incoming-wave{display:none}
+  .incoming-bottom{max-width:360px}.answer-call{min-height:48px;padding:8px 16px;font-size:12px}
+  .answer-icon{width:30px;height:30px}.answer-icon svg{width:19px;height:19px}
+  .decline-call{min-height:30px;margin:2px 0 4px;font-size:10px}
+  .vision-consent{margin-top:6px;font-size:10px;line-height:1.4;gap:8px}.vision-consent input{width:16px;height:16px}
+  .privacy-note{font-size:8px;line-height:1.5;margin-top:6px}
+  .incoming-status{font-size:9px;padding:7px 10px;margin-bottom:8px;line-height:1.4}
+  .call-header{top:12px;left:14px;right:14px;height:40px}.vision-strip,.phone-app[data-focused=true] .vision-strip{top:64px;left:14px;right:14px}
+  .call-feedback{top:100px!important;left:14px;right:14px}.call-side-panel{top:106px;bottom:87px;left:14px;right:14px;gap:10px}
+  .call-footer,.phone-app[data-focused=true] .call-footer{bottom:12px;left:12px;right:12px;gap:6px}
+  .phone-app[data-focused=true] .call-side-panel{bottom:80px;max-height:190px}
+  .transcript{max-height:140px}.world-picks{margin:0;padding:12px 15px;border-radius:24px}#world-picks-list{max-height:175px}
+  .world-picks-note{font-size:8px}.world-pick{padding:9px 0}.world-pick strong{font-size:12px}
+}

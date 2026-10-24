@@ -321,6 +321,22 @@
             if(!Array.isArray(result.products))throw new Error('The product search returned an invalid catalog result.');
             if(this._current(c))this.options.onRecommendations?.(result.products,result.message || 'Products from the Coupang reference catalog.');
           } finally {clearTimeout(timer);c.toolControllers.delete(controller);}
+        } else if(event.name==='search_world_products') {
+          const query=typeof args.query==='string'?args.query.trim().slice(0,300):'';
+          const max_price=args.max_price==null?null:Number(args.max_price);
+          if(!query||max_price!==null&&(!Number.isFinite(max_price)||max_price<0))throw new Error('Use the shopper’s words and a valid explicit budget.');
+          const controller=new AbortController();c.toolControllers.add(controller);const timer=setTimeout(()=>controller.abort(),12000);
+          try {
+            const response=await this.fetch('/api/products/world',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'search',query,max_price}),signal:controller.signal});
+            if(!response.ok)throw new Error('World product search is unavailable.');result=await response.json();
+            if(result.catalog_namespace!=='world-simulation'||!Array.isArray(result.products))throw new Error('The world catalog result is invalid.');
+            if(this._current(c))this.options.onWorldRecommendations?.(result.products,result.message);
+          }finally{clearTimeout(timer);c.toolControllers.delete(controller);}
+        } else if(event.name==='open_world_product') {
+          if(typeof args.sku_id!=='string'||!/^[A-Za-z][A-Za-z0-9-]{0,99}$/.test(args.sku_id))throw new Error('Use an exact world SKU, never a sourced listing ID.');
+          if(!this.options.onWorldProduct)throw new Error('World product details are unavailable on this page.');
+          result=await this.options.onWorldProduct(args.sku_id);
+          if(!result||result.ok!==true)throw new Error(result?.error||'That world product is unavailable.');
         } else if(event.name==='set_tryon') {
           if(!['makeup','clothes','desk','glasses','none'].includes(args.mode))throw new Error('Choose makeup, clothes, desk, glasses, or none.');
           const supported={makeup:['color','opacity'],clothes:['opacity','scale','rotation'],glasses:['opacity','scale','rotation'],desk:['opacity','scale','x','y','rotation'],none:[]}[args.mode];

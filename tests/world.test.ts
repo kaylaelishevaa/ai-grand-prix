@@ -1,3 +1,4 @@
+import {fixtureBlueprint} from './fixtures/blueprint';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createProfile,deleteMemory,eligibleCatalog} from '../lib/profile';
@@ -9,7 +10,7 @@ import {getSku} from '../lib/catalog';
 const now=new Date('2026-10-25T01:00:00.000Z');
 const meta:CallMeta={cached:false,offline:false,model:'fixture',inputTokens:0,outputTokens:0,latencyMs:1,cacheKey:'fixture'};
 function profile(){let value=createProfile('world',now);value=remember(value,{id:'mornings',text:'I make matcha slowly on weekend mornings.',source:'from our first call',confidence:0.9,kind:'call'},now);value.journey={hatched:true,interviewCount:5,interviewComplete:true,nextQuestion:'',districts:[],processedCallIds:[]};return value;}
-const district=(name='Your Mornings')=>({name,explanation:'A place for your morning matcha.',sourceMemoryIds:['memory-1'],items:[{skuId:'matcha',oneLiner:'For your morning matcha.'},{skuId:'mugs',oneLiner:'A pair for your table.'}]});
+const district=(name='Your Mornings')=>({blueprint:fixtureBlueprint(['matcha','mugs']),name,explanation:'A place for your morning matcha.',sourceMemoryIds:['memory-1'],items:[{skuId:'matcha',oneLiner:'For your morning matcha.'},{skuId:'mugs',oneLiner:'A pair for your table.'}]});
 function provider(output:unknown,inputs:unknown[]=[]):typeof structuredCall {
   return (async(request:Parameters<typeof structuredCall>[0])=>{inputs.push(request.input);return{data:request.validate(output),meta};}) as typeof structuredCall;
 }
@@ -72,7 +73,7 @@ test('a new date-night district uses catalog wardrobe and beauty items and persi
   initial.journey!.districts=[{id:'morning-room',name:'Your Mornings',provenance:'from your story',sourceMemoryIds:['mornings'],scene:{name:'Your Mornings',explanation:'Your morning matcha.',kind:'kitchen',items:district().items},createdAt:now.toISOString()}];
   const dateIds=['dateDress','littleHandbag','roseLipstick','softCompact'];
   for(const id of dateIds)assert(getSku(id),`The date product ${id} must exist in the catalog.`);
-  const output={districts:[{name:'Your Getting-Ready Corner',explanation:'A closet and vanity for the date you described.',sourceMemoryIds:['memory-2'],items:dateIds.map(skuId=>({skuId,oneLiner:getSku(skuId)!.description}))}]};
+  const output={districts:[{blueprint:fixtureBlueprint(dateIds),name:'Your Getting-Ready Corner',explanation:'A closet and vanity for the date you described.',sourceMemoryIds:['memory-2'],items:dateIds.map(skuId=>({skuId,oneLiner:getSku(skuId)!.description}))}]};
   const result=await generateWorld(initial,{requestId:'date-room',command:'A date-night closet and makeup corner under ₩100k'},{call:provider(output,inputs)});
   const added=result.districts.at(-1)!;
   assert.equal(result.districts.length,2);assert.equal(added.scene.kind,'dressing');
@@ -90,7 +91,7 @@ test('a new date-night district uses catalog wardrobe and beauty items and persi
 test('closet plus makeup needs both product categories, while explicit no-makeup keeps cosmetics out',async()=>{
   const initial=profile();
   const allowed=eligibleCatalog(initial),memory=[{id:'memory-1',text:'a closet and makeup vanity'}];
-  const allClothes={districts:[{name:'A closet',explanation:'Getting ready.',sourceMemoryIds:['memory-1'],items:[{skuId:'dateDress',oneLiner:'A dress.'},{skuId:'littleHandbag',oneLiner:'A bag.'}]}]};
+  const allClothes={districts:[{blueprint:fixtureBlueprint(['dateDress','littleHandbag']),name:'A closet',explanation:'Getting ready.',sourceMemoryIds:['memory-1'],items:[{skuId:'dateDress',oneLiner:'A dress.'},{skuId:'littleHandbag',oneLiner:'A bag.'}]}]};
   assert.throws(()=>validateWorld(allClothes,allowed,memory,{min:1,max:1},150000,{wardrobe:true,beauty:true}),/both wardrobe and beauty/);
   initial.journey!.districts=[{id:'old',name:'Your Mornings',provenance:'from your story',sourceMemoryIds:['mornings'],scene:{name:'Your Mornings',explanation:'Morning.',items:district().items},createdAt:now.toISOString()}];
   const inputs:unknown[]=[],result=await generateWorld(initial,{requestId:'no-cosmetics',command:'A simple wardrobe, no makeup'},{call:provider(allClothes,inputs)});

@@ -1,2 +1,6 @@
-import JourneyApp from '@/components/JourneyApp';
-export default function Page(){return <JourneyApp/>;}
+import PhoneDemo, {type PhoneDemoQuery} from '@/components/PhoneDemo';
+import '@/components/phone-demo.css';
+
+export default async function Page({searchParams}: {searchParams: Promise<PhoneDemoQuery>}) {
+  return <PhoneDemo query={await searchParams}/>;
+}

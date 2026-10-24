@@ -1,8 +1,8 @@
 # Coopy's five-step journey
 
-The default app follows **hatch → first call → world → district → delegation → approval**. The last two actions stay inside the product verdict sheet: Coopy prepares work and the customer explicitly approves that item. There is no separate Decisions or Head page in the current UI. `/guided` retains the optional day-story and its scripted future chapters.
+A new user starts **hatch → first call**, which generates their worlds. The returning app opens **Home**, then **Explore → world → district → delegation → approval**. `/` frames `/experience` in a 390px phone viewport; `/experience` also runs directly. The last two actions stay inside the product verdict sheet: Coopy prepares work and the customer explicitly approves that item. There is no separate Decisions or Head page in the current UI. `/guided` retains the optional day-story and its scripted future chapters.
 
-The Call and Your world controls remain available throughout the app. The first call leads five story questions using the existing structured conversation. Later calls default to the teammate's Realtime camera and try-on experience; “Type instead” retains structured words/photo calls and the shared verdict. There is no comparison/scan/buy mode selector. See [the teammate integration](teammate-voice.md) for the separate sourced catalog, media consent and offline boundaries.
+After onboarding, Home, Call and Explore stay in the bottom navigation. The original hatch remains the fresh-user entry, and `/?utility=hatch` replays its animation without resetting profile data. The first call leads five story questions using the existing structured conversation. Later calls default to the teammate's Realtime camera and try-on experience; “Type instead” retains structured words/photo calls and the shared verdict. There is no comparison/scan/buy mode selector. See [the teammate integration](teammate-voice.md) for the separate sourced catalog, media consent and offline boundaries.
 
 ## Approval stays with the product
 
@@ -12,9 +12,11 @@ The Head and Decisions navigation entries, utility routes and guided beats are r
 
 ## The returning homepage and its worlds
 
-After the first journey, the default homepage opens on **Your worlds**: the user's personal districts shown as destinations in one connected 3D landscape with their provenance and saved-moment counts. **Worlds to explore** provides curated starting points for other occasions. These starters are authored previews, not popularity rankings or evidence of other users' behavior.
+After the first journey, **Home** shows Coopy’s brief and at most three prioritized local plans or receipts. It does not invent delivery events. The teammate’s `d2f6843` homepage supplies the companion-first composition and prepared scenarios, restyled for this app. `?presenter=1&state=normal|problem|first|quiet|night` exposes explicitly labelled synthetic events with working local track/fix/rate sheets. These scenarios do not mutate the live profile.
 
-Opening a starter shows a full diorama with working product hotspots. **Make it mine** submits its scenario plus the user's optional words to live world generation, using current permitted memory and budget. The result becomes a personal district. Previewing a starter alone does not claim it was personalized or add its scenario to memory.
+**Explore** first shows the whole landscape (up to six places together, including on the phone) before opening an individual district. It starts on **Your worlds**: the user's personal districts shown as destinations in one connected 3D landscape with their provenance and saved-moment counts. **Worlds to explore** provides curated starting points for other occasions. These starters are authored previews, not popularity rankings or evidence of other users' behavior.
+
+Opening a starter shows an authored diorama with working product hotspots. **Make it mine** submits its scenario plus the user's optional words to live world generation, using current permitted memory and budget. The model creates a new geometry blueprint as well as selecting products; the result becomes a personal district. Previewing a starter alone does not claim it was personalized or add its scenario to memory.
 
 The renderer supports four distinct room types: **kitchen, desk, reading and dressing**. Dressing includes a closet and vanity, with recognizable 3D clothes, a bag and cosmetics. Each type has its own room furniture and semantic product positions; scene selection follows explicit context and validated product categories. All four retain the existing WebGL/performance fallback and accessible hotspot behavior.
 
@@ -25,9 +27,9 @@ Every personal district can become a private journal. **Keep this moment** store
 | Capability | What actually happens |
 | --- | --- |
 | Interview and typed calls | The server sends the user's current message, optional photo, permitted profile context and catalog evidence to the configured OpenAI model. Structured results are validated. Browser voice input/output depends on available browser support; text remains available. |
-| Live camera call | After an explicit start, WebRTC sends microphone audio to OpenAI. Camera snapshots require a separate opt-in. Try-on tracking runs in the browser; 18 sourced listing references are separate from synthetic reviews. Offline mode disables this transport and uses the cached typed path. |
+| Live camera call | After an explicit start, WebRTC sends microphone audio to OpenAI. Camera snapshots require a separate opt-in. Try-on tracking runs in the browser; 18 sourced listing references are separate from synthetic reviews. Separate world tools search the same eligible seeded catalog and open its shared verdict sheet after stopping call media. Offline mode disables this transport and uses the cached typed path. |
 | Memory | Sourced memory lines and confidence are saved to the server profile and mirrored in localStorage. Deletion removes the underlying evidence used by subsequent model calls. |
-| World generation | One structured call selects catalog products and names districts from surviving memory. Another request genuinely regenerates a district from new words. “Make it mine” uses this live generation path for a curated starter. |
+| World generation | One structured call selects catalog products and designs each district's terrain, geometry instances, palette, atmosphere and product anchors from surviving memory. Reimagine sends new words through the same generation path. Three.js renders the validated blueprint; it is not model-written executable code or an arbitrary text-to-mesh model. |
 | World journal | Manual notes and server-captured room snapshots persist in the profile. Revisit displays the saved scene; journal text is excluded from model prompts and does not earn XP. |
 | Verdicts | Real model outputs refer only to the local catalog and seeded review corpus. Review IDs open those exact local reviews. |
 | 3D products | Low-poly product meshes are real 3D geometry with accessible hotspot dots. They are not verified manufacturer 3D assets. |
@@ -55,6 +57,7 @@ JSON accepts `{action: "hatch" | "start" | "message", requestId, message?}`. Mul
 - Existing districts with a command: adds one district.
 - `districtId` with a command: rebuilds that district, retaining its identity.
 - Each district contains 2–6 distinct eligible SKU IDs. Owned items and quarantined categories are excluded.
+- Each newly generated district must include a valid `blueprint`. Older saved worlds may omit it and retain their authored renderer. See [the blueprint contract](generated-worlds.md) for geometry bounds, supports, persistence and cache behavior.
 - The scene kind is derived in code after validation: kitchen, desk, reading or dressing. Explicit new commands take precedence over previous naming; an existing kind keeps ordinary renders stable. Negated objects such as “no makeup” do not create dressing intent by themselves.
 - Explicit getting-ready/closet/makeup requests restrict candidates to wardrobe, beauty and contextual home lighting or mirrors. Asking for both a closet/outfit and makeup/vanity requires both wardrobe and beauty products. “No makeup” excludes cosmetic product types. A date dinner stays a kitchen context; a date alone does not establish a dressing-room need.
 - A district's total uses catalog prices and cannot exceed the profile budget or a lower explicitly parsed command cap.

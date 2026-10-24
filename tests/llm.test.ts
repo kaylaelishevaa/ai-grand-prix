@@ -12,6 +12,7 @@ import { AppError, errorResponse } from '../lib/server/errors';
 import { validateVerdict } from '../lib/server/services';
 import { getSku, reviewsForSku } from '../lib/catalog';
 import type { Verdict } from '../lib/types';
+import {BlueprintValidationError,blueprintValidationFeedback} from '../lib/scene-blueprint';
 
 const fakeKey = 'TEST_ONLY_CREDENTIAL_DO_NOT_SEND';
 const model = 'gpt-5-mini';
@@ -156,6 +157,90 @@ test('two invalid outputs stop with the evidence-fallback error and no cache fil
   await assert.rejects(structuredCall(request({ maxAttempts: 99 }), { cache, env, fetch: fetchMock }), expectCode('INVALID_MODEL_OUTPUT'));
   assert.equal(calls, 2, 'untrusted attempts cannot bypass the one-retry cap');
   assert.equal((await readdir(cache.directory)).length, 0);
+});
+
+test('geometry repair receives the previous answer and bounded measured feedback, then caches only its valid replacement',async t=>{
+  const cache=await temporaryCache(t),logs=quietLogs(t),bodies:Record<string,any>[]=[];
+  const invalid={answer:'PRIVATE_MODEL_DESIGN_NOT_FOR_LOGS'};
+  const feedback='1. Node tram-roof rotated bounds x=[-4.1,3.2]; allowed x=[-3.8,3.8].\n2. Products matcha/mugs are 0.2 apart; need at least 0.78 horizontal separation.';
+  const response=await structuredCall(request({
+    operation:'world_districts',maxAttempts:2,retryInstructions:'Preserve the valid composition.',validationFeedback:blueprintValidationFeedback,
+    validate:value=>{const answer=validateAnswer(value);if(answer.answer===invalid.answer)throw new BlueprintValidationError(feedback);return answer;},
+  }),{cache,env,fetch:(async(_url,init)=>{
+    bodies.push(JSON.parse(String(init?.body)));return modelResponse(bodies.length===1?invalid:{answer:'Repaired complete plan'});
+  }) as typeof fetch});
+  assert.equal(bodies.length,2);assert.equal(bodies[0].input.length,1);assert.equal(bodies[1].input.length,3);
+  assert.deepEqual(bodies[1].input[0],bodies[0].input[0]);
+  assert.deepEqual(bodies[1].input[1],{role:'assistant',content:JSON.stringify(invalid)});
+  assert.match(bodies[1].input[2].content,/Preserve valid parts/);
+  assert(bodies[1].input[2].content.includes(feedback));
+  assert(bodies[1].instructions.includes('Preserve the valid composition.'));
+  assert.equal((await cache.get<Answer>(response.meta.cacheKey))?.output.answer,'Repaired complete plan');
+  assert(!JSON.stringify(logs).includes(invalid.answer));assert(!JSON.stringify(logs).includes(fakeKey));
+});
+
+test('incomplete model output gets a concise-output repair instead of a misleading geometry error',async t=>{
+  const cache=await temporaryCache(t);quietLogs(t);const bodies:Record<string,any>[]=[];
+  const result=await structuredCall(request({operation:'scene',maxAttempts:2,validationFeedback:blueprintValidationFeedback}),{cache,env,fetch:(async(_url,init)=>{
+    bodies.push(JSON.parse(String(init?.body)));
+    return bodies.length===1?Response.json({status:'incomplete',output:[{content:[{type:'output_text',text:'{"answer":"partial'}]}]}):modelResponse({answer:'Complete'});
+  }) as typeof fetch});
+  assert.equal(result.data.answer,'Complete');assert.match(bodies[1].instructions,/incomplete or hit its token limit/);
+  assert.match(bodies[1].input[2].content,/fewer concise nodes/);
+});
+
+test('development geometry diagnostic contains only safe operation/time/reason and never the raw answer or profile',async t=>{
+  const root=await mkdtemp(path.join(tmpdir(),'coupi-geometry-diagnostic-'));t.after(()=>rm(root,{recursive:true,force:true}));
+  t.mock.method(process,'cwd',()=>root);const logs=quietLogs(t),cache=new ResponseCache(path.join(root,'responses'));
+  const privateMarker='PRIVATE_PROFILE_AND_OUTPUT';
+  await assert.rejects(()=>structuredCall(request({operation:'scene',input:{privateMarker},maxAttempts:1,validationFeedback:blueprintValidationFeedback,validate:()=>{throw new SyntaxError(privateMarker);}}),{
+    cache,env:{...env,NODE_ENV:'development'},fetch:(async()=>modelResponse({answer:privateMarker})) as typeof fetch,
+  }),expectCode('INVALID_MODEL_OUTPUT'));
+  const diagnostic=JSON.parse(await readFile(path.join(root,'.cache','geometry-validation.json'),'utf8'));
+  assert.deepEqual(Object.keys(diagnostic).sort(),['operation','reason','time']);assert.equal(diagnostic.operation,'scene');
+  assert.match(diagnostic.reason,/complete valid JSON/);assert(Number.isFinite(Date.parse(diagnostic.time)));
+  assert(!JSON.stringify(diagnostic).includes(privateMarker));assert(!JSON.stringify(logs).includes(privateMarker));
+  assert(!JSON.stringify(diagnostic).includes(fakeKey));assert.deepEqual(await readdir(root),['.cache']);
+});
+
+test('provider timeout keeps the 90s default and clamps explicit budgets to 1–180 seconds',async t=>{
+  const cache=await temporaryCache(t);quietLogs(t);
+  const budgets:number[]=[],signals:AbortSignal[]=[];
+  t.mock.method(AbortSignal,'timeout',(milliseconds:number)=>{
+    budgets.push(milliseconds);const signal=new AbortController().signal;signals.push(signal);return signal;
+  });
+  let calls=0;
+  const fetchMock=(async(_url:unknown,init?:RequestInit)=>{assert.equal(init?.signal,signals.at(-1));calls++;return modelResponse({answer:'A bounded request.'});}) as typeof fetch;
+  const cases:[number|undefined,number][]=[[undefined,90000],[180000,180000],[999999,180000],[-5,1000],[500,1000],[120000,120000],[0,90000]];
+  for(const [index,[timeoutMs,expected]] of cases.entries()){
+    await structuredCall(request({timeoutMs,input:{case:index}}),{cache,env,fetch:fetchMock});
+    assert.equal(budgets.at(-1),expected);
+  }
+  assert.equal(calls,cases.length);
+  // A timeout is operational policy, not a new semantic request requiring another model response.
+  const replay=await structuredCall(request({timeoutMs:180000,input:{case:0}}),{cache,env:offlineEnv,fetch:forbiddenFetch({calls:0})});
+  assert.equal(replay.meta.cached,true);assert.equal(budgets.length,cases.length);
+});
+
+test('an aborted timeout stops the provider attempt with a safe error and never caches or retries it',async t=>{
+  const cache=await temporaryCache(t),logs=quietLogs(t);
+  t.mock.method(AbortSignal,'timeout',()=>{
+    const controller=new AbortController();
+    queueMicrotask(()=>controller.abort(new DOMException('private transport diagnostic','TimeoutError')));
+    return controller.signal;
+  });
+  let calls=0;
+  const fetchMock=(async(_url:unknown,init?:RequestInit)=>{
+    calls++;return new Promise<Response>((_resolve,reject)=>{
+      const signal=init!.signal!;if(signal.aborted)reject(signal.reason);
+      else signal.addEventListener('abort',()=>reject(signal.reason),{once:true});
+    });
+  }) as typeof fetch;
+  await assert.rejects(()=>structuredCall(request({timeoutMs:180000,maxAttempts:2}),{cache,env,fetch:fetchMock}),error=>{
+    assert(error instanceof AppError);assert.equal(error.code,'OPENAI_NETWORK_ERROR');assert.match(error.message,/timed out/);
+    assert(!error.message.includes('private transport'));return true;
+  });
+  assert.equal(calls,1);assert.equal((await readdir(cache.directory)).length,0);assert(!JSON.stringify(logs).includes(fakeKey));
 });
 
 for (const [status, apiCode, expectedText] of [

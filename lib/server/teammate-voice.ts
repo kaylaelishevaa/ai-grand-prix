@@ -5,6 +5,7 @@ import type {Profile} from '../types';
 import {AppError,errorResponse} from './errors';
 import {requireLocalOrigin} from './http';
 import {sessionResponse,withSession} from './store';
+import {permittedVoiceWorlds} from './voice-world-products';
 
 /** These are sourced historical references, kept separate from the synthetic review/catalog database. */
 export const teammateCatalog=sourceCatalog;
@@ -16,7 +17,7 @@ export function eligibleTeammateProducts(profile:Profile){
 }
 export function teammateProfileContext(profile:Profile){
   const safe=sanitizeProfileForAI(profile);
-  return {traits:safe.traits,memoryLines:safe.memoryLines.slice(-32),budget:safe.budget};
+  return {traits:safe.traits,memoryLines:safe.memoryLines.slice(-32),budget:safe.budget,worlds:permittedVoiceWorlds(profile)};
 }
 /** Preserve the teammate's raw-SDP protocol while using the app's latest HttpOnly profile session. */
 export async function teammateVoiceRoute(request:Request):Promise<Response>{

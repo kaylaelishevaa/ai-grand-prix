@@ -25,6 +25,15 @@
   }
   window.CoupiCallBridge = {
     getAvailability,
+    async openWorldProduct(skuId) {
+      if (typeof skuId !== 'string' || !/^[A-Za-z][A-Za-z0-9-]{0,99}$/.test(skuId) || window.parent === window) return {ok:false,error:'Open a world product from the main Coopy app.'};
+      const response = await fetch('/api/products/world', {method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'open',skuId}),cache:'no-store'});
+      const result = await response.json();
+      if (!response.ok || result.ok !== true || result.catalog_namespace !== 'world-simulation' || result.skuId !== skuId) return {ok:false,error:typeof result.error==='string'?result.error:'That world product is unavailable.'};
+      stop();
+      post({type:'coupi-live-call-product',namespace:'world-simulation',skuId});
+      return {ok:true,skuId,call_paused:true,purchased:false};
+    },
     attach(handler) { if (typeof handler === 'function') stop = handler; },
     transcript(entry) {
       if (!entry || entry.role !== 'user' || entry.final !== true || typeof entry.text !== 'string' || entry.synthetic === true) return;

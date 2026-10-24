@@ -5,16 +5,21 @@ import {Glyph} from './Glyph';
 import {resolveSceneKind} from '@/lib/scenes';
 import {getSceneMood} from '@/lib/scene-moods';
 import {resolveSceneContext} from '@/lib/world-context';
+import {validatedBlueprintForScene} from '@/lib/blueprint-projection';
+import {GeneratedBlueprintSVG} from './SceneFallback';
 import {atlasLayout} from './diorama/atlas-layout';
 import type {AtlasController,AtlasPlace} from './diorama/atlas-engine';
+import './world-atlas.css';
 
 export type WorldPlace=AtlasPlace&{subtitle:string;moments?:number};
 
 function IllustratedAtlas({places,compact}:{places:WorldPlace[];compact:boolean}) {
   const positions=atlasLayout(places.length,compact);
-  return <svg className="atlas-illustration" viewBox={compact?'0 0 400 610':'0 0 1200 650'} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-    <path d={compact?'M190 110C330 230 75 310 210 440':'M170 400C330 480 320 100 490 180S780 160 900 300 1030 570 780 520'} fill="none" stroke="#c5ad8c" strokeWidth="3" strokeDasharray="2 13" strokeLinecap="round"/>
-    {places.map((place,index)=>{const kind=resolveSceneKind(place.scene),mood=getSceneMood(kind,resolveSceneContext(place.scene)),point=positions[index];return <g key={place.id} transform={`translate(${point.fallbackX/100*(compact?400:1200)} ${point.fallbackY/100*(compact?610:650)-72}) scale(${compact?.9:1.12})`}>
+  const width=compact?400:1200,height=compact?336:650,scale=compact?(places.length<=2?.72:places.length<=4?.5:.4):places.length<=4?1.12:.93;
+  const path=positions.map((p,i)=>`${i?'L':'M'}${p.fallbackX/100*width} ${p.fallbackY/100*height-18}`).join(' ');
+  return <svg className="atlas-illustration" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <path d={path} fill="none" stroke="#c5ad8c" strokeWidth="3" strokeDasharray="2 13" strokeLinecap="round"/>
+    {places.map((place,index)=>{const kind=resolveSceneKind(place.scene),mood=getSceneMood(kind,resolveSceneContext(place.scene)),point=positions[index],blueprint=validatedBlueprintForScene(place.scene);if(blueprint)return <g key={place.id} transform={`translate(${point.fallbackX/100*width} ${point.fallbackY/100*height-60*scale}) scale(${scale})`}><GeneratedBlueprintSVG blueprint={blueprint} x={-165} y={-172} width={330} height={230} thumbnail/></g>;return <g key={place.id} transform={`translate(${point.fallbackX/100*width} ${point.fallbackY/100*height-60*scale}) scale(${scale})`}>
       <ellipse cx="0" cy="37" rx="126" ry="29" fill={mood.accent} opacity=".07"/>
       <path d="M-132 4C-120-40-43-58 1-43 59-68 132-39 134-4 151 29 67 58 12 50-58 64-143 41-132 4Z" fill={mood.palette.floor}/>
       <path d="M-132 4C-103 29-58 39 12 35 89 45 124 24 134-4L134 9C130 45 72 63 12 58-64 72-134 41-132 4Z" fill={mood.palette.wall}/>
@@ -31,6 +36,10 @@ export default function WorldAtlas({places,compact,onEnter}:{places:WorldPlace[]
   const host=useRef<HTMLDivElement>(null),canvas=useRef<HTMLCanvasElement>(null),engine=useRef<AtlasController|null>(null);
   const labels=useRef(new Map<string,HTMLButtonElement>());
   const [mode,setMode]=useState<'loading'|'ready'|'fallback'>('loading');
+  const [highlighted,setHighlighted]=useState<string|null>(null);
+  const selected=places.find(place=>place.id===highlighted)||places[0],selectedIndex=places.indexOf(selected);
+  const selectedMood=selected?getSceneMood(resolveSceneKind(selected.scene),resolveSceneContext(selected.scene)):null;
+  const selectedBlueprint=selected?validatedBlueprintForScene(selected.scene):null;
   const positions=atlasLayout(places.length,compact);
   // Disposing an atlas deliberately loses its WebGL context. A replacement
   // renderer must own a new canvas; label-only profile updates need no rebuild.
@@ -50,7 +59,7 @@ export default function WorldAtlas({places,compact,onEnter}:{places:WorldPlace[]
     }).catch(()=>{if(!cancelled)setMode('fallback');});
     return()=>{cancelled=true;resize?.disconnect();intersection?.disconnect();engine.current?.dispose();engine.current=null;};
   },[renderKey]);
-  return <div className="world-atlas" data-state={mode} data-compact={compact} role="group" aria-label="Your world, a landscape of connected places">
+  return <div className="world-atlas atlas-overview" data-state={mode} data-compact={compact} data-count={places.length} role="group" aria-label="Your world, a landscape of connected places">
     <div ref={host} className="atlas-stage"
       onPointerMove={event=>{if(event.pointerType==='touch')return;const bounds=event.currentTarget.getBoundingClientRect();engine.current?.setPointer((event.clientX-bounds.left)/bounds.width*2-1,(event.clientY-bounds.top)/bounds.height*2-1);}}
       onPointerLeave={()=>engine.current?.setPointer(0,0)}>
@@ -58,13 +67,14 @@ export default function WorldAtlas({places,compact,onEnter}:{places:WorldPlace[]
       <canvas key={renderKey} ref={canvas} className="world-atlas-canvas" aria-hidden="true"/>
       {mode!=='ready'&&<IllustratedAtlas places={places} compact={compact}/>}
       <span className="atlas-coordinate" aria-hidden="true">A FEW PLACES / ONE LITTLE LIFE</span>
-      <div className="atlas-beacons">{places.map((place,index)=>{const mood=getSceneMood(resolveSceneKind(place.scene),resolveSceneContext(place.scene)),point=positions[index];return <button key={place.id} ref={element=>{if(element)labels.current.set(place.id,element);else labels.current.delete(place.id);}} className="atlas-beacon"
-        style={{'--place-accent':mood.accent,...(mode!=='ready'?{left:`${point.fallbackX}%`,top:`${point.fallbackY}%`,transform:'translate(-50%,0)',opacity:1,visibility:'visible'}:{left:0,top:0})} as CSSProperties & {'--place-accent':string}}
-        aria-label={`Enter ${place.name}`} onClick={()=>onEnter(place.id)}><span>{String(index+1).padStart(2,'0')}</span></button>;})}</div>
+      <div className="atlas-beacons">{places.map((place,index)=>{const mood=getSceneMood(resolveSceneKind(place.scene),resolveSceneContext(place.scene)),point=positions[index],blueprint=validatedBlueprintForScene(place.scene);return <button key={place.id} ref={element=>{if(element)labels.current.set(place.id,element);else labels.current.delete(place.id);}} className="atlas-beacon"
+        style={{'--place-accent':blueprint?.palette.accent||mood.accent,...(mode!=='ready'?{left:`${point.fallbackX}%`,top:`${point.fallbackY}%`,transform:'translate(-50%,0)',opacity:1,visibility:'visible'}:{left:0,top:0})} as CSSProperties & {'--place-accent':string}}
+        aria-label={`Enter ${place.name}`} data-highlighted={selected?.id===place.id} onPointerEnter={()=>setHighlighted(place.id)} onFocus={()=>setHighlighted(place.id)} onClick={()=>onEnter(place.id)}><span>{String(index+1).padStart(2,'0')}</span></button>;})}</div>
       <p className="atlas-invitation"><span/><span>follow a feeling. choose a place.</span><Glyph name="arrow-up"/></p>
     </div>
-    <div className="atlas-wayfinding">{places.map((place,index)=>{const mood=getSceneMood(resolveSceneKind(place.scene),resolveSceneContext(place.scene));return <button key={place.id} className="atlas-waypoint" style={{'--place-accent':mood.accent} as CSSProperties} aria-label={`Wander into ${place.name}`} onClick={()=>onEnter(place.id)}>
-      <span className="waypoint-number">{String(index+1).padStart(2,'0')}</span><span className="waypoint-copy"><span className="destination-weather">{mood.time}</span><span className="destination-name">{place.name}<Glyph name="arrow-up"/></span><span className="destination-story">{place.moments?`${place.moments} ${place.moments===1?'moment':'moments'} kept · `:''}{place.subtitle}</span></span>
-    </button>;})}</div>
+    {selected&&selectedMood&&<div className="atlas-wayfinding"><button className="atlas-waypoint" style={{'--place-accent':selectedBlueprint?.palette.accent||selectedMood.accent} as CSSProperties} aria-label={`Wander into ${selected.name}`} onClick={()=>onEnter(selected.id)}>
+      <span className="waypoint-number">{String(selectedIndex+1).padStart(2,'0')}</span><span className="waypoint-copy"><span className="destination-weather">{selectedBlueprint?.atmosphere.timeLabel||selectedMood.time}</span><span className="destination-name">{selected.name}<Glyph name="arrow-up"/></span><span className="destination-story">{selected.subtitle}</span></span>
+    </button><span className="atlas-place-count">{places.length} {places.length===1?'PLACE':'PLACES'}<br/>ONE LITTLE WORLD</span></div>}
+    <nav className="atlas-place-index" aria-label="Districts in the whole world">{places.map((place,index)=><button key={place.id} type="button" onPointerEnter={()=>setHighlighted(place.id)} onFocus={()=>setHighlighted(place.id)} onClick={()=>onEnter(place.id)}><span>{String(index+1).padStart(2,'0')}</span>{place.name}</button>)}</nav>
   </div>;
 }

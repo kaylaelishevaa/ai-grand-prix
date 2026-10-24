@@ -1,3 +1,4 @@
+import {fixtureBlueprint} from './fixtures/blueprint';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resolveSceneContext} from '../lib/world-context';
@@ -53,7 +54,7 @@ test('live world generation persists explicit outdoor context without requiring 
   let instructions='';
   const call=(async(request:Parameters<typeof structuredCall>[0])=>{
     instructions=request.instructions;
-    return {data:request.validate({districts:[{name:'A quiet picnic',explanation:'A little place for a slow afternoon.',sourceMemoryIds:['memory-1'],items:[{skuId:'mugs',oneLiner:'Two stoneware mugs.'},{skuId:'bambooTray',oneLiner:'A simple tray.'}]}]}),meta:{cached:false,offline:false,model:'fixture',inputTokens:0,outputTokens:0,latencyMs:1,cacheKey:'fixture'}};
+    return {data:request.validate({districts:[{blueprint:fixtureBlueprint(['mugs','bambooTray']),name:'A quiet picnic',explanation:'A little place for a slow afternoon.',sourceMemoryIds:['memory-1'],items:[{skuId:'mugs',oneLiner:'Two stoneware mugs.'},{skuId:'bambooTray',oneLiner:'A simple tray.'}]}]}),meta:{cached:false,offline:false,model:'fixture',inputTokens:0,outputTokens:0,latencyMs:1,cacheKey:'fixture'}};
   }) as typeof structuredCall;
   const output=await generateWorld(profile,{requestId:'river',command:'An outdoor picnic by the river under ₩50,000'},{call});
   assert.equal(output.districts.at(-1)!.scene.context!.type,'outdoor');

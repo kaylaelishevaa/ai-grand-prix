@@ -72,7 +72,7 @@ function fixture(t, options = {}) {
   }
   const mic = microphone();
   const audio = {srcObject: null, play: async () => {}, pause() {this.paused = true;}};
-  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], visionStates = [], captures = [];
+  const calls = [], transcripts = [], states = [], recommendations = [], worldRecommendations = [], worldActions = [], tryons = [], actions = [], visionStates = [], captures = [];
   let permissions = 0;
   const voice = new context.window.NookVoiceSession({
     audio, PeerConnection: Peer, greeting: options.greeting,
@@ -91,6 +91,7 @@ function fixture(t, options = {}) {
         return options.sessionResponse || response('v=0\no=answer', 200, {'x-nook-call-id': 'call_mock'});
       }
       if (url.endsWith('/end')) return response({ok: true});
+      if (url.endsWith('/world')) return options.worldSearch ? options.worldSearch(params) : response({ok:true,catalog_namespace:'world-simulation',products:[]});
       if (url.endsWith('/search')) {assert.equal(url, '/api/products/search'); return options.search ? options.search(params) : response({products: [], message: 'No matching catalog products'});}
       throw Error(`Unexpected endpoint ${url}`);
     },
@@ -101,12 +102,14 @@ function fixture(t, options = {}) {
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
     onRecommendations: (products, message) => recommendations.push({products, message}),
+    onWorldRecommendations: (products, message) => worldRecommendations.push({products, message}),
+    onWorldProduct: async skuId => {worldActions.push(skuId);return options.onWorldProduct?.(skuId) || {ok:true,skuId,purchased:false};},
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return {ok:true,action,product_id:product_id || "324548922",purchased:false};},
   });
   t.after(() => voice.end());
   return {
-    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, timerDelays, visionStates, captures,
+    voice, mic, audio, calls, transcripts, states, recommendations, worldRecommendations, worldActions, tryons, peers, actions, timerDelays, visionStates, captures,
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
@@ -209,6 +212,26 @@ test('multiple tools deduplicate across GA events and wait for response.done plu
   await tick();
   assert.equal(countReplies(channel), baseline + 2);
   assert.equal(f.calls.filter(([url]) => url.endsWith('/search')).length, 1);
+});
+
+test('world tools use a separate catalog namespace and exact SKU bridge instead of try-on actions',async t=>{
+  const result={ok:true,catalog_namespace:'world-simulation',products:[{skuId:'socks',name:'Red crew socks',price:6900,catalog_namespace:'world-simulation'}],message:'Synthetic world products.'};
+  const f=fixture(t,{worldSearch:params=>{assert.deepEqual(JSON.parse(params.body),{action:'search',query:'red socks',max_price:8000});return response(result);}});
+  await connect(f);const channel=f.channel;
+  tool(f,'world-search','search_world_products',{query:'red socks',max_price:8000},'r-world');await tick();
+  assert.equal(f.worldRecommendations.length,1);assert.equal(f.recommendations.length,0);assert.equal(f.tryons.length,0);
+  assert.deepEqual(JSON.parse(toolOutputs(channel).find(event=>event.item.call_id==='world-search').item.output),result);
+  tool(f,'world-open','open_world_product',{sku_id:'socks'},'r-world-open');await tick();assert.deepEqual(f.worldActions,['socks']);assert.equal(f.actions.length,0);
+  tool(f,'bad-world-open','open_world_product',{sku_id:'1814412512'},'r-invalid-world');await tick();assert.deepEqual(f.worldActions,['socks']);
+  const failed=JSON.parse(toolOutputs(channel).find(event=>event.item.call_id==='bad-world-open').item.output);assert.equal(failed.ok,false);assert.match(failed.error,/never a sourced listing ID/);
+});
+
+test('world search rejects a sourced result namespace and an excluded product open honestly fails',async t=>{
+  const f=fixture(t,{worldSearch:()=>response({products:[{id:'1814412512'}],catalog_namespace:'sourced-listings'}),onWorldProduct:()=>({ok:false,error:'Already owned or excluded.'})});
+  await connect(f);const channel=f.channel;
+  tool(f,'wrong-world','search_world_products',{query:'lipstick',max_price:null},'r-world-bad');await tick();assert.equal(f.worldRecommendations.length,0);
+  tool(f,'excluded-world','open_world_product',{sku_id:'detergent'},'r-world-blocked');await tick();
+  const failed=JSON.parse(toolOutputs(channel).find(event=>event.item.call_id==='excluded-world').item.output);assert.equal(failed.ok,false);assert.match(failed.error,/excluded/);
 });
 
 test('invalid tools and failed catalog requests return honest failures without product invention', async t => {

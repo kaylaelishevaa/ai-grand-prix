@@ -96,7 +96,7 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.equal(config.audio.input.transcription.model,'gpt-4o-mini-transcribe');
   assert.equal(config.audio.output.voice,'marin');
   assert.equal(config.audio.input.turn_detection.interrupt_response,true);
-  assert.deepEqual(config.tools.map(t=>t.name),['search_products','set_tryon','product_action','look_at_camera']);
+  assert.deepEqual(config.tools.map(t=>t.name),['search_products','set_tryon','product_action','look_at_camera','search_world_products','open_world_product']);
 });
 
 test('upstream errors, invalid answers, and network exceptions never expose raw details', async () => {

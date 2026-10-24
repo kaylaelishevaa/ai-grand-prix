@@ -1,13 +1,51 @@
 'use client';
 
-import {useId,type CSSProperties} from 'react';
+import {useEffect,useId,useMemo,useRef,useState,type CSSProperties} from 'react';
 import {getSku} from '@/lib/catalog';
 import {resolveSceneKind,type SceneKind} from '@/lib/scenes';
 import {resolveSceneContext,type SceneSetting} from '@/lib/world-context';
 import type {SceneResult} from '@/lib/types';
+import type {SceneBlueprint} from '@/lib/scene-blueprint';
+import {blueprintPaintOrder,createBlueprintProjection,validatedBlueprintForScene,type BlueprintProjection} from '@/lib/blueprint-projection';
+import {observeElementSize} from '@/lib/observe-element-size';
 import {productArt} from './art';
 import {Glyph} from './Glyph';
 import './scene-fallback.css';
+
+/** The same validated node transforms become polygons when WebGL is unavailable. */
+export function GeneratedBlueprintSVG({blueprint,width=900,height=620,x=0,y=0,thumbnail=false,className='',projection}: {
+  blueprint:SceneBlueprint;width?:number;height?:number;x?:number;y?:number;thumbnail?:boolean;className?:string;projection?:BlueprintProjection;
+}) {
+  const id='blueprint-'+useId().replace(/[^a-zA-Z0-9-]/g,'');
+  const computed=useMemo(()=>projection||createBlueprintProjection(blueprint,width,height,thumbnail),[projection,blueprint,width,height,thumbnail]);
+  const paintOrder=useMemo(()=>blueprintPaintOrder(computed),[computed]);
+  return <svg className={`generated-blueprint-svg ${className}`} x={x} y={y} width={width} height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true" data-blueprint-projection="true">
+    <defs><radialGradient id={`${id}-shadow`}><stop stopColor="#16424a" stopOpacity=".15"/><stop offset="1" stopColor="#16424a" stopOpacity="0"/></radialGradient></defs>
+    <ellipse cx={width/2} cy={height-20} rx={width*.42} ry={Math.max(8,height*.06)} fill={`url(#${id}-shadow)`}/>
+    <g className="blueprint-terrain">{computed.terrain.map((face,index)=><polygon key={index} points={face.points} fill={face.fill} stroke={face.fill} strokeWidth=".5"/>)}</g>
+    <g className="blueprint-depth-layers">{paintOrder.map((entry,index)=>{
+      if(entry.kind==='face'){const face=entry.face;return <polygon key={`face-${face.nodeId}-${index}`} data-blueprint-node={face.nodeId} points={face.points} fill={face.fill} stroke={face.fill} strokeWidth=".4"/>;}
+      const anchor=entry.product,sku=getSku(anchor.skuId);if(!sku)return null;
+      // This markup is the existing authored catalog art, never model-authored SVG.
+      const illustration=productArt(sku.type,sku.color).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+      return <svg key={sku.id} data-blueprint-product={sku.id} className="blueprint-product-art" x={anchor.x-anchor.width/2} y={anchor.y-anchor.height*.85} width={anchor.width} height={anchor.height} viewBox="0 0 220 180"><g dangerouslySetInnerHTML={{__html:illustration}}/></svg>;
+    })}</g>
+  </svg>;
+}
+
+function BlueprintFallback({scene,blueprint,onSelect}:{scene:SceneResult;blueprint:SceneBlueprint;onSelect:(id:string)=>void}) {
+  const host=useRef<HTMLDivElement>(null);
+  const [size,setSize]=useState({width:900,height:620});
+  useEffect(()=>observeElementSize(host.current,setSize),[]);
+  const projection=useMemo(()=>createBlueprintProjection(blueprint,size.width,size.height),[blueprint,size]);
+  const sky=blueprint.atmosphere.skyTop;
+  const luminance=[1,3,5].reduce((sum,index,i)=>sum+parseInt(sky.slice(index,index+2),16)*[.2126,.7152,.0722][i],0);
+  return <div ref={host} className="scene-room fallback-room scenic-fallback blueprint-fallback" data-generated-world="true" style={{background:`linear-gradient(160deg,${sky},${blueprint.atmosphere.skyBottom})`,'--blueprint-label':luminance>145?'#16424a':'#fff8f0'} as CSSProperties} role="group" aria-label={`${scene.name}, lightweight projection of your generated world`}>
+    <GeneratedBlueprintSVG blueprint={blueprint} width={size.width} height={size.height} projection={projection}/>
+    {projection.products.map(anchor=>{const sku=getSku(anchor.skuId);if(!sku)return null;return <button key={sku.id} type="button" className="blueprint-touchpoint" data-edge={anchor.x<100?'left':anchor.x>size.width-100?'right':'center'} style={{left:`${anchor.x/size.width*100}%`,top:`${anchor.y/size.height*100}%`}} aria-label={`Explore ${sku.name}`} onClick={()=>onSelect(sku.id)}><span className="fallback-product-dot"><Glyph name="plus"/></span><span className="fallback-product-name">{sku.name}</span></button>;})}
+    <span className="fallback-atmosphere-label">{blueprint.atmosphere.timeLabel} · {blueprint.atmosphere.weatherLabel}</span>
+  </div>;
+}
 
 function Tree({x,y,scale=1,color='#6f9174'}:{x:number;y:number;scale?:number;color?:string}) {
   return <g transform={`translate(${x} ${y}) scale(${scale})`}><path d="M0 15Q-7-50 3-117" fill="none" stroke="#6c7966" strokeWidth="9"/><path d="M2-62-32-91M2-40 34-75" stroke="#6c7966" strokeWidth="6"/><ellipse cx="0" cy="-127" rx="53" ry="64" fill={color}/><ellipse cx="-33" cy="-89" rx="39" ry="45" fill={color}/><ellipse cx="34" cy="-91" rx="38" ry="46" fill={color}/><path d="M-20-159q-22 18-20 43" stroke="#fff8f0" strokeOpacity=".18" strokeWidth="9" strokeLinecap="round" fill="none"/></g>;
@@ -87,6 +125,8 @@ const placements:Record<SceneKind,{x:number;y:number;w?:number;h?:number}[]>={
 /** A complete scenic world, including every product action, survives without WebGL. */
 export default function SceneFallback({scene,onSelect}:{scene:SceneResult;onSelect:(id:string)=>void}) {
   const kind=resolveSceneKind(scene),context=resolveSceneContext(scene),id=useId().replaceAll(':','');
+  const blueprint=useMemo(()=>validatedBlueprintForScene(scene),[scene.blueprint,scene.items]);
+  if(blueprint)return <BlueprintFallback scene={scene} blueprint={blueprint} onSelect={onSelect}/>;
   let clothingIndex=0,otherIndex=0;
   return <div className={`scene-room fallback-room scenic-fallback room-${kind} setting-${context.setting}`} data-kind={kind} data-setting={context.setting} role="group" aria-label={`${scene.name}, illustrated world`}>
     <Landscape kind={kind} id={id} setting={context.setting}/>

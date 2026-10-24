@@ -5,6 +5,8 @@ import { buildRoomArchitecture, createRoomGeometries } from './rooms';
 import { getSceneMood } from '../../lib/scene-moods';
 import type { SceneKind } from '../../lib/scenes';
 import type {SceneContext} from '../../lib/world-context';
+import {BLUEPRINT_MATERIALS,type SceneBlueprint} from '../../lib/scene-blueprint';
+import {buildBlueprintArchitecture,createBlueprintGeometryPool,normalizeBlueprintProduct,blueprintCameraFit,type BlueprintArchitecture} from './blueprint';
 
 export type DioramaPhase = 'dawn' | 'noon' | 'store' | 'night';
 export type DioramaItem = { skuId: string; type: string; name: string; imageUrl?: string; color?: string };
@@ -13,6 +15,7 @@ export type DioramaOptions = {
   phase: DioramaPhase;
   kind?: SceneKind;
   context?: SceneContext;
+  blueprint?: SceneBlueprint;
   items: DioramaItem[];
   /** CSS-pixel hotspot anchors; position a DOM card immediately above each point. */
   onProjection: (projections: DioramaProjection[]) => void;
@@ -21,7 +24,7 @@ export type DioramaOptions = {
   reducedMotion?: boolean;
 };
 export type DioramaController = {
-  setItems(items: DioramaItem[], kind?: SceneKind, context?:SceneContext): void;
+  setItems(items: DioramaItem[], kind?: SceneKind, context?:SceneContext, blueprint?:SceneBlueprint): void;
   setPhase(phase: DioramaPhase): void;
   setPointer(x: number, y: number): void;
   resize(width: number, height: number): void;
@@ -31,17 +34,17 @@ export type DioramaController = {
 type Piece = { group: THREE.Group; position: THREE.Vector3; rotation: THREE.Euler };
 type Anchor = { object: THREE.Object3D; projection: DioramaProjection };
 
-/**
- * Small, deliberately constrained scene renderer. Images stay in accessible DOM
- * billboards, so an unavailable product image can never taint the WebGL canvas.
- */
+/** Constrained scene renderer: catalog meshes and validated blueprint geometry
+ * stay local; projected product touchpoints remain accessible DOM controls. */
 export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions): DioramaController | null {
   const resources = new Set<{ dispose(): void }>();
   const own = <T extends { dispose(): void }>(resource: T): T => { resources.add(resource); return resource; };
   let partialRenderer: THREE.WebGLRenderer | undefined;
+  let generatedRoom:BlueprintArchitecture|null=null;
   let cleanup: (() => void) | undefined;
   function releaseResources() {
     // A failed context must not prevent the remaining resources from releasing.
+    generatedRoom?.dispose();generatedRoom=null;
     for (const resource of resources) { try { resource.dispose(); } catch { /* continue cleanup */ } }
     resources.clear();
     try { partialRenderer?.dispose(); } catch { /* context may already be gone */ }
@@ -69,6 +72,8 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     scene.add(hemisphere, sun);
 
     const geometries = createRoomGeometries(own);
+    const blueprintGeometries=createBlueprintGeometryPool(geometries,own);
+    const blueprintPaint=Object.fromEntries(BLUEPRINT_MATERIALS.map(key=>[key,own(new THREE.MeshLambertMaterial({color:'#fff8f0',flatShading:true,side:THREE.DoubleSide}))])) as Record<(typeof BLUEPRINT_MATERIALS)[number],THREE.MeshLambertMaterial>;
     const materials = {
       paper: own(new THREE.MeshLambertMaterial({ color: '#fff8f0', flatShading: true })),
       floor: own(new THREE.MeshLambertMaterial({ color: '#e9ddc8', flatShading: true })),
@@ -135,13 +140,18 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     let currentKind: SceneKind = options.kind || 'kitchen';
     let currentPhase = options.phase;
     let currentContext=options.context;
+    let currentBlueprint=options.blueprint;
+    let pendingBlueprint:SceneBlueprint|undefined;
+    let generatedBounds:THREE.Box3|null=null;
     let pendingContext:SceneContext|undefined;
     let pendingKind: SceneKind | null = null;
     let furnitureCount = 0;
     function buildRoom(kind: SceneKind) {
+      generatedRoom?.dispose();generatedRoom=null;
       room.clear();
       pieces.length = 0;
-      buildRoomArchitecture(kind, { piece, mesh, blob },currentContext);
+      if(currentBlueprint)generatedRoom=buildBlueprintArchitecture(currentBlueprint,{piece,blob},blueprintGeometries,key=>blueprintPaint[key]);
+      else buildRoomArchitecture(kind, { piece, mesh, blob },currentContext);
       // Builders may rotate a whole window or furniture group after creating it.
       for (const part of pieces) part.rotation.copy(part.group.rotation);
       furnitureCount = pieces.length;
@@ -186,10 +196,11 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     const rain=new THREE.LineSegments(rainGeometry,rainMaterial);rain.frustumCulled=false;scene.add(rain);
     function setAtmosphere(){
       const mood=getSceneMood(currentKind,currentContext);
-      rain.visible=mood.atmosphere==='rain';dust.visible=!rain.visible;
+      rain.visible=currentBlueprint?/\b(rain|rainy|drizzle|showers)\b/i.test(currentBlueprint.atmosphere.weatherLabel):mood.atmosphere==='rain';dust.visible=!rain.visible;
       dustMaterial.color.set(mood.atmosphere==='fireflies'?'#FFE2A5':mood.atmosphere==='paper'?'#FFFFEE':'#E9C46B');
       dustMaterial.size=mood.atmosphere==='fireflies'?.045:mood.atmosphere==='paper'?.035:.027;
       dustMaterial.opacity=mood.atmosphere==='fireflies'?.75:.45;
+      if(currentBlueprint){dustMaterial.color.set(currentBlueprint.atmosphere.lightColor);dustMaterial.size=.028;dustMaterial.opacity=.4;rainMaterial.color.set(currentBlueprint.atmosphere.skyTop);}
     }
     function animateAtmosphere(_delta:number){
       const t=reducedMotion?0:clock;
@@ -213,9 +224,9 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
         const motion=part.group.userData.motion;
         if(!motion)continue;
         const offset=part.position.x+part.position.z;
-        if(motion==='tree'||motion==='leaf'||motion==='curtain')part.group.rotation.z=part.rotation.z+Math.sin(t*.7+offset)*.012;
+        if(motion==='tree'||motion==='leaf'||motion==='curtain'||motion==='sway')part.group.rotation.z=part.rotation.z+Math.sin(t*.7+offset)*.012;
         else if(motion==='lantern')part.group.rotation.z=part.rotation.z+Math.sin(t*.9+offset)*.045;
-        else if(motion==='paper')part.group.position.y=part.position.y+Math.sin(t*.7+offset)*.055;
+        else if(motion==='paper'||motion==='float')part.group.position.y=part.position.y+Math.sin(t*.7+offset)*.055;
         else if(motion==='water')part.group.scale.set(1+Math.sin(t*.8)*.012,1,1+Math.cos(t*.8)*.008);
       }
     }
@@ -226,46 +237,54 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       pieces.splice(furnitureCount);
       const slots = assignRoomSlots(items, currentKind);
       anchors = items.map((item, index) => {
-        const slot = slots[index];
+        const slot = slots[index],generatedAnchor=generatedRoom?.anchors.get(item.skuId);
+        if(currentBlueprint&&!generatedAnchor)throw new Error('Generated scene is missing a validated product anchor.');
         const product = productLibrary.build(item);
-        product.scale.setScalar(slot.scale ?? 1);
+        const generatedSize=generatedAnchor?normalizeBlueprintProduct(product,generatedAnchor):undefined;
+        if(!generatedAnchor)product.scale.setScalar(slot.scale ?? 1);
         // A wrapper keeps product proportions separate from the assembly spring.
         const model = new THREE.Group();
         model.name = `placed:${item.skuId}`;
         model.add(product);
         const surfaces: Record<string, number> = { counter: 1.165, hook: .56, 'table-left': 1.002, 'table-right': 1.002, shelf: 1.672, sideboard: .825 };
         productBounds.setFromObject(product);
-        const top = productBounds.max.y;
-        const surface = slot.hangAt !== undefined ? slot.hangAt - top : slot.surface ?? surfaces[slot.key] ?? slot.y;
-        model.position.set(slot.x, surface, slot.z);
+        const top = generatedSize?.height??productBounds.max.y;
+        const surface = generatedAnchor?.y??(slot.hangAt !== undefined ? slot.hangAt - top : slot.surface ?? surfaces[slot.key] ?? slot.y);
+        model.position.set(generatedAnchor?.x??slot.x,surface,generatedAnchor?.z??slot.z);
         room.add(model);
         productGroups.push(model);
         pieces.push({ group: model, position: model.position.clone(), rotation: model.rotation.clone() });
         const object = new THREE.Object3D();
         object.position.set(0, top + .13, 0);
         model.add(object);
-        if (item.type !== 'apron' && item.type !== 'towel' && slot.hangAt === undefined) {
+        if (generatedAnchor||(item.type !== 'apron' && item.type !== 'towel' && slot.hangAt === undefined)) {
           const contact = new THREE.Mesh(geometries.plane, shadowMaterial);
           contact.rotation.x = -Math.PI / 2;
           contact.position.y = .006;
-          const footprint = slot.scale ?? 1;
+          const footprint = generatedSize?generatedSize.radius*2:slot.scale??1;
           contact.scale.set(.95 * footprint, .8 * footprint, 1);
           model.add(contact);
         }
         return { object, projection: { skuId: item.skuId, x: 0, y: 0, scale: 1, visible: false, opacity: 0 } };
       });
       projections = anchors.map(anchor => anchor.projection);
+      room.updateMatrixWorld(true);
+      generatedBounds=currentBlueprint?new THREE.Box3().setFromObject(room):null;
+      if(!currentBlueprint)target.set(0,1.15,0);
+      if(width>1&&height>1)resize(width,height);
       setPhase(currentPhase);
     }
 
     function setPhase(phase: DioramaPhase) {
       currentPhase=phase;
       const mood=getSceneMood(currentKind,currentContext),night=phase==='night';
-      hemisphere.color.set(mood.sky);
-      hemisphere.groundColor.set(mood.ground);
-      hemisphere.intensity=night?1.35:currentKind==='reading'?1.7:2.15;
-      sun.color.set(night?'#E6BC9F':mood.key);
-      sun.intensity=night?1.35:mood.keyIntensity;
+      const light=currentBlueprint?.atmosphere;
+      hemisphere.color.set(light?.skyTop??mood.sky);
+      hemisphere.groundColor.set(light?.skyBottom??mood.ground);
+      hemisphere.intensity=light?light.intensity*(night?.8:1.25):night?1.35:currentKind==='reading'?1.7:2.15;
+      sun.color.set(light?.lightColor??(night?'#E6BC9F':mood.key));
+      sun.intensity=light?light.intensity*(night?.8:1.35):night?1.35:mood.keyIntensity;
+      if(currentBlueprint)for(const key of BLUEPRINT_MATERIALS)blueprintPaint[key].color.set(currentBlueprint.palette[key]);
       for(const [key,color] of Object.entries(mood.palette))materials[key as keyof typeof materials].color.set(color);
       materials.ray.opacity=currentKind==='reading'?.09:.1;
       renderer.toneMappingExposure=currentKind==='reading'?1.03:1.09;
@@ -278,7 +297,9 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       height = Math.max(1, nextHeight);
       renderer.setSize(width, height, false);
       const aspect = width / height;
-      const viewHeight = Math.max(6.3, 8.6 / aspect);
+      const fit=generatedBounds?blueprintCameraFit(generatedBounds,aspect):undefined;
+      if(fit)target.copy(fit.target);
+      const viewHeight = fit?.height??Math.max(6.3, 8.6 / aspect);
       camera.left = -viewHeight * aspect / 2;
       camera.right = viewHeight * aspect / 2;
       camera.top = viewHeight / 2;
@@ -297,9 +318,10 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     }
 
     function applyPendingRoom() {
-      if (pendingKind !== null && (pendingKind !== currentKind||JSON.stringify(pendingContext)!==JSON.stringify(currentContext))) {
+      if (pendingKind !== null && (pendingKind !== currentKind||JSON.stringify(pendingContext)!==JSON.stringify(currentContext)||JSON.stringify(pendingBlueprint)!==JSON.stringify(currentBlueprint))) {
         currentKind = pendingKind;
         currentContext=pendingContext;
+        currentBlueprint=pendingBlueprint;
         buildRoom(currentKind);
         productGroups = [];
       }
@@ -427,7 +449,7 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       const yaw = Math.PI / 4 + orbit.yaw;
       const pitch = Math.atan(1 / Math.sqrt(2)) + orbit.pitch;
       const radius = 12;
-      camera.position.set(Math.sin(yaw) * Math.cos(pitch) * radius, target.y + Math.sin(pitch) * radius, Math.cos(yaw) * Math.cos(pitch) * radius);
+      camera.position.set(target.x+Math.sin(yaw) * Math.cos(pitch) * radius, target.y + Math.sin(pitch) * radius, target.z+Math.cos(yaw) * Math.cos(pitch) * radius);
       camera.lookAt(target);
       camera.updateMatrixWorld();
       room.position.y = reducedMotion ? 0 : Math.sin(clock * 0.7) * 0.025;
@@ -457,11 +479,12 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     animationFrame = requestAnimationFrame(frame);
 
     return {
-      setItems(items, kind = currentKind, context=currentContext) {
+      setItems(items, kind = currentKind, context=currentContext, blueprint?:SceneBlueprint) {
         if (disposed) return;
         pendingItems = items.slice(0, 6);
         pendingKind = kind;
         pendingContext=context;
+        pendingBlueprint=blueprint;
         restorePieces();
         firstAssembly = false;
         swapped = false;

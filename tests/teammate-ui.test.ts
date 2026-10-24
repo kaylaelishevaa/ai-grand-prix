@@ -61,6 +61,34 @@ test('camera sharing follows consent, pause/resume, camera-off and end while loc
   f.nodes.get('end-call').onclick();f.visionTick();assert.equal(f.voice.images.length,2);
 });
 
+test('world product open rechecks the server and stops camera/microphone before the exact parent event',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const requests=[];
+  f.context.fetch=async(url,init)=>{requests.push({url,body:JSON.parse(init.body)});return{ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'socks'})};};
+  f.context.window.parent.postMessage=(data,target)=>{if(data.type==='coupi-live-call-product'){assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);}f.messages.push({data,target});};
+  const result=await f.voice.opts.onWorldProduct('socks');assert.equal(result.ok,true);
+  assert.deepEqual(requests,[{url:'/api/products/world',body:{action:'open',skuId:'socks'}}]);
+  const event=f.messages.find(message=>message.data.type==='coupi-live-call-product');
+  assert.deepEqual(JSON.parse(JSON.stringify(event)),{data:{type:'coupi-live-call-product',namespace:'world-simulation',skuId:'socks'},target:'https://coupi.test'});
+  assert.equal(f.store.cart.size,0);assert(!f.store.catalog.has('socks'));
+});
+
+test('excluded world products do not navigate or stop the active call, and numeric source IDs never bridge',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();let requests=0;
+  f.context.fetch=async()=>{requests++;return{ok:true,json:async()=>({ok:false,error:'Already owned or excluded.'})};};
+  assert.equal((await f.voice.opts.onWorldProduct('detergent')).ok,false);assert.equal(f.camera.running,true);assert(f.voice.call);
+  assert.equal((await f.voice.opts.onWorldProduct('1814412512')).ok,false);assert.equal(requests,1);
+  assert(!f.messages.some(message=>message.data.type==='coupi-live-call-product'));
+});
+
+test('world result rows retain their simulation namespace and Details opens the shared evidence flow',async t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();
+  f.voice.opts.onWorldRecommendations([{skuId:'socks',name:'Red socks',price:6900,catalog_namespace:'world-simulation'},{id:catalog[0].id,name:'Source listing',catalog_namespace:'sourced-listings'}]);
+  assert.equal(f.nodes.get('world-picks').hidden,false);assert.equal(f.nodes.get('product-zone').hidden,true);assert.equal(f.nodes.get('world-picks-list').children.length,1);
+  const row=f.nodes.get('world-picks-list').children[0];assert.equal(row.children[0].children[0].textContent,'Red socks');assert.equal(row.children[1].textContent,'Details ↗');
+  f.context.fetch=async()=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'socks'})});await row.children[1].onclick();
+  assert(f.messages.some(message=>message.data.type==='coupi-live-call-product'&&message.data.skuId==='socks'));assert.equal(f.voiceStarts,0);assert.equal(f.cameraStarts,0);
+});
+
 test('camera opt-out and hidden page never share a frame',async t=>{
   const f=fixture(t);f.nodes.get('vision-consent').checked=false;await f.nodes.get('answer-call').onclick();
   f.visionTick();assert.equal(f.camera.running,true);assert.equal(f.voice.images.length,0);

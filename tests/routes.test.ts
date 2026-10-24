@@ -1,3 +1,4 @@
+import {fixtureBlueprint} from './fixtures/blueprint';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
@@ -70,7 +71,7 @@ async function fixture(run: (context: { root: string; calls: CapturedCall[]; bro
       assert(input.tally['kitchen:vibe:warm-neutrals'] > 0);
       output = { lines: [{ text: 'Prefers warm neutrals in the kitchen', traitKeys: ['kitchen:vibe:warm-neutrals'] }] };
     } else if (operation === 'scene') {
-      output = { name: 'A quieter kitchen', explanation: 'Five catalog picks with a total of ₩95,500.', items: ['kettleAlt', 'glass', 'cottonApron', 'bambooTray', 'miniSpeaker'].map((skuId) => ({ skuId, oneLiner: 'A simple fit for your quieter kitchen.' })) };
+      output = { blueprint:fixtureBlueprint(['kettleAlt', 'glass', 'cottonApron', 'bambooTray', 'miniSpeaker']), name: 'A quieter kitchen', explanation: 'Five catalog picks with a total of ₩95,500.', items: ['kettleAlt', 'glass', 'cottonApron', 'bambooTray', 'miniSpeaker'].map((skuId) => ({ skuId, oneLiner: 'A simple fit for your quieter kitchen.' })) };
     } else if (operation === 'ask_verdict') {
       askAttempt++;
       if (askMode === 'clarify') {

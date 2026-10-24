@@ -6,9 +6,9 @@ import {buildRoomArchitecture,createRoomGeometries,type RoomKit} from '../compon
 import type {SceneKind} from '../lib/scenes';
 
 test('atlas places use one legible journey with bounded pagination layouts',()=>{
-  for(const compact of [false,true])for(const count of [1,2,3,4,12]){
+  for(const compact of [false,true])for(const count of [0,1,2,3,4,5,6,12]){
     const layout=atlasLayout(count,compact);
-    assert.equal(layout.length,Math.min(count,compact?2:4));
+    assert.equal(layout.length,Math.min(count,6));
     assert.equal(new Set(layout.map(p=>`${p.x}:${p.z}`)).size,layout.length);
     assert(layout.every(p=>Number.isFinite(p.x+p.z+p.scale)&&p.scale>0));
     if(count===1)assert.equal(layout[0].x+layout[0].z,0);
@@ -20,8 +20,8 @@ test('scenic geometry fits the atlas camera at desktop and phone widths',()=>{
   const geometries=createRoomGeometries(own),material=own(new THREE.MeshBasicMaterial());
   const kinds:SceneKind[]=['kitchen','dressing','reading','desk'];
   try{
-    for(const [width,height,compact] of [[1320,600,false],[800,540,false],[390,610,true]] as const){
-      const layout=atlasLayout(compact?2:4,compact),aspect=width/height,span=atlasCameraSpan(layout.length,compact,aspect);
+    for(const [width,height,compact] of [[1320,600,false],[800,540,false],[390,318,true]] as const){
+      const layout=atlasLayout(6,compact),aspect=width/height,span=atlasCameraSpan(layout.length,compact,aspect);
       const camera=new THREE.OrthographicCamera(-span*aspect/2,span*aspect/2,span/2,-span/2,.1,80);
       for(const pointer of [-1,0,1]){
         const yaw=Math.PI/4+pointer*.054,pitch=.65+pointer*.025;
@@ -29,7 +29,7 @@ test('scenic geometry fits the atlas camera at desktop and phone widths',()=>{
         layout.forEach((position,index)=>{
           const scene=new THREE.Group();scene.position.set(position.x,position.y,position.z);scene.scale.setScalar(position.scale);
           const kit:RoomKit={piece(name,x=0,y=0,z=0){const group=new THREE.Group();group.name=name;group.position.set(x,y,z);scene.add(group);return group;},mesh(parent,geometry,_material,x,y,z,sx,sy,sz){const mesh=new THREE.Mesh(geometries[geometry],material);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);parent.add(mesh);return mesh;},blob(){}};
-          buildRoomArchitecture(kinds[index],kit);scene.updateMatrixWorld();
+          buildRoomArchitecture(kinds[index%kinds.length],kit);scene.updateMatrixWorld();
           scene.traverse(object=>{if(!(object instanceof THREE.Mesh))return;const positions=object.geometry.getAttribute('position');for(let v=0;v<positions.count;v+=Math.max(1,Math.floor(positions.count/16))){const point=new THREE.Vector3().fromBufferAttribute(positions,v).applyMatrix4(object.matrixWorld).project(camera);assert(Math.abs(point.x)<.98,`${width}px scene ${index}: x ${point.x}`);assert(point.y<.98&&point.y>-.98,`${width}px scene ${index}: y ${point.y}`);}});
         });
       }

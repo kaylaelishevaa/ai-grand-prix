@@ -54,7 +54,7 @@
   }
   function shareSnapshot(reason='interval'){if(!visionEnabled())return false;const frame=snapshots.capture(reason);return frame?voice.sendCameraSnapshot(frame):false;}
 
-  const hands=new window.NookHandGestures({video:$('live-video'),getMirror:()=>camera.options.mirror,isEnabled:()=>handsWanted&&camera.running&&phase==='active'&&!!store.current&&!decisionBusy&&!$('details-dialog').open&&!$('cart-dialog').open&&!$('catalog-dialog').open,
+  const hands=new window.NookHandGestures({video:$('live-video'),getMirror:()=>camera.options.mirror,isEnabled:()=>handsWanted&&camera.running&&phase==='active'&&!!store.current&&$('world-picks').hidden&&!decisionBusy&&!$('details-dialog').open&&!$('cart-dialog').open&&!$('catalog-dialog').open,
     onSwipe:direction=>decide(direction),onStatus:(message,kind)=>{text('gesture-status',kind==='error'?'Hand tracking unavailable · swipe the card':hands.running?'Wave or swipe: ← skip · save →':'Preparing hand swipes…');}});
   async function startHands(){if(!handsWanted||!camera.running||!store.current||phase!=='active'||hands.running||gestureStarting)return;gestureStarting=true;try{await hands.start();}finally{gestureStarting=false;handUI();}}
   function handUI(){const active=hands.running&&handsWanted;$('gesture-toggle').setAttribute('aria-pressed',String(active));$('gesture-toggle').setAttribute('aria-label',active?'Disable hand swipes':'Enable hand swipes');$('gesture-toggle').classList.toggle('is-off',!active);}
@@ -63,6 +63,8 @@
   voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:'Hi, I’m Coopy. How can I help you today?',getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
     onTranscript:transcript,onRecommendations:(list,message)=>recommend(list,message),
+    onWorldRecommendations:(list,message)=>worldRecommendations(list,message),
+    onWorldProduct:skuId=>bridge.openWorldProduct(skuId),
     onTryon:async(next,options)=>{
       const token=generation;let target=trying;
       if(next==='none'){await setMode('none');return {product_id:null,preview_kind:null};}
@@ -113,7 +115,22 @@
   }
   function renderCard(){const p=store.current;show('product-zone',!!p);if(!p){stopHands();sync();return;}
     const img=$('product-image');img.hidden=!p.image;img.removeAttribute('src');if(p.image){img.src=p.image;img.alt=p.name;img.onerror=()=>{img.hidden=true;};}text('product-title',p.name);text('product-category',typeLabels[p.productType]||({makeup:'Beauty',clothes:'Style',desk:'Your space'})[p.category]);text('product-price',p.price?'₩'+p.price.toLocaleString('en-US')+' · reference':'See price on Coupang');text('product-position',`${Math.max(1,displayedTotal-store.queue.length+1)} / ${displayedTotal}`);$('product-card').style.transform='';$('product-card').style.opacity='';$('product-card').classList.remove('accept','reject');text('swipe-feedback','');show('swipe-feedback',false);sync();startHands();}
-  function recommend(list,message){if(!['connecting','active','browse'].includes(phase))return;store.recommend(list);displayedTotal=store.queue.length;hands.reset();renderCard();if(!store.current)toast('No match in this demo catalog. Ask Coopy for another idea.');}
+  function recommend(list,message){if(!['connecting','active','browse'].includes(phase))return;show('world-picks',false);store.recommend(list);displayedTotal=store.queue.length;hands.reset();renderCard();if(!store.current)toast('No match in this demo catalog. Ask Coopy for another idea.');}
+  function worldRecommendations(list,message){
+    if(!['connecting','active','browse'].includes(phase))return;
+    const root=$('world-picks-list');root.replaceChildren();
+    for(const product of list.slice(0,4)){
+      if(product.catalog_namespace!=='world-simulation'||typeof product.skuId!=='string'||typeof product.name!=='string')continue;
+      const row=document.createElement('div');row.className='world-pick';
+      const copy=document.createElement('div'),name=document.createElement('strong'),price=document.createElement('span');
+      name.textContent=product.name;price.textContent=Number.isFinite(product.price)?'₩'+product.price.toLocaleString('en-US'):'';copy.append(name,price);
+      const button=document.createElement('button');button.textContent='Details ↗';button.onclick=async()=>{button.disabled=true;try{const result=await bridge.openWorldProduct(product.skuId);if(!result.ok)notice(result.error);}catch{notice('That product could not open. Please try again.');}finally{button.disabled=false;}};
+      row.append(copy,button);root.append(row);
+    }
+    show('world-picks',root.children.length>0);show('product-zone',false);show('product-empty',false);
+    if(!root.children.length)toast(message||'No match in your world catalog.');
+    hands.reset();
+  }
   function updateBag(){text('cart-count',String(store.cart.size));$('cart-button').setAttribute('aria-label',`Saved this call, ${store.cart.size} items`);sync();}
   async function decide(direction){if(decisionBusy||!store.current)return;decisionBusy=true;const token=generation;const p=store.current;const card=$('product-card');card.classList.add(direction==='right'?'accept':'reject');text('swipe-feedback',direction==='right'?'SAVED':'SKIP');show('swipe-feedback',true);card.style.transform=`translateX(${direction==='right'?110:-110}%) rotate(${direction==='right'?12:-12}deg)`;card.style.opacity='0';await new Promise(resolve=>setTimeout(resolve,220));if(token!==generation)return;if(store.current?.id===p.id){store.decide(direction);updateBag();toast(direction==='right'?'Saved for this call':'Skipped');}decisionBusy=false;hands.reset();renderCard();}
   function productDetails(p=store.current){p=trusted(p);if(!p)return;store.detailProduct=p;text('detail-title',p.name);const img=$('detail-image');img.hidden=!p.image;if(p.image){img.src=p.image;img.alt=p.name;}const attributes=(p.verifiedAttributes||[]).slice(0,4).join(' · ');text('detail-body',(attributes?attributes+'. ':'')+(p.price?'Historical reference: ₩'+p.price.toLocaleString('en-US')+'. ':'')+'Check current price and options on Coupang.');text('detail-preview-note',p.category==='makeup'?'Lip colour is estimated from this listing photo; lighting and finish vary.':'The preview uses this product photo. Placement and fit are approximate.');$('detail-link').href=p.url;window.CoupiReferenceComparison.render(p,[...store.catalog.values()],chosen=>{store.queue=[chosen,...store.queue.filter(item=>item.id!==chosen.id)];displayedTotal=Math.max(displayedTotal,store.queue.length);renderCard();productDetails(chosen);toast('a new pick. still yours to decide.');});if(!$('details-dialog').open)$('details-dialog').showModal();hands.reset();}
