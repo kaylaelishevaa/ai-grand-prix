@@ -1,0 +1,257 @@
+/* Coupi's call uses the shared shell palette; camera and try-on behavior stay intact. */
+:root {
+  color-scheme: light;
+  --forest: #2d7879;
+  --cream: #173d43;
+  --sage: #d5f0f3;
+  --coral: #dc746e;
+  --font: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --call-ink: #173d43;
+  --call-teal: #2d7879;
+  --call-muted: #59787d;
+  --call-line: #cfe7e9;
+  --call-glass: rgb(249 254 254 / 92%);
+}
+
+.coupi-call-page { color: var(--call-ink); background: #e7f3f5; }
+.coupi-call-page button:focus-visible,
+.coupi-call-page a:focus-visible,
+.coupi-call-page input:focus-visible { outline-color: #378b91; }
+.coupi-call-page .phone-app { background: #e9f8fa; box-shadow: 0 22px 64px -38px #438d9638; }
+.coupi-call-page .wordmark { color: var(--call-teal); letter-spacing: -1.4px; }
+.coupi-call-page .wordmark .brand-dot { color: #80c9ce; font-weight: 700; }
+
+/* A quiet incoming-call screen, with room for the three-page navigation. */
+.incoming-screen,
+.end-screen {
+  color: var(--call-ink);
+  background: linear-gradient(155deg, #f3fcfc 0%, #e9f8fa 55%, #def2f5 100%);
+  padding-bottom: calc(var(--nav-height, 72px) + 20px + env(safe-area-inset-bottom));
+}
+.incoming-tag { color: var(--call-muted); font-size: 10px; letter-spacing: 0; }
+.incoming-tag > span { background: #61a6a6; }
+.incoming-person { padding: 16px 0 26px; }
+.nori-orbit {
+  width: 178px;
+  height: 178px;
+  padding: 8px;
+  margin: 6px 0 24px;
+  border: 1px solid #c6e4e7;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+.nori-orb {
+  overflow: hidden;
+  background: #f4f1df;
+  box-shadow: 0 7px 24px #285d6910;
+  animation: none;
+}
+.coupi-portrait,
+.coupi-avatar { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.orbit-dot { display: none; }
+.incoming-kicker { color: #527d83; font-size: 9px; letter-spacing: 1.4px; }
+.incoming-person h1 {
+  font-family: var(--font);
+  font-size: 45px;
+  line-height: 1.08;
+  font-weight: 650;
+  letter-spacing: -1.8px;
+}
+.incoming-subtitle { color: var(--call-muted); font-size: 13px; margin-top: 8px; }
+.incoming-wave { display: none; }
+.incoming-promise {
+  color: var(--call-ink);
+  font-family: var(--font);
+  font-size: 25px;
+  line-height: 1.25;
+  font-weight: 550;
+  letter-spacing: -.7px;
+  margin-bottom: 19px;
+}
+.answer-call {
+  color: white;
+  background: var(--call-teal);
+  border: 1px solid #2a7071;
+  border-radius: 19px;
+  box-shadow: 0 6px 18px #286e7718;
+}
+.answer-call:hover { background: #256b6c; }
+.answer-icon { background: #ffffff1a; border-radius: 12px; }
+.decline-call { color: #4b7278; }
+.vision-consent { color: #4b7278; font-size: 11px; }
+.vision-consent input { accent-color: var(--call-teal); }
+.privacy-note { color: #66858a; font-size: 9px; letter-spacing: 0; }
+.incoming-status { color: #a24941; }
+
+/* Translucent light surfaces stay legible over either camera without tinting it. */
+.call-screen { background: #e9f8fa; }
+.camera-fallback {
+  background: linear-gradient(155deg, #f1fbfc, #d5f0f3);
+  color: #476e76;
+}
+.fallback-orb {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border: 5px solid #f8ffff;
+  background: #f4f1df;
+  box-shadow: 0 9px 30px #336c7710;
+}
+.video-shade {
+  background: linear-gradient(180deg, #133b4520, transparent 30%, transparent 62%, #10343e55);
+}
+.call-person {
+  min-height: 43px;
+  padding: 4px 9px 4px 4px;
+  border: 1px solid #ffffff78;
+  border-radius: 25px;
+  background: var(--call-glass);
+  color: var(--call-ink);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 3px 12px #123f4510;
+}
+.mini-nori { width: 33px; height: 33px; overflow: hidden; background: #f4f1df; border-color: #e5ece3; }
+.call-person strong { font-weight: 650; font-size: 13px; }
+.ai-tag { color: #44787c; border-color: #bedce0; background: #eefafa; }
+#call-status { color: #557b81; }
+.call-timer { color: var(--call-ink); background: var(--call-glass); padding: 6px 7px; border-radius: 12px; }
+.call-timer:empty { display: none; }
+.catalog-button,
+.cart-button,
+.focus-product,
+.vision-toggle {
+  color: var(--call-ink);
+  background: var(--call-glass);
+  border-color: #ffffff91;
+  box-shadow: 0 3px 12px #123f4510;
+}
+#cart-count { color: white; background: var(--call-teal); }
+.vision-toggle[aria-pressed=false] { color: #58757a; }
+.vision-toggle[data-state=received] { border-color: #95c9cc; }
+.vision-toggle[data-state=error] { color: #a34842; }
+#vision-action { color: #286c71; }
+#call-notice { color: #6e493f; background: #fff7edee; border-color: #ecded0; }
+.inline-retry { color: #225f65; background: #d9f1f4; }
+.deck-label { color: var(--call-ink); text-shadow: none; }
+.deck-label > span { padding: 4px 7px; border-radius: 12px; background: var(--call-glass); }
+.product-card { color: var(--call-ink); background: #fbfffff5; box-shadow: 0 8px 28px #123f451a; }
+.product-picture-fallback { color: #93bdc2; }
+.product-retailer { color: #64858a; }
+.product-copy #product-price { color: #2e767c; }
+.product-actions { border-top-color: #dcecee; }
+.product-actions button { color: #356e74; background: #e7f5f7; }
+.product-actions .try-button { color: white; background: var(--call-teal); }
+.swipe-actions button { color: var(--call-ink); background: var(--call-glass); }
+.swipe-actions p { color: var(--call-ink); background: var(--call-glass); padding: 4px 7px; border-radius: 12px; }
+.swipe-feedback,
+.swipe-feedback:not(:empty) { color: #296e70; background: #dff5f3f2; }
+.swipe-feedback.reject,
+.product-card.reject .swipe-feedback { color: #ae514a; background: #fff0ecf2; }
+.product-empty { color: #3c737b; background: var(--call-glass); }
+.bubble {
+  color: var(--call-ink);
+  background: #fbfffff0;
+  border: 1px solid #ffffffa6;
+  box-shadow: 0 5px 18px #123f4514;
+}
+.bubble.user { color: #184b52; background: #d5f0f3f0; border-color: #c5e8ed; }
+.bubble-label { color: #426f75; opacity: 1; }
+.tryon-chip { color: #245f66; background: var(--call-glass); border-color: #cde5e8; }
+.tryon-chip button { color: #316c73; background: #deeff2; }
+.text-form { background: #fbfffff5; box-shadow: 0 5px 18px #123f4514; }
+.text-form input { color: var(--call-ink); }
+.text-form input::placeholder { color: #729096; }
+.text-form button { color: white; background: var(--call-teal); }
+.gesture-status { color: var(--call-ink); background: var(--call-glass); padding: 4px 8px; border-radius: 12px; }
+.call-control { color: var(--call-ink); background: #f5ffffe8; border-color: #ffffff91; box-shadow: 0 3px 10px #123f4510; }
+.call-control:hover { background: #e4f5f8; }
+.call-control[aria-pressed=true],
+.call-control.active { color: #fff; background: var(--call-teal); border-color: var(--call-teal); }
+.call-control#mute-call[aria-pressed=true]:after,
+.call-control#toggle-camera[aria-pressed=true]:after { box-shadow: 0 0 0 2px var(--call-teal); }
+.end-control { color: white; background: #db7772; border-color: #dd817a; box-shadow: 0 4px 15px #71363316; }
+.end-control:hover { background: #c76360; }
+
+/* Keep the existing small try-on controls and two-bubble conversation layout. */
+.phone-app[data-focused=true] .call-person { min-height: 35px; padding: 3px 8px 3px 3px; gap: 6px; }
+.phone-app[data-focused=true] .mini-nori { width: 27px; height: 27px; }
+.phone-app[data-focused=true] .bubble { color: var(--call-ink); background: #fbffffed; }
+.phone-app[data-focused=true] .bubble.user { color: #184b52; background: #d5f0f3ed; }
+.phone-app[data-focused=true] .bubble-label { color: #426f75; }
+.phone-app[data-focused=true] .call-control { color: var(--call-ink); background: #f5ffffe8; }
+.phone-app[data-focused=true] .call-control[aria-pressed=true] { color: white; background: var(--call-teal); }
+.phone-app[data-focused=true] .end-control { color: white; background: #db7772; }
+.phone-app[data-focused=true] .video-shade { background: linear-gradient(180deg, #133b4515, transparent 22%, transparent 77%, #10343e36); }
+
+.end-orb { overflow: hidden; background: #f4f1df; box-shadow: 0 0 0 7px #ffffff80; }
+.end-message h1 { font-family: var(--font); font-size: 39px; font-weight: 550; letter-spacing: -1.5px; }
+.end-message #end-summary { color: var(--call-muted); }
+.toast { color: #205e65; background: #effcfbf5; border-color: #cde6e9; box-shadow: 0 6px 20px #123f4520; }
+
+/* Product sheets belong to the same light, uncluttered app. */
+.sheet-dialog { color: var(--call-ink); background: #f7fcfd; box-shadow: 0 -20px 80px #173d4333; }
+.sheet-dialog::backdrop { background: #163f4659; }
+.sheet-grip { background: #c9e1e5; }
+.sheet-kicker { color: #62858c; }
+.sheet-heading h2 { font-family: var(--font); font-size: 28px; font-weight: 550; letter-spacing: -.8px; }
+.sheet-close { color: #42777f; background: #e4f1f4; }
+.sheet-note { color: #66858c; }
+.cart-item,
+.bag-item { border-bottom-color: #dcebee; }
+.cart-item img { background: #edf6f8; }
+.cart-item p,
+.cart-item small,
+.empty-bag,
+.cart-items > p,
+.detail-body { color: #55787f; }
+.cart-item button,
+.bag-item button { color: #3c737a; background: #e1f0f3; }
+.cart-item a,
+.bag-item a,
+.catalog-download { color: #2e747c; }
+.sheet-primary { color: white; background: var(--call-teal); }
+.sheet-secondary { color: #356e76; background: #e1f1f4; }
+.catalog-tabs button { color: #47727b; background: #eef8fa; border-color: #d5e9ed; }
+.catalog-tabs button[aria-pressed=true] { color: white; background: var(--call-teal); border-color: var(--call-teal); }
+.catalog-item { background: white; border-color: #deedf0; }
+.catalog-item span { color: #61838a; }
+.catalog-item button { color: #286c74; background: #dff1f4; }
+
+@media (max-width: 520px) {
+  .incoming-screen,
+  .end-screen { padding-bottom: calc(var(--nav-height, 72px) + 17px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 380px) {
+  .incoming-tag { font-size: 9px; }
+  .incoming-person h1 { font-size: 40px; }
+  .nori-orbit { width: 150px; height: 150px; }
+  .incoming-promise { font-size: 23px; }
+  .call-person { gap: 6px; padding-right: 7px; }
+  .call-timer { padding: 5px; font-size: 9px; }
+}
+/* Desktop frames lose 40px to the outer margin; compact before the hero gets tight. */
+@media (max-height: 780px) {
+  .nori-orbit { width: 132px; height: 132px; padding: 6px; margin: 0 0 16px; box-shadow: none; }
+  .incoming-person > .incoming-kicker { display: none; }
+  .incoming-person h1 { font-size: 38px; }
+  .incoming-subtitle { font-size: 12px; margin-top: 5px; }
+  .incoming-promise { font-size: 22px; margin-bottom: 12px; }
+}
+@media (max-height: 700px) {
+  .incoming-screen { padding-top: max(20px, env(safe-area-inset-top)); }
+  .incoming-person { padding: 10px 0 24px; }
+  .nori-orbit { width: 116px; height: 116px; padding: 6px; margin: 0 0 15px; box-shadow: none; }
+  .incoming-person h1 { font-size: 35px; }
+  .incoming-subtitle { font-size: 12px; margin-top: 5px; }
+  .incoming-kicker { font-size: 8px; margin-bottom: 7px; }
+  .incoming-promise { font-size: 22px; margin-bottom: 12px; }
+  .vision-consent { font-size: 10px; }
+  .privacy-note { font-size: 8px; }
+  .end-message h1 { font-size: 35px; }
+}
+@media (max-height: 590px) {
+  .incoming-screen { overflow-y: auto; }
+  .incoming-person { flex: 0 0 auto; padding: 20px 0; }
+  .nori-orbit { width: 88px; height: 88px; margin-bottom: 12px; }
+  .incoming-person h1 { font-size: 30px; }
+}

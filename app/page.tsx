@@ -1,1 +1,1 @@
-export default function Home(){return <main><h1>Nook</h1><a href="/camera">Open camera and voice studio</a></main>;}
+export default function Home(){return <main><h1>Coupi</h1><nav><a href="/">Main</a><a href="/call">Video call</a><a href="/explore">Explore worlds</a></nav></main>;}

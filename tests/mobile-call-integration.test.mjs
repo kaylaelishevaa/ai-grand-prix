@@ -50,7 +50,7 @@ function fixture(t,options={}){
 test('camera sharing follows consent, pause/resume, camera-off and end while local try-on remains usable',async t=>{
   const f=fixture(t);f.visionTick();assert.equal(f.voice.images.length,0);
   await f.nodes.get('answer-call').onclick();f.visionTick();assert.equal(f.voice.images.length,1);
-  assert.equal(f.nodes.get('vision-status').textContent,'Nori sees snapshots');
+  assert.equal(f.nodes.get('vision-status').textContent,'Coupi sees snapshots');
   f.nodes.get('vision-toggle').onclick();f.visionTick();assert.equal(f.voice.images.length,1);assert(f.voice.imageClears>0);assert.equal(f.camera.running,true);
   f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));await f.voice.opts.onTryon('desk',{x:.25});assert.equal(f.camera.options.x,.25);assert.equal(f.voice.opts.getCameraSnapshot('tool'),null);
   f.nodes.get('vision-toggle').onclick();assert.equal(f.voice.images.length,2);assert.equal(f.voice.images[1].metadata.reason,'resume');

@@ -1,4 +1,6 @@
 import cameraPage from "../site-pages/camera.html?raw";
+import mainPage from "../site-pages/main.html?raw";
+import explorePage from "../site-pages/explore.html?raw";
 import { handleVoiceRequest } from "../lib/nook-voice.mjs";
 import handler from "vinext/server/fetch-handler";
 import { runWithConnectorBinding } from "../lib/connector-context";
@@ -11,9 +13,13 @@ const worker = {
       const result = await handleVoiceRequest(request, env);
       if(result) return result;
     }
-    if(['/','/index.html','/camera','/camera.html'].includes(path)) {
+    const pagePath = path.length > 1 ? path.replace(/\/$/, '') : path;
+    const page = ['/', '/index.html'].includes(pagePath) ? mainPage
+      : ['/call', '/camera', '/camera.html'].includes(pagePath) ? cameraPage
+      : pagePath === '/explore' ? explorePage : null;
+    if(page !== null) {
       if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405});
-      return new Response(request.method==='HEAD'?null:cameraPage,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin'}});
+      return new Response(request.method==='HEAD'?null:page,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin'}});
     }
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and

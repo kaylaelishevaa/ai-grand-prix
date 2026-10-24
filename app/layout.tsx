@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nook — Shopping companion",
+  title: "Coupi — Shopping companion",
   description: "Try things on and talk through real Coupang products.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/assets/coupi.png",
+    shortcut: "/assets/coupi.png",
   },
 };
 

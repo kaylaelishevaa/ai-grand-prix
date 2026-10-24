@@ -42,7 +42,7 @@
       const r = await this.fetch('/api/voice/status', {credentials:'same-origin', cache:'no-store', signal});
       if(!r.ok) throw new Error('The voice server is unavailable. Reload this page or try again shortly.');
       const data = await r.json();
-      if(typeof data.ready !== 'boolean') throw new Error('This page needs the Nook voice server. Open the deployed camera studio.');
+      if(typeof data.ready !== 'boolean') throw new Error('This page needs the Coupi voice server. Open the deployed camera studio.');
       return data;
     }
     _current(c) { return this.call === c && !c.ended; }
@@ -177,7 +177,7 @@
           else if(peer.connectionState==='disconnected') {
             this._state('reconnecting','The voice connection was interrupted. Reconnecting…');
             c.disconnectTimer=setTimeout(()=>{if(this._current(c)){this._cleanup(c);this._state('error','Voice disconnected. Your microphone is off. Start again when your connection recovers.');}},8000);
-          } else if(peer.connectionState==='connected' && c.ready) this._state('connected',c.muted?'Microphone muted. You can still hear Nori.':'Connected. Tell Nori what you’re looking for.');
+          } else if(peer.connectionState==='connected' && c.ready) this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Connected. Tell Coupi what you’re looking for.');
         });
         for(const track of microphone.getAudioTracks()) {
           peer.addTrack(track,microphone);
@@ -190,7 +190,7 @@
         const offer=await peer.createOffer();
         if(!this._current(c))return false;
         await peer.setLocalDescription(offer);
-        this._state('connecting','Connecting to Nori…');
+        this._state('connecting','Connecting to Coupi…');
         const response=await this.fetch('/api/voice/session',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/sdp'},body:offer.sdp,signal:c.abort.signal});
         c.callId=response.headers?.get('x-nook-call-id') || null;
         if(!this._current(c)){this._finishRemote(c.callId);return false;}
@@ -215,14 +215,14 @@
       if(c.ready)return;
       c.ready=true;c.connectedAt=Date.now();clearTimeout(c.setupTimer);
       c.callTimer=setTimeout(()=>{if(this._current(c))this.end('This 10-minute demo call has ended. Start another call to continue.');},MAX_CALL_MS);
-      this._state('connected','Connected. Tell Nori what you’re looking for.');this._greet(c);
+      this._state('connected','Connected. Tell Coupi what you’re looking for.');this._greet(c);
     }
     _greet(c) {
       if(c.greeted || !c.ready || c.channel?.readyState!=='open')return;
       c.greeted=true;
       const context=this.options.getContext?.() || {};
       c.lastContext=contextText(context);
-      const greeting=typeof this.options.greeting==='string'?this.options.greeting.trim().slice(0,300):'Hi, I’m Nori, your AI shopping companion. How can I help you today?';
+      const greeting=typeof this.options.greeting==='string'?this.options.greeting.trim().slice(0,300):'Hi, I’m Coupi, your AI shopping companion. How can I help you today?';
       this._captureCamera(c,'call-start');
       this._text(c,`App context, not a spoken shopper request: ${c.lastContext}. The shopper answered the call. Begin with this brief greeting: ${JSON.stringify(greeting)}. Camera vision is available only when you have actually received camera images and sharing is not paused. Otherwise say you cannot see the current scene. These are periodic snapshots, not continuous video.`);
       c.needsReply=true;this._reply(c);
@@ -250,9 +250,9 @@
         case 'conversation.item.added':case 'conversation.item.done':case 'conversation.item.created':this._ackCamera(c,event);break;
         case 'response.created':
           if(event.response?.id)c.activeResponses.add(event.response.id);
-          c.replyRequested=false;c.awaitingVad=false;this._state('thinking','Nori is thinking…');break;
+          c.replyRequested=false;c.awaitingVad=false;this._state('thinking','Coupi is thinking…');break;
         case 'input_audio_buffer.speech_started':c.speaking=true;c.awaitingVad=true;this._captureCamera(c,'speech-start');this._state('listening','Listening to you…');break;
-        case 'input_audio_buffer.speech_stopped':c.speaking=false;this._state('thinking','Nori is considering your request…');break;
+        case 'input_audio_buffer.speech_stopped':c.speaking=false;this._state('thinking','Coupi is considering your request…');break;
         case 'conversation.item.input_audio_transcription.completed':
           if(event.transcript)this.options.onTranscript?.({role:'user',key:event.item_id || `user-${Date.now()}`,text:event.transcript,final:true});break;
         case 'conversation.item.input_audio_transcription.failed':this._state('connected','Audio is connected, but this turn’s transcript is unavailable.');break;
@@ -260,9 +260,9 @@
           this.options.onTranscript?.({role:'assistant',key:event.item_id || event.response_id || 'assistant-current',delta:event.delta || '',final:false});break;
         case 'response.output_audio_transcript.done': case 'response.audio_transcript.done': case 'response.output_text.done':
           this.options.onTranscript?.({role:'assistant',key:event.item_id || event.response_id || 'assistant-current',text:event.transcript ?? event.text ?? '',final:true});break;
-        case 'output_audio_buffer.started':this._state('speaking','Nori is speaking. You can interrupt naturally.');break;
+        case 'output_audio_buffer.started':this._state('speaking','Coupi is speaking. You can interrupt naturally.');break;
         case 'output_audio_buffer.stopped':case 'output_audio_buffer.cleared':
-          if(!c.speaking)this._state('connected',c.muted?'Microphone muted. You can still hear Nori.':'Listening. What would you like to try next?');break;
+          if(!c.speaking)this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Listening. What would you like to try next?');break;
         case 'response.function_call_arguments.done':
           if(event.response_id && !c.completedResponses.has(event.response_id))c.activeResponses.add(event.response_id);
           this._tool(c,event);break;
@@ -275,8 +275,8 @@
           for(const item of response.output || [])if(item.type==='function_call')this._tool(c,{...item,response_id:response.id});
           if(response.status==='failed') {
             const detail=response.status_details?.error?.message;
-            this._state('connected',detail || 'Nori could not complete that reply. Please try again.');
-          } else if(!c.speaking && !c.activeResponses.size)this._state('connected',c.muted?'Microphone muted. You can still hear Nori.':'Connected. You can keep talking or trying things on.');
+            this._state('connected',detail || 'Coupi could not complete that reply. Please try again.');
+          } else if(!c.speaking && !c.activeResponses.size)this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Connected. You can keep talking or trying things on.');
           this._reply(c);break;
         }
         case 'error': {
@@ -373,7 +373,7 @@
       c.muted=!c.muted;
       if(c.muted){c.speaking=false;c.awaitingVad=false;}
       c.microphone?.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
-      this._state('connected',c.muted?'Microphone muted. You can still hear Nori.':'Microphone on. You can speak to Nori.');return c.muted;
+      this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Microphone on. You can speak to Coupi.');return c.muted;
     }
     async resumeAudio() {await this.audio.play();this.options.onPlaybackBlocked?.(false);}
   }
@@ -381,7 +381,7 @@
 
   function mount() {
     const root=document.getElementById('voice-call-root');if(!root)return;
-    root.innerHTML=`<section class="voice-panel" aria-label="AI voice shopping assistant"><div class="voice-heading"><div><span class="voice-eyebrow">A LITTLE CONVERSATION</span><h2>Try it on. Talk it through.</h2></div><span class="voice-indicator" data-state="idle"><i></i><span id="voice-indicator-text">Voice off</span></span></div><p class="voice-intro">Tell Nori what you need while you try things on. Ask for a budget, a colour, or a different direction.</p><div class="voice-actions"><button id="voice-start" class="voice-button voice-primary" disabled>Start voice call</button><button id="voice-mute" class="voice-button" disabled>Mute microphone</button><button id="voice-end" class="voice-button voice-end" disabled>End call</button><button id="voice-play" class="voice-button" hidden>Enable speaker audio</button><button id="voice-recheck" class="voice-link" hidden>Check connection again</button></div><p id="voice-status" class="voice-status" role="status" aria-live="polite">Checking voice availability…</p><p class="voice-privacy">Starting a call sends your microphone audio to OpenAI. Camera frames stay in this browser. Nori uses real catalog references; prices and availability need checking on Coupang.</p><details class="voice-transcript-details" open><summary>Conversation <span id="voice-duration"></span></summary><div id="voice-transcript" class="voice-transcript" role="log" aria-live="polite" aria-relevant="additions text"><p class="voice-empty">Your conversation appears here when the call starts.</p></div></details><form id="voice-text-form" class="voice-text-form"><input id="voice-text" aria-label="Type a message to Nori during the call" placeholder="Or type while your microphone is muted…" maxlength="1000" disabled><button class="voice-button" id="voice-send" type="submit" disabled>Send</button></form><p class="voice-footnote">AI-generated voice · No orders or payments · Demo calls end after 10 minutes</p><audio id="voice-audio" autoplay></audio></section>`;
+    root.innerHTML=`<section class="voice-panel" aria-label="AI voice shopping assistant"><div class="voice-heading"><div><span class="voice-eyebrow">A LITTLE CONVERSATION</span><h2>Try it on. Talk it through.</h2></div><span class="voice-indicator" data-state="idle"><i></i><span id="voice-indicator-text">Voice off</span></span></div><p class="voice-intro">Tell Coupi what you need while you try things on. Ask for a budget, a colour, or a different direction.</p><div class="voice-actions"><button id="voice-start" class="voice-button voice-primary" disabled>Start voice call</button><button id="voice-mute" class="voice-button" disabled>Mute microphone</button><button id="voice-end" class="voice-button voice-end" disabled>End call</button><button id="voice-play" class="voice-button" hidden>Enable speaker audio</button><button id="voice-recheck" class="voice-link" hidden>Check connection again</button></div><p id="voice-status" class="voice-status" role="status" aria-live="polite">Checking voice availability…</p><p class="voice-privacy">Starting a call sends your microphone audio to OpenAI. Camera frames stay in this browser. Coupi uses real catalog references; prices and availability need checking on Coupang.</p><details class="voice-transcript-details" open><summary>Conversation <span id="voice-duration"></span></summary><div id="voice-transcript" class="voice-transcript" role="log" aria-live="polite" aria-relevant="additions text"><p class="voice-empty">Your conversation appears here when the call starts.</p></div></details><form id="voice-text-form" class="voice-text-form"><input id="voice-text" aria-label="Type a message to Coupi during the call" placeholder="Or type while your microphone is muted…" maxlength="1000" disabled><button class="voice-button" id="voice-send" type="submit" disabled>Send</button></form><p class="voice-footnote">AI-generated voice · No orders or payments · Demo calls end after 10 minutes</p><audio id="voice-audio" autoplay></audio></section>`;
     const el=id=>root.querySelector('#'+id);
     const rows=new Map();let connectedAt=null;
     const session=new NookVoiceSession({
@@ -392,7 +392,7 @@
       onPlaybackBlocked:blocked=>{el('voice-play').hidden=!blocked;},
       onTranscript:entry=>{
         let row=rows.get(entry.key);
-        if(!row){root.querySelector('.voice-empty')?.remove();row=document.createElement('div');row.className='voice-message '+entry.role;const label=document.createElement('strong');label.textContent=entry.role==='user'?'You':'Nori';const text=document.createElement('p');row.append(label,text);el('voice-transcript').append(row);rows.set(entry.key,row);if(rows.size>100){const first=rows.keys().next().value;rows.get(first).remove();rows.delete(first);}}
+        if(!row){root.querySelector('.voice-empty')?.remove();row=document.createElement('div');row.className='voice-message '+entry.role;const label=document.createElement('strong');label.textContent=entry.role==='user'?'You':'Coupi';const text=document.createElement('p');row.append(label,text);el('voice-transcript').append(row);rows.set(entry.key,row);if(rows.size>100){const first=rows.keys().next().value;rows.get(first).remove();rows.delete(first);}}
         const text=row.querySelector('p');if(typeof entry.text==='string'&&entry.text)text.textContent=entry.text;else if(entry.delta)text.textContent+=entry.delta;
         el('voice-transcript').scrollTop=el('voice-transcript').scrollHeight;
       },

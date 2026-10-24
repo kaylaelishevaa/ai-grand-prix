@@ -3,12 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#153d33">
-  <meta name="description" content="A little call. A new way to shop. Try things on and find your next favourite with Nori.">
-  <title>Nook — A call with Nori</title>
+  <meta name="theme-color" content="#e7f6f8">
+  <meta name="description" content="A little call. A new way to shop. Try things on and find your next favourite with Coupi.">
+  <title>Coupi — Video call</title>
+  <link rel="icon" type="image/png" href="/assets/coupi.png">
   <link rel="stylesheet" href="/mobile-call.css">
+  <link rel="stylesheet" href="/coupi-shell.css">
+  <link rel="stylesheet" href="/coupi-call.css">
 </head>
-<body>
+<body class="coupi-call-page">
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="14" rx="3"/><path d="m15 9 6-3v12l-6-3"/></symbol>
     <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol>
@@ -25,36 +28,36 @@
     <symbol id="i-speaker" viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
   </svg>
 
-  <main id="phone-app" class="phone-app">
-    <section id="incoming-screen" class="incoming-screen" aria-label="Incoming call from Nori">
-      <div class="incoming-top"><a class="wordmark" href="/" aria-label="Nook home">nook<span>✳</span></a><span class="incoming-tag"><span></span> A little shopping call</span></div>
+  <main id="phone-app" class="phone-app coupi-app">
+    <section id="incoming-screen" class="incoming-screen" aria-label="Incoming call from Coupi">
+      <div class="incoming-top"><a class="wordmark" href="/" aria-label="Coupi home">coupi<span class="brand-dot">.</span></a><span class="incoming-tag"><span></span> Your shopping companion</span></div>
       <div class="incoming-person">
-        <div class="nori-orbit" aria-hidden="true"><div class="nori-orb"><svg><use href="#i-spark"/></svg></div><span class="orbit-dot"></span></div>
-        <p class="incoming-kicker">YOUR NEXT GOOD FIND IS CALLING</p>
-        <h1>Nori</h1>
+        <div class="nori-orbit" aria-hidden="true"><div class="nori-orb"><img class="coupi-portrait" src="/assets/coupi.png" alt="Coupi, your shopping companion"></div><span class="orbit-dot"></span></div>
+        <p class="incoming-kicker">A LITTLE HELP, A GOOD FIND</p>
+        <h1>Coupi</h1>
         <p class="incoming-subtitle">Your shopping companion</p>
         <div class="incoming-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       </div>
       <div class="incoming-bottom">
-        <p class="incoming-promise">A little conversation.<br>A little more you.</p>
+        <p class="incoming-promise">Let’s find your<br>kind of thing.</p>
         <p id="incoming-status" class="incoming-status" role="status" hidden></p>
-        <button id="answer-call" class="answer-call"><span class="answer-icon"><svg><use href="#i-video"/></svg></span><span>Answer video call</span><svg class="answer-arrow"><use href="#i-arrow"/></svg></button>
+        <button id="answer-call" class="answer-call"><span class="answer-icon"><svg><use href="#i-video"/></svg></span><span>Start video call</span><svg class="answer-arrow"><use href="#i-arrow"/></svg></button>
         <button id="decline-call" class="decline-call">Browse instead</button>
-        <label class="vision-consent"><input id="vision-consent" type="checkbox" checked> Let Nori see my camera</label><p class="privacy-note">Mic + camera snapshots go to OpenAI during the call.</p>
+        <label class="vision-consent"><input id="vision-consent" type="checkbox" checked> Let Coupi see my camera</label><p class="privacy-note">Mic + camera snapshots go to OpenAI during the call.</p>
       </div>
     </section>
 
-    <section id="call-screen" class="call-screen" aria-label="Video call with Nori" hidden>
+    <section id="call-screen" class="call-screen" aria-label="Video call with Coupi" hidden>
       <video id="live-video" autoplay muted playsinline hidden></video>
       <canvas id="live-canvas" width="720" height="960" aria-label="Your live camera and try-on preview"></canvas>
-      <div id="camera-fallback" class="camera-fallback"><div class="fallback-orb" aria-hidden="true">✳</div><span id="camera-fallback-text">Your camera goes here</span></div>
+      <div id="camera-fallback" class="camera-fallback"><div class="fallback-orb" aria-hidden="true"><img class="coupi-avatar" src="/assets/coupi.png" alt=""></div><span id="camera-fallback-text">Your camera goes here</span></div>
       <div class="video-shade" aria-hidden="true"></div>
       <header class="call-header">
-        <div class="call-person"><span class="mini-nori" aria-hidden="true">✳</span><div><strong>Nori <span class="ai-tag">AI</span></strong><span id="call-status">Connecting…</span></div></div>
+        <div class="call-person"><span class="mini-nori" aria-hidden="true"><img class="coupi-avatar" src="/assets/coupi.png" alt=""></span><div><strong>Coupi <span class="ai-tag">AI</span></strong><span id="call-status">Connecting…</span></div></div>
         <button id="focus-product" class="focus-product" aria-label="Show product and controls" hidden><img id="focus-product-image" alt=""><span id="focus-product-label">Products</span><span aria-hidden="true">⌄</span></button><span id="call-timer" class="call-timer">00:00</span><button id="catalog-button" class="catalog-button" aria-label="Explore product previews">18 picks</button>
         <button id="cart-button" class="cart-button" aria-label="View your bag"><svg><use href="#i-bag"/></svg><span id="cart-count">0</span></button>
       </header>
-      <div id="vision-strip" class="vision-strip" hidden><button id="vision-toggle" class="vision-toggle" aria-pressed="true" aria-label="Pause camera sharing with Nori"><svg><use href="#i-eye"/></svg><span id="vision-status">Camera sharing ready</span><span id="vision-action">Pause</span></button></div>
+      <div id="vision-strip" class="vision-strip" hidden><button id="vision-toggle" class="vision-toggle" aria-pressed="true" aria-label="Pause camera sharing with Coupi"><svg><use href="#i-eye"/></svg><span id="vision-status">Camera sharing ready</span><span id="vision-action">Pause</span></button></div>
       <div class="call-feedback"><p id="call-notice" role="status" hidden></p><button id="retry-call" class="inline-retry" hidden>Reconnect</button><button id="play-audio" class="inline-retry" hidden><svg><use href="#i-speaker"/></svg> Enable sound</button></div>
 
       <section id="product-zone" class="product-zone" aria-label="Recommended product" hidden>
@@ -66,12 +69,12 @@
         </article>
         <div class="swipe-actions"><button id="product-skip" aria-label="Skip this product"><span>←</span> Skip</button><p>Swipe to choose</p><button id="product-save" aria-label="Add this product to your bag">Add to bag <span>→</span></button></div>
       </section>
-      <div id="product-empty" class="product-empty" hidden>Ask Nori for a few more ideas.</div>
+      <div id="product-empty" class="product-empty" hidden>Ask Coupi for a few more ideas.</div>
 
       <div class="conversation-area">
         <div id="tryon-chip" class="tryon-chip" hidden><svg><use href="#i-spark"/></svg><span id="tryon-label">Trying it on</span><button id="clear-tryon" aria-label="Remove try-on overlay"><svg><use href="#i-close"/></svg></button></div>
         <div id="transcript" class="transcript" role="log" aria-live="polite" aria-relevant="additions text"></div>
-        <form id="text-form" class="text-form" hidden><input id="text-input" type="text" maxlength="1000" autocomplete="off" placeholder="Tell Nori…" aria-label="Message Nori"><button type="submit" aria-label="Send message"><svg><use href="#i-arrow"/></svg></button></form>
+        <form id="text-form" class="text-form" hidden><input id="text-input" type="text" maxlength="1000" autocomplete="off" placeholder="Tell Coupi…" aria-label="Message Coupi"><button type="submit" aria-label="Send message"><svg><use href="#i-arrow"/></svg></button></form>
       </div>
       <footer class="call-footer">
         <p id="gesture-status" class="gesture-status">Talk naturally. Try something new.</p>
@@ -88,15 +91,20 @@
     </section>
 
     <section id="end-screen" class="end-screen" aria-label="Call ended" hidden>
-      <a class="wordmark" href="/" aria-label="Nook home">nook<span>✳</span></a>
-      <div class="end-message"><div class="end-orb" aria-hidden="true">✳</div><p class="incoming-kicker">UNTIL NEXT TIME</p><h1 id="end-title">A little less<br>scrolling.</h1><p id="end-summary">Your call has ended.</p></div>
-      <div class="end-bottom"><button id="call-again" class="answer-call"><svg><use href="#i-video"/></svg> Call Nori again <svg class="answer-arrow"><use href="#i-arrow"/></svg></button><p class="privacy-note">Camera and microphone are off.</p></div>
+      <a class="wordmark" href="/" aria-label="Coupi home">coupi<span class="brand-dot">.</span></a>
+      <div class="end-message"><div class="end-orb" aria-hidden="true"><img class="coupi-avatar" src="/assets/coupi.png" alt=""></div><p class="incoming-kicker">UNTIL NEXT TIME</p><h1 id="end-title">A little less<br>scrolling.</h1><p id="end-summary">Your call has ended.</p></div>
+      <div class="end-bottom"><button id="call-again" class="answer-call"><svg><use href="#i-video"/></svg> Call Coupi again <svg class="answer-arrow"><use href="#i-arrow"/></svg></button><p class="privacy-note">Camera and microphone are off.</p></div>
     </section>
+    <nav class="app-nav" aria-label="Main navigation">
+      <a href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg><span>Main</span></a>
+      <a href="/call" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Video call</span></a>
+      <a href="/explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c5 4 5 12 0 16-5-4-5-12 0-16Z"/></svg><span>Explore worlds</span></a>
+    </nav>
     <div id="toast" class="toast" role="status" hidden></div>
     <audio id="voice-audio" autoplay></audio>
     <dialog id="cart-dialog" class="sheet-dialog" aria-labelledby="cart-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">THE GOOD FINDS</p><h2 id="cart-title">Your bag</h2></div><button id="close-cart" class="sheet-close" aria-label="Close bag"><svg><use href="#i-close"/></svg></button></header><div id="cart-items" class="cart-items"></div><p class="sheet-note">Saved for this call. Nothing is ordered.</p></dialog>
-    <dialog id="details-dialog" class="sheet-dialog" aria-labelledby="detail-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><p class="sheet-kicker">A CLOSER LOOK</p><button id="close-details" class="sheet-close" aria-label="Close product details"><svg><use href="#i-close"/></svg></button></header><img id="detail-image" class="detail-image" alt=""><h2 id="detail-title"></h2><div id="detail-body" class="detail-body"></div><p id="detail-preview-note" class="sheet-note"></p><div class="detail-actions"><button id="detail-ask" class="sheet-primary"><svg><use href="#i-mic"/></svg> Ask Nori about it</button><a id="detail-link" class="sheet-secondary" target="_blank" rel="noopener noreferrer">View on Coupang <span>↗</span></a></div><p class="sheet-note">Check current price and availability on Coupang.</p></dialog>
-    <dialog id="catalog-dialog" class="sheet-dialog catalog-dialog" aria-labelledby="catalog-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">REAL COUPANG PICKS</p><h2 id="catalog-title">Find your next thing.</h2></div><button id="close-catalog" class="sheet-close" aria-label="Close product catalog"><svg><use href="#i-close"/></svg></button></header><div class="catalog-tabs" role="group" aria-label="Product categories"><button id="type-lipstick">Lipstick</button><button id="type-chair">Chairs</button><button id="type-lamp">Lamps</button><button id="type-tshirt">T-shirts</button><button id="type-hoodie">Hoodies</button><button id="type-glasses">Glasses</button></div><div id="catalog-items" class="catalog-items"></div><p class="sheet-note">Original listing photos. Approximate previews, not a fit guarantee.</p><a class="catalog-download" href="/product-catalog.csv" download="nook-18-coupang-products.csv">Download all 18 product names &amp; links</a></dialog>
+    <dialog id="details-dialog" class="sheet-dialog" aria-labelledby="detail-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><p class="sheet-kicker">A CLOSER LOOK</p><button id="close-details" class="sheet-close" aria-label="Close product details"><svg><use href="#i-close"/></svg></button></header><img id="detail-image" class="detail-image" alt=""><h2 id="detail-title"></h2><div id="detail-body" class="detail-body"></div><p id="detail-preview-note" class="sheet-note"></p><div class="detail-actions"><button id="detail-ask" class="sheet-primary"><svg><use href="#i-mic"/></svg> Ask Coupi about it</button><a id="detail-link" class="sheet-secondary" target="_blank" rel="noopener noreferrer">View on Coupang <span>↗</span></a></div><p class="sheet-note">Check current price and availability on Coupang.</p></dialog>
+    <dialog id="catalog-dialog" class="sheet-dialog catalog-dialog" aria-labelledby="catalog-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">REAL COUPANG PICKS</p><h2 id="catalog-title">Find your next thing.</h2></div><button id="close-catalog" class="sheet-close" aria-label="Close product catalog"><svg><use href="#i-close"/></svg></button></header><div class="catalog-tabs" role="group" aria-label="Product categories"><button id="type-lipstick">Lipstick</button><button id="type-chair">Chairs</button><button id="type-lamp">Lamps</button><button id="type-tshirt">T-shirts</button><button id="type-hoodie">Hoodies</button><button id="type-glasses">Glasses</button></div><div id="catalog-items" class="catalog-items"></div><p class="sheet-note">Original listing photos. Approximate previews, not a fit guarantee.</p><a class="catalog-download" href="/product-catalog.csv" download="coupi-18-coupang-products.csv">Download all 18 product names &amp; links</a></dialog>
   </main>
   <script src="/coupang-products.js" defer></script>
   <script src="/product-preview.js" defer></script>

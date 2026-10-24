@@ -1,6 +1,6 @@
-# Nook — AI shopping companion
+# Coupi — AI shopping companion
 
-Talk to Nori, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 18 sourced products across six categories.
+Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 18 sourced products across six categories.
 
 Each developer runs their own local server and supplies **their own OpenAI API key**. No usable API key is included in this repository.
 
@@ -37,7 +37,7 @@ OPENAI_REALTIME_MODEL=gpt-realtime-2.1
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENAI_API_KEY` | Your server-side API key. Required for Nori's live AI call. |
+| `OPENAI_API_KEY` | Your server-side API key. Required for Coupi's live AI call. |
 | `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1`. Your project needs access to this Realtime model. |
 
 Keep the key in `.env.local`, never in browser JavaScript or a `NEXT_PUBLIC_` / `VITE_` variable. OpenAI keys belong on the server; see [API authentication guidance](https://developers.openai.com/api/reference/overview). Do not share keys in chat, screenshots, or commits. `.env.local`, `.dev.vars*`, `node_modules/`, and `dist/` are already ignored by Git; build output can contain local preview configuration, so keep it ignored.
@@ -50,7 +50,7 @@ Restart the server whenever you change environment variables. If an older `.dev.
 npm run dev
 ```
 
-Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. `/camera` opens the same call interface. Keep the terminal running; press **Ctrl+C** to stop the server.
+Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Use the bottom navigation to open **Video call** (`/call`) or **Explore worlds** (`/explore`). Main (`/`) and Explore Worlds are intentionally empty shells for the next phase. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
 
 This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
@@ -58,16 +58,16 @@ To check that the server loaded your configuration, open [the local voice status
 
 ## 4. Try the demo
 
-1. Click **Answer video call** and allow camera and microphone access.
-2. Ask Nori, for example, “Show me glasses under 30,000 won.”
+1. Open **Video call**, click **Start video call** and allow camera and microphone access.
+2. Ask Coupi, for example, “Show me glasses under 30,000 won.”
 3. Select **Try it** on a product. Cards and secondary controls minimize during try-on; **Products** or **More** restores them.
 4. Use **Flip** to switch between front and back cameras when the device has both.
-5. Swipe or ask Nori to skip/save a product. The bag is an in-memory demo; nothing is purchased.
+5. Swipe or ask Coupi to skip/save a product. The bag is an in-memory demo; nothing is purchased.
 6. Click **End call** when finished.
 
 Without an API key, choose **Browse instead → 18 picks → a category → Try it** to test the catalog and local camera overlays. AI voice and AI camera understanding require your own working key.
 
-Camera snapshots are shared with OpenAI during an active call when **Let Nori see my camera** is enabled. The eye/Pause control stops that sharing while local try-on continues. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
+Camera snapshots are shared with OpenAI during an active call when **Let Coupi see my camera** is enabled. The eye/Pause control stops that sharing while local try-on continues. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
 
 ## Phone camera testing
 
@@ -101,7 +101,8 @@ npm run build
 
 Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clothing fit, colour, physical scale, and room perspective are approximate. There is no generated-photo workflow, checkout, live price/stock feed, or persistent shopping profile.
 
-- `site-pages/camera.html`, `public/mobile-call.*`: mobile call interface.
+- `site-pages/main.html`, `site-pages/explore.html`, `public/coupi-shell.css`: empty page shells and shared navigation.
+- `site-pages/camera.html`, `public/mobile-call.*`, `public/coupi-call.css`: mobile call interface and Coupi theme.
 - `public/camera-engine.js`, `public/product-preview.js`: local tracking and product rendering.
 - `public/voice-call.js`, `lib/nook-voice.mjs`, `worker/index.ts`: Realtime connection, catalog tools, and server routes.
 - `data/catalog.json`, `public/products/`, `public/product-catalog.csv`: 18 products and their images/links.
