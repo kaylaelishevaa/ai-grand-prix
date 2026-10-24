@@ -12,6 +12,8 @@
   let controlsExpanded=false;
   let voice=null, suppressMemory=false, availabilityChecking=false, networkAllowed=false;
   const bridge=window.CoupiCallBridge;
+  const firstInterview=new URLSearchParams(location.search).get('interview')==='1';
+  if(firstInterview)$('phone-app').dataset.interview='true';
   function reportMedia(){bridge.state({phase,cameraActive:camera.running,microphoneActive:!!voice?.call?.microphone?.getAudioTracks().some(track=>track.readyState==='live'&&track.enabled)});}
   const trusted=p=>p&&store.catalog.get(String(p.id));
   const show=(id,visible)=>{$(id).hidden=!visible;};
@@ -60,7 +62,7 @@
   function handUI(){const active=hands.running&&handsWanted;$('gesture-toggle').setAttribute('aria-pressed',String(active));$('gesture-toggle').setAttribute('aria-label',active?'Disable hand swipes':'Enable hand swipes');$('gesture-toggle').classList.toggle('is-off',!active);}
   function stopHands(){gestureStarting=false;hands.stop();handUI();text('gesture-status','Swipe: ← skip · save →');}
   function transcript(entry){if(!suppressMemory)bridge.transcript(entry);if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}store.message(entry);const root=$('transcript');root.replaceChildren();for(const item of store.messages){const bubble=document.createElement('div');bubble.className='bubble '+(item.role==='user'?'user':'assistant');const label=document.createElement('span');label.className='bubble-label';label.textContent=item.role==='user'?'You':'Coopy';const body=document.createElement('p');body.className='bubble-text';body.textContent=item.text; bubble.append(label,body);root.append(bubble);}}
-  voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:'Hi, I’m Coopy. How can I help you today?',getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
+  voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:firstInterview?'Before we find anything, tell me: what do your mornings look like?':'Hi, I’m Coopy. How can I help you today?',getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
     onTranscript:transcript,onRecommendations:(list,message)=>recommend(list,message),
     onWorldRecommendations:(list,message)=>worldRecommendations(list,message),
@@ -86,6 +88,7 @@
       else if(state==='idle'&&phase==='active'&&!ending){endCall(message);}
     }
   });
+  window.addEventListener('message',event=>{if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='coupi-interview-progress')return;const value=event.data;if(!Number.isInteger(value.count)||value.count<0||value.count>5)return;voice.updateContext({...context(),interview:{answeredCount:value.count,nextQuestion:String(value.question||'').slice(0,250),complete:value.complete===true}});});
   window.NookMobile={camera,voice,store,endCall,openCatalog};bridge.attach(()=>endCall());
   async function startCamera({strictFacing=false}={}){if(cameraBusy)return false;const preflight=generation;const status=await bridge.getAvailability();if(preflight!==generation)return false;if(status.offline){notice(status.reason||'Offline rehearsal: live camera and tracking are off. Browse the reference picks locally.');return false;}cameraBusy=true;cameraUI();const token=generation;try{const ok=await camera.start({facingMode,portrait:true,strictFacing});if(token!==generation)return false;if(ok){facingMode=camera.actualFacingMode||facingMode;camera.setOptions({mirror:facingMode==='user'});startHands();}else if(!strictFacing)notice(camera.lastCameraError?.message||'Allow Camera in browser settings, then tap Retry.',true);return ok;}finally{if(token===generation){cameraBusy=false;cameraUI();}}}
   async function answer(){if(phase==='connecting'||voice.call||availabilityChecking)return;availabilityChecking=true;$('answer-call').disabled=true;const preflight=generation;const status=await bridge.getAvailability(true);availabilityChecking=false;if(preflight!==generation)return;if(!status.ready){text('incoming-status',status.reason||(status.offline?'Offline rehearsal: live calls are disabled.':'Live voice is not configured on this server.'));show('incoming-status',true);$('answer-call').disabled=false;return;}show('incoming-status',false);const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;screen('connecting');notice('');text('camera-fallback-text','Opening your camera…');$('answer-call').disabled=true;store.clearMessages();initialGreeting=true;transcript({role:'assistant',key:'opening',text:'How can I help you today?'});initialGreeting=true;

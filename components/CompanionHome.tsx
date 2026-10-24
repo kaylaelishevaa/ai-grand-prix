@@ -32,7 +32,7 @@ export default function CompanionHome({profile,onCall,onExplore,onOpenProduct,of
   const mood=demo?.scenario||live.mood;
   const closeSheet=useCallback(()=>{setSheet(null);setRating(null);},[]);
   function chooseScenario(value:HomeScenario|'live'){setDemo(value==='live'?null:createHomeDemo(value));closeSheet();setNotice('');}
-  function openCard(card:HomeCard){if(card.sku){onOpenProduct(card.sku.id);return;}setRating(null);setSheet(card);}
+  function openCard(card:HomeCard){if(card.href){location.assign(card.href);return;}if(card.sku){onOpenProduct(card.sku.id);return;}setRating(null);setSheet(card);}
   function act(action:HomeDemoAction,message:string,keepOpen=false){if(!demo)return;setDemo(applyHomeDemoAction(demo,action));setNotice(message);if(!keepOpen)closeSheet();}
   const order=demo?.orders.find(item=>item.id===sheet?.sourceId),product=sheet?.reference,swap=order?.swapId?referenceById(order.swapId):undefined;
   const difference=product?.price!=null&&swap?.price!=null?swap.price-product.price:null;

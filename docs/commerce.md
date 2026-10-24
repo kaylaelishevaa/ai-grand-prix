@@ -1,0 +1,31 @@
+The commerce path is a persisted **local simulation**: selected Decisions → quote → explicit checkout confirmation → order → prepared tracking → return/refund ledger. It never calls a payment processor, merchant, courier, support worker or LLM. Every order and ledger entry carries `simulation:true`; no real charge, shipment, compensation or refund occurs. The prepared `/commerce/doorstep.png` asset was generated with imagegen; it is not evidence of a real delivery.
+
+`Profile.commerce` stores orders, returns, refund/compensation entries and action receipts in the same profile JSON as its Decisions and ownership. Orders snapshot product names, actual selected catalog/delegation prices, mock address/payment, delivery instructions and the chosen delivery promise. They do not reuse future catalog changes as historical order facts.
+
+`GET /api/commerce` returns `{profile, commerce, account}`. `POST` accepts the typed `CommerceAction` union in `lib/commerce-types.ts`:
+
+| Action | Behavior |
+| --- | --- |
+| `quote` | Validates selected pending decision IDs, current mock address/payment and delivery promise. Returns a fingerprinted quote; no approval or order is created. |
+| `checkout` | Requires the reviewed quote ID and a unique request ID. Revalidates all current guards, then writes the order, Decision approvals and ownership together. Repeating the same confirmation returns the same order; reusing an ID with a different payload is rejected. |
+| `advanceTracking` | Advances one prepared stage: preparing → packed → hub → out for delivery → delivered. Delivered exposes a prepared, labelled doorstep image. |
+| `simulateDelay` | Creates the explicitly simulated ₩3,000 compensation claim, pending the user's approval. |
+| `approveCompensation` | Records a local compensation credit once; no payment is sent. |
+| `returnDecision` | Assesses one delivered order line using a reason and prepared evidence or upload metadata, without issuing any refund. |
+| `submitReturn` | Confirms the reviewed assessment. Prepared low-value damage can record a keep-item refund; other known scenarios prepare a door pickup; uncertain evidence creates a simulated human-review request. |
+| `humanReview` | Explicitly advances the concept's human-review example to approved pickup. The UI identifies this as simulated; no real employee was contacted. |
+| `completePickup` | Completes the prepared pickup example and records its local refund once. |
+
+Checkout applies server-side ownership/quarantine checks, the night-add lock, delegation price floors and caps, current per-member category permissions, and remaining monthly profile/household budgets. Household settings and checkout share a household lock, and the approved member profile is saved before releasing it. Monthly expenditure includes order snapshots and older approved Decisions without orders, less recorded return refunds. Compensation is not treated as a purchase refund. No commerce approval or return awards XP.
+
+Account includes an explicit, visibly labelled rehearsal clock: real time, 02:14 night, or the next available 09:00 morning. This is a reversible simulator setting for demonstrating the night-add rule without waiting overnight. It changes the effective clock used by the guard; it never deletes a Decision's `lockedUntil`, and holds beyond that simulated morning remain locked. Returning to real time restores normal clock evaluation. The older `pretend2am` control maps to the same night setting.
+
+Delivery choices are promises, not time slots. Rocket eligibility comes from every selected SKU's explicit Rocket/tomorrow catalog fact. Dawn additionally requires simulated WOW membership, a saved sample address marked dawn-eligible and each SKU's explicit 7am fact. The next day's 7am promise is computed in the profile's time zone; after midnight it refers to the following day. Mixed/standard products retain their individual raw catalog delivery facts rather than gaining an invented faster promise. Shipping fees in this concept are explicitly zero; they are not a statement of current Coupang fees or eligibility.
+
+Return policy is a **concept**, not a claim about current merchant rules. A prepared damaged-item example priced at ₩30,000 or less may be kept after confirmation. Larger prepared-damage and ordinary change-of-mind examples use a simulated tomorrow-at-your-door pickup with no box needed. An arbitrary uploaded photo is stored only as bounded filename/type/size metadata, never described as inspected; it routes to human review. Uncertain cases are never automatically denied. Only delivered lines from the active profile qualify, and each line can have one return. Refund amounts come from its paid snapshot, never a client-supplied number.
+
+Tests use fake time, sample account data, temporary isolated profile storage and a fetch implementation that throws. They verify read-only quotes, atomic/idempotent checkout, stale-quote refusal, night/ownership/quarantine/budget/permission guards, Dawn gating and midnight rollover, tracking and compensation approval, prepared and uncertain return paths, exact paid refund amounts and persistent end-to-end behavior without network access.
+
+The interaction direction is grounded in official descriptions, without presenting this prototype as current retailer policy. Coupang's [March 2021 registration statement](https://www.sec.gov/Archives/edgar/data/1834584/000162828021004212/coupang-sx1a2.htm) describes return collection at customers' doors without repackaging. Its [WOW membership overview](https://www.aboutcoupang.com/the-wow-factor-a-look-inside-the-incredible-benefits-of-wow-membership-2/) describes eligible Rocket Fresh orders placed before midnight arriving by 7am. The prototype extends this into a code-gated promise for its synthetic catalog; it does not verify real service coverage, inventory, membership pricing or present-day eligibility.
+
+Coupang's [cancellation and returns FAQ](https://news.coupang.com/archives/63778/) uses order/item selection and explains that handling varies with product and delivery status. The prototype's general-item returnless threshold, no-automatic-denial concept, instant local refund ledger and ₩3,000 compensation event are invented simulation rules. These sources do not establish those rules as actual Coupang policies.

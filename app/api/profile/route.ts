@@ -17,7 +17,7 @@ const requestSchema=z.discriminatedUnion('action',[
  z.object({action:z.literal('confirmMemory'),lineId:z.string().min(1).max(100)}),
  z.object({action:z.literal('correctMemory'),lineId:z.string().min(1).max(100),text:z.string().trim().min(1).max(400)}),
  z.object({action:z.literal('deleteMemory'),lineId:z.string().min(1).max(100)}),
- z.object({action:z.literal('settings'),budget:z.number().int().min(10000).max(5000000).optional(),pretend2am:z.boolean().optional(),timezone:z.string().max(80).optional()}),
+ z.object({action:z.literal('settings'),budget:z.number().int().min(10000).max(5000000).optional(),pretend2am:z.boolean().optional(),rehearsalClock:z.enum(['day','night']).nullable().optional(),timezone:z.string().max(80).optional()}),
  z.object({action:z.literal('summarize')}),z.object({action:z.literal('reset')})
 ]);
 export async function GET(request:Request){try{const result=await withSession(request,async session=>({profile:session.profile}));return sessionResponse(result.data,result.session);}catch(error){return errorResponse(error);}}
@@ -46,7 +46,7 @@ export async function POST(request:Request){try{
    if(original.kind==='scripted'){line.kind='scripted';line.source+=' · scripted scenario';}
   }else if(body.action==='deleteMemory')profile=deleteMemory(profile,body.lineId);
   else if(body.action==='reset')profile={...createProfile(profile.id),timezone:profile.timezone};
-  else if(body.action==='settings'){profile={...profile,budget:body.budget??profile.budget,pretend2am:body.pretend2am??profile.pretend2am,timezone:body.timezone?validatedTimezone(body.timezone):profile.timezone,revision:profile.revision+1,updatedAt:new Date().toISOString()};if(body.budget!==undefined)profile=remember(profile,{id:'budget:'+profile.revision,text:`monthly comfort zone: ₩${body.budget.toLocaleString('en-US')}`,source:'from your budget setting',confidence:1,kind:'settings'});}
+  else if(body.action==='settings'){const rehearsalClock=body.rehearsalClock!==undefined?body.rehearsalClock:body.pretend2am!==undefined?(body.pretend2am?'night':null):(profile.rehearsalClock||(profile.pretend2am?'night':null));profile={...profile,budget:body.budget??profile.budget,rehearsalClock,pretend2am:rehearsalClock==='night',timezone:body.timezone?validatedTimezone(body.timezone):profile.timezone,revision:profile.revision+1,updatedAt:new Date().toISOString()};if(body.budget!==undefined)profile=remember(profile,{id:'budget:'+profile.revision,text:`monthly comfort zone: ₩${body.budget.toLocaleString('en-US')}`,source:'from your budget setting',confidence:1,kind:'settings'});}
   session.profile=profile;return{...response,profile};
  });return sessionResponse(result.data,result.session);
  }catch(error){return errorResponse(error);}}

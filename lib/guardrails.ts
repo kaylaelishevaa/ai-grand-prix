@@ -30,8 +30,13 @@ export function fromLocalClock(parts: WallClock, timezone: string): Date {
   return new Date(instant);
 }
 export function effectiveNow(profile: Profile, now: Date = new Date()): Date {
-  if (!profile.pretend2am) return new Date(now);
+  const mode=profile.rehearsalClock||(profile.pretend2am?'night':null);
+  if (!mode) return new Date(now);
   const wall = localClock(now, profile.timezone);
+  if(mode==='day'){
+    if(wall.hour>=22){const tomorrow=new Date(Date.UTC(wall.year,wall.month-1,wall.day+1));wall.year=tomorrow.getUTCFullYear();wall.month=tomorrow.getUTCMonth()+1;wall.day=tomorrow.getUTCDate();}
+    return fromLocalClock({...wall,hour:9,minute:0,second:0},profile.timezone);
+  }
   return fromLocalClock({ ...wall, hour: 2, minute: 14, second: 0 }, profile.timezone);
 }
 export function lockUntilMorning(profile: Profile, now: Date = new Date()): string | null {

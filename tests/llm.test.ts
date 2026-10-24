@@ -313,6 +313,18 @@ test('verdict validation rejects invented picks, unknown reviews, duplicates and
   assert.throws(() => validateVerdict(kettleVerdict({ runnerUpSkuId: 'kettle' }), allowed), /runner-up/);
 });
 
+test('verdict citations belong only to its actual pick and runner-up, even when other products are eligible', () => {
+  const socks = getSku('socks')!;
+  const allowed = [kettle, kettleAlt, socks];
+  const sockReviewId = reviewsForSku(socks.id)[0].id;
+  const runnerReviewId = reviewsForSku(kettleAlt.id)[0].id;
+  assert.throws(() => validateVerdict(kettleVerdict({ citations: [...kettleCitationIds, sockReviewId] }), allowed), /disallowed citation/);
+  const comparedCitations = [...kettleCitationIds, runnerReviewId];
+  assert.deepEqual(validateVerdict(kettleVerdict({ citations: comparedCitations }), allowed).citations, comparedCitations);
+  assert.throws(() => validateVerdict(kettleVerdict({ runnerUpSkuId: null, citations: comparedCitations }), allowed), /disallowed citation/);
+  assert.deepEqual(validateVerdict(kettleVerdict({ runnerUpSkuId: null }), allowed).citations, kettleCitationIds);
+});
+
 test('verdict validation rejects the old unsupported 6% claim and citations that omit the chosen product', () => {
   assert.throws(() => validateVerdict(kettleVerdict({ dissent: '6% of reviews report a loose lid.' }), [kettle, kettleAlt]), /Unsupported review percentage/);
   assert.throws(() => validateVerdict(kettleVerdict({ dissent: '99% are delighted.' }), [kettle, kettleAlt]), /Unsupported review percentage/);

@@ -2,3 +2,7 @@
 .journey-shell[data-view=call][data-navigation=main]>.journey-header,.journey-shell[data-view=call][data-navigation=main]>.journey-system{display:none}
 .journey-shell[data-view=call][data-navigation=main] .journey-main{padding-top:16px}
 @media(max-width:640px){.journey-shell[data-view=call][data-navigation=main] .live-call-wayfinding{margin-bottom:12px;min-height:32px}.journey-shell[data-view=call][data-navigation=main] .live-call-frame{min-height:400px;height:calc(100svh - 132px)}.journey-shell[data-view=call][data-navigation=main] .live-call-provenance{font-size:6px;margin-top:9px}.journey-shell[data-view=call][data-navigation=main] .journey-main>.screen-caption{margin-top:18px}}
+
+.live-call-interview-progress{font:8px/1.8 var(--mono);color:var(--muted);margin:12px 0}.live-call-memories{margin:20px 0}.live-call-memories>p{font:10px/1.9 var(--mono);padding:12px 0;border-bottom:1px solid var(--line)}.live-call-memories small{display:block;color:var(--muted);font-size:8px}
+
+.journey-shell[data-view=call][data-call-interface=video]>.journey-header,.journey-shell[data-view=call][data-call-interface=video]>.journey-system,.journey-shell[data-view=call][data-call-interface=video]>.journey-trail{display:none}.journey-shell[data-view=call][data-call-interface=video] .journey-main{padding-top:16px}@media(max-width:640px){.journey-shell[data-view=call][data-call-interface=video] .live-call-frame{min-height:400px;height:calc(100svh - 150px)}.journey-shell[data-view=call][data-call-interface=video] .live-call-wayfinding{margin-bottom:10px;min-height:32px}}

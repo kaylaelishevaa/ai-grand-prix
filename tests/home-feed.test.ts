@@ -4,9 +4,15 @@ import {applyHomeDemoAction,buildDemoHome,buildLiveHome,createHomeDemo,HOME_SCEN
 import {createProfile} from '../lib/profile';
 import {getSku} from '../lib/catalog';
 import type {Decision} from '../lib/types';
+import type {CommerceOrder} from '../lib/commerce-types';
 
 const now=new Date('2026-10-26T02:00:00Z');
 const decision=(skuId:string,index=0):Decision=>({id:'plan-'+skuId,skuId,source:'your call',addedAt:new Date(now.getTime()-index*1000).toISOString(),lockedUntil:null,approvedAt:null});
+function persistedOrder(skuIds:string[],id='persisted-order',claim=false):CommerceOrder {
+  const lines=skuIds.map(skuId=>{const sku=getSku(skuId)!;return{id:'plan-'+skuId,decisionId:'plan-'+skuId,skuId,name:sku.name,category:sku.category,quantity:1 as const,catalogPrice:sku.price,unitPrice:sku.price,discount:0,total:sku.price,deliveryFact:sku.delivery};});
+  const total=lines.reduce((sum,line)=>sum+line.total,0);
+  return{id,requestId:'confirmation-'+id,requestHash:'fixture',createdAt:now.toISOString(),lines,subtotal:total,discount:0,shippingFee:0,total,currency:'KRW',address:{id:'sample',label:'Sample home',line:'Demo building',postcode:'00000',area:'Seoul demo',dawnEligible:true,sample:true},payment:{id:'coopy-pay',label:'CoopyPay · mock',last4:'0000',sample:true},delivery:{kind:'rocket',label:'Rocket: tomorrow',promisedAt:null,basis:'Synthetic catalog.',simulation:true},deliveryInstruction:'leave at the front door',status:'shipping',stage:'packed',timeline:[{id:id+'-packed',step:'packed',label:'Packed · simulation',at:now.toISOString(),simulation:true}],deliveredAt:null,doorstepPhoto:null,compensation:claim?{id:'claim-'+id,amount:3000,status:'pending',reason:'Prepared delay example.',createdAt:now.toISOString(),approvedAt:null,simulation:true}:null,simulation:true};
+}
 
 test('live home is driven by profile facts and never manufactures retailer deliveries',()=>{
   const profile=createProfile('home',now);profile.decisions=[decision('kettle')];
@@ -39,6 +45,36 @@ test('live priorities keep pending choices ahead of receipts, with at most three
 test('a plan with an invalid or watching quote does not get a ready-for-approval brief',()=>{
   const profile=createProfile('watching',now);profile.decisions=[{...decision('kettle'),delegation:{budgetCap:100,watchPrice:true,haggle:false,bundle:false,scheduleDelivery:false,status:'watching',quotedPrice:100,discount:0,floorPrice:100,bundledDecisionIds:[],deliveryPlan:null,checkedAt:now.toISOString(),simulation:true}}];
   assert.doesNotMatch(buildLiveHome(profile,now).brief,/needs your OK/);assert.match(buildLiveHome(profile,now).brief,/limits/);
+});
+
+test('a persisted commerce order links to tracking instead of duplicating its older approved Decision receipt',()=>{
+  const profile=createProfile('actual-order-home',now);profile.decisions=[{...decision('kettle'),approvedAt:now.toISOString()}];
+  const order=persistedOrder(['kettle'],'order / sample');profile.commerce={version:1,orders:[order],returns:[],refunds:[],receipts:[]};
+  const before=structuredClone(profile),feed=buildLiveHome(profile,now);
+  assert.equal(feed.cards.length,1);assert.equal(feed.cards[0].kind,'arrival');assert.equal(feed.cards[0].sourceId,order.id);
+  assert.equal(feed.cards[0].href,'/orders/order%20%2F%20sample/tracking');assert.equal(feed.cards[0].action,'Track');
+  assert.match(feed.cards[0].line,/local order.*shipping.*simulated delivery/);
+  assert(!feed.cards.some(card=>card.id.startsWith('receipt:')));assert.doesNotMatch(feed.brief,/nothing was purchased/);
+  assert.deepEqual(profile,before,'Home must not advance tracking or approve anything');
+});
+
+test('a persisted pending compensation claim outranks ready Decisions and remains visible within the card cap',()=>{
+  const profile=createProfile('claim-home',now);profile.decisions=['socks','lamp','apron'].map((id,index)=>decision(id,index));
+  const order=persistedOrder(['kettle'],'delayed-order',true);profile.commerce={version:1,orders:[order],returns:[],refunds:[],receipts:[]};
+  const feed=buildLiveHome(profile,now);assert.equal(feed.cards.length,3);assert.equal(feed.pendingCount,3);
+  assert.equal(feed.cards[0].kind,'problem');assert.equal(feed.cards[0].action,'Review claim');assert.equal(feed.cards[0].sourceId,order.id);assert.match(feed.cards[0].line,/₩3,000.*needs your OK/);assert.match(feed.brief,/compensation claim needs your OK/);
+  assert(feed.cards.slice(1).every(card=>card.kind==='decision'));
+  order.compensation!.status='approved';const approved=buildLiveHome(profile,now);assert(!approved.cards.some(card=>card.kind==='problem'));assert.doesNotMatch(approved.brief,/compensation claim/);
+});
+
+test('quarantined commerce orders are excluded from both cards and brief, including mixed orders with a safe first line',()=>{
+  const profile=createProfile('private-order-home',now);profile.quarantine.push({category:'kitchen',sensitive:true,note:'private'});
+  profile.decisions=[{...decision('socks'),approvedAt:now.toISOString()},{...decision('kettle'),approvedAt:now.toISOString()},decision('lamp')];
+  const hidden=persistedOrder(['socks','kettle'],'hidden-mixed',true);profile.commerce={version:1,orders:[hidden],returns:[],refunds:[],receipts:[]};
+  const feed=buildLiveHome(profile,now);assert.equal(feed.cards.length,1);assert.equal(feed.cards[0].sku!.id,'lamp');assert.equal(feed.pendingCount,1);
+  assert.doesNotMatch(JSON.stringify(feed),/hidden-mixed|compensation|₩3,000|kettle|\+ 1 more/);
+  assert(!feed.cards.some(card=>card.id==='receipt:plan-socks'),'A hidden order must not reappear as a misleading no-purchase legacy receipt');
+  profile.decisions=profile.decisions.filter(item=>item.approvedAt);const quiet=buildLiveHome(profile,now);assert.deepEqual(quiet.cards,[]);assert.equal(quiet.mood,'quiet');assert.doesNotMatch(quiet.brief,/order|claim|delivery|approval/);
 });
 
 test('prepared story priorities suppress nudges on a delivery issue and cap the feed at two',()=>{

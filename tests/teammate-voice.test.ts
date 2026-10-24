@@ -7,7 +7,8 @@ import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import vm from 'node:vm';
-import {createVoiceHandler} from '../lib/teammate/nook-voice.mjs';
+import {createVoiceHandler,sessionConfiguration} from '../lib/teammate/nook-voice.mjs';
+import {FIRST_CALL_QUESTIONS} from '../lib/server/call';
 import {eligibleTeammateProducts,teammateCatalog,teammateProfileContext} from '../lib/server/teammate-voice';
 import {createProfile,deleteMemory} from '../lib/profile';
 import {remember} from '../lib/memory';
@@ -57,6 +58,27 @@ test('realtime context contains only surviving allowed memories and quarantine a
   const chosen=eligibleTeammateProducts(profile)[0];
   profile.owned.push({skuId:chosen.id,source:'have-one',acquiredAt:new Date().toISOString()});
   assert(!eligibleTeammateProducts(profile).some(product=>product.id===chosen.id));
+});
+
+test('first-interview Realtime config keeps the warm five-question flow and disables every shopping/camera tool',async()=>{
+  const profile=createProfile('first-voice-context');
+  for(const count of [0,2,4]){
+    profile.journey={hatched:true,interviewCount:count,interviewComplete:false,nextQuestion:FIRST_CALL_QUESTIONS[count],districts:[],processedCallIds:[]};
+    const context=teammateProfileContext(profile),config=sessionConfiguration({OPENAI_REALTIME_MODEL:'test-realtime'},context);
+    assert.deepEqual(config.tools,[]);assert.equal(context.interview.answeredCount,count);assert.equal(context.interview.question,FIRST_CALL_QUESTIONS[count]);
+    assert.match(config.instructions,/warm reverse-onboarding interview/);assert.match(config.instructions,/ONE at a time/);assert.match(config.instructions,/do not sell or show products/);assert.match(config.instructions,/not your inferred facts/);assert.match(config.instructions,/Skipping a question is allowed/);
+    assert(config.instructions.includes(JSON.stringify({active:true,answeredCount:count,question:FIRST_CALL_QUESTIONS[count],questions:[...FIRST_CALL_QUESTIONS]})));
+    assert.match(config.instructions,/After the fifth answer say: Give me a second/);
+  }
+  let requests=0;
+  const context=teammateProfileContext(profile),handler=createVoiceHandler({profileContext:context,fetchImpl:(async(_url,init)=>{
+    requests++;const transmitted=JSON.parse(String((init!.body as FormData).get('session')));
+    assert.deepEqual(transmitted.tools,[]);assert(transmitted.instructions.includes(FIRST_CALL_QUESTIONS[4]));assert.match(transmitted.instructions,/Start with the current interview.question/);
+    return new Response(answer,{headers:{'content-type':'application/sdp'}});
+  }) as typeof fetch});
+  assert.equal((await handler(post('/api/voice/session',offer),{OPENAI_API_KEY:'TEST_ONLY_FIRST_INTERVIEW',OPENAI_REALTIME_MODEL:'test-realtime'}))!.status,200);assert.equal(requests,1);
+  profile.journey!.interviewComplete=true;profile.journey!.interviewCount=5;
+  const ongoing=sessionConfiguration({},teammateProfileContext(profile));assert(ongoing.tools.some(tool=>tool.name==='search_world_products'));assert(ongoing.tools.some(tool=>tool.name==='look_at_camera'));assert.doesNotMatch(ongoing.instructions,/FIRST CALL OVERRIDE/);
 });
 
 test('offline voice refuses a valid SDP before fetch or key use while local search stays available',async()=>{

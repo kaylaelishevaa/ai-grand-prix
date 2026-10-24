@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
-import CoupiApp, {Art, Button, Meta, Modal, Pet, ReviewRow, Speech, SystemClock, TypedDissent} from './CoupiApp';
+import {Art, Button, Meta, Modal, Pet, ReviewRow, Speech, SystemClock, TypedDissent} from './CoupiApp';
 import CompanionCall from './CompanionCall';
 import LiveCallExperience from './LiveCallExperience';
 import CompanionHome from './CompanionHome';
@@ -12,6 +12,9 @@ import SceneDiorama from './SceneDiorama';
 import SceneFallback from './SceneFallback';
 import WorldHome from './WorldHome';
 import WorldJournal from './WorldJournal';
+import ProductFooter from './ProductFooter';
+import NetworkNotice from './NetworkNotice';
+import SellerQA from './SellerQA';
 import {worldTemplates,type WorldTemplate} from '@/data/world-templates';
 import {Glyph} from './Glyph';
 import {catalog, getReview, getSku, reviewsForSku} from '@/lib/catalog';
@@ -26,11 +29,11 @@ import type {AskResponse, Profile, SceneResult, Verdict} from '@/lib/types';
 import type {CallResponse, District, WorldResponse} from '@/lib/journey-types';
 import './journey.css';
 
-type View = 'hatch' | 'home' | 'call' | 'world' | 'district' | 'preview' | 'archive' | 'stroll';
+type View = 'hatch' | 'home' | 'call' | 'world' | 'district' | 'preview' | 'archive';
 type Panel = 'verdict' | 'why' | 'review' | 'reviews' | 'delegate' | 'everything';
 const money = (value:number) => '₩' + value.toLocaleString('en-US');
 const uid = () => crypto.randomUUID();
-const captions:Record<View,string> = {hatch:'replaces onboarding',home:'replaces the homepage',call:'replaces a search box',world:'replaces browsing',district:'replaces categories',preview:'replaces trend feeds',archive:'replaces a forgotten browsing history',stroll:'replaces endless scrolling'};
+const captions:Record<View,string> = {hatch:'replaces onboarding',home:'replaces the homepage',call:'replaces a search box',world:'replaces browsing',district:'replaces categories',preview:'replaces trend feeds',archive:'replaces a forgotten browsing history'};
 
 async function api<T>(url:string, body?:unknown):Promise<T> {
   const response = await fetch(url, {method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
@@ -120,15 +123,16 @@ export default function JourneyApp() {
   const scenicKind=activeScene?resolveSceneKind(activeScene):undefined;
   const scenicContext=activeScene?resolveSceneContext(activeScene):undefined;
   const scenicMood=scenicKind?getSceneMood(scenicKind,scenicContext):undefined;
-  const contextName=view==='preview'?template?.name:view==='district'||view==='stroll'?district?.name:undefined;
+  const contextName=view==='preview'?template?.name:view==='district'?district?.name:undefined;
   const pending=profile?.decisions.filter(d=>!d.approvedAt)||[];
   const sku=productId?getSku(productId):undefined;
-  const phase=profile?.pretend2am?'night':view==='hatch'?'dawn':view==='call'?'store':'noon';
+  const rehearsal=profile?.rehearsalClock||(profile?.pretend2am?'night':null);
+  const phase=rehearsal==='night'?'night':view==='hatch'?'dawn':view==='call'?'store':'noon';
   const productDecision=sku?profile?.decisions.find(item=>item.skuId===sku.id&&!item.approvedAt):undefined;
   const approvedDecision=sku?profile?.decisions.find(item=>item.skuId===sku.id&&!!item.approvedAt):undefined;
   const productOwned=!!sku&&!!profile?.owned.some(item=>item.skuId===sku.id);
   const hasMainNavigation=!!profile&&(!!profile.journey?.interviewComplete||presenter);
-  const step=productId&&(panel==='delegate'||productDecision||approvedDecision)?4:view==='hatch'?0:view==='call'&&!profile?.journey?.interviewComplete?1:view==='world'?2:['district','preview','stroll'].includes(view)?3:2;
+  const step=productId&&(panel==='delegate'||productDecision||approvedDecision)?4:view==='hatch'?0:view==='call'&&!profile?.journey?.interviewComplete?1:view==='world'?2:['district','preview'].includes(view)?3:2;
 
   function changeView(next:View) {setView(next);setError('');window.scrollTo({top:0,behavior:'instant'});}
   function openUtility(next:'call') {setTypedCall(false);if(view!==next){lastView.current=view;changeView(next);}}
@@ -204,11 +208,11 @@ export default function JourneyApp() {
     if(productOwned)return <section className="runner-up"><span className="eyebrow">ALREADY IN YOUR WORLD</span><p>one is enough. you already have this.</p></section>;
     if(!productDecision)return null;
     const locked=isDecisionLocked(profile,productDecision),job=productDecision.delegation,issue=decisionApprovalIssue(productDecision);
-    return <section className="runner-up" aria-label="Coopy's pending plan" aria-live="polite"><span className="eyebrow">COOPY’S PLAN / YOUR WORD COMES NEXT</span><div className="decision-statuses">{locked&&<span className="status-chip status-night"><Glyph name="moon"/> sleep on it · 07:00</span>}<span className={`status-chip status-${job?.status||'ready'}`}>{job?.status==='watching'?'watching…':job?.status==='haggled'?`haggled −${money(job.discount)} · simulated`:'ready for your approval'}</span></div><div className="product-row"><span><b>{sku.name}</b><small>{job?`your cap ${money(job.budgetCap)}`:'your call, kept here until you decide'}</small></span><strong>{money(job?.quotedPrice??sku.price)}</strong></div>{locked&&<p className="lock-note">it’s late. i’ll hold this until 7am. morning-you gets a vote.</p>}{issue&&<p className="footnote">{issue}</p>}{job?.deliveryPlan&&<p className="delegation-detail">{job.deliveryPlan}{job.bundle&&job.bundledDecisionIds.length?` · grouped with ${job.bundledDecisionIds.length} other pending item${job.bundledDecisionIds.length===1?'':'s'}`:''}</p>}<div className="sheet-actions"><Button disabled={delegating||productBusy||comparisonBusy||locked||!!issue} onClick={()=>void updateProductPlan('approve')}>{delegating?'Checking your limits…':'Approve this plan'} <Glyph name="check"/></Button>{job?.status==='watching'&&<Button secondary disabled={delegating||comparisonBusy} onClick={()=>void updateProductPlan('refresh')}>Check now</Button>}<Button secondary disabled={delegating||comparisonBusy} onClick={()=>{setPanel('delegate');setProductError('');}}>Adjust the plan</Button><Button secondary disabled={delegating||comparisonBusy} onClick={()=>void updateProductPlan('remove')}>Let it go</Button></div><p className="footnote">Executes only with your approval. This is a local plan; negotiation, delivery booking and payment are simulated.{pending.length>1?` ${pending.length-1} other proposal${pending.length===2?' is':'s are'} kept with their products.`:''}</p></section>;
+    return <section className="runner-up" aria-label="Coopy's pending plan" aria-live="polite"><span className="eyebrow">COOPY’S PLAN / YOUR WORD COMES NEXT</span><div className="decision-statuses">{locked&&<span className="status-chip status-night"><Glyph name="moon"/> sleep on it · 07:00</span>}<span className={`status-chip status-${job?.status||'ready'}`}>{job?.status==='watching'?'watching…':job?.status==='haggled'?`haggled −${money(job.discount)} · simulated`:'ready for your approval'}</span></div><div className="product-row"><span><b>{sku.name}</b><small>{job?`your cap ${money(job.budgetCap)}`:'your call, kept here until you decide'}</small></span><strong>{money(job?.quotedPrice??sku.price)}</strong></div>{locked&&<p className="lock-note">it’s late. i’ll hold this until 7am. morning-you gets a vote.</p>}{issue&&<p className="footnote">{issue}</p>}{job?.deliveryPlan&&<p className="delegation-detail">{job.deliveryPlan}{job.bundle&&job.bundledDecisionIds.length?` · grouped with ${job.bundledDecisionIds.length} other pending item${job.bundledDecisionIds.length===1?'':'s'}`:''}</p>}<div className="sheet-actions"><Button disabled={delegating||productBusy||comparisonBusy||locked||!!issue} onClick={()=>location.assign('/checkout?items='+encodeURIComponent(productDecision.id))}>{delegating?'Checking your limits…':'Review checkout'} <Glyph name="check"/></Button>{job?.status==='watching'&&<Button secondary disabled={delegating||comparisonBusy} onClick={()=>void updateProductPlan('refresh')}>Check now</Button>}<Button secondary disabled={delegating||comparisonBusy} onClick={()=>{setPanel('delegate');setProductError('');}}>Adjust the plan</Button><Button secondary disabled={delegating||comparisonBusy} onClick={()=>void updateProductPlan('remove')}>Let it go</Button></div><p className="footnote">Executes only with your approval. This is a local plan; negotiation, delivery booking and payment are simulated.{pending.length>1?` ${pending.length-1} other proposal${pending.length===2?' is':'s are'} kept with their products.`:''}</p></section>;
   }
 
 
-  return <div className="app-shell journey-shell" data-view={view} data-phase={phase} data-scene-kind={scenicKind} data-scene-setting={scenicContext?.setting} data-modal={productId?'open':'closed'} data-navigation={hasMainNavigation?'main':'onboarding'}>
+  return <div className="app-shell journey-shell" data-view={view} data-phase={phase} data-scene-kind={scenicKind} data-scene-setting={scenicContext?.setting} data-modal={productId?'open':'closed'} data-navigation={hasMainNavigation?'main':'onboarding'} data-call-interface={!typedCall&&!status?.offline?'video':'text'}>
     <div className="ambient-field" aria-hidden="true"><span className="ambient-orb orb-one"/><span className="ambient-orb orb-two"/><span className="ambient-orb orb-three"/></div><div className="film-grain" aria-hidden="true"/>
     <header className="journey-header">
       <button className="wordmark" aria-label="Coopy home" onClick={()=>changeView(hasMainNavigation?'home':'hatch')}><span className="brand-flower"><Glyph name="flower"/></span>COUPI<span className="brand-dot">.</span></button>
@@ -216,12 +220,14 @@ export default function JourneyApp() {
       {!hasMainNavigation&&<div className="journey-utilities">
         <button className={view==='call'?'current':''} onClick={()=>openUtility('call')} aria-label="Call Coopy"><Glyph name="mic"/><span>Call</span><b className="call-presence"/></button>
       </div>}
+      {hasMainNavigation&&<nav className="journey-account-links" aria-label="Your plans and account"><Link href="/decisions" aria-label="Decisions"><Glyph name="check"/></Link><Link href="/orders" aria-label="Orders"><Glyph name="box"/></Link><Link href="/account" aria-label="Account"><Glyph name="user"/></Link></nav>}
       {hasMainNavigation&&<span className="journey-home-note">your little someone</span>}
     </header>
-    <div className="journey-system"><span><i/>{status?.offline?'OFFLINE REPLAY':'COOPY IS HERE'}</span><SystemClock/><span>{profile?.pretend2am?'NIGHT REHEARSAL':'ON YOUR SIDE'}</span></div>
+    <div className="journey-system"><span><i/>{status?.offline?'OFFLINE REPLAY':'COOPY IS HERE'}</span><SystemClock/><span>{rehearsal==='night'?'NIGHT REHEARSAL':rehearsal==='day'?'DAY REHEARSAL':'ON YOUR SIDE'}</span></div>
     {!hasMainNavigation&&<nav className="journey-trail" aria-label="Your journey">{['Meet','Tell your story','Your world','Wander','Your word'].map((label,index)=><span key={label} className={index===step?'active':index<step?'done':''} aria-current={index===step?'step':undefined}><b>{String(index+1).padStart(2,'0')}</b>{label}</span>)}</nav>}
 
     <main className={`journey-main journey-${view}`}>
+      <NetworkNotice/>
       {busy&&<div className="busy-banner" role="status"><span className="busy-dot"/>{busy}{busySeconds>=5&&<span aria-hidden="true"> · {Math.floor(busySeconds/60)}:{String(busySeconds%60).padStart(2,'0')}</span>}<span className="shimmer"/></div>}
       {error&&<div className="error-banner" role="alert"><b>one little pause.</b><p>{error}</p><button aria-label="Dismiss error" onClick={()=>setError('')}><Glyph name="close"/></button></div>}
       {!profile&&!busy&&<div className="empty-state"><Pet/><h2>Let’s reconnect.</h2><Button secondary onClick={()=>location.reload()}>Try again</Button></div>}
@@ -233,7 +239,7 @@ export default function JourneyApp() {
         <div className="hatch-world"><span className="hatch-orbit orbit-a"/><span className="hatch-orbit orbit-b"/><HatchDiorama hatched={hatched} onHatch={()=>void hatch()} phase="dawn" fallback={<button className="intro-egg" disabled={hatched||!!busy} onClick={()=>void hatch()} aria-label="Tap to hatch Coopy">{hatched?<Pet size="large"/>:<span className="egg-shape"/>}</button>}/><span className="hatch-coordinates">YOUR WORLD / NOT YET WRITTEN</span></div>
       </section>}
 
-      {profile&&view==='call'&&(profile.journey?.interviewComplete&&!typedCall&&!status?.offline?<LiveCallExperience profile={profile} onProfile={storeProfile} onClose={closeUtility} onType={()=>setTypedCall(true)} onOpenProduct={id=>void openProduct(id)}/>:<CompanionCall profile={profile} offline={status?.offline} onProfile={storeProfile} onComplete={completeCall} onOpenProduct={(id,v)=>void openProduct(id,v)} onClose={closeUtility}/>)}
+      {profile&&view==='call'&&(!typedCall&&!status?.offline?<LiveCallExperience profile={profile} onProfile={storeProfile} onClose={closeUtility} onType={()=>setTypedCall(true)} onComplete={completeCall} onOpenProduct={id=>void openProduct(id)}/>:<CompanionCall profile={profile} offline={status?.offline} onProfile={storeProfile} onComplete={completeCall} onOpenProduct={(id,v)=>void openProduct(id,v)} onClose={closeUtility}/>)}
 
       {profile&&view==='home'&&<CompanionHome profile={profile} offline={status?.offline} presenter={presenter} initialScenario={homeScenario} onCall={()=>openUtility('call')} onExplore={()=>changeView('world')} onOpenProduct={id=>void openProduct(id)}/>}
 
@@ -251,7 +257,7 @@ export default function JourneyApp() {
 
       {profile&&view==='district'&&(district?<section className="district-detail screen-surface">
         <button className="text-button" onClick={()=>changeView('world')}><Glyph name="arrow-left"/> Your world</button>
-        <div className="district-heading"><div><p className="eyebrow orange">{districtScene?.blueprint?.atmosphere.timeLabel||scenicMood?.time} / {districtScene?.blueprint?'IMAGINED FROM YOUR STORY':scenicMood?.label}</p><h1>{moment?.districtName||district.name}</h1><p>{moment?`a moment kept on ${new Date(moment.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:district.provenance}</p></div><button className="quiet-pill" onClick={()=>changeView('stroll')}><Glyph name="heart"/> walk around <span>optional</span></button></div>
+        <div className="district-heading"><div><p className="eyebrow orange">{districtScene?.blueprint?.atmosphere.timeLabel||scenicMood?.time} / {districtScene?.blueprint?'IMAGINED FROM YOUR STORY':scenicMood?.label}</p><h1>{moment?.districtName||district.name}</h1><p>{moment?`a moment kept on ${new Date(moment.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:district.provenance}</p></div></div>
         {moment&&<div className="moment-return"><span>THEN / YOUR SAVED ROOM<br/>Product details still show the current demo catalog.</span><button onClick={()=>setMomentId('')}>Back to now <Glyph name="arrow-right"/></button></div>}
         <div className="full-district"><SceneDiorama scene={districtScene!} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={districtScene!} onSelect={id=>void openProduct(id)}/>}/><div className="district-scene-note"><span>{districtScene!.blueprint?'A place imagined from your words. Follow a light to look closer.':'Follow a little light. Stay as long as you like.'}</span><span>{districtScene!.items.length} things to discover · your pace</span></div></div>
         {moment&&<p className="moment-note">{moment.text}</p>}
@@ -261,15 +267,15 @@ export default function JourneyApp() {
         <nav className="scene-journey-links" aria-label="Continue your journey"><span>{nextDistrict?'A LITTLE FURTHER ALONG':'A GOOD PLACE TO PAUSE'}</span><button onClick={()=>nextDistrict?enterDistrict(nextDistrict):changeView('world')}>{nextDistrict?nextDistrict.name:'Back to your world'}<Glyph name="arrow-right"/></button></nav>
       </section>:<div className="empty-state"><h2>This little world has moved.</h2><Button secondary onClick={()=>changeView('world')}>Back to your world</Button></div>)}
 
-      {profile&&view==='stroll'&&<CoupiApp embedded initialView="taste" initialDeckMode="stroll" districtSkuIds={district?.scene.items.map(i=>i.skuId)} onProfileChange={storeProfile} onExit={()=>changeView('district')} onOpenProduct={id=>void openProduct(id)}/>}
 
-      {view!=='stroll'&&<p className="screen-caption"><span className="caption-mark"/>{captions[view]}</p>}
+      {<p className="screen-caption"><span className="caption-mark"/>{view==='call'&&!profile?.journey?.interviewComplete?'replaces onboarding forms':captions[view]}</p>}
     </main>
+    <ProductFooter/>
     <footer className="journey-footer"><span>COOPY / ON YOUR SIDE</span><Link href="/guided">take the guided day <Glyph name="arrow-up"/></Link><span>SIMULATION — SYNTHETIC CATALOG & ORDERS</span></footer>
     {hasMainNavigation&&<nav className="journey-bottom-nav" aria-label="Main navigation">
       <button aria-current={view==='home'?'page':undefined} onClick={()=>changeView('home')}><Glyph name="home"/><span>Home</span></button>
       <button aria-current={view==='call'?'page':undefined} onClick={()=>openUtility('call')}><Glyph name="mic"/><span>Call</span><i aria-hidden="true"/></button>
-      <button aria-current={['world','district','preview','archive','stroll'].includes(view)?'page':undefined} onClick={()=>changeView('world')}><Glyph name="scene"/><span>Explore</span></button>
+      <button aria-current={['world','district','preview','archive'].includes(view)?'page':undefined} onClick={()=>changeView('world')}><Glyph name="scene"/><span>Explore</span></button>
     </nav>}
     {notice&&<div className="toast" role="status">{notice}</div>}
 
@@ -278,7 +284,7 @@ export default function JourneyApp() {
       {productError&&<div className="sheet-error" role="alert"><p>{productError}</p>{panel==='verdict'&&<button className="text-button" onClick={()=>void openProduct(sku.id)}>Try the evidence check again</button>}</div>}
       {panel==='verdict'&&<><Art sku={sku} className="sheet-art"/><div className="sheet-product-heading"><h2>{sku.name}</h2><strong>{money(sku.price)}</strong></div><span className="delivery-pill"><Glyph name="rocket"/>{sku.delivery} · demo</span>
         {productBusy?<div className="product-thinking" role="status"><span className="busy-dot"/> looking at your story, then the evidence…</div>:<><Speech>{verdict?.clarifyingQuestion||verdict?.reason||sku.description}</Speech>{verdict?.clarifyingQuestion&&<Button secondary onClick={()=>{closeProduct();openUtility('call');}}>Tell Coopy in the call <Glyph name="mic"/></Button>}{verdict?.dissent&&<TypedDissent text={verdict.dissent}/>}</>}
-        <div className="citations">{(verdict?.citations||reviewsForSku(sku.id).filter(r=>r.stars<=2).slice(0,2).map(r=>r.id)).map(id=><button key={id} onClick={()=>{setReviewId(id);setPanel('review');}}><Glyph name="arrow-up"/>{id} · {getReview(id)?.stars}<Glyph name="star"/></button>)}</div>
+        <SellerQA skuId={sku.id}/><div className="citations">{(verdict?.citations||reviewsForSku(sku.id).filter(r=>r.stars<=2).slice(0,2).map(r=>r.id)).map(id=><button key={id} onClick={()=>{setReviewId(id);setPanel('review');}}><Glyph name="arrow-up"/>{id} · {getReview(id)?.stars}<Glyph name="star"/></button>)}</div>
         <VerdictComparison profile={profile} pickSkuId={sku.id} verdict={verdict} origin={productOrigin} disabled={productBusy||comparisonBusy||delegating||productOwned} onBusyChange={setComparisonBusy} onChange={(next,p)=>{productRequest.current++;setComparisonBusy(false);storeProfile(p);setProductId(next.pickSkuId);setVerdict(next);setCap(getSku(next.pickSkuId!)!.price);setProductError('');setPanel('verdict');flash('new pick, honest trade-off. i remembered your choice.');}}/>
         {renderProductPlan()}<div className="journey-verdict-actions">{!productDecision&&!productOwned&&<Button disabled={productBusy||comparisonBusy||delegating} onClick={()=>{setPanel('delegate');setProductError('');}}>Let Coopy handle it <Glyph name="arrow-right"/></Button>}<button className="text-button" disabled={comparisonBusy} onClick={()=>setPanel('why')}>Why?</button></div>
         <div className="verdict-quiet-actions"><button onClick={()=>setPanel('reviews')}>Read all reviews <Glyph name="arrow-right"/></button><button onClick={()=>setPanel('everything')}>See everything</button></div>
@@ -290,7 +296,7 @@ export default function JourneyApp() {
       {panel==='review'&&(()=>{const review=getReview(reviewId);return review?<><ReviewRow review={review}/><Button secondary onClick={()=>setPanel('reviews')}>Read the unfiltered list <Glyph name="arrow-right"/></Button></>:<p>This review isn’t in the corpus.</p>;})()}
       {panel==='reviews'&&(()=>{const ids=[...new Set([sku.id,verdict?.runnerUpSkuId,reviewId?getReview(reviewId)?.skuId:null].filter((id):id is string=>!!id))];const rows=ids.flatMap(reviewsForSku);return <><h2 className="modal-title">All {rows.length} reviews.</h2><p className="raw-intro">Seeded demo reviews. Original order, no relevance filter, no hidden negatives.</p>{rows.map(review=><ReviewRow review={review} key={review.id}/>)}{!rows.length&&<p>No reviews are available for this product. Coopy cannot invent them.</p>}<p className="raw-end">That’s every review in the local corpus.</p><a className="text-button" href={`https://www.coupang.com/np/search?q=${encodeURIComponent(sku.aliases[0]||sku.name)}`} target="_blank" rel="noopener noreferrer">Find similar products on Coupang <Glyph name="arrow-up"/></a><p className="footnote">Opens a product search. A verified Coupang listing and its live reviews are not connected to this demo SKU.</p></>;})()}
       {panel==='everything'&&<><h2 className="modal-title">Nothing hidden.</h2><p className="raw-intro">The full catalog is always one tap away.</p><div className="evidence-catalog-list">{eligibleCatalog(profile).map(item=><button className="product-row" key={item.id} onClick={()=>void openProduct(item.id)}><Art sku={item}/><span><b>{item.name}</b><small>{item.category}</small></span><strong>{money(item.price)}</strong></button>)}</div></>}
-      {panel==='delegate'&&<div className="delegation-panel"><h2 className="modal-title">leave the little<br/>things with me.</h2><div className="product-row"><Art sku={sku}/><span><b>{sku.name}</b><small>{money(sku.price)} · catalog price</small></span></div><p className="delegation-intro">Give me a limit. I’ll prepare a plan, and bring it back for your word.</p><div className="delegation-options">{([['watchPrice','Watch the price','Keep it pending if it’s above your cap. Check again when you return.'],['haggle','Try for a better price','Rehearse an offer within a code-enforced floor. No seller is contacted.'],['bundle','Bring things together','Group the delivery plan with your other pending items.'],['scheduleDelivery','Plan Rocket delivery','Keep the catalog delivery promise in the plan. Nothing is booked.']] as const).map(([key,title,detail])=><label key={key}><input type="checkbox" checked={options[key]} onChange={e=>setOptions(o=>({...o,[key]:e.target.checked}))}/><span><b>{title}</b><small>{detail}</small></span></label>)}</div><div className="delegation-budget"><label htmlFor="delegation-cap">MY LIMIT FOR THIS ITEM<strong>{money(cap)}</strong></label><input id="delegation-cap" type="range" min="0" max={Math.max(50000,Math.ceil(sku.price*1.5/1000)*1000)} step="100" value={cap} onChange={e=>setCap(Number(e.target.value))}/><p>Per item. Other pending items keep their own limits.</p></div><div className="delegation-vow"><Glyph name="lock"/><span>executes only with your approve.</span></div><Button disabled={delegating||comparisonBusy||productBusy||productOwned} onClick={()=>void delegate()}>{delegating?'Checking your limits…':'Take care of it, Coopy'} <Glyph name="arrow-right"/></Button><p className="footnote">Local agent plan. Negotiations and orders are simulated; no merchant integration is connected.</p></div>}
+      {panel==='delegate'&&<div className="delegation-panel"><h2 className="modal-title">leave the little<br/>things with me.</h2><div className="product-row"><Art sku={sku}/><span><b>{sku.name}</b><small>{money(sku.price)} · catalog price</small></span></div><p className="delegation-intro">Give me a limit. I’ll prepare a plan, and bring it back for your word.</p><div className="delegation-options">{([['watchPrice','Watch the price','Keep it pending if it’s above your cap. Check again when you return.'],['haggle','Try for a better price','Rehearse an offer within a code-enforced floor. No seller is contacted.'],['bundle','Bring things together','Group the delivery plan with your other pending items.'],['scheduleDelivery','Plan Rocket delivery','Keep the catalog delivery promise in the plan. Nothing is booked.']] as const).map(([key,title,detail])=><label key={key}><input type="checkbox" checked={options[key]} onChange={e=>setOptions(o=>({...o,[key]:e.target.checked}))}/><span><b>{title}</b><small>{detail}</small></span></label>)}</div><div className="delegation-budget"><label htmlFor="delegation-cap">MY LIMIT FOR THIS ITEM<strong>{money(cap)}</strong></label><input id="delegation-cap" type="range" min="0" max={Math.max(50000,Math.ceil(sku.price*1.5/1000)*1000)} step="100" value={cap} onChange={e=>setCap(Number(e.target.value))}/><p>Per item. Other pending items keep their own limits.</p></div><div className="delegation-vow"><Glyph name="lock"/><span>executes only with your approve.</span></div><Button disabled={delegating||comparisonBusy||productBusy||productOwned} onClick={()=>void delegate()}>{delegating?'Checking your limits…':'Take care of it, Coopy'} <Glyph name="arrow-right"/></Button><div className="product-inline-links"><Link href="/terms#delegation">Delegation Terms</Link><Link href="/permissions">Your permissions</Link><Link href="/decisions">All your plans</Link></div><p className="footnote">Local agent plan. Negotiations and orders are simulated; no merchant integration is connected.</p></div>}
     </Modal>}
   </div>;
 }

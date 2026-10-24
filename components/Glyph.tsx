@@ -1,7 +1,9 @@
 import type {SVGProps} from 'react';
 
-export type GlyphName = 'home'|'heart'|'scene'|'search'|'scan'|'check'|'head'|'arrow-right'|'arrow-left'|'arrow-up'|'clock'|'refresh'|'spark'|'flower'|'close'|'minus'|'plus'|'mic'|'stop'|'camera'|'sun'|'moon'|'lock'|'download'|'swap'|'star'|'image'|'help'|'rocket';
+export type GlyphName = 'home'|'heart'|'scene'|'search'|'scan'|'check'|'head'|'arrow-right'|'arrow-left'|'arrow-up'|'clock'|'refresh'|'spark'|'flower'|'close'|'minus'|'plus'|'mic'|'stop'|'camera'|'sun'|'moon'|'lock'|'download'|'swap'|'star'|'image'|'help'|'rocket'|'box'|'user';
 const paths:Record<GlyphName,React.ReactNode>={
+ box:<><path d="m12 3 9 5v9l-9 5-9-5V8l9-5Zm-9 5 9 5 9-5M12 13v9M7.5 5.5l9 5"/></>,
+ user:<><circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/></>,
  home:<><path d="m3 10 9-7 9 7"/><path d="M5 9v11h5v-6h4v6h5V9"/></>,
  heart:<path d="M20.2 5.8a5 5 0 0 0-7.1 0L12 7l-1.1-1.2a5 5 0 0 0-7.1 7.1L12 21l8.2-8.1a5 5 0 0 0 0-7.1Z"/>,
  scene:<><path d="M12 2 9.6 9.6 2 12l7.6 2.4L12 22l2.4-7.6L22 12l-7.6-2.4Z"/></>,

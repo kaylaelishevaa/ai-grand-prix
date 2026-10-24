@@ -1,0 +1,66 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {randomUUID} from 'node:crypto';
+import {GET as getAccount,POST as postAccount} from '../app/api/account/route';
+import {POST as postDelegate} from '../app/api/delegate/route';
+import {GET as getCommerce,POST as postCommerce} from '../app/api/commerce/route';
+import {loadMemberProfile,withAccountSession,householdSpentThisMonth} from '../lib/server/account-store';
+import {addDecision} from '../lib/guardrails';
+import {assignDelegation} from '../lib/delegation';
+import {rememberWords} from '../lib/memory';
+import {getSku} from '../lib/catalog';
+
+const origin='http://127.0.0.1:3007',day=new Date('2026-10-25T05:00:00Z');
+function request(cookies:Map<string,string>,body?:unknown){return new Request(origin+'/api/account',{method:body===undefined?'GET':'POST',headers:{origin,cookie:[...cookies].map(([key,value])=>key+'='+value).join('; '),...(body===undefined?{}:{'content-type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)})});}
+async function send(handler:(request:Request)=>Promise<Response>,cookies:Map<string,string>,body?:unknown){const response=await handler(request(cookies,body));for(const header of response.headers.getSetCookie()){const pair=header.split(';')[0],split=pair.indexOf('=');cookies.set(pair.slice(0,split),pair.slice(split+1));}return {status:response.status,data:await response.json()};}
+async function isolated(work:()=>Promise<void>){const directory=await mkdtemp(path.join(tmpdir(),'coupi-account-test-')),oldData=process.env.COUPI_DATA_DIR,oldAccount=process.env.COUPI_ACCOUNT_DIR;process.env.COUPI_DATA_DIR=directory;delete process.env.COUPI_ACCOUNT_DIR;try{await work();}finally{if(oldData===undefined)delete process.env.COUPI_DATA_DIR;else process.env.COUPI_DATA_DIR=oldData;if(oldAccount===undefined)delete process.env.COUPI_ACCOUNT_DIR;else process.env.COUPI_ACCOUNT_DIR=oldAccount;await rm(directory,{recursive:true,force:true});}}
+
+test('account initializes once with sample details and a distinct blank member, including cookie-loss recovery',{concurrency:false},async()=>isolated(async()=>{
+ const cookies=new Map<string,string>(),first=await send(getAccount,cookies);assert.equal(first.status,200);const{account,profile}=first.data;
+ assert.equal(account.members.length,2);assert.notEqual(account.id,profile.id);assert.equal(account.defaultPaymentId,'coopy-pay');assert(account.addresses.every((item:{sample:boolean})=>item.sample));assert(account.payments.every((item:{sample:boolean})=>item.sample));
+ const other=await loadMemberProfile(account.members[1].profileId);assert.equal(other.memoryLines.length,0);assert.equal(other.owned.length,0);assert.equal(other.decisions.length,0);assert.equal(other.journey,undefined);
+ cookies.delete('coupi_household');const recovered=await send(getAccount,cookies);assert.equal(recovered.data.account.id,account.id);assert.deepEqual(recovered.data.account.members,account.members);
+}));
+
+test('household switching isolates memory, worlds, owned items and orders; foreign members are rejected',{concurrency:false},async()=>isolated(async()=>{
+ const cookies=new Map<string,string>(),initial=await send(getAccount,cookies),firstId=initial.data.profile.id,otherId=initial.data.account.members[1].profileId;
+ await withAccountSession(request(cookies),async session=>{session.profile=rememberWords(session.profile,'I prefer warm linen','account-test-memory','call');session.profile.owned.push({skuId:'mugs',acquiredAt:day.toISOString(),source:'approved'});session.profile.journey={hatched:true,interviewComplete:true,interviewCount:5,nextQuestion:'',districts:[],processedCallIds:[]};session.profile.commerce={version:1,orders:[],returns:[],refunds:[],receipts:[{requestId:'private-receipt',action:'test',hash:'test',resultId:'private'}]};});
+ const switched=await send(postAccount,cookies,{action:'switch',profileId:otherId});assert.equal(switched.status,200);assert.equal(cookies.get('coupi_profile'),otherId);assert.equal(switched.data.profile.memoryLines.length,0);assert.equal(switched.data.profile.owned.length,0);assert.equal(switched.data.profile.journey,undefined);assert.equal(switched.data.profile.commerce,undefined);
+ const back=await send(postAccount,cookies,{action:'switch',profileId:firstId});assert(back.data.profile.memoryLines.some((line:{text:string})=>line.text.includes('warm')));assert(back.data.profile.owned.some((item:{skuId:string})=>item.skuId==='mugs'));assert.equal(back.data.profile.commerce.receipts[0].requestId,'private-receipt');
+ const denied=await send(postAccount,cookies,{action:'switch',profileId:randomUUID()});assert.equal(denied.status,403);assert.equal(cookies.get('coupi_profile'),firstId);
+ const forged=new Map(cookies);forged.set('coupi_profile',randomUUID());assert.equal((await send(getAccount,forged)).status,403);
+}));
+
+test('revoking a member category stops its delegation and blocks assign/refresh, without touching the other member',{concurrency:false},async()=>isolated(async()=>{
+ const cookies=new Map<string,string>(),initial=await send(getAccount,cookies),currentId=initial.data.profile.id,otherId=initial.data.account.members[1].profileId;
+ let jobId='';await withAccountSession(request(cookies),async session=>{session.profile=assignDelegation(session.profile,{skuId:'kettle',budgetCap:50000,watchPrice:true,haggle:false,bundle:false,scheduleDelivery:true},day).profile;jobId=session.profile.decisions[0].id;});
+ const revoked=await send(postAccount,cookies,{action:'permission',category:'kitchen',enabled:false,cap:50000});assert.equal(revoked.status,200);assert.equal(revoked.data.account.licenses[currentId].kitchen.enabled,false);assert.equal(revoked.data.account.licenses[otherId].kitchen.enabled,true);assert.equal(revoked.data.profile.decisions[0].delegation,undefined);assert.equal(revoked.data.profile.decisions[0].approvedAt,null);assert.equal(revoked.data.account.permissionLog.at(-1).action,'revoked');
+ const blocked=await send(postDelegate,cookies,{action:'assign',skuId:'mugs',budgetCap:20000,watchPrice:true,haggle:false,bundle:false,scheduleDelivery:true});assert.equal(blocked.status,403);assert.equal(blocked.data.code,'LICENSE_REVOKED');
+ const refresh=await send(postDelegate,cookies,{action:'refresh',id:jobId});assert.equal(refresh.status,403);
+ const forbidden=await send(postAccount,cookies,{action:'permission',category:'personal-care',enabled:true,cap:10000});assert.equal(forbidden.status,400);
+}));
+
+test('sample payment/address IDs and notification bounds are validated, and settings persist',{concurrency:false},async()=>isolated(async()=>{
+ const cookies=new Map<string,string>();await send(getAccount,cookies);
+ assert.equal((await send(postAccount,cookies,{action:'settings',defaultAddressId:'not-saved'})).status,400);
+ assert.equal((await send(postAccount,cookies,{action:'settings',defaultPaymentId:'real-card'})).status,400);
+ assert.equal((await send(postAccount,cookies,{action:'settings',dailyLimit:11})).status,400);
+ const saved=await send(postAccount,cookies,{action:'settings',householdBudget:220000,wowMember:true,defaultAddressId:'sample-studio',defaultPaymentId:'demo-card',dailyLimit:0,quietHours:false});assert.equal(saved.status,200);
+ const loaded=await send(getAccount,cookies);assert.equal(loaded.data.account.householdBudget,220000);assert.equal(loaded.data.account.wowMember,true);assert.equal(loaded.data.account.defaultAddressId,'sample-studio');assert.equal(loaded.data.account.defaultPaymentId,'demo-card');assert.equal(loaded.data.account.notifications.dailyLimit,0);assert.equal(loaded.data.account.notifications.quietHours,false);
+}));
+
+test('cross-member concurrent checkouts cannot overspend a shared household budget',{concurrency:false},async()=>isolated(async()=>{
+ const firstCookies=new Map<string,string>(),initial=await send(getAccount,firstCookies),otherId=initial.data.account.members[1].profileId;
+ const secondCookies=new Map(firstCookies);await send(postAccount,secondCookies,{action:'switch',profileId:otherId});
+ const cap=Math.max(10000,getSku('mugs')!.price+1000);await send(postAccount,firstCookies,{action:'settings',householdBudget:cap});
+ for(const cookies of [firstCookies,secondCookies])await withAccountSession(request(cookies),async session=>{session.profile=addDecision(session.profile,'mugs','household concurrency test',day).profile;});
+ async function quote(cookies:Map<string,string>){const current=await send(getCommerce,cookies),account=current.data.account,input={decisionIds:[current.data.profile.decisions[0].id],addressId:account.defaultAddressId,paymentMethodId:account.defaultPaymentId,deliveryKind:'rocket',deliveryInstruction:'leave at the sample door'},quoted=await send(postCommerce,cookies,{action:'quote',...input});assert.equal(quoted.status,200);return{...input,quoteId:quoted.data.quote.id};}
+ const first=await quote(firstCookies),second=await quote(secondCookies);
+ const results=await Promise.all([send(postCommerce,firstCookies,{action:'checkout',...first,requestId:'household-first'}),send(postCommerce,secondCookies,{action:'checkout',...second,requestId:'household-second'})]);
+ assert.deepEqual(results.map(result=>result.status).sort(),[200,409]);assert(['CHECKOUT_BUDGET','CHECKOUT_CHANGED'].includes(results.find(result=>result.status!==200)!.data.code));
+ const a=await send(getCommerce,firstCookies),b=await send(getCommerce,secondCookies);assert.equal(a.data.commerce.orders.length+b.data.commerce.orders.length,1);
+ await withAccountSession(request(firstCookies),async(session,account)=>{assert.equal(await householdSpentThisMonth(account,new Date(),session.profile),getSku('mugs')!.price);});
+}));

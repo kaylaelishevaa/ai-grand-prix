@@ -62,3 +62,5 @@ body{display:block;padding:0;min-height:100dvh}button,input,a{font-family:var(--
   .transcript{max-height:140px}.world-picks{margin:0;padding:12px 15px;border-radius:24px}#world-picks-list{max-height:175px}
   .world-picks-note{font-size:8px}.world-pick{padding:9px 0}.world-pick strong{font-size:12px}
 }
+
+.phone-app[data-interview=true] #decline-call,.phone-app[data-interview=true] .product-zone,.phone-app[data-interview=true] .catalog-button,.phone-app[data-interview=true] .swipe-actions{display:none!important}

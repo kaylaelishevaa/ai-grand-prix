@@ -53,6 +53,7 @@ export function createProfile(id: string, now: Date = new Date()): Profile {
     xp: 0,
     budget: 150000,
     pretend2am: false,
+    rehearsalClock: null,
     timezone: 'Asia/Seoul',
     answeredQuestionIds: [],
     updatedAt: iso(now),
