@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home, layout A, five states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 2140px; height: 1010px; box-sizing: border-box; padding: 40px; background: #E9E6DA; color: #183E30; font-family: 'DM Sans', system-ui, sans-serif; display: flex; gap: 40px; align-items: flex-start">
+
+  <div style="width: 380px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-direction: column; gap: 4px; height: 66px"><span style="font-family: Georgia, serif; font-size: 24px">1 · First Home</span><span style="font-size: 14px">After the first call. One line about what COUPI learned; the details live in Inside COUPI's head.</span></div>
+    <div style="width: 380px; height: 800px; box-sizing: border-box; border: 8px solid #1B2622; border-radius: 44px; background: #F5F3E9; overflow: hidden; display: flex; flex-direction: column">
+      <div style="padding: 18px 18px 0; display: flex; justify-content: space-between; align-items: center">
+        <button type="button" aria-label="Inside COUPI's head" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #183E30; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+        <button type="button" aria-label="Decisions, none waiting" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #183E30; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></button>
+      </div>
+      <div style="display: flex; justify-content: center; margin-top: 8px"><dc-import name="Coupi" mood="excited" size="150" hint-size="150px,133px"></dc-import></div>
+      <div style="margin: 12px 18px 0; background: #FFFFFF; border-radius: 22px; padding: 16px 18px; font-family: Georgia, serif; font-size: 18px; line-height: 1.38">That was fun, Mina. Your lipstick arrives tomorrow morning.</div>
+      <div style="padding: 16px 16px 0; display: flex; flex-direction: column; gap: 10px">
+        <div style="background: #FFFFFF; border-radius: 20px; padding: 10px 12px 10px 10px; display: flex; gap: 12px; align-items: center">
+          <img src="/_blob/295913a7a1324255fb7eecb444870403" alt="Romand Zero Matte lipstick, 09 Shell Nude" style="flex: none; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #FFFFFF; border: 1px solid #EEE9DC">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600">Romand Zero Matte · 09</span><span style="font-size: 12.5px; color: #3D5248">Tomorrow by 7am</span></div>
+          <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: none; background: #183E30; color: #F5F3E9; font-family: inherit; font-size: 13px; font-weight: 600">Track</button>
+        </div>
+        <div style="background: #DCE7D3; border-radius: 20px; padding: 14px 12px 14px 16px; display: flex; gap: 12px; align-items: center">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600">I learned 3 things about you</span><span style="font-size: 12.5px; color: #2F4A3E">Check I got them right</span></div>
+          <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid #183E30; background: transparent; color: #183E30; font-family: inherit; font-size: 13px; font-weight: 600">Review</button>
+        </div>
+      </div>
+      <nav aria-label="Main" style="margin-top: auto; flex: none; height: 88px; background: #FFFFFF; border-top: 1px solid #E5E2D6; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; padding-top: 10px">
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: #183E30; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #183E30; text-decoration: none; margin-top: -32px"><span style="width: 68px; height: 68px; border-radius: 34px; background: #183E30; display: flex; align-items: center; justify-content: center; border: 4px solid #F5F3E9"><dc-import name="Coupi" mood="calm" size="46" hint-size="46px,41px"></dc-import></span>Call</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 500; color: #3D5248; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Explore</a>
+      </nav>
+    </div>
+  </div>
+
+  <div style="width: 380px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-direction: column; gap: 4px; height: 66px"><span style="font-family: Georgia, serif; font-size: 24px">2 · Normal day</span><span style="font-size: 14px">At most three cards, most important first. The nudge carries its own reason.</span></div>
+    <div style="width: 380px; height: 800px; box-sizing: border-box; border: 8px solid #1B2622; border-radius: 44px; background: #F5F3E9; overflow: hidden; display: flex; flex-direction: column">
+      <div style="padding: 18px 18px 0; display: flex; justify-content: space-between; align-items: center">
+        <button type="button" aria-label="Inside COUPI's head" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #183E30; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+        <button type="button" aria-label="Decisions, 1 waiting" style="position: relative; width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #183E30; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span style="position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; border-radius: 9px; background: #EE8773; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span></button>
+      </div>
+      <div style="display: flex; justify-content: center; margin-top: 8px"><dc-import name="Coupi" mood="calm" size="150" hint-size="150px,133px"></dc-import></div>
+      <div style="margin: 12px 18px 0; background: #FFFFFF; border-radius: 22px; padding: 16px 18px; font-family: Georgia, serif; font-size: 18px; line-height: 1.38">Morning, Mina. Your desk lamp comes by noon, and one thing needs your OK.</div>
+      <div style="padding: 16px 16px 0; display: flex; flex-direction: column; gap: 10px">
+        <div style="background: #FFFFFF; border-radius: 20px; padding: 10px 12px 10px 10px; display: flex; gap: 12px; align-items: center">
+          <img src="/_blob/9f3b210b768876efc94cf1928b8fc369" alt="Duplex LED desk lamp" style="flex: none; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #FFFFFF; border: 1px solid #EEE9DC">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600">Desk lamp</span><span style="font-size: 12.5px; color: #3D5248">Today by 12:00</span></div>
+          <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: none; background: #183E30; color: #F5F3E9; font-family: inherit; font-size: 13px; font-weight: 600">Track</button>
+        </div>
+        <div style="background: #FFFFFF; border-radius: 20px; padding: 10px 12px 10px 10px; display: flex; gap: 12px; align-items: center">
+          <img src="/_blob/74cbd15ec210caf6e3b311e7744de06a" alt="EYELAB blue-light glasses, rose gold" style="flex: none; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #FFFFFF; border: 1px solid #EEE9DC">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600">Blue-light glasses</span><span style="font-size: 12.5px; color: #3D5248">₩19,900 · needs your OK</span></div>
+          <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: none; background: #183E30; color: #F5F3E9; font-family: inherit; font-size: 13px; font-weight: 600">Review</button>
+        </div>
+        <div style="background: #FFFFFF; border-radius: 20px; padding: 10px 12px 10px 10px; display: flex; gap: 12px; align-items: center">
+          <img src="/_blob/c028f2f68b7ba650477b31119fc096f1" alt="KATE Lip Monster lipstick 03" style="flex: none; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #FFFFFF; border: 1px solid #EEE9DC">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600">Lip Monster 03 is back</span><span style="font-size: 12.5px; color: #3D5248">You saved it on Tuesday</span></div>
+          <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid #183E30; background: transparent; color: #183E30; font-family: inherit; font-size: 13px; font-weight: 600">Look</button>
+        </div>
+      </div>
+      <nav aria-label="Main" style="margin-top: auto; flex: none; height: 88px; background: #FFFFFF; border-top: 1px solid #E5E2D6; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; padding-top: 10px">
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: #183E30; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #183E30; text-decoration: none; margin-top: -32px"><span style="width: 68px; height: 68px; border-radius: 34px; background: #183E30; display: flex; align-items: center; justify-content: center; border: 4px solid #F5F3E9"><dc-import name="Coupi" mood="calm" size="46" hint-size="46px,41px"></dc-import></span>Call</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 500; color: #3D5248; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Explore</a>
+      </nav>
+    </div>
+  </div>
+
+  <div style="width: 380px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-direction: column; gap: 4px; height: 66px"><span style="font-family: Georgia, serif; font-size: 24px">3 · Problem day</span><span style="font-size: 14px">The problem takes the top card with one ready fix. Everything else waits.</span></div>
+    <div style="width: 380px; height: 800px; box-sizing: border-box; border: 8px solid #1B2622; border-radius: 44px; background: #F5F3E9; overflow: hidden; display: flex; flex-direction: column">
+      <div style="padding: 18px 18px 0; display: flex; justify-content: space-between; align-items: center">
+        <button type="button" aria-label="Inside COUPI's head" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #183E30; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+        <button type="button" aria-label="Decisions, 1 waiting" style="position: relative; width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #183E30; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span style="position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; border-radius: 9px; background: #EE8773; color: #FFFFFF; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span></button>
+      </div>
+      <div style="display: flex; justify-content: center; margin-top: 8px"><dc-import name="Coupi" mood="attentive" size="150" hint-size="150px,133px"></dc-import></div>
+      <div style="margin: 12px 18px 0; background: #FFFFFF; border-radius: 22px; padding: 16px 18px; font-family: Georgia, serif; font-size: 18px; line-height: 1.38">Your chair is running late. I found one that comes tomorrow.</div>
+      <div style="padding: 16px 16px 0; display: flex; flex-direction: column; gap: 10px">
+        <div style="background: #FBE3DC; border-radius: 20px; padding: 12px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; gap: 12px; align-items: center">
+            <img src="/_blob/98aad1081642a5e9c6ec838b517b509b" alt="Chair Club MT20 office chair, black" style="flex: none; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #FFFFFF">
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; color: #5E2416"><span style="font-size: 14.5px; font-weight: 700">Office chair: Friday, not Wednesday</span><span style="font-size: 12.5px">Swap: Seoul chair, tomorrow · +₩7,530</span></div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <button type="button" style="min-height: 44px; border-radius: 14px; border: none; background: #A8402B; color: #FFFFFF; font-family: inherit; font-size: 13.5px; font-weight: 600">Swap</button>
+            <button type="button" style="min-height: 44px; border-radius: 14px; border: 1.5px solid #A8402B; background: transparent; color: #5E2416; font-family: inherit; font-size: 13.5px; font-weight: 600">Other options</button>
+          </div>
+        </div>
+        <div style="background: #FFFFFF; border-radius: 20px; padding: 10px 12px 10px 10px; display: flex; gap: 12px; align-items: center">
+          <img src="/_blob/74cbd15ec210caf6e3b311e7744de06a" alt="EYELAB blue-light glasses, rose gold" style="flex: none; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #FFFFFF; border: 1px solid #EEE9DC">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600">Blue-light glasses</span><span style="font-size: 12.5px; color: #3D5248">₩19,900 · needs your OK</span></div>
+          <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: none; background: #183E30; color: #F5F3E9; font-family: inherit; font-size: 13px; font-weight: 600">Review</button>
+        </div>
+      </div>
+      <nav aria-label="Main" style="margin-top: auto; flex: none; height: 88px; background: #FFFFFF; border-top: 1px solid #E5E2D6; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; padding-top: 10px">
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: #183E30; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #183E30; text-decoration: none; margin-top: -32px"><span style="width: 68px; height: 68px; border-radius: 34px; background: #183E30; display: flex; align-items: center; justify-content: center; border: 4px solid #F5F3E9"><dc-import name="Coupi" mood="calm" size="46" hint-size="46px,41px"></dc-import></span>Call</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 500; color: #3D5248; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Explore</a>
+      </nav>
+    </div>
+  </div>
+
+  <div style="width: 380px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-direction: column; gap: 4px; height: 66px"><span style="font-family: Georgia, serif; font-size: 24px">4 · Quiet day</span><span style="font-size: 14px">Nothing needs her, and COUPI says so. One world to wander into, nothing else.</span></div>
+    <div style="width: 380px; height: 800px; box-sizing: border-box; border: 8px solid #1B2622; border-radius: 44px; background: #F5F3E9; overflow: hidden; display: flex; flex-direction: column">
+      <div style="padding: 18px 18px 0; display: flex; justify-content: space-between; align-items: center">
+        <button type="button" aria-label="Inside COUPI's head" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #183E30; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+        <button type="button" aria-label="Decisions, none waiting" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #FFFFFF; color: #183E30; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></button>
+      </div>
+      <div style="display: flex; justify-content: center; margin-top: 8px"><dc-import name="Coupi" mood="relaxed" size="150" hint-size="150px,133px"></dc-import></div>
+      <div style="margin: 12px 18px 0; background: #FFFFFF; border-radius: 22px; padding: 16px 18px; font-family: Georgia, serif; font-size: 18px; line-height: 1.38">Nothing needs you today. Enjoy it.</div>
+      <div style="padding: 16px 16px 0; display: flex; flex-direction: column; gap: 10px">
+        <div style="background: #ECDCC9; border-radius: 22px; padding: 12px; display: flex; flex-direction: column; gap: 12px">
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <img src="/_blob/9f3b210b768876efc94cf1928b8fc369" alt="Duplex LED desk lamp" style="width: 100%; height: 120px; border-radius: 14px; object-fit: cover; background: #FFFFFF">
+            <img src="/_blob/98aad1081642a5e9c6ec838b517b509b" alt="Chair Club MT20 office chair" style="width: 100%; height: 120px; border-radius: 14px; object-fit: cover; background: #FFFFFF">
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 4px 2px">
+            <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-family: Georgia, serif; font-size: 19px">A desk you'll like sitting at</span><span style="font-size: 12.5px; color: #4A3A28">A world built from your lamp and chair</span></div>
+            <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: none; background: #183E30; color: #F5F3E9; font-family: inherit; font-size: 13px; font-weight: 600">Explore</button>
+          </div>
+        </div>
+      </div>
+      <nav aria-label="Main" style="margin-top: auto; flex: none; height: 88px; background: #FFFFFF; border-top: 1px solid #E5E2D6; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; padding-top: 10px">
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: #183E30; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #183E30; text-decoration: none; margin-top: -32px"><span style="width: 68px; height: 68px; border-radius: 34px; background: #183E30; display: flex; align-items: center; justify-content: center; border: 4px solid #F5F3E9"><dc-import name="Coupi" mood="calm" size="46" hint-size="46px,41px"></dc-import></span>Call</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 500; color: #3D5248; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Explore</a>
+      </nav>
+    </div>
+  </div>
+
+  <div style="width: 380px; display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; flex-direction: column; gap: 4px; height: 66px"><span style="font-family: Georgia, serif; font-size: 24px">5 · Night</span><span style="font-size: 14px">After 22:00 the app dims. Late additions wait until 7am, and COUPI says so.</span></div>
+    <div style="width: 380px; height: 800px; box-sizing: border-box; border: 8px solid #1B2622; border-radius: 44px; background: #183E30; color: #EEF3EA; overflow: hidden; display: flex; flex-direction: column">
+      <div style="padding: 18px 18px 0; display: flex; justify-content: space-between; align-items: center">
+        <button type="button" aria-label="Inside COUPI's head" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: #244A3D; color: #EEF3EA; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+        <button type="button" aria-label="Decisions, 1 held" style="position: relative; width: 44px; height: 44px; border-radius: 22px; border: none; background: #244A3D; color: #EEF3EA; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span style="position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; border-radius: 9px; background: #D5E8A5; color: #183E30; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center">1</span></button>
+      </div>
+      <div style="display: flex; justify-content: center; margin-top: 8px"><dc-import name="Coupi" mood="sleepy" size="150" hint-size="150px,133px"></dc-import></div>
+      <div style="margin: 12px 18px 0; background: #244A3D; border-radius: 22px; padding: 16px 18px; font-family: Georgia, serif; font-size: 18px; line-height: 1.38">It's late. I'll keep the MAC lipstick until morning, if you still want it then.</div>
+      <div style="padding: 16px 16px 0; display: flex; flex-direction: column; gap: 10px">
+        <div style="background: #244A3D; border-radius: 20px; padding: 10px 12px 10px 10px; display: flex; gap: 12px; align-items: center">
+          <img src="/_blob/95f32a54055d23e4811ab00f8f3ddba0" alt="MAC Powder Kiss lipstick" style="flex: none; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #FFFFFF">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600">MAC Powder Kiss</span><span style="font-size: 12.5px; color: #B9C9BF">₩35,700 · until 7am</span></div>
+          <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid #D5E8A5; background: transparent; color: #D5E8A5; font-family: inherit; font-size: 13px; font-weight: 600">Remove</button>
+        </div>
+        <div style="background: #244A3D; border-radius: 20px; padding: 10px 12px 10px 10px; display: flex; gap: 12px; align-items: center">
+          <img src="/_blob/74cbd15ec210caf6e3b311e7744de06a" alt="EYELAB blue-light glasses" style="flex: none; width: 60px; height: 60px; border-radius: 14px; object-fit: cover; background: #FFFFFF">
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14.5px; font-weight: 600">Your glasses</span><span style="font-size: 12.5px; color: #B9C9BF">Tomorrow by 7am</span></div>
+          <button type="button" style="flex: none; height: 36px; padding: 0 14px; border-radius: 18px; border: none; background: #D5E8A5; color: #183E30; font-family: inherit; font-size: 13px; font-weight: 600">Track</button>
+        </div>
+      </div>
+      <nav aria-label="Main" style="margin-top: auto; flex: none; height: 88px; background: #1F4436; border-top: 1px solid #2C5446; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; padding-top: 10px">
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: #EEF3EA; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Home</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: #EEF3EA; text-decoration: none; margin-top: -32px"><span style="width: 68px; height: 68px; border-radius: 34px; background: #0F2A21; display: flex; align-items: center; justify-content: center; border: 4px solid #183E30"><dc-import name="Coupi" mood="sleepy" size="46" hint-size="46px,41px"></dc-import></span>Call</a>
+        <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 500; color: #B9C9BF; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Explore</a>
+      </nav>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2140,"height":1010}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

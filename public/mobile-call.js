@@ -34,6 +34,7 @@
   function updateFocusUI(){
     const active=!!trying&&camera.running&&['active','browse'].includes(phase),focused=active&&!controlsExpanded;
     $('phone-app').dataset.focused=String(focused);
+    show('gesture-status',!!store.current&&!focused&&['connecting','active','browse'].includes(phase));
     show('focus-product',focused);show('focus-toggle',active);
     $('focus-toggle').setAttribute('aria-expanded',String(controlsExpanded));
     $('focus-toggle').setAttribute('aria-label',controlsExpanded?'Hide call controls':'Show call controls');
@@ -49,10 +50,13 @@
     show('vision-strip',['connecting','active'].includes(phase));
     $('vision-toggle').setAttribute('aria-pressed',String(visionWanted));
     $('vision-toggle').setAttribute('aria-label',visionWanted?'Pause camera sharing with Coupi':'Resume camera sharing with Coupi');
-    $('vision-toggle').dataset.state=enabled?visionState:'paused';
     const age=visionLastAt?Date.now()-Date.parse(visionLastAt):Infinity;
-    const label=!visionWanted?'Coupi’s view is paused':!camera.running?'Camera off · Coupi can’t see':!enabled?'Camera sharing waiting':visionState==='error'?'Camera sharing delayed':visionState==='received'&&age<12000?'Coupi sees snapshots':visionState==='received'?'Refreshing Coupi’s view…':'Sharing camera…';
-    text('vision-status',label);text('vision-action',visionWanted?'Pause':'Resume');
+    const displayState=!enabled?'paused':visionState==='error'?'error':age<12000?'received':visionLastAt?'refreshing':'sent';
+    $('vision-toggle').dataset.state=displayState;
+    const label=!visionWanted?'':!camera.running?'Camera off · Coupi can’t see':!enabled?'Camera sharing waiting':displayState==='error'?'Camera sharing delayed':displayState==='received'?'Coupi sees snapshots':displayState==='refreshing'?'Refreshing Coupi’s view…':'Sharing camera…';
+    show('vision-status',visionWanted);
+    if($('vision-status').textContent!==label)text('vision-status',label);
+    text('vision-action',visionWanted?'Pause':'Resume');
   }
   function shareSnapshot(reason='interval'){if(!visionEnabled())return false;const frame=snapshots.capture(reason);return frame?voice.sendCameraSnapshot(frame):false;}
 
@@ -60,7 +64,19 @@
     onSwipe:direction=>decide(direction),onStatus:(message,kind)=>{text('gesture-status',kind==='error'?'Hand tracking unavailable · swipe the card':hands.running?'Hand swipe: ← next collection · add selected →':'Preparing hand swipes…');}});
   async function startHands(){if(!handsWanted||!camera.running||!store.current||!['active','browse'].includes(phase)||hands.running||gestureStarting)return;gestureStarting=true;try{await hands.start();}finally{gestureStarting=false;}}
   function stopHands(){gestureStarting=false;hands.stop();text('gesture-status','← Next collection · selected item → bag');}
-  function transcript(entry){if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}store.message(entry);conversation.schedule();}
+  function transcript(entry){
+    if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}
+    store.message(entry);conversation.schedule();
+    const current=store.messages.at(-1);
+    if(!current)return;
+    const body=$('caption-text'),speaker=current.role==='user'?'You':'Coupi';
+    if($('caption-speaker').textContent!==speaker)text('caption-speaker',speaker);
+    show('live-caption',true);
+    if(body.textContent!==current.text){
+      body.textContent=current.text;
+      body.scrollTop=body.scrollHeight;
+    }
+  }
   personalization=new window.CoupiCallPersonalization({catalog:[...store.catalog.values()],onChange:()=>{hands.reset();sync();},onSkip:()=>toast('Let’s find what you need.'),onSaved:()=>{endCall('Your worlds are ready.');window.location.href='/explore';}});
   voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:personalization.greeting,getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
@@ -91,10 +107,26 @@
   });
   window.NookMobile={camera,voice,store,discovery,checkout,personalization};
   async function startCamera({strictFacing=false}={}){if(cameraBusy)return false;cameraBusy=true;cameraUI();const token=generation;try{const ok=await camera.start({facingMode,portrait:true,strictFacing});if(token!==generation)return false;if(ok){facingMode=camera.actualFacingMode||facingMode;camera.setOptions({mirror:facingMode==='user'});startHands();}else if(!strictFacing)notice(camera.lastCameraError?.message||'Allow Camera in browser settings, then tap Retry.',true);return ok;}finally{if(token===generation){cameraBusy=false;cameraUI();}}}
-  async function answer(){if(phase==='connecting'||voice.call)return;const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;lastPurchase=null;purchasePairings=[];screen('connecting');notice('');text('camera-fallback-text','Opening your camera…');$('answer-call').disabled=true;store.clearMessages();conversation.reset();initialGreeting=true;voice.options.greeting=personalization.greeting;transcript({role:'assistant',key:'opening',text:personalization.greeting});initialGreeting=true;if(personalization.world&&!store.current)recommend(personalization.world.products,'',{mixed:true,sourceOnly:true,groupLabel:personalization.world.title,maxPrice:personalization.profile?.budget});
-    try{await startCamera();if(token!==generation||phase!=='connecting')return;await voice.start();}catch{notice('Could not start the call. Check Camera and Microphone permissions.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
+  async function answer(){if(phase==='connecting'||voice.call)return;const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;lastPurchase=null;purchasePairings=[];screen('connecting');notice('');text('camera-fallback-text',visionWanted?'Opening your camera…':'Camera off. Tap Camera to turn it on.');$('answer-call').disabled=true;store.clearMessages();conversation.reset();initialGreeting=true;voice.options.greeting=personalization.greeting;transcript({role:'assistant',key:'opening',text:personalization.greeting});initialGreeting=true;if(personalization.world&&!store.current)recommend(personalization.world.products,'',{mixed:true,sourceOnly:true,groupLabel:personalization.world.title,maxPrice:personalization.profile?.budget});
+    try{
+      if(visionWanted)await startCamera();
+      else{stopHands();camera.stop(false);cameraBusy=false;cameraUI();}
+      if(token!==generation||phase!=='connecting')return;
+      await voice.start();
+    }catch{notice('Could not start the call. Check Camera and Microphone permissions.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
   }
-  function endCall(message='Call ended'){if(ending)return;ending=true;generation++;previewEpoch++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;decisionBusy=false;stopHands();snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});loadingEpoch=0;loadingProductId=null;$('product-try').disabled=false;show('tryon-chip',false);connectedAt=null;screen('ended');text('end-title','A little closer to your thing.');text('end-summary',store.cart.size?`${store.cart.size} ${store.cart.size===1?'pick':'picks'} saved in your bag.`:message==='Call ended'?'Your camera and microphone are off.':message);closeDialogs();ending=false;}
+  function endCall(message='Call ended',markCompleted=true){
+    if(ending)return;
+    const completed=markCompleted&&phase==='active'&&!document.hidden;
+    ending=true;generation++;previewEpoch++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;decisionBusy=false;
+    stopHands();snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});
+    loadingEpoch=0;loadingProductId=null;$('product-try').disabled=false;$('answer-call').disabled=false;show('tryon-chip',false);connectedAt=null;
+    screen(message==='Call ended'?'incoming':'ended');
+    text('end-title','A little closer to your thing.');
+    text('end-summary',store.cart.size?`${store.cart.size} ${store.cart.size===1?'pick':'picks'} saved in your bag.`:message==='Call ended'?'Your camera and microphone are off.':message);
+    closeDialogs();ending=false;
+    if(completed){try{window.localStorage.setItem('coupi_first_call_done','1');}catch{/* Storage may be unavailable. */}}
+  }
   function previewLabel(){return trying?`${trying.preview?.shadeLabel||trying.brand||typeLabels[trying.productType]||'Product'} · ${trying.category==='makeup'?'shade estimate':'live placement guide'}`:'';}
   async function setMode(next){const token=generation;if(!Object.hasOwn(defaults,next))throw Error('Choose makeup, glasses, clothes, desk, or none.');if(next==='none'){previewEpoch++;trying=null;previewMeta=null;loadingEpoch=0;loadingProductId=null;$('product-try').disabled=store.current?.preview?.available===false;}const changed=mode!==next;mode=next;if(changed||next==='none')camera.setOptions(defaults[next]);const modeEpoch=previewEpoch;await camera.setMode(next);if(token!==generation||modeEpoch!==previewEpoch)return false;if(camera.errors[next])throw Error('Tracking is unavailable. Try again in good light or check your connection.');show('tryon-chip',next!=='none'&&!!trying);text('tryon-label',previewLabel());updateFocusUI();updateVisionUI();sync();return true;}
   async function tryOn(p=store.current){
@@ -120,7 +152,7 @@
   const priceText=p=>Number.isFinite(p.price)?'₩'+p.price.toLocaleString('en-US'):'See price';
   function adoptDiscovery(){const p=discovery.current;if((trying&&trying.id!==p?.id)||(loadingProductId&&loadingProductId!==p?.id))setMode('none').catch(e=>notice(e.message));store.recommend(p?[p,...discovery.products.slice(0,10).filter(x=>String(x.id)!==String(p.id))]:[]);displayedTotal=discovery.visible.length;renderCard();renderInline();}
   function selectProduct(p){p=trusted(p);if(!p||!discovery.select(p.id))return false;adoptDiscovery();return true;}
-  function renderCard(){const p=store.current;show('product-zone',!!p);show('product-empty',!p);if(!p){stopHands();sync();return;}
+  function renderCard(){const p=store.current;show('product-zone',!!p);show('product-empty',!p);updateFocusUI();if(!p){stopHands();sync();return;}
     const img=$('product-image');img.hidden=!p.image;img.removeAttribute('src');if(p.image){img.src=p.image;img.alt=p.name;img.onerror=()=>{img.hidden=true;};}
     text('product-title',p.name);text('product-category',discovery.label||typeLabels[p.productType]);
     const price=$('product-price');price.replaceChildren();const amount=document.createElement('span');amount.textContent=priceText(p);const note=document.createElement('small');note.textContent='reference price';price.append(amount,note);
@@ -278,7 +310,7 @@
   $('answer-call').onclick=answer;$('call-again').onclick=()=>{screen('incoming');answer();};$('decline-call').onclick=browse;$('end-call').onclick=()=>endCall();
   $('mute-call').onclick=()=>voice.mute();$('text-toggle').onclick=()=>{show('text-form',$('text-form').hidden);$('text-toggle').setAttribute('aria-expanded',String(!$('text-form').hidden));if(!$('text-form').hidden){$('conversation-box').dataset.collapsed='false';$('chat-minimize').setAttribute('aria-expanded','true');$('text-input').focus();}};$('text-form').onsubmit=sendMessage;
   $('chat-attach').onclick=()=>{choosingImage=true;clearTimeout(pickerTimer);pickerTimer=setTimeout(()=>{choosingImage=false;if(document.hidden&&phase==='active')endCall('Call paused while you were away. Tap to call again.');},60000);$('chat-image-file').click();};$('chat-image-file').addEventListener('cancel',()=>{choosingImage=false;clearTimeout(pickerTimer);});$('chat-image-file').onchange=prepareAttachment;$('attachment-remove').onclick=clearAttachment;
-  $('chat-minimize').onclick=()=>{const collapsed=$('conversation-box').dataset.collapsed!=='true';$('conversation-box').dataset.collapsed=String(collapsed);$('chat-minimize').setAttribute('aria-expanded',String(!collapsed));$('chat-minimize').setAttribute('aria-label',collapsed?'Show conversation':'Minimize conversation');text('chat-minimize',collapsed?'⌃':'⌄');};
+  $('chat-minimize').onclick=()=>{const collapsed=$('conversation-box').dataset.collapsed!=='true';$('conversation-box').dataset.collapsed=String(collapsed);$('chat-minimize').setAttribute('aria-expanded',String(!collapsed));$('chat-minimize').setAttribute('aria-label',collapsed?'Show conversation':'Minimize conversation');text('chat-minimize',collapsed?'⌃':'⌄');if(collapsed){const body=$('caption-text');body.scrollTop=body.scrollHeight;}};
   $('chat-history-open').onclick=()=>{$('chat-history-dialog').showModal();conversation.openHistory();hands.reset();};$('close-chat-history').onclick=()=>$('chat-history-dialog').close();
   $('group-open').onclick=()=>openCatalog();$('save-group').onclick=saveGroup;$('catalog-save-group').onclick=saveGroup;$('catalog-more').onclick=()=>{discovery.viewMore();adoptDiscovery();renderCatalog();};$('catalog-next-style').onclick=nextStyle;
   $('inline-peek').onclick=()=>openCatalog();$('back-camera').onclick=backToCamera;$('call-screen').addEventListener('scroll',collectionScrollState,{passive:true});
@@ -306,7 +338,7 @@
   $('live-canvas').addEventListener('pointerdown',e=>{if(mode!=='desk'||!camera.running)return;const r=e.currentTarget.getBoundingClientRect(),ratio=camera.canvas.width/camera.canvas.height;let w=r.width,h=w/ratio;if(h<r.height){h=r.height;w=h*ratio;}camera.setOptions({x:Math.max(0,Math.min(1,(e.clientX-r.left+(w-r.width)/2)/w)),y:Math.max(0,Math.min(1,(e.clientY-r.top+(h-r.height)/2)/h))});sync();});
   const timer=setInterval(()=>{text('call-timer',connectedAt?`${Math.floor((Date.now()-connectedAt)/60000)}:${String(Math.floor((Date.now()-connectedAt)/1000)%60).padStart(2,'0')}`:'');},1000);
   const visionTimer=setInterval(()=>{updateVisionUI();shareSnapshot('interval');},3000);
-  window.addEventListener('pagehide',()=>{clearInterval(timer);clearInterval(visionTimer);endCall();});document.addEventListener('visibilitychange',()=>{if(!document.hidden||choosingImage)return;if(phase==='active')endCall('Call paused while you were away. Tap to call again.');else if(phase==='browse'&&camera.running){stopHands();camera.stop(false);cameraUI();}});
+  window.addEventListener('pagehide',()=>{clearInterval(timer);clearInterval(visionTimer);endCall('Call ended',false);});document.addEventListener('visibilitychange',()=>{if(!document.hidden||choosingImage)return;if(phase==='active')endCall('Call paused while you were away. Tap to call again.');else if(phase==='browse'&&camera.running){stopHands();camera.stop(false);cameraUI();}});
   for(const d of [$('cart-dialog'),$('details-dialog'),$('catalog-dialog'),$('collections-dialog'),$('compare-dialog'),$('chat-history-dialog')])d.addEventListener('close',()=>{hands.reset();sync();});
   $('mute-call').disabled=true;$('text-input').disabled=false;$('text-toggle').disabled=false;$('chat-send').disabled=true;$('flip-camera').disabled=true;$('gesture-toggle').setAttribute('aria-pressed','true');text('gesture-status','← Next collection · selected item → bag');updateBag();updateVisionUI();updateFocusUI();renderInline();
 })();

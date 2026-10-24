@@ -89,6 +89,10 @@
         <section id="conversation-box" class="conversation-box" aria-label="Conversation">
           <div class="conversation-heading"><button id="chat-history-open" aria-label="Open conversation history">Conversation <span id="chat-count">0</span><span aria-hidden="true">↗</span></button><button id="chat-minimize" aria-label="Minimize conversation" aria-expanded="true">⌄</button></div>
           <div id="transcript" class="transcript" role="log" aria-live="polite" aria-relevant="additions text" tabindex="0" aria-label="Scrollable conversation"></div>
+          <div id="live-caption" class="live-caption" role="status" aria-live="polite" aria-atomic="true" hidden>
+            <span id="caption-speaker" class="caption-speaker"></span>
+            <p id="caption-text" class="caption-text" tabindex="0" aria-label="Live captions"></p>
+          </div>
           <button id="chat-latest" class="chat-latest" hidden>Latest ↓</button>
           <form id="text-form" class="text-form" hidden>
             <div id="attachment-preview" class="attachment-preview" hidden><img id="attachment-image" alt="Selected image"><span id="attachment-name"></span><button id="attachment-remove" type="button" aria-label="Remove attached image">×</button></div>
@@ -98,7 +102,7 @@
         </section>
       </div>
       <footer class="call-footer">
-        <p id="gesture-status" class="gesture-status">Talk naturally. Try something new.</p>
+        <p id="gesture-status" class="gesture-status" hidden>Swipe: ← skip · save →</p>
         <div class="call-controls">
           <button id="mute-call" class="call-control" aria-label="Mute microphone" aria-pressed="false" title="Mute"><svg><use href="#i-mic"/></svg></button>
           <button id="toggle-camera" class="call-control" aria-label="Turn camera off" aria-pressed="false" title="Camera"><svg><use href="#i-video"/></svg></button>
@@ -133,9 +137,9 @@
       <div class="end-bottom"><button id="call-again" class="answer-call"><svg><use href="#i-video"/></svg> Call Coupi again <svg class="answer-arrow"><use href="#i-arrow"/></svg></button><p class="privacy-note">Camera and microphone are off.</p></div>
     </section>
     <nav class="app-nav" aria-label="Main navigation">
-      <a href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg><span>Main</span></a>
-      <a href="/call" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Video call</span></a>
-      <a href="/explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c5 4 5 12 0 16-5-4-5-12 0-16Z"/></svg><span>Explore worlds</span></a>
+      <a href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg><span>Home</span></a>
+      <a href="/call" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Call</span></a>
+      <a href="/explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c5 4 5 12 0 16-5-4-5-12 0-16Z"/></svg><span>Explore</span></a>
     </nav>
     <div id="toast" class="toast" role="status" hidden></div>
     <audio id="voice-audio" autoplay></audio>

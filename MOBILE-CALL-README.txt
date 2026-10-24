@@ -1,6 +1,8 @@
-Nook mobile call prototype
+Coupi mobile call prototype
 
-Open / or /camera. Both use the phone-first incoming-call interface. Answer video call starts the camera, followed by the real AI audio connection. With "Let Nori see my camera" enabled, compressed snapshots go directly to OpenAI through the Realtime data channel about every three seconds and on spoken/typed requests. An active try-on sends a separate labeled preview alongside the real scene. This is image understanding, not a continuous video stream. The onscreen AI presence is an animated orb, not a remote human video stream.
+Open / for Coupi's home screen, /call or /camera for the video-call interface, and /explore for Explore Worlds. /camera.html remains a call-page alias.
+
+Answer video call starts the camera, followed by the real AI audio connection. With "Let Nori see my camera" enabled, compressed snapshots go directly to OpenAI through the Realtime data channel about every three seconds and on spoken/typed requests. An active try-on sends a separate labeled preview alongside the real scene. This is image understanding, not a continuous video stream. The onscreen AI presence is an animated orb, not a remote human video stream.
 
 The camera-sharing pill shows server receipt and can pause/resume sharing without stopping local try-on. No images are sent before the call connects, with sharing off, with the camera off, or from a hidden page. The application does not write audio or frames to storage. It keeps at most two acknowledged snapshot messages in model context; removing context is not a provider data-retention guarantee. The look_at_camera tool asks for a fresh view when needed. Nori uses visual context for catalog search and supported approximate overlay adjustments.
 

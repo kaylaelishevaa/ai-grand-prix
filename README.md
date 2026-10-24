@@ -33,13 +33,13 @@ Open `.env.local` in your editor and replace the placeholder:
 
 ```dotenv
 OPENAI_API_KEY=PASTE_YOUR_OWN_OPENAI_API_KEY_HERE
-OPENAI_REALTIME_MODEL=gpt-realtime-2.1
+OPENAI_REALTIME_MODEL=gpt-realtime-2.1-mini
 ```
 
 | Variable | Purpose |
 | --- | --- |
 | `OPENAI_API_KEY` | Your server-side API key. Required for Coupi's live AI call. |
-| `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1`. Your project needs access to this Realtime model. |
+| `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1-mini`. Your project needs access to this Realtime model. |
 | `OPENAI_TRANSCRIPTION_MODEL` | Caption model; defaults to `gpt-4o-transcribe`. Supported overrides are `gpt-4o-mini-transcribe` and `gpt-4o-mini-transcribe-2025-12-15`. |
 | `OPENAI_TRANSCRIPTION_LANGUAGE` | Optional two-letter language such as `en` or `ko`. Leave blank for automatic mixed-language detection. |
 
