@@ -1,6 +1,6 @@
 # Coupi — AI shopping companion
 
-Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 36 sourced listings/options across six categories, plus live Coupang product search.
+Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 82 sourced Coupang listings/options, plus live Coupang product search.
 
 Each developer runs their own local server and supplies **their own OpenAI API key**. No usable API key is included in this repository.
 
@@ -53,7 +53,7 @@ Restart the server whenever you change environment variables. If an older `.dev.
 npm run dev
 ```
 
-Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers two starting points: **Video call** (`/call`) for shopping and **Explore worlds** (`/explore`) for optional personalization. The bottom navigation connects all three pages. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
+Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers **Video call** (`/call`) for shopping and its optional first-call interview, and **Explore worlds** (`/explore`) for worlds built from confirmed preferences. The bottom navigation connects all three pages. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
 
 This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
@@ -62,13 +62,13 @@ To check that the server loaded your configuration, open [the local voice status
 ## 4. Try the demo
 
 1. Open **Video call**, click **Start video call** and allow camera and microphone access.
-2. Ask Coupi, for example, “Show me glasses under 30,000 won.”
-3. Select **Try it** on a product. Cards and secondary controls minimize during try-on; **Products** or **More** restores them.
+2. New shoppers hear a short welcome and can answer a few lifestyle questions in the same call. Tap **Skip to shopping**, say “skip,” or ask directly for something such as “Show me glasses under 30,000 won.”
+3. Scroll recommendations inside the fixed product window at the top of the call. Select **Try on** on a product. The window and secondary controls minimize during try-on; **Products** reopens the window and **Controls** restores controls.
 4. Use **Flip** to switch between front and back cameras when the device has both.
-5. Swipe left for the next related collection; swipe right adds only the selected product. You can also ask Coupi to skip/save a product. The bag is an in-memory demo; nothing is purchased.
+5. Tap the top window’s chevron to focus the selected product and use hand swipes: left for the next related collection, right to add only that item. Each list row also has its own **Add to bag** action. The bag is an in-memory demo; nothing is purchased.
 6. Click **End call** when finished.
 
-Without an API key, choose **Browse instead → scroll down → a collection → Try on** to test the catalog and local camera overlays. AI voice, camera understanding, and live product search require your own working key. Use **Search Coupang** to search with saved preferences, or **None of these? Show different products** to request unseen items of the same type. The download link is replaced by the product list.
+The entry flow is a video call; there is no separate Browse mode or onboarding questionnaire. AI voice and AI camera understanding require your own working API key. The automated checks below run without a key.
 
 At **/setting** (also **/settings**), save a suggested preference or type a custom memory. Saved preferences guide call recommendations and live product searches while memory is on; pause or forget them there. Preferences stay in this browser and are sent to the AI only when used for a call or search.
 
@@ -82,13 +82,13 @@ The current work is on `feat/coupi-call-discovery`; `main` keeps the three-page 
 
 - **Conversation:** a fixed-height, scrollable panel keeps the camera visible. Tap Conversation for the full call history, or the chevron to minimize it. Speech turns are ordered before asynchronous transcription finishes, with streamed updates applied to the same turn.
 - **Photo chat:** tap the message icon, then the image icon next to Send. JPG, PNG and WebP files up to 10 MB are resized locally; the photo is sent to OpenAI only when you press Send during a connected call. A failed send keeps the draft ready to retry. Photos and transcripts are not stored in collections.
-- **Scrollable collections:** scroll down directly from the camera, or tap Products. Each themed collection starts with six matching products; View more expands to ten when available. Next collection moves to related options: lipstick → lip balm, everyday glasses → sunglasses, basic → branded T-shirts, hoodies → sweaters. Budget and explicit exclusions remain in effect. Restrictive preferences can return fewer than six actual matches. Tap Try on to select that exact item and return to the camera; the call keeps running while browsing. Hand swipes pause while scrolling collections.
+- **Scrollable collections:** recommendations open inside a fixed window at the top of the video call. Scroll inside that window; the camera, conversation and call controls stay in place, with no section below the call. Each themed collection starts with six matching products; View more adds up to ten inside the same window. Next collection moves to related options: lipstick → lip balm, everyday glasses → sunglasses, basic → branded T-shirts, hoodies → sweaters. Budget and explicit exclusions remain in effect. Restrictive preferences can return fewer than six actual matches. Tap Try on to preview that exact item and minimize the window. Hand swipes pause while the list is open; focus the selected product to use them.
 - **Collections:** Save collection keeps up to ten products in that group and the selected item in this browser. The bookmark button restores saved groups, even after exploring a different style.
 - **Compare:** choose two or three products of the same type, then Compare. The table shows sourced prices, variants, attributes and available review evidence. Ask Coupi to discuss the selection during a call.
 - **Reviews:** ratings, a precomputed AI summary, pros/cons and translated review samples are available for 19 product options across 10 families, including the first Romand, MAC and Kate lipsticks and EYELAB glasses. Other products explicitly show missing evidence. These are historical samples from linked public mirrors, not a live Coupang review feed or a summary of every review.
 - **Hand swipes:** shorter gestures now register. The neutral reset and cooldown prevent repeated actions from one motion; the hand button turns tracking off.
 
-For a quick review demo, open **Details** on the first Romand lipstick. For more, ask for **pink lipsticks**, scroll below the camera and tap **View more**. Review evidence can span multiple shades or options; this is labeled in the UI. The catalog includes pink/red lipsticks, lip balms, optical glasses, sunglasses, basic/branded T-shirts, hoodies, sweaters, chairs and desk lamps. Sourced brands are shown; seller identities are not inferred. Product-family links may require selecting the pictured option on Coupang. Photos with people, multiple products, or unsuitable scenes are marked **No preview** unless a faithful cutout is available. Prices are historical reference values, and seller/stock details are not invented.
+For a quick review demo, open **Details** on the first Romand lipstick. For more, ask for **pink lipsticks**, scroll within the top product window and tap **View more**. Review evidence can span multiple shades or options; this is labeled in the UI. The catalog includes pink/red lipsticks, lip balms, optical glasses, sunglasses, basic/branded T-shirts, hoodies, sweaters, chairs and desk lamps. Sourced brands are shown; seller identities are not inferred. Product-family links may require selecting the pictured option on Coupang. Photos with people, multiple products, or unsuitable scenes are marked **No preview** unless a faithful cutout is available. Prices are historical reference values, and seller/stock details are not invented.
 
 Design references: [NN/g comparison tables](https://www.nngroup.com/articles/comparison-tables/) and [Baymard comparison selection](https://baymard.com/research-articles/provide-comparison-features). The compact selection tray and explicit per-item actions adapt these patterns to the call interface.
 
@@ -98,15 +98,15 @@ Live previews preserve the original product pixels. Exact-photo silhouette masks
 
 ## Optional personalized start
 
-Open **Explore worlds** or **New here? Make your own worlds** on the call screen. New shoppers can answer three swipeable this-or-that prompts, write a short story, or choose **Talk with Coupi** for an optional conversation. They can skip every step and go directly to shopping.
+New shoppers enter the interview directly through **Start video call**. Coupi says “Welcome new user! We want to learn more about you to personalize your experience,” then asks one easy question at a time about interests, everyday activities or style. There is no separate onboarding page, quick-pick exercise or story form. **Skip to shopping** is available before and during the call; saying “skip” or asking for a specific product also exits the interview.
 
-Quick picks and voice conversations both end in an editable review. Only **Build my worlds** saves the chosen interests, style, optional per-item budget and story in this browser. No camera images or conversation transcripts are saved to the profile. Explore then shows real catalog products grouped into worlds; style prioritizes matching catalog color tags, and the budget filters prices. Written stories provide context for later calls; interest choices determine world selection. Preferences can be edited or reset in Explore.
+After a few useful answers, `draft_preferences` opens a short read-only summary of what the shopper volunteered. Only **Save preferences** stores the confirmed interests, style, optional per-item budget and conversation summary in this browser. **Keep talking** dismisses the draft so corrections can be made conversationally. Saving keeps the camera and voice call connected and continues shopping. No camera images or full conversation transcripts are saved to the profile.
 
-The voice route is `/call?intent=personalize`. Coupi asks short lifestyle questions and uses `draft_preferences` to open review, without saving. **Skip to shopping** or a spoken shopping request exits discovery. Confirming Build ends the call and opens Explore. World cards link to `/call?world=<id>` and seed the matching catalog collection; they never start the camera or microphone automatically. Saved preferences are soft defaults, and an explicit new request takes priority.
+**Explore worlds** displays real catalog products grouped from saved preferences. Interest choices determine the worlds, style prioritizes matching catalog color tags, and the budget filters prices. Before preferences are saved, Explore only offers **Talk with Coupi**. Returning shoppers go straight to shopping; **Talk to update** uses `/call?intent=personalize` to revise preferences through a call. World cards use `/call?world=<id>` and seed their matching collection without automatically starting the camera or microphone. Preferences can be reset in Explore. Saved preferences are soft defaults; an explicit current request takes priority.
 
 ## Demo checkout
 
-During a connected call, say **“buy this”** for the product being viewed, **“buy these products”** for an explicitly chosen comparison, or **“pay for my cart”** for all bag items. If the selection is unclear, Coupi asks which items you mean. You can also use **Buy this**, **Buy these products** in comparison, or **Review & checkout** in the bag without an API key.
+During a connected call, say **“buy this”** for the product being viewed, **“buy these products”** for an explicitly chosen comparison, or **“pay for my cart”** for all bag items. If the selection is unclear, Coupi asks which items you mean. You can also use **Buy this**, **Buy these products** in comparison, or **Review & checkout** in the bag during the call.
 
 1. **Review:** select items, change quantities (1–9), or remove them from this checkout. Reference prices come from the catalog; delivery and other fees are not calculated.
 2. **Payment:** choose Card or Coupi Pay. The call remains connected. Go back to revise the selection, or press **Pay** yourself.
@@ -144,7 +144,7 @@ npm run build
 
 ## Current scope and source files
 
-Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clothing fit, colour, physical scale, and room perspective are approximate. Checkout is a local simulation; no order is sent to Coupang and no payment is processed. There is no generated-photo workflow, live price/stock feed, or persistent shopping profile.
+Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clothing fit, colour, physical scale, and room perspective are approximate. Checkout is a local simulation; no order is sent to Coupang and no payment is processed. There is no generated-photo workflow, live price/stock feed, or cloud-synced shopping profile. Confirmed preferences and saved collections stay in the current browser.
 
 - `site-pages/main.html`, `site-pages/explore.html`, `public/coupi-shell.css`: main entry, personalized worlds page and shared navigation.
 - `site-pages/camera.html`, `public/mobile-call.*`, `public/coupi-call.css`: mobile call interface and Coupi theme.

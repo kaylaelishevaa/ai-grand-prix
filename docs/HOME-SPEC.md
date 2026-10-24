@@ -79,7 +79,7 @@ Code builds the cards from data. The model never decides what is true; it only w
 | **Loading** | Data or brief pending | Idle | — (show a three-dot bubble) | Skeleton cards |
 | **Offline or model error** | Brief can't be generated | Calm | Template brief (section 5) | As normal |
 
-Problem card for the demo: one ready fix as the main button ("Swap", to the Seoul chair arriving tomorrow, +₩7,530) and "Other options" (wait until Fri, cancel this item). On a problem day show at most two cards. Nothing changes until the customer picks.
+Problem card for the demo: one ready fix as the main button ("Swap", to the Study chair arriving tomorrow, +₩37,930) and "Other options" (wait until Fri, cancel this item). On a problem day show at most two cards. Nothing changes until the customer picks.
 
 Design reference: the "COUPI and Home" page of the Living Plan Screens canvas (https://claude.ai/artifact/PQ1MwQWipy3vGEcoKLzXuV).
 
@@ -107,8 +107,8 @@ window.HOME_DEMO = {
   orders: [
     { id: "1042", items: ["1814412512"], status: "delivered", deliveredAt: "2026-10-25T07:02" },   // Romand 09 Shell Nude
     { id: "1043", items: ["55518713"],   status: "out_for_delivery", eta: "2026-10-26T12:00" },    // Duplex LED desk lamp
-    { id: "1044", items: ["20145368"],   status: "delayed", eta: "2026-10-30", originalEta: "2026-10-28",
-      swap: { item: "7950092256", eta: "2026-10-27", priceDelta: 7530 } }                         // Chair Club MT20 → Seoul chair
+    { id: "1044", items: ["7395651009"],   status: "delayed", eta: "2026-10-30", originalEta: "2026-10-28",
+      swap: { item: "7330605115", eta: "2026-10-27", priceDelta: 37930 } }                         // Duoback DK073W → DK073B
   ],
   decisions: [ { item: "7612276799", status: "waiting", addedAt: "2026-10-25T21:10" } ],            // EYELAB glasses ₩19,900
   held: [ { item: "7322824636", heldUntil: "2026-10-27T07:00" } ],                                  // MAC lipstick ₩35,700
@@ -184,7 +184,7 @@ No demo language anywhere a customer can see it: no "demo", "sample", "reference
 | Arrival | Desk lamp arrives today | By 12:00 | **Track order** |
 | Waiting for approval | Blue-light glasses | ₩19,900 · waiting for your OK | **Review** → sheet with **Buy for ₩19,900** and **Not now** |
 | Back in stock | Lip Monster 03 is back in stock | You saved it on Wednesday | **View** |
-| Late delivery | Your chair is running late | Now Friday, not Wednesday. A similar chair can come tomorrow for ₩7,530 more. | **Get it tomorrow** · **Wait for Friday** |
+| Late delivery | Your chair is running late | Now Friday, not Wednesday. A similar chair can come tomorrow for ₩37,930 more. | **Get it tomorrow** · **Wait for Friday** |
 | Delivered | Your lipstick arrived | How's the shade? | **Rate it** |
 | First time | I learned 3 things about you | Make sure I got them right | **Check** |
 | Night hold | MAC Powder Kiss | I'll ask you again at 7am · ₩35,700 | **Remove** |

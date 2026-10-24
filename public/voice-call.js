@@ -546,7 +546,7 @@
           result=await this.options.onProductAction(args.action,args.product_id);
           if(!result || typeof result!=='object')throw new Error('The product action did not return a verified result.');
         } else if(event.name==='draft_preferences' || event.name==='skip_personalization') {
-          if(this.options.getContext?.()?.personalization?.active!==true)throw new Error('Personalization is not active. The shopper must opt in before drafting preferences.');
+          if(this.options.getContext?.()?.personalization?.active!==true)throw new Error('Personalization is not active. Only draft preferences during the optional interview.');
           if(!this.options.onPreferences)throw new Error('Preference review is unavailable on this page.');
           const skip=event.name==='skip_personalization';
           if(skip&&Object.keys(args).length)throw new Error('Skipping personalization does not accept profile fields or save anything.');
@@ -555,7 +555,7 @@
           if(!this._current(c))return;
           if(!skip&&this.options.getContext?.()?.personalization?.active!==true)throw new Error('Personalization ended before the review was ready. No preferences were saved.');
           if(!reviewed || typeof reviewed!=='object' || Array.isArray(reviewed) || reviewed.ok!==true || reviewed.saved===true || reviewed.persisted===true || (skip?reviewed.skipped!==true:reviewed.draft_ready!==true))throw new Error(reviewed?.error || 'The preference review did not open. No preferences were saved.');
-          result=skip?{ok:true,skipped:true,saved:false,instruction:'Personalization has ended without saving a draft. Stop onboarding questions. Continue with the shopper’s requested product, or ask what they want to buy.'}:{ok:true,draft_ready:true,confirmation_required:true,saved:false,preferences,instruction:'The editable preference review is open. Ask the shopper to check it and tap Build my worlds to save. Do not claim anything was saved or worlds were built yet. Avoid more questions while they review.'};
+          result=skip?{ok:true,skipped:true,saved:false,instruction:'Personalization has ended without saving a draft. Stop onboarding questions. Continue with the shopper’s requested product, or ask what they want to buy.'}:{ok:true,draft_ready:true,confirmation_required:true,saved:false,preferences,instruction:'The read-only preference summary is open. Ask the shopper to check it and tap Save preferences to save, or Keep talking to make a correction. The same call stays connected after saving. Do not claim anything was saved or worlds were built yet. Avoid more questions while they review.'};
         } else if(event.name==='start_checkout') {
           if(Object.keys(args).some(key=>!['scope','product_ids'].includes(key)))throw new Error('Checkout only accepts a scope and optional exact product IDs. Payment cannot be submitted by voice.');
           if(!['selected','comparison','cart','products'].includes(args.scope))throw new Error('Choose selected, comparison, cart, or products to open the demo order review.');

@@ -14,7 +14,7 @@ const waiting = (item = '7612276799') => ({ item, status: 'waiting', addedAt: st
 const arriving = (items = ['55518713']) => ({ id: 'arrival', items, status: 'out_for_delivery', eta: stamp(26, 12) });
 const delivered = (at = stamp(25)) => ({ id: 'delivered', items: ['1814412512'], status: 'delivered', deliveredAt: at });
 const saved = (item = '7185725748') => ({ item, event: 'back_in_stock', savedAt: stamp(21) });
-const delayed = () => ({ id: 'late', items: ['6775922884-gray'], status: 'delayed', eta: '2026-10-30', originalEta: '2026-10-28', swap: { item: '6775922884', eta: '2026-10-27', priceDelta: 7530 } });
+const delayed = () => ({ id: 'late', items: ['7395651009'], status: 'delayed', eta: '2026-10-30', originalEta: '2026-10-28', swap: { item: '7330605115', eta: '2026-10-27', priceDelta: 37930 } });
 
 test('higher priorities win and three higher cards suppress all nudges', () => {
   const data = { ...base(), orders: [delivered(), arriving()], decisions: [waiting()], saved: [saved()] };
@@ -55,12 +55,12 @@ test('date-only arrivals are not late at midnight; cancelled orders stay absent'
 });
 
 test('arrivals include today and tomorrow, ordered by ETA, excluding later days', () => {
-  const data = { ...base(), orders: [{ ...arriving(['7612276799']), id: 'tomorrow', eta: stamp(27) }, { ...arriving(['6775922884-gray']), id: 'later', eta: stamp(28) }, arriving()] };
+  const data = { ...base(), orders: [{ ...arriving(['7612276799']), id: 'tomorrow', eta: stamp(27) }, { ...arriving(['7395651009']), id: 'later', eta: stamp(28) }, arriving()] };
   assert.deepEqual(buildCards(data, now).map(c => c.source.id), ['arrival', 'tomorrow']);
 });
 
 test('quote window is inclusive at 24 hours and ended decisions stay absent', () => {
-  const data = { ...base(), decisions: [waiting('1814412512'), { item: '7612276799', status: 'quoted', expiresAt: new Date(+now + 86400000).toISOString() }, { item: '55518713', status: 'quoted', expiresAt: new Date(+now + 86400001).toISOString() }, { item: '6775922884-gray', status: 'approved', expiresAt: stamp(26, 9) }] };
+  const data = { ...base(), decisions: [waiting('1814412512'), { item: '7612276799', status: 'quoted', expiresAt: new Date(+now + 86400000).toISOString() }, { item: '55518713', status: 'quoted', expiresAt: new Date(+now + 86400001).toISOString() }, { item: '7395651009', status: 'approved', expiresAt: stamp(26, 9) }] };
   assert.deepEqual(buildCards(data, now).map(c => c.product.id), ['7612276799', '1814412512']);
 });
 
@@ -226,8 +226,8 @@ test('every Home state boots its real controller and renders the intended mood a
 });
 
 test('opening and dismissing either problem sheet changes nothing until a choice', () => {
-  const f = homeFixture('problem'), before = f.cards(), id = 'problem:1044:6775922884-gray';
-  f.act('open', id); assert.match(f.body(), /Get it tomorrow/); assert.match(f.body(), /₩7,530/); f.close();
+  const f = homeFixture('problem'), before = f.cards(), id = 'problem:1044:7395651009';
+  f.act('open', id); assert.match(f.body(), /Get it tomorrow/); assert.match(f.body(), /₩37,930/); f.close();
   assert.equal(f.cards(), before);
   f.act('options', id); assert.match(f.body(), /Wait for Friday/); assert.match(f.body(), /Cancel this item/); f.close();
   assert.equal(f.cards(), before);
@@ -254,7 +254,7 @@ test('review, track, and evidence-backed product sheets use customer copy and ex
 test('Wait for Friday keeps the original chair and clears the delivery problem', () => {
   const f = homeFixture('problem');
   assert.match(f.cards(), /data-home-action="wait"[^>]+>Wait for Friday/);
-  f.act('wait', 'problem:1044:6775922884-gray');
+  f.act('wait', 'problem:1044:7395651009');
   assert.doesNotMatch(f.cards(), /home-card problem/);
   assert.doesNotMatch(f.nodes.get('home-brief').textContent, /chair is running late/);
   assert.equal(f.nodes.get('home-status').textContent, 'Your choice is saved.');
@@ -293,7 +293,7 @@ test('section 14 card copy and short names are exact', () => {
   assert.deepEqual(copy(card('normal', 'arrival')), ['Desk lamp arrives today', 'By 12:00', 'Track order']);
   assert.deepEqual(copy(card('normal', 'decision')), ['Blue-light glasses', '₩19,900 · waiting for your OK', 'Review']);
   assert.deepEqual(copy(card('normal', 'nudge')), ['Lip Monster 03 is back in stock', 'You saved it on Wednesday', 'View']);
-  assert.deepEqual(copy(card('problem', 'problem')), ['Your chair is running late', 'Now Friday, not Wednesday. A similar chair can come tomorrow for ₩7,530 more.', 'Get it tomorrow']);
+  assert.deepEqual(copy(card('problem', 'problem')), ['Your chair is running late', 'Now Friday, not Wednesday. A similar chair can come tomorrow for ₩37,930 more.', 'Get it tomorrow']);
   assert.deepEqual(copy(card('night', 'nudge', new Date(2026, 9, 26, 23))), ['MAC Powder Kiss', "I'll ask you again at 7am · ₩35,700", 'Remove']);
   assert.deepEqual(copy(buildCards({ ...base(), orders: [delivered()] }, now)[0]), ['Your lipstick arrived', "How's the shade?", 'Rate it']);
   assert.match(homeFixture('first').cards(), /Make sure I got them right/);

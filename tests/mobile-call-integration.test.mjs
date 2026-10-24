@@ -12,12 +12,11 @@ function deferred(){let resolve;const promise=new Promise(r=>resolve=r);return {
 class Element {
   constructor(tag='div'){this.tagName=tag.toUpperCase();this.nodeType=1;this.hidden=false;this.disabled=false;this.open=false;this.dataset={};this.style={};this.children=[];this.attributes={};this.listeners=new Map();this.value='';this.files=[];this.scrollTop=0;this.clientHeight=100;this._text='';const classes=new Set();this.classList={add:(...c)=>c.forEach(x=>classes.add(x)),remove:(...c)=>c.forEach(x=>classes.delete(x)),contains:c=>classes.has(c),toggle:(c,on)=>{const active=on===undefined?!classes.has(c):on;active?classes.add(c):classes.delete(c);return active;}};}
   set textContent(value){this._text=String(value??'');this.children=[];} get textContent(){return this._text+this.children.map(child=>child.textContent).join(' ');}
-  get scrollHeight(){return this._scrollHeight??this.children.length*40;}
+  get scrollHeight(){return this._scrollHeight??this.children.length*40;} set scrollHeight(value){this._scrollHeight=value;}
   setAttribute(k,v){this.attributes[k]=String(v);} getAttribute(k){return this.attributes[k]??null;} removeAttribute(k){delete this.attributes[k];if(k==='src')delete this.src;}
   append(...nodes){for(const node of nodes){node.parentElement=this;this.children.push(node);}} replaceChildren(...nodes){this.children=[];this._text='';this.append(...nodes);}
-  remove(){if(this.parentElement)this.parentElement.children=this.parentElement.children.filter(child=>child!==this);}
-  removeChild(node){const index=this.children.indexOf(node);assert.notEqual(index,-1);this.children.splice(index,1);return node;}
-  set scrollHeight(value){this._scrollHeight=value;}
+  remove(){if(this.parentElement)this.parentElement.removeChild(this);}
+  removeChild(node){const index=this.children.indexOf(node);assert.notEqual(index,-1);this.children.splice(index,1);node.parentElement=null;return node;}
   addEventListener(k,fn){if(!this.listeners.has(k))this.listeners.set(k,[]);this.listeners.get(k).push(fn);}
   emit(k,event={}){for(const fn of this.listeners.get(k)||[])fn(event);}
   showModal(){this.open=true;} close(){this.open=false;this.emit('close');}
@@ -27,9 +26,10 @@ class Element {
 }
 
 function fixture(t,options={}){
-  const nodes=new Map([...html.matchAll(/<([a-z][a-z0-9]*)\b[^>]*?\bid="([^"]+)"[^>]*>/gi)].map(m=>[m[2],new Element(m[1])]));
+  const nodes=new Map([...html.matchAll(/<([a-z][a-z0-9]*)\b[^>]*?\bid="([^"]+)"[^>]*>/gi)].map(m=>{const node=new Element(m[1]);node.hidden=/\shidden(?:\s|>)/.test(m[0]);return [m[2],node];}));
   for(const match of html.matchAll(/<dialog\b[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/dialog>/g))for(const child of match[2].matchAll(/\bid="([^"]+)"/g)){if(nodes.has(child[1]))nodes.get(child[1]).parentElement=nodes.get(match[1]);}
   const events=new Element(),docEvents=new Element(),sequence=[],intervals=[],storage=options.storage||new Map();
+  const localStorage=options.blockStorage?{getItem(){throw Error('Storage blocked');},setItem(){throw Error('Storage blocked');},removeItem(){throw Error('Storage blocked');}}:typeof storage.getItem==='function'?storage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value)),removeItem:key=>storage.delete(key)};
   nodes.get('vision-consent').checked=true;
   let cameraStarts=0,voiceStarts=0,gestureInstance;
   class Camera {
@@ -53,13 +53,17 @@ function fixture(t,options={}){
   }
   class Snapshots {constructor(opts){this.opts=opts;}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
   class Hands {constructor(opts){gestureInstance=this;this.opts=opts;this.running=false;}async start(){this.running=true;}stop(){this.running=false;}reset(){}}
-  const context={window:{location:{search:options.search||'',href:'/call'},COUPANG_PRODUCTS:options.catalog||catalog,localStorage:options.storage||{getItem(){return null;},setItem(){}},requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,URLSearchParams,requestAnimationFrame:fn=>{fn();return 1;}};
-  context.window.localStorage=options.blockStorage?{getItem(){throw Error('Storage blocked');}}:typeof storage.getItem==='function'?storage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)};
+  const context={window:{location:{search:options.search||'',href:'/call'},COUPANG_PRODUCTS:options.catalog||catalog,localStorage,requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,URLSearchParams,requestAnimationFrame:fn=>{fn();return 1;}};
   context.URL=URL;context.AbortController=AbortController;context.window.fetch=options.fetch||(()=>{throw Error('Unexpected network request');});
   vm.createContext(context);vm.runInContext(stateSource,context);for(const moduleSource of moduleSources)vm.runInContext(moduleSource,context);vm.runInContext(source,context);
   const mobile=context.window.NookMobile;
   t.after(()=>nodes.get('end-call').onclick());
   return {...mobile,nodes,context,sequence,docEvents,events,storage,hands:gestureInstance,visionTick:()=>intervals.find(i=>i.ms===3000).fn(),get cameraStarts(){return cameraStarts;},get voiceStarts(){return voiceStarts;}};
+}
+
+async function startShopping(f){
+  f.personalization.skip();await f.nodes.get('answer-call').onclick();
+  if(!f.store.current)f.voice.opts.onRecommendations([...f.store.catalog.values()].filter(p=>p.productType==='lipstick'),'',{productType:'lipstick'});
 }
 
 test('camera sharing follows consent, pause/resume, camera-off and end while local try-on remains usable',async t=>{
@@ -127,38 +131,19 @@ test('camera opt-out and hidden page never share a frame',async t=>{
   f.docEvents.emit('visibilitychange');assert.equal(f.voice.call,null);assert.equal(f.camera.running,false);
 });
 
-test('starting a call with camera opt-out closes a camera opened while browsing',async t=>{
-  const f=fixture(t);f.nodes.get('vision-consent').checked=false;f.nodes.get('decline-call').onclick();
-  await f.nodes.get('product-try').onclick();assert.equal(f.camera.running,true);
-  await f.nodes.get('retry-call').onclick();await tick();
-  assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,1);assert.equal(f.voice.call.ready,true);
-  f.visionTick();assert.equal(f.voice.images.length,0);
-});
-
-test('camera opt-out cancels a pending browse camera request and still allows manual activation',async t=>{
-  const permission=deferred();const f=fixture(t,{cameraPermission:n=>n===1?permission.promise:Promise.resolve()});
-  f.nodes.get('vision-consent').checked=false;f.nodes.get('decline-call').onclick();
-  const opening=f.nodes.get('toggle-camera').onclick();
-  await f.nodes.get('retry-call').onclick();await tick();
-  assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,1);
-  permission.resolve();await opening;assert.equal(f.camera.running,false);
-  await f.nodes.get('toggle-camera').onclick();assert.equal(f.camera.running,true);assert.equal(f.cameraStarts,2);
-  f.visionTick();assert.equal(f.voice.images.length,0);
-});
-
 test('calling again preserves camera opt-out after manually turning the camera on',async t=>{
   const f=fixture(t);f.nodes.get('vision-consent').checked=false;await f.nodes.get('answer-call').onclick();
   await f.nodes.get('toggle-camera').onclick();f.nodes.get('end-call').onclick();
-  f.nodes.get('call-again').onclick();await tick();
+  f.nodes.get('answer-call').onclick();await tick();
   assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,2);
   assert.equal(f.voice.call.ready,true);f.visionTick();assert.equal(f.voice.images.length,0);
 });
 
-test('mobile entry boots against real HTML IDs, and Browse requests no camera or voice',t=>{
+test('mobile entry has one call entry and no separate browse or onboarding link',t=>{
   const f=fixture(t);assert(f.voice);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);
-  f.nodes.get('decline-call').onclick();
-  assert.equal(f.nodes.get('phone-app').dataset.phase,'browse');assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);
-  assert.equal(f.store.queue.length,Math.min(10,catalog.filter(p=>p.productType==='lipstick').length));assert(f.store.queue.every(p=>p.productType==='lipstick'));assert.equal(f.nodes.get('product-zone').hidden,false);
+  assert.equal(f.nodes.has('decline-call'),false);assert.equal(f.nodes.has('personalization-entry'),false);
+  assert.equal(f.voice.opts.getContext().screen,'incoming');assert.equal(f.store.queue.length,0);
+  assert.equal(f.personalization.active,true);assert.equal(f.nodes.get('incoming-skip-personalization').hidden,false);
 });
 
 test('Answer starts camera then real-call adapter; End closes both and returns to the start screen',async t=>{
@@ -167,8 +152,17 @@ test('Answer starts camera then real-call adapter; End closes both and returns t
   f.nodes.get('end-call').onclick();assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
 });
 
-test('captions show the latest speaker while preserving conversation state',async t=>{
+test('fixed transcript keeps earlier turns available in stable order',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const emit=e=>f.voice.opts.onTranscript(e);
+  emit({role:'user',key:'early-user',text:'I want a shirt'});emit({role:'assistant',key:'reply',delta:'What colour?'});
+  assert.equal(f.store.messages.length,2);assert.equal(f.store.messages[0].key,'early-user');
+  emit({role:'user',key:'next-user',text:'Blue'});emit({role:'assistant',key:'next-reply',text:'Here are your picks'});
+  assert.equal(f.nodes.get('conversation-history').children.length,4);assert.deepEqual(Array.from(f.store.messages,m=>m.key),['early-user','reply','next-user','next-reply']);
+});
+
+test('captions show the latest speaker while preserving conversation state',async t=>{
+  const f=fixture(t);assert.equal(f.nodes.get('transcript').hidden,true);await f.nodes.get('answer-call').onclick();
   const emit=e=>f.voice.opts.onTranscript(e);
   emit({role:'user',key:'early-user',text:'I want a shirt'});
   assert.equal(f.nodes.get('caption-speaker').textContent,'You');assert.equal(f.nodes.get('caption-text').textContent,'I want a shirt');
@@ -176,6 +170,12 @@ test('captions show the latest speaker while preserving conversation state',asyn
   assert.equal(f.store.messages.length,2);assert.equal(f.store.messages[0].key,'early-user');
   assert.equal(f.nodes.get('caption-speaker').textContent,'Coupi');assert.equal(f.nodes.get('caption-text').textContent,'What colour?');
   assert.equal(f.nodes.get('transcript').hidden,false);
+  const body=f.nodes.get('caption-text');body.scrollHeight=220;body.scrollTop=0;
+  f.nodes.get('chat-minimize').onclick();
+  assert.equal(f.nodes.get('conversation-box').dataset.collapsed,'true');assert.equal(body.scrollTop,220);
+  f.nodes.get('chat-minimize').onclick();
+  assert.equal(f.nodes.get('conversation-box').dataset.collapsed,'false');assert.equal(f.nodes.get('transcript').hidden,false);
+  assert.equal(f.nodes.get('conversation-history').children.length,2);
 });
 
 test('streaming captions reuse the text box, follow new text and skip unchanged final writes',async t=>{
@@ -202,7 +202,7 @@ test('late transcripts cannot replace the current caption and a new call resets 
   emit({role:'assistant',key:'next-reply',delta:'Another lamp'});
   assert.equal(body.textContent,'Another lamp');
   f.nodes.get('end-call').onclick();f.nodes.get('call-again').onclick();await tick();
-  assert.equal(f.nodes.get('caption-text'),body);assert.equal(body.textContent,'What do you want to buy?');
+  assert.equal(f.nodes.get('caption-text'),body);assert.equal(body.textContent,f.personalization.greeting);
   assert.equal(f.nodes.get('caption-speaker').textContent,'Coupi');
 });
 
@@ -272,7 +272,7 @@ test('unsent drafts remain in text mode and a new call clears only the old histo
   f.voice.call.ready=true;f.voice.opts.onState({state:'connected',muted:true});f.nodes.get('text-toggle').onclick();
   f.voice.opts.onTranscript({role:'assistant',key:'old',text:'Previous call'});
   f.nodes.get('end-call').onclick();f.nodes.get('call-again').onclick();await tick();
-  assert.equal(form.hidden,false);assert.equal(history.children.length,1);assert.equal(history.children[0].children[2].textContent,'What do you want to buy?');
+  assert.equal(form.hidden,false);assert.equal(history.children.length,1);assert.equal(history.children[0].children[2].textContent,f.personalization.greeting);
 });
 
 test('conversation history keeps earlier turns available in stable order',async t=>{
@@ -300,7 +300,7 @@ test('selecting two products in one category changes the actual photo source and
 });
 
 test('inline catalog exposes all product groups and selecting a row tries its exact product',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('catalog-button').onclick();
+  const f=fixture(t);await startShopping(f);f.nodes.get('catalog-button').onclick();
   for(const type of ['lipstick','lipbalm','chair','lamp','tshirt','hoodie','sweater','glasses']){
     f.nodes.get('inline-type-'+type).onclick();assert.equal(f.discovery.productType,type);
     assert.equal(f.nodes.get('catalog-dialog').open,false);
@@ -310,12 +310,12 @@ test('inline catalog exposes all product groups and selecting a row tries its ex
   const row=f.nodes.get('inline-items').children.find(row=>row.children[1]?.children.some(button=>button.textContent==='Try on'));
   assert(row,'An available optical glasses preview must be present');
   const productId=row.dataset.id;await row.children[1].children.find(button=>button.textContent==='Try on').onclick();
-  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.camera.product.productType,'glasses');assert.equal(f.camera.product.id,productId);assert.equal(f.store.current.id,productId);assert.equal(f.voiceStarts,0);
+  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.camera.product.productType,'glasses');assert.equal(f.camera.product.id,productId);assert.equal(f.store.current.id,productId);assert.equal(f.voiceStarts,1);
   assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.opts.getContext().visible_panel,'call');
 });
 
-test('each product offers an in-app introduction with a sourced retailer link',t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('catalog-search-open').onclick();const rows=f.nodes.get('catalog-items').children;
+test('each product offers an in-app introduction with a sourced retailer link',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('catalog-search-open').onclick();const rows=f.nodes.get('catalog-items').children;
   for(const row of rows){
     const actions=row.children[1].children[3];
     assert.equal(actions.children.length,1);assert.equal(actions.children[0].textContent,'Show details');
@@ -327,12 +327,12 @@ test('each product offers an in-app introduction with a sourced retailer link',t
   assert(f.nodes.get('detail-body').textContent.startsWith(selected.verifiedAttributes[0]));
   assert.equal(f.nodes.get('detail-link').href,selected.url);
   assert.equal(f.store.current,current);assert.equal(f.nodes.get('catalog-dialog').open,true);
-  assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);
+  assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,1);
   f.nodes.get('close-details').onclick();assert.equal(f.nodes.get('catalog-dialog').open,true);
 });
 
-test('live product details use the sourced introduction and handle unavailable photos and prices',t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();
+test('live product details use the sourced introduction and handle unavailable photos and prices',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await startShopping(f);
   const product={id:'900123',name:'Black round frames',description:'Round black eyeglass frames. Size options are unverified.',url:'https://www.coupang.com/vp/products/900123?itemId=456',source:'coupang_web',category:'glasses',productType:'glasses',currency:'KRW',price:null,image:null};
   f.voice.opts.onRecommendations([product],'',{query:'glasses',category:'glasses'});
   f.nodes.get('catalog-items').children[0].children[1].children[3].children[0].onclick();
@@ -363,26 +363,26 @@ test('voice cannot reactivate a camera the shopper turned off',async t=>{
 });
 
 test('browse card action opens grounded details; saving only adds to local bag',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();const p=f.store.current;const size=f.store.queue.length;
+  const f=fixture(t);await startShopping(f);const p=f.store.current;const size=f.store.queue.length;
   const details=await f.voice.opts.onProductAction('browse',p.id);
   assert.equal(f.nodes.get('details-dialog').open,true);assert.equal(f.nodes.get('detail-title').textContent,p.name);assert.equal(f.store.queue.length,size);assert.equal(details.purchased,false);
   f.nodes.get('close-details').onclick();const result=await f.voice.opts.onProductAction('save',p.id);
-  assert.equal(f.store.cart.size,1);assert.equal(result.purchased,false);assert.equal(f.voiceStarts,0);
+  assert.equal(f.store.cart.size,1);assert.equal(result.purchased,false);assert.equal(f.voiceStarts,1);
   f.nodes.get('cart-button').onclick();const actions=f.nodes.get('cart-items').children[0].children[1].children;
   assert.equal(actions[0].textContent,'Show details');assert.equal(actions[0].href,undefined);
   actions[0].onclick();assert.equal(f.nodes.get('detail-title').textContent,p.name);
 });
 
 test('ending during swipe animation prevents late bag mutation',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();const pending=f.nodes.get('product-save').onclick();f.nodes.get('end-call').onclick();await pending;
+  const f=fixture(t);await startShopping(f);const pending=f.nodes.get('product-save').onclick();f.nodes.get('end-call').onclick();await pending;
   assert.equal(f.store.cart.size,0);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
 });
 
 test('old camera-permission completion cannot start voice inside a newer pending call',async t=>{
   const first=deferred(),second=deferred();const f=fixture(t,{cameraPermission:n=>n===1?first.promise:second.promise});
   const oldAnswer=f.nodes.get('answer-call').onclick();await tick();f.nodes.get('end-call').onclick();
-  // The real Call again handler returns void; invoking Answer after its screen transition is equivalent.
-  f.nodes.get('call-again').onclick();await tick();first.resolve();await oldAnswer;await tick();
+  // Answer starts a new call from the start screen after the cancelled connection.
+  f.nodes.get('answer-call').onclick();await tick();first.resolve();await oldAnswer;await tick();
   assert.equal(f.voiceStarts,0,'Old Answer must not start the new call before its own camera finishes');
   second.resolve();await tick();await tick();assert.equal(f.voiceStarts,1);
 });
@@ -405,7 +405,7 @@ test('try-on minimizes controls while Controls/Hide toggles them and Products op
   assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
   assert.equal(f.nodes.get('focus-toggle-label').textContent,'Controls');
   assert.equal(f.voice.opts.getContext().visible_panel,'catalog');
-  assert(f.nodes.get('call-screen').scrollTop>0);
+  assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.nodes.get('product-zone').dataset.collection,'true');
   assert.equal(f.nodes.get('catalog-dialog').open,false);
   assert.equal(f.camera.running,true);assert.equal(f.voice.call.ready,true);
   assert.equal(f.nodes.has('render-generate'),false);
@@ -481,9 +481,7 @@ test('first and returning calls close media and stay on the start screen',async 
   assert.equal(returning.context.window.location.href,'/call');assert.equal(returning.nodes.get('incoming-screen').hidden,false);assert.equal(returning.nodes.get('end-screen').hidden,true);
 });
 
-test('browsing, a cancelled connection, and leaving the page do not complete the first call',async t=>{
-  const browsing=fixture(t);browsing.nodes.get('decline-call').onclick();browsing.nodes.get('end-call').onclick();
-  assert.equal(browsing.storage.has('coupi_first_call_done'),false);
+test('a cancelled connection and leaving the page do not complete the first call',async t=>{
   const wait=deferred(),connecting=fixture(t,{cameraPermission:()=>wait.promise});
   const answering=connecting.nodes.get('answer-call').onclick();connecting.nodes.get('end-call').onclick();wait.resolve();await answering;
   assert.equal(connecting.storage.has('coupi_first_call_done'),false);assert.equal(connecting.nodes.get('answer-call').disabled,false);assert.equal(connecting.nodes.get('incoming-screen').hidden,false);
@@ -515,7 +513,7 @@ test('voice recommendations open a priced list capped at fifteen and try the exa
 });
 
 test('a short glasses result never pads the list with defaults or exposes unrelated categories',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await startShopping(f);
   f.voice.opts.onRecommendations([liveProducts()[0],catalog.find(p=>p.productType==='lipstick')],'Matches',{query:'glasses',category:'all',max_price:null,product_types:[]});
   const rows=f.nodes.get('catalog-items').children;
   assert.equal(rows.length,1);assert.match(rows[0].children[1].children[0].textContent,/Glasses/);
@@ -528,14 +526,14 @@ test('typed search asks for ten choices and excludes paused memories',async t=>{
   let body;
   const storage=new Map([['coupi_memory',JSON.stringify([{text:'Rose gold'}])],['coupi_memory_paused','1']]);
   const f=fixture(t,{storage,fetch:async(url,init)=>{body=JSON.parse(init.body);return {ok:true,json:async()=>({products:liveProducts().slice(0,10)})};}});
-  f.nodes.get('decline-call').onclick();f.nodes.get('catalog-search-input').value='glasses';
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('catalog-search-input').value='glasses';
   await f.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
   assert.equal(body.limit,10);assert.deepEqual(body.memories,[]);
   assert.equal(f.nodes.get('catalog-items').children.length,10);
 });
 
 test('a listing without a photo stays in the choices but cannot start the camera',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await startShopping(f);
   f.voice.opts.onRecommendations([{...liveProducts()[0],image:null}]);
   const button=f.nodes.get('catalog-items').children[0].children[2];
   assert.equal(button.disabled,true);assert.equal(button.textContent,'No preview');
@@ -543,14 +541,14 @@ test('a listing without a photo stays in the choices but cannot start the camera
   await assert.rejects(f.voice.opts.onProductAction('try_on','800000'),/no preview photo/);
   assert.equal(f.cameraStarts,0);
 });
-test('typed Coupang search includes saved preferences and shows results without starting media',async t=>{
+test('typed Coupang search includes saved preferences and shows results without restarting the call or starting the camera',async t=>{
   let body;
   const storage=new Map([['coupi_memory',JSON.stringify([{text:'I like white frames',source:'you told me'}])]]);
   const f=fixture(t,{storage,fetch:async(url,init)=>{assert.equal(url,'/api/products/search');body=JSON.parse(init.body);return {ok:true,json:async()=>({products:liveProducts()})};}});
-  f.nodes.get('decline-call').onclick();f.nodes.get('catalog-search-input').value='white glasses';
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('catalog-search-input').value='white glasses';
   await f.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
   assert.deepEqual(body.memories,['I like white frames']);assert.equal(body.query,'white glasses');
-  assert.equal(f.nodes.get('catalog-items').children.length,15);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);
+  assert.equal(f.nodes.get('catalog-items').children.length,15);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,1);
 });
 
 test('voice glasses results hide unrelated categories and refresh replaces the list with unseen glasses',async t=>{
@@ -577,7 +575,7 @@ test('voice glasses results hide unrelated categories and refresh replaces the l
 test('refresh cannot send duplicate in-flight requests and failure leaves retry available',async t=>{
   const pending=deferred();let calls=0;
   const f=fixture(t,{fetch:()=>{calls++;return pending.promise;}});
-  f.nodes.get('decline-call').onclick();f.nodes.get('type-glasses').onclick();
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('type-glasses').onclick();
   const refresh=f.nodes.get('catalog-refresh').onclick();
   assert.equal(f.nodes.get('catalog-refresh').disabled,true);
   f.nodes.get('catalog-refresh').onclick();assert.equal(calls,1);
@@ -588,7 +586,7 @@ test('refresh cannot send duplicate in-flight requests and failure leaves retry 
 test('refresh retries the latest failed query instead of reverting to an older product category',async t=>{
   const requests=[];
   const f=fixture(t,{fetch:async(url,init)=>{requests.push(JSON.parse(init.body));return {ok:false,json:async()=>({error:'Try again'})};}});
-  f.nodes.get('decline-call').onclick();f.nodes.get('type-chair').onclick();
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('type-chair').onclick();
   f.nodes.get('catalog-search-input').value='white glasses';
   await f.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
   await f.nodes.get('catalog-refresh').onclick();
@@ -598,12 +596,12 @@ test('refresh retries the latest failed query instead of reverting to an older p
 
 test('search failure is visible and ending a call discards late search results',async t=>{
   const pending=deferred();const f=fixture(t,{fetch:()=>pending.promise});
-  f.nodes.get('decline-call').onclick();f.nodes.get('catalog-search-input').value='white glasses';
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('catalog-search-input').value='white glasses';
   const searching=f.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
   f.nodes.get('end-call').onclick();pending.resolve({ok:true,json:async()=>({products:liveProducts()})});await searching;
   assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
   const failure=fixture(t,{fetch:async()=>({ok:false,json:async()=>({error:'Search unavailable. Try again.'})})});
-  failure.nodes.get('decline-call').onclick();failure.nodes.get('catalog-search-input').value='white glasses';
+  failure.nodes.get('vision-consent').checked=false;await startShopping(failure);failure.nodes.get('catalog-search-input').value='white glasses';
   await failure.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
   assert.equal(failure.nodes.get('catalog-items').children.length,0);assert.match(failure.nodes.get('catalog-summary').textContent,/Search unavailable/);
   assert.equal(failure.nodes.get('catalog-search-submit').disabled,false);
@@ -611,7 +609,7 @@ test('search failure is visible and ending a call discards late search results',
 
 
 test('selecting a non-first result adds only that product, retains selection, and never bulk-adds a group',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('catalog-button').onclick();
+  const f=fixture(t);await startShopping(f);f.nodes.get('catalog-button').onclick();
   const second=f.discovery.visible[1];assert(second);f.nodes.get('catalog-items').children[1].children[0].onclick();
   assert.equal(f.store.current.id,second.id);assert.equal(f.discovery.current.id,second.id);
   f.nodes.get('close-catalog').onclick();await f.nodes.get('product-save').onclick();
@@ -620,7 +618,7 @@ test('selecting a non-first result adds only that product, retains selection, an
 });
 
 test('a saved result group returns after switching styles with selected product intact',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();
+  const f=fixture(t);await startShopping(f);
   f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'),'',{query:'normal glasses',category:'glasses'});
   const original=Array.from(f.discovery.products,p=>p.id),selected=f.store.current.id;
   f.nodes.get('save-group').onclick();assert.equal(f.discovery.collections.length,1);
@@ -648,7 +646,7 @@ test('ending discards an attached image and a late image-preparation result cann
 
 test('hand swipes are gated while any product, history, comparison or collection dialog is open',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'));
-  assert.equal(f.hands.opts.isEnabled(),true);
+  f.nodes.get('back-camera').onclick();assert.equal(f.hands.opts.isEnabled(),true);
   for(const id of ['details-dialog','catalog-dialog','cart-dialog','chat-history-dialog','collections-dialog','compare-dialog']){
     f.nodes.get(id).showModal();assert.equal(f.hands.opts.isEnabled(),false,id);f.nodes.get(id).close();assert.equal(f.hands.opts.isEnabled(),true,id);
   }
@@ -701,7 +699,7 @@ test('buy selected and buy from details review the exact intended product while 
 });
 
 test('buy comparison reviews every compared product without changing the bag',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('catalog-button').onclick();
+  const f=fixture(t);await startShopping(f);f.nodes.get('catalog-button').onclick();
   const chosen=f.discovery.visible.slice(0,3);
   for(let i=0;i<3;i++)f.nodes.get('catalog-items').children[i].children[1].children.find(button=>button.textContent==='Compare').onclick();
   f.nodes.get('compare-open').onclick();assert.equal(f.nodes.get('compare-dialog').open,true);
@@ -746,7 +744,7 @@ test('only explicit payment confirmation completes the demo and removes just the
 
 test('checkout gates hand swipes and ending the call cancels an unfinished checkout without altering the bag',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'));
-  const product=f.store.current;f.store.cart.set(product.id,product);assert.equal(f.hands.opts.isEnabled(),true);
+  const product=f.store.current;f.store.cart.set(product.id,product);f.nodes.get('back-camera').onclick();assert.equal(f.hands.opts.isEnabled(),true);
   f.nodes.get('product-buy').onclick();assert.equal(f.hands.opts.isEnabled(),false);
   f.nodes.get('checkout-next').onclick();assert.equal(f.hands.opts.isEnabled(),false);
   f.nodes.get('end-call').onclick();
@@ -793,7 +791,7 @@ test('an incoming voice checkout cannot replace a quote awaiting the shopper’s
 });
 
 test('empty bag and fully deselected checkout cannot proceed to payment',async t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('cart-button').onclick();
+  const f=fixture(t);await startShopping(f);f.nodes.get('cart-button').onclick();
   assert.equal(f.nodes.get('cart-checkout').disabled,true);
   await assert.rejects(Promise.resolve().then(()=>f.voice.opts.onCheckout({scope:'cart',productIds:[]})));
   assert.equal(f.nodes.get('checkout-dialog').open,false);f.nodes.get('close-cart').onclick();
@@ -810,29 +808,44 @@ function inlineCatalog(){
 const inlineRows=f=>f.nodes.get('inline-items').children.filter(row=>row.dataset.id);
 const inlineAction=(row,name)=>row.children[1].children.find(button=>button.textContent===name);
 
-test('inline collection starts with six picks, expands to ten, and keeps the live call while returning to camera',async t=>{
+test('recommendations open six picks inside the fixed product panel, expand to ten, and leave the call stationary',async t=>{
   const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
   f.voice.opts.onRecommendations([...f.store.catalog.values()].filter(p=>p.productType==='lipstick'),'',{query:'pink lipstick',category:'makeup'});
   assert.equal(inlineRows(f).length,6);assert.equal(f.nodes.get('inline-more').hidden,false);
   assert.match(f.nodes.get('inline-description').textContent,/6 brands/);
-  f.nodes.get('inline-peek').onclick();assert.equal(f.nodes.get('call-screen').scrollTop,500);
+  assert.equal(f.nodes.get('inline-products').hidden,false);assert.equal(f.nodes.get('product-zone').dataset.collection,'true');
   assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.voice.opts.getContext().visible_panel,'catalog');
-  assert.equal(f.hands.opts.isEnabled(),false);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
+  assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.hands.opts.isEnabled(),false);assert.match(f.nodes.get('gesture-status').textContent,/Scroll picks/);
+  const scroller=f.nodes.get('product-panel-scroll');scroller.scrollTop=180;
   f.nodes.get('inline-more').onclick();assert.equal(inlineRows(f).length,10);assert.equal(f.nodes.get('inline-more').hidden,true);
-  assert.equal(f.nodes.get('call-screen').scrollTop,500,'Expanding the grid must not jump back to video');
-  f.nodes.get('back-camera').onclick();assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.opts.getContext().visible_panel,'call');
-  assert.equal(f.hands.opts.isEnabled(),true);assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,1);
+  assert.equal(scroller.scrollTop,180,'View more retains the position inside the product window');assert.equal(f.nodes.get('call-screen').scrollTop,0);
+  f.nodes.get('back-camera').onclick();assert.equal(f.nodes.get('inline-products').hidden,true);assert.equal(f.nodes.get('product-zone').dataset.collection,'false');assert.equal(f.voice.opts.getContext().visible_panel,'call');
+  assert.equal(f.hands.opts.isEnabled(),true);assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,1);assert.match(f.nodes.get('gesture-status').textContent,/Hand swipe:/);
+  f.nodes.get('group-open').onclick();assert.equal(scroller.scrollTop,180);assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
 });
 
-test('scrolling into collections gates gestures and does not interrupt the camera or call',async t=>{
+test('internal product scrolling, selection and comparison preserve position without moving the call',async t=>{
   const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
   f.voice.opts.onRecommendations([...f.store.catalog.values()].filter(p=>p.productType==='lipstick'));
-  const scroller=f.nodes.get('call-screen');f.nodes.get('call-stage').offsetHeight=600;
-  scroller.scrollTop=510;scroller.emit('scroll');assert.equal(f.voice.opts.getContext().visible_panel,'catalog');assert.equal(f.hands.opts.isEnabled(),false);
+  const scroller=f.nodes.get('product-panel-scroll');scroller.scrollTop=210;scroller.emit('scroll');
+  const selected=inlineRows(f)[2],id=selected.dataset.id;selected.children[0].onclick();
+  assert.equal(f.store.current.id,id);assert.equal(scroller.scrollTop,210);
+  inlineAction(inlineRows(f)[2],'Compare').onclick();assert.equal(scroller.scrollTop,210);assert.equal(f.discovery.comparison.length,1);
+  inlineAction(inlineRows(f)[2],'Add to bag').onclick();assert.equal(scroller.scrollTop,210);assert.deepEqual(Array.from(f.store.cart.keys()),[id]);
   f.voice.opts.onTranscript({key:'while-browsing',role:'assistant',text:'Here are a few options.',final:true});
-  assert.equal(scroller.scrollTop,510);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
-  scroller.scrollTop=80;scroller.emit('scroll');assert.equal(f.voice.opts.getContext().visible_panel,'catalog');assert.equal(f.hands.opts.isEnabled(),false,'Partial scrolling must also pause hand decisions');
-  scroller.scrollTop=0;scroller.emit('scroll');assert.equal(f.voice.opts.getContext().visible_panel,'call');assert.equal(f.hands.opts.isEnabled(),true);
+  assert.equal(scroller.scrollTop,210);assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
+  scroller.scrollTop=0;scroller.emit('scroll');assert.equal(f.voice.opts.getContext().visible_panel,'catalog');assert.equal(f.hands.opts.isEnabled(),false,'At the top of the list, hand decisions remain paused until focus mode');
+  f.nodes.get('back-camera').onclick();assert.equal(f.voice.opts.getContext().visible_panel,'call');assert.equal(f.hands.opts.isEnabled(),true);
+});
+
+test('new categories, related collections and fresh recommendations reset only the internal product list',async t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
+  f.nodes.get('catalog-button').onclick();const scroller=f.nodes.get('product-panel-scroll');
+  scroller.scrollTop=210;f.nodes.get('inline-type-tshirt').onclick();assert.equal(scroller.scrollTop,0);
+  scroller.scrollTop=210;f.nodes.get('inline-next').onclick();assert.equal(scroller.scrollTop,0);assert.equal(f.discovery.collectionStyle,'branded');
+  scroller.scrollTop=210;f.voice.opts.onRecommendations([...f.store.catalog.values()].filter(p=>p.productType==='lipstick'));assert.equal(scroller.scrollTop,0);
+  assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.nodes.get('inline-products').hidden,false);
+  f.nodes.get('end-call').onclick();assert.equal(f.nodes.get('inline-products').hidden,true);assert.equal(f.nodes.get('product-zone').dataset.collection,'false');assert.equal(scroller.scrollTop,0);
 });
 
 test('Try on from an inline row returns the chosen product to the camera and only its Add action affects the bag',async t=>{
@@ -847,19 +860,19 @@ test('Try on from an inline row returns the chosen product to the camera and onl
 
 test('Save collection retains all ten picks and selected item across a six-item related collection',async t=>{
   const memory=new Map(),storage={getItem:key=>memory.get(key)||null,setItem:(key,value)=>memory.set(key,value)};
-  const f=fixture(t,{catalog:inlineCatalog(),storage});f.nodes.get('decline-call').onclick();f.nodes.get('inline-type-lipstick').onclick();
+  const f=fixture(t,{catalog:inlineCatalog(),storage});await startShopping(f);f.nodes.get('inline-type-lipstick').onclick();
   const selected=inlineRows(f)[2];selected.children[0].onclick();const selectedId=selected.dataset.id;
   f.nodes.get('inline-save').onclick();assert.equal(f.discovery.collections.length,1);assert.equal(f.discovery.collections[0].productCount,10);assert.equal(memory.size,1);
   f.nodes.get('inline-next').onclick();assert.equal(f.discovery.productType,'lipbalm');assert.equal(inlineRows(f).length,6);assert.equal(f.store.cart.size,0);
   f.nodes.get('inline-saved').onclick();const saved=f.nodes.get('collection-items').children[0];saved.children[3].children[0].onclick();
   assert.equal(f.nodes.get('collections-dialog').open,false);assert.equal(f.nodes.get('catalog-dialog').open,false);
   assert.equal(f.discovery.productType,'lipstick');assert.equal(f.store.current.id,selectedId);assert.equal(inlineRows(f).length,6);
-  assert.equal(f.voice.opts.getContext().visible_panel,'catalog');assert.equal(f.nodes.get('call-screen').scrollTop,500);
+  assert.equal(f.voice.opts.getContext().visible_panel,'catalog');assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.nodes.get('inline-products').hidden,false);
   f.nodes.get('inline-more').onclick();assert.equal(inlineRows(f).length,10);assert.equal(f.store.cart.size,0);
 });
 
-test('Next collection presents related eyewear, branded shirts and sweaters as separate six-item groups',t=>{
-  const f=fixture(t,{catalog:inlineCatalog()});f.nodes.get('decline-call').onclick();
+test('Next collection presents related eyewear, branded shirts and sweaters as separate six-item groups',async t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});await startShopping(f);
   for(const [type,expected,theme,style] of [['glasses','glasses','sunglasses',''],['tshirt','tshirt','','branded'],['hoodie','sweater','','']]){
     f.nodes.get('inline-type-'+type).onclick();const before=inlineRows(f).map(row=>row.dataset.id);assert.equal(before.length,6);
     f.nodes.get('inline-next').onclick();assert.equal(f.discovery.productType,expected);assert.equal(f.discovery.theme,theme);assert.equal(f.discovery.collectionStyle,style);
@@ -878,8 +891,8 @@ test('inline call bar keeps mute and end usable while the collection is visible'
 });
 
 
-test('the opening question is neutral and reviews are directly accessible',async t=>{
-  const f=fixture(t);assert.equal(f.voice.opts.greeting,'What do you want to buy?');await f.nodes.get('answer-call').onclick();
+test('the shopping question is neutral after skipping and reviews are directly accessible',async t=>{
+  const f=fixture(t);f.nodes.get('incoming-skip-personalization').onclick();await f.nodes.get('answer-call').onclick();
   assert.equal(f.store.messages[0].text,'What do you want to buy?');
   f.voice.opts.onRecommendations(catalog.filter(p=>p.reviewEvidence?.reviews?.length));
   f.nodes.get('product-details').onclick();
@@ -932,19 +945,30 @@ test('a delayed close event from the completed receipt cannot cancel its replace
 
 function profileStorage(){const data=new Map();return {getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key),data};}
 const draftPrefs={interests:['focused_work','beauty_play'],vibe:'calm',budget:20000,story:'I enjoy reading and making my desk comfortable.'};
-test('personalization is opt-in and never blocks a direct shopping call',async t=>{
-  const storage=profileStorage(),f=fixture(t,{storage});assert.equal(f.personalization.active,false);assert.equal(f.voice.opts.getContext().personalization.active,false);
+test('new users can skip the interview before starting without leaving the call page',async t=>{
+  const storage=profileStorage(),f=fixture(t,{storage});assert.equal(f.personalization.active,true);
+  f.nodes.get('incoming-skip-personalization').onclick();assert.equal(f.personalization.active,false);
+  assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);assert.equal(f.context.window.location.href,'/call');
   await f.nodes.get('answer-call').onclick();assert.equal(f.voice.opts.greeting,'What do you want to buy?');
   assert.throws(()=>f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs}),/not active/);assert.equal(storage.data.size,0);
 });
-test('new-customer conversation drafts preferences but only the explicit Build button saves and opens worlds',async t=>{
-  const storage=profileStorage(),f=fixture(t,{storage,search:'?intent=personalize'});assert.equal(f.personalization.active,true);assert.equal(f.cameraStarts,0);assert.equal(storage.data.size,0);
-  await f.nodes.get('answer-call').onclick();assert.equal(f.voice.opts.greeting,'What do you enjoy doing in your free time?');
+test('skipping while camera permission is pending updates the actual call greeting',async t=>{
+  const wait=deferred(),f=fixture(t,{cameraPermission:()=>wait.promise});
+  const starting=f.nodes.get('answer-call').onclick();await tick();
+  f.nodes.get('personalization-skip').onclick();assert.equal(f.personalization.active,false);
+  wait.resolve();await starting;assert.equal(f.voice.opts.greeting,'What do you want to buy?');
+  assert.equal(f.store.messages[0].text,'What do you want to buy?');assert.equal(f.voice.sentTexts.length,0);
+});
+test('new-customer interview confirms preferences and keeps the same camera and call active',async t=>{
+  const storage=profileStorage(),f=fixture(t,{storage});assert.equal(f.personalization.active,true);assert.equal(f.cameraStarts,0);assert.equal(storage.data.size,0);
+  await f.nodes.get('answer-call').onclick();assert.match(f.voice.opts.greeting,/Welcome new user! We want to learn more about you to personalize your experience/);
   const result=f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs});assert.equal(result.saved,false);assert.equal(result.draft_ready,true);
   assert.equal(f.nodes.get('personalization-dialog').open,true);assert.equal(f.voice.opts.getContext().personalization.draft_pending,true);assert.equal(storage.data.size,0);assert.equal(f.hands.opts.isEnabled(),false);
-  f.nodes.get('preference-story').value='I like cozy reading evenings.';f.nodes.get('personalization-save').onclick();
-  const profile=JSON.parse(storage.getItem('coupi.preferences.v1'));assert.equal(profile.story,'I like cozy reading evenings.');assert.equal(profile.completed,true);assert.equal(profile.budget,20000);
-  assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.context.window.location.href,'/explore');
+  assert.match(f.nodes.get('preference-summary').textContent,/reading/);assert.equal(f.nodes.has('preference-story'),false);
+  f.nodes.get('personalization-save').onclick();
+  const profile=JSON.parse(storage.getItem('coupi.preferences.v1'));assert.equal(profile.story,draftPrefs.story);assert.equal(profile.completed,true);assert.equal(profile.budget,20000);
+  assert.equal(f.camera.running,true);assert.equal(f.voice.call.ready,true);assert.equal(f.context.window.location.href,'/call');assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,1);
+  assert.equal(f.personalization.active,false);assert.equal(f.voice.opts.getContext().personalization.preferences.story,draftPrefs.story);assert.match(f.voice.sentTexts.at(-1),/continue shopping in this call/);
 });
 test('Skip discards the draft, keeps the call active and never saves partial answers',async t=>{
   const storage=profileStorage(),f=fixture(t,{storage,search:'?intent=personalize'});await f.nodes.get('answer-call').onclick();f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs});
@@ -956,10 +980,10 @@ test('blocked local storage leaves preference review open and keeps the call con
   const f=fixture(t,{storage,search:'?intent=personalize'});await f.nodes.get('answer-call').onclick();f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs});f.nodes.get('personalization-save').onclick();
   assert.equal(f.nodes.get('personalization-dialog').open,true);assert.equal(f.nodes.get('personalization-error').hidden,false);assert.equal(f.voice.call.ready,true);assert.equal(f.context.window.location.href,'/call');
 });
-test('a saved world seeds a budget-filtered catalog but does not start a call or onboarding automatically',t=>{
+test('a saved world seeds a budget-filtered catalog but does not start a call or onboarding automatically',async t=>{
   const storage=profileStorage();storage.setItem('coupi.preferences.v1',JSON.stringify({version:1,completed:true,...draftPrefs}));
   const f=fixture(t,{storage,search:'?world=desk-reset'});assert.equal(f.personalization.active,false);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);assert.equal(f.personalization.world.id,'desk-reset');
-  f.nodes.get('decline-call').onclick();assert.equal(f.cameraStarts,0);assert(f.store.queue.length>0);assert(f.store.queue.every(p=>p.price<=20000));assert.equal(f.voice.opts.getContext().personalization.preferences.story,draftPrefs.story);
+  await startShopping(f);assert.equal(f.cameraStarts,1);assert(f.store.queue.length>0);assert(f.store.queue.every(p=>p.price<=20000));assert.equal(f.voice.opts.getContext().personalization.preferences.story,draftPrefs.story);
   assert.deepEqual(Array.from(f.store.queue,p=>p.id),Array.from(f.personalization.world.products,p=>p.id));assert.equal(f.discovery.label,f.personalization.world.title);
 });
 test('answering a world call preserves every listed product and category tabs leave the world group',async t=>{
@@ -979,16 +1003,16 @@ test('changing the selected card cancels an earlier photo load before it can pre
   assert.equal(f.nodes.get('tryon-chip').hidden,true);assert.notEqual(f.camera.product?.id,first.id);
 });
 
-test('clearing comparison resets the inline product chips as well as the count',t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();
+test('clearing comparison resets the inline product chips as well as the count',async t=>{
+  const f=fixture(t);await startShopping(f);
   for(let i=0;i<2;i++)f.nodes.get('inline-items').children[i].children[1].children.find(b=>b.textContent==='Compare').onclick();
   f.nodes.get('inline-compare').onclick();f.nodes.get('compare-clear').onclick();
   assert.equal(f.discovery.comparison.length,0);assert.equal(f.nodes.get('inline-compare').disabled,true);
   assert(f.nodes.get('inline-items').children.every(row=>row.children[1].children.find(b=>b.textContent==='Compare').getAttribute('aria-pressed')==='false'));
 });
 
-test('changing categories retains the current price limit and opening an empty result group does not replace its filters',t=>{
-  const f=fixture(t);f.nodes.get('decline-call').onclick();
+test('changing categories retains the current price limit and opening an empty result group does not replace its filters',async t=>{
+  const f=fixture(t);await startShopping(f);
   f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lipstick'),'',{productType:'lipstick',maxPrice:10000});
   f.nodes.get('inline-type-lamp').onclick();assert.equal(f.discovery.maxPrice,10000);assert(f.discovery.products.every(p=>p.price<=10000));
   f.voice.opts.onRecommendations([],'',{productType:'lipstick',query:'purple lipstick',maxPrice:1,sourceOnly:true});
@@ -1015,4 +1039,17 @@ test('live search results remain selectable by color and enter checkout using tr
   assert.equal(quote.step,'review');assert.equal(quote.selectedItems[0].product.id,products[1].id);
   assert.equal(quote.referenceTotal,products[1].price);
   assert.equal(f.nodes.get('checkout-dialog').open,true);
+});
+
+
+test('skipping personalization during camera setup updates the opening caption and greeting together',async t=>{
+  const permission=deferred(),f=fixture(t,{cameraPermission:()=>permission.promise});
+  const starting=f.nodes.get('answer-call').onclick();
+  assert.match(f.nodes.get('caption-text').textContent,/Welcome new user/);
+  f.nodes.get('personalization-skip').onclick();
+  assert.equal(f.nodes.get('caption-text').textContent,'What do you want to buy?');
+  assert.equal(f.store.messages[0].text,'What do you want to buy?');
+  permission.resolve();await starting;
+  assert.equal(f.voice.opts.greeting,'What do you want to buy?');
+  assert.equal(f.voiceStarts,1);
 });

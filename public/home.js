@@ -19,7 +19,7 @@ const dayStart = value => { const d = date(value); return new Date(d.getFullYear
 const nextDay = value => { const d = date(value); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime(); };
 const weekday = value => date(value).toLocaleDateString('en-US', { weekday: 'long' });
 const clock = value => date(value).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-const shortNames = { '1814412512': 'Romand Zero Matte 09', '55518713': 'Desk lamp', '7612276799': 'Blue-light glasses', '6775922884-gray': 'Gray dining chair', '7185725748': 'Lip Monster 03', '7322824636': 'MAC Powder Kiss', '6775922884': 'Yellow dining chair' };
+const shortNames = { '1814412512': 'Romand Zero Matte 09', '55518713': 'Desk lamp', '7612276799': 'Blue-light glasses', '7395651009': 'Office chair', '7185725748': 'Lip Monster 03', '7322824636': 'MAC Powder Kiss', '7330605115': 'Study chair' };
 const displayName = product => shortNames[product.id] || product.aliases?.[0] || product.name;
 const noun = product => ({ lamp: 'lamp', chair: 'chair', glasses: 'glasses', lipstick: 'lipstick', tshirt: 'T-shirt', hoodie: 'hoodie' })[product.productType] || 'item';
 const catalogMap = data => new Map((Array.isArray(data.catalog) ? data.catalog : Object.values(data.catalog || {})).map(p => [String(p.id), p]));
@@ -151,7 +151,7 @@ export function createDemoScenario(input, state, now) {
     data.orders = data.orders.filter(o => o.status === 'out_for_delivery');
     data.held = [];
   } else if (state === 'quiet') {
-    data.orders = [{ id: 'owned-desk', items: ['55518713', '6775922884-gray'], status: 'delivered', deliveredAt: stamp(-10) }];
+    data.orders = [{ id: 'owned-desk', items: ['55518713', '7395651009'], status: 'delivered', deliveredAt: stamp(-10) }];
     data.decisions = []; data.held = []; data.saved = [];
   } else if (state === 'night') {
     data.orders = [{ id: 'night-order', items: ['7612276799'], status: 'packed', eta: stamp(1) }];
