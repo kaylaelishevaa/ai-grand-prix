@@ -104,6 +104,13 @@
 .phone-app[data-camera="on"][data-focused="true"] .call-stage .product-zone {
   top: calc(var(--flex-call-top) + 82px);
 }
+/* Reserve the caption panel plus its footer offset, keeping product scrolling inside its window. */
+.phone-app[data-camera="on"] .call-stage:has(#conversation-box[data-collapsed="true"]) .product-zone {
+  max-height: calc(100% - var(--flex-call-top) - 337px);
+}
+.phone-app[data-camera="on"][data-focused="true"] .call-stage:has(#conversation-box[data-collapsed="true"]) .product-zone {
+  max-height: calc(100% - var(--flex-call-top) - 287px);
+}
 
 /* Camera-off uses the same bounded screen, with real space for the conversation. */
 .phone-app[data-camera="off"] .call-screen,
@@ -162,6 +169,23 @@
   min-height: 0;
   overflow: hidden;
   pointer-events: auto;
+}
+/* Minimized live captions belong to video; camera-off always retains full chat. */
+.phone-app[data-camera="off"] .conversation-area:has(#conversation-box[data-collapsed]) {
+  inset: auto;
+  gap: 7px;
+}
+.phone-app[data-camera="off"] #live-caption { display: none !important; }
+.phone-app[data-camera="off"] #conversation-box #transcript {
+  display: flex !important;
+  flex: 1 1 auto;
+  height: auto;
+  max-height: none;
+  min-height: 0;
+}
+.phone-app[data-camera="off"] .conversation-area > .text-form {
+  position: static;
+  inset: auto;
 }
 .phone-app[data-camera="off"] .personalization-strip { flex: 0 0 auto; margin: 0; padding: 7px 10px; }
 .phone-app[data-camera="off"] .conversation-box {
@@ -274,3 +298,9 @@
 /* The format tabs own mode changes; avoid duplicate inactive controls in chat. */
 .phone-app[data-camera="off"] #text-toggle,
 .phone-app[data-format="text"] #mute-call { display: none; }
+
+/* Keep the latest video caption compact and consistent with the cyan surfaces. */
+.phone-app[data-camera="on"] .conversation-area:has(#conversation-box[data-collapsed="true"]) { bottom: calc(88px + env(safe-area-inset-bottom)); }
+.phone-app[data-camera="on"] .live-caption { height: 74px; padding: 8px 12px; gap: 2px; color: #254d53; background: #f8ffffed; }
+.phone-app[data-camera="on"] .caption-speaker { color: #47777b; }
+.phone-app[data-camera="on"] .caption-text { height: 40px; font-size: 13px; line-height: 20px; }

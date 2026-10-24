@@ -47,6 +47,7 @@
     try{
       // Stop video immediately for a camera-free format; never restart it after a cancelled switch.
       if(format!=='video'){camera.stop(false);await setMode('none');cameraUI();}
+      if(token!==generation||phase!=='active')return false;
       const nextInput=format==='text'?'text':'voice';
       const changed=await voice.setInputMode(nextInput);
       if(token!==generation||phase!=='active')return false;
@@ -82,14 +83,26 @@
     show('vision-strip',camera.running&&['connecting','active'].includes(phase));
     $('vision-toggle').setAttribute('aria-pressed',String(visionWanted));
     $('vision-toggle').setAttribute('aria-label',visionWanted?'Pause camera sharing with Coupi':'Resume camera sharing with Coupi');
-    $('vision-toggle').dataset.state=enabled?visionState:'paused';
     const age=visionLastAt?Date.now()-Date.parse(visionLastAt):Infinity;
-    const label=!visionWanted?'Coupi’s view is paused':!camera.running?'Camera off · Coupi can’t see':!enabled?'Camera sharing waiting':visionState==='error'?'Camera sharing delayed':visionState==='received'&&age<12000?'Coupi sees snapshots':visionState==='received'?'Refreshing Coupi’s view…':'Sharing camera…';
-    text('vision-status',label);text('vision-action',visionWanted?'Pause':'Resume');
+    const displayState=!enabled?'paused':visionState==='error'?'error':age<12000?'received':visionLastAt?'refreshing':'sent';
+    $('vision-toggle').dataset.state=displayState;
+    const label=!visionWanted?'':!camera.running?'Camera off · Coupi can’t see':!enabled?'Camera sharing waiting':displayState==='error'?'Camera sharing delayed':displayState==='received'?'Coupi sees snapshots':displayState==='refreshing'?'Refreshing Coupi’s view…':'Sharing camera…';
+    show('vision-status',visionWanted);
+    if($('vision-status').textContent!==label)text('vision-status',label);
+    text('vision-action',visionWanted?'Pause':'Resume');
   }
   function shareSnapshot(reason='interval'){if(!visionEnabled())return false;const frame=snapshots.capture(reason);return frame?voice.sendCameraSnapshot(frame):false;}
 
-  function transcript(entry){if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}store.message(entry);conversation.schedule();}
+  function transcript(entry){
+    if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}
+    store.message(entry);conversation.schedule();
+    const current=store.messages.at(-1);
+    if(!current)return;
+    const body=$('caption-text'),speaker=current.role==='user'?'You':'Coupi';
+    if($('caption-speaker').textContent!==speaker)text('caption-speaker',speaker);
+    show('live-caption',true);
+    if(body.textContent!==current.text){body.textContent=current.text;body.scrollTop=body.scrollHeight;}
+  }
   personalization=new window.CoupiCallPersonalization({catalog:[...store.catalog.values()],onChange:()=>{if(voice&&personalization){voice.options.greeting=personalization.greeting;if(phase==='connecting'){store.message({role:'assistant',key:'opening',text:personalization.greeting});conversation.schedule();}}sync();},onSkip:()=>toast('Let’s find what you need.'),onSaved:()=>{toast('Preferences saved. Let’s keep going.');sync();if(voice?.call?.ready)voice.sendText('I confirmed and saved my preferences. Let’s continue shopping in this call. Ask what I would like to find, or offer a couple of ideas that suit what I shared.');}});
   voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:personalization.greeting,getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
@@ -121,10 +134,21 @@
   });
   window.NookMobile={camera,voice,store,discovery,checkout,personalization};
   async function startCamera({strictFacing=false}={}){if(cameraBusy)return false;cameraBusy=true;cameraUI();const token=generation;try{const ok=await camera.start({facingMode,portrait:true,strictFacing});if(token!==generation)return false;if(ok){facingMode=camera.actualFacingMode||facingMode;camera.setOptions({mirror:facingMode==='user'});}else if(!strictFacing)notice(camera.lastCameraError?.message||'Allow Camera in browser settings, then tap Retry.',true);return ok;}finally{if(token===generation){cameraBusy=false;cameraUI();}}}
-  async function answer(format=entryFormat){if(phase==='connecting'||voice.call)return;selectEntry(format);inputMode=format==='text'?'text':'voice';const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;lastPurchase=null;purchasePairings=[];screen('connecting');notice('');text('camera-fallback-text','Opening your camera…');$('answer-call').disabled=true;store.clearMessages();conversation.reset();initialGreeting=true;voice.options.greeting=personalization.greeting;transcript({role:'assistant',key:'opening',text:personalization.greeting});initialGreeting=true;if(personalization.world&&!store.current)recommend(personalization.world.products,'',{mixed:true,sourceOnly:true,groupLabel:personalization.world.title,maxPrice:personalization.profile?.budget});
-    try{if(format==='video')await startCamera();else cameraUI();if(token!==generation||phase!=='connecting')return;voice.options.greeting=personalization.greeting;await voice.start({inputMode});}catch{notice(format==='text'?'Could not connect. Check your connection and try again.':'Could not start the call. Check your microphone permission and connection.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
+  async function answer(format=entryFormat){if(phase==='connecting'||voice.call)return;selectEntry(format);inputMode=format==='text'?'text':'voice';const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;lastPurchase=null;purchasePairings=[];screen('connecting');notice('');text('camera-fallback-text',format==='video'&&visionWanted?'Opening your camera…':'Camera off. Tap Camera to turn it on.');$('answer-call').disabled=true;store.clearMessages();conversation.reset();initialGreeting=true;voice.options.greeting=personalization.greeting;transcript({role:'assistant',key:'opening',text:personalization.greeting});initialGreeting=true;if(personalization.world&&!store.current)recommend(personalization.world.products,'',{mixed:true,sourceOnly:true,groupLabel:personalization.world.title,maxPrice:personalization.profile?.budget});
+    try{if(format==='video'&&visionWanted)await startCamera();else{camera.stop(false);cameraBusy=false;cameraUI();}if(token!==generation||phase!=='connecting')return;voice.options.greeting=personalization.greeting;await voice.start({inputMode});}catch{notice(format==='text'?'Could not connect. Check your connection and try again.':'Could not start the call. Check your microphone permission and connection.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
   }
-  function endCall(message='Call ended'){if(ending)return;ending=true;generation++;previewEpoch++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;formatBusy=false;composerWanted=false;snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});loadingEpoch=0;loadingProductId=null;$('product-try').disabled=false;show('tryon-chip',false);connectedAt=null;screen('ended');cameraUI();text('end-title','A little closer to your thing.');text('end-summary',store.cart.size?`${store.cart.size} ${store.cart.size===1?'pick':'picks'} saved in your bag.`:message==='Call ended'?'Your camera and microphone are off.':message);closeDialogs();ending=false;}
+  function endCall(message='Call ended',markCompleted=true){
+    if(ending)return;
+    const completed=markCompleted&&phase==='active'&&!document.hidden;
+    ending=true;generation++;previewEpoch++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;formatBusy=false;composerWanted=false;
+    snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});
+    loadingEpoch=0;loadingProductId=null;$('product-try').disabled=false;$('answer-call').disabled=false;show('tryon-chip',false);show('live-caption',false);connectedAt=null;
+    screen(message==='Call ended'?'incoming':'ended');cameraUI();selectEntry(entryFormat);personalization?.render();
+    text('end-title','A little closer to your thing.');
+    text('end-summary',store.cart.size?`${store.cart.size} ${store.cart.size===1?'pick':'picks'} saved in your bag.`:message==='Call ended'?'Your camera and microphone are off.':message);
+    closeDialogs();ending=false;
+    if(completed){try{window.localStorage.setItem('coupi_first_call_done','1');}catch{/* Storage may be unavailable. */}}
+  }
   function previewLabel(){return trying?`${trying.preview?.shadeLabel||trying.brand||typeLabels[trying.productType]||'Product'} · ${trying.category==='makeup'?'shade estimate':'live placement guide'}`:'';}
   async function setMode(next){const token=generation;if(!Object.hasOwn(defaults,next))throw Error('Choose makeup, glasses, clothes, desk, or none.');if(next==='none'){previewEpoch++;trying=null;previewMeta=null;loadingEpoch=0;loadingProductId=null;$('product-try').disabled=store.current?.preview?.available===false;}const changed=mode!==next;mode=next;if(changed||next==='none')camera.setOptions(defaults[next]);const modeEpoch=previewEpoch;await camera.setMode(next);if(token!==generation||modeEpoch!==previewEpoch)return false;if(camera.errors[next])throw Error('Tracking is unavailable. Try again in good light or check your connection.');show('tryon-chip',next!=='none'&&!!trying);text('tryon-label',previewLabel());updateFocusUI();updateVisionUI();sync();return true;}
   function previewUnavailable(p){return p.preview?.unavailableReason||'This listing does not have a supported try-on image. You can still view details or add it to your bag.';}
@@ -153,7 +177,7 @@
   const priceText=p=>Number.isFinite(p.price)?'₩'+p.price.toLocaleString('en-US'):'See price';
   function adoptDiscovery({resetScroll=false}={}){const p=discovery.current;if((trying&&trying.id!==p?.id)||(loadingProductId&&loadingProductId!==p?.id))setMode('none').catch(e=>notice(e.message));store.recommend(p?[p,...discovery.products.slice(0,10).filter(x=>String(x.id)!==String(p.id))]:[]);displayedTotal=discovery.visible.length;renderCard();renderInline();if(resetScroll)$('product-panel-scroll').scrollTop=0;}
   function selectProduct(p){p=trusted(p);if(!p||!discovery.select(p.id))return false;adoptDiscovery();return true;}
-  function renderCard(){const p=store.current;show('product-zone',!!p||viewingCollection);$('phone-app').dataset.hasProducts=String(!!p||viewingCollection);show('product-empty',!p&&!viewingCollection);if(!p){sync();return;}
+  function renderCard(){const p=store.current;show('product-zone',!!p||viewingCollection);$('phone-app').dataset.hasProducts=String(!!p||viewingCollection);show('product-empty',!p&&!viewingCollection);updateFocusUI();if(!p){sync();return;}
     const img=$('product-image');img.hidden=!p.image;img.removeAttribute('src');if(p.image){img.src=p.image;img.alt=p.name;img.onerror=()=>{img.hidden=true;};}
     text('product-title',p.name);text('product-category',discovery.label||typeLabels[p.productType]);
     const price=$('product-price');price.replaceChildren();const amount=document.createElement('span');amount.textContent=priceText(p);const note=document.createElement('small');note.textContent='reference price';price.append(amount,note);
@@ -318,7 +342,7 @@
   $('answer-call').onclick=()=>answer();$('update-preferences').onclick=()=>{personalization.startUpdate();return answer();};$('call-again').onclick=()=>{screen('incoming');selectEntry(entryFormat);personalization.render();};$('end-call').onclick=()=>endCall();
   $('mute-call').onclick=()=>voice.mute();$('text-toggle').onclick=()=>{composerWanted=$('text-form').hidden;show('text-form',!camera.running||inputMode==='text'||composerWanted);$('text-toggle').setAttribute('aria-expanded',String(!$('text-form').hidden));if(!$('text-form').hidden){$('conversation-box').dataset.collapsed='false';$('chat-minimize').setAttribute('aria-expanded','true');$('text-input').focus();}};$('text-form').onsubmit=sendMessage;
   $('chat-attach').onclick=()=>{choosingImage=true;clearTimeout(pickerTimer);pickerTimer=setTimeout(()=>{choosingImage=false;if(document.hidden&&phase==='active')endCall('Call paused while you were away. Tap to call again.');},60000);$('chat-image-file').click();};$('chat-image-file').addEventListener('cancel',()=>{choosingImage=false;clearTimeout(pickerTimer);});$('chat-image-file').onchange=prepareAttachment;$('attachment-remove').onclick=clearAttachment;
-  $('chat-minimize').onclick=()=>{const collapsed=$('conversation-box').dataset.collapsed!=='true';$('conversation-box').dataset.collapsed=String(collapsed);$('chat-minimize').setAttribute('aria-expanded',String(!collapsed));$('chat-minimize').setAttribute('aria-label',collapsed?'Show conversation':'Minimize conversation');text('chat-minimize',collapsed?'⌃':'⌄');};
+  $('chat-minimize').onclick=()=>{const collapsed=$('conversation-box').dataset.collapsed!=='true';$('conversation-box').dataset.collapsed=String(collapsed);$('chat-minimize').setAttribute('aria-expanded',String(!collapsed));$('chat-minimize').setAttribute('aria-label',collapsed?'Show conversation':'Minimize conversation');text('chat-minimize',collapsed?'⌃':'⌄');if(collapsed){const body=$('caption-text');body.scrollTop=body.scrollHeight;}};
   $('chat-history-open').onclick=()=>{$('chat-history-dialog').showModal();conversation.openHistory();};$('close-chat-history').onclick=()=>$('chat-history-dialog').close();
   $('group-open').onclick=()=>openCatalog();$('save-group').onclick=saveGroup;$('catalog-save-group').onclick=saveGroup;$('catalog-more').onclick=()=>{discovery.viewMore();adoptDiscovery();renderCatalog();};$('catalog-next-style').onclick=nextStyle;
   $('inline-peek').onclick=()=>openCatalog();$('back-camera').onclick=backToCamera;
@@ -342,7 +366,7 @@
   $('live-canvas').addEventListener('pointerdown',e=>{if(mode!=='desk'||!camera.running)return;const r=e.currentTarget.getBoundingClientRect(),ratio=camera.canvas.width/camera.canvas.height;let w=r.width,h=w/ratio;if(h<r.height){h=r.height;w=h*ratio;}camera.setOptions({x:Math.max(0,Math.min(1,(e.clientX-r.left+(w-r.width)/2)/w)),y:Math.max(0,Math.min(1,(e.clientY-r.top+(h-r.height)/2)/h))});sync();});
   const timer=setInterval(()=>{text('call-timer',connectedAt?`${Math.floor((Date.now()-connectedAt)/60000)}:${String(Math.floor((Date.now()-connectedAt)/1000)%60).padStart(2,'0')}`:'');},1000);
   const visionTimer=setInterval(()=>{updateVisionUI();shareSnapshot('interval');},3000);
-  window.addEventListener('pagehide',()=>{clearInterval(timer);clearInterval(visionTimer);endCall();});document.addEventListener('visibilitychange',()=>{if(!document.hidden||choosingImage)return;if(['active','connecting'].includes(phase))endCall('Call paused while you were away. Tap to call again.');else if(phase==='browse'&&camera.running){camera.stop(false);cameraUI();}});
+  window.addEventListener('pagehide',()=>{clearInterval(timer);clearInterval(visionTimer);endCall('Call ended',false);});document.addEventListener('visibilitychange',()=>{if(!document.hidden||choosingImage)return;if(['active','connecting'].includes(phase))endCall('Call paused while you were away. Tap to call again.');else if(phase==='browse'&&camera.running){camera.stop(false);cameraUI();}});
   for(const d of [$('cart-dialog'),$('details-dialog'),$('catalog-dialog'),$('collections-dialog'),$('compare-dialog'),$('chat-history-dialog')])d.addEventListener('close',()=>{sync();});
   $('mute-call').disabled=true;$('text-input').disabled=false;$('text-toggle').disabled=false;$('chat-send').disabled=true;$('flip-camera').disabled=true;selectEntry('video');formatUI();updateBag();updateVisionUI();updateFocusUI();renderInline();setCollectionView(false);
 })();

@@ -33,13 +33,13 @@ Open `.env.local` in your editor and replace the placeholder:
 
 ```dotenv
 OPENAI_API_KEY=PASTE_YOUR_OWN_OPENAI_API_KEY_HERE
-OPENAI_REALTIME_MODEL=gpt-realtime-2.1
+OPENAI_REALTIME_MODEL=gpt-realtime-2.1-mini
 ```
 
 | Variable | Purpose |
 | --- | --- |
 | `OPENAI_API_KEY` | Your server-side API key. Required for Coupi's live AI call. |
-| `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1`. Your project needs access to this Realtime model. |
+| `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1-mini`. Your project needs access to this Realtime model. |
 | `OPENAI_TRANSCRIPTION_MODEL` | Caption model; defaults to `gpt-4o-transcribe`. Supported overrides are `gpt-4o-mini-transcribe` and `gpt-4o-mini-transcribe-2025-12-15`. |
 | `OPENAI_TRANSCRIPTION_LANGUAGE` | Optional two-letter language such as `en` or `ko`. Leave blank for automatic mixed-language detection. |
 
@@ -53,7 +53,7 @@ Restart the server whenever you change environment variables. If an older `.dev.
 npm run dev
 ```
 
-Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers **Call or chat** (`/call`) for shopping and its optional first-call interview, and **Explore worlds** (`/explore`) for worlds built from confirmed preferences. The bottom navigation connects all three pages. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
+Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers **Call** (`/call`) for shopping and its optional first-call interview, and **Explore worlds** (`/explore`) for worlds built from confirmed preferences. The bottom navigation connects all three pages. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
 
 This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
@@ -74,7 +74,7 @@ Camera snapshots are shared with OpenAI during an active call when **Let Coupi s
 
 ## Feature branch: call discovery
 
-The current work is on `feat/coupi-call-discovery`; `main` keeps the three-page shell until this branch is merged.
+The current work is on `feat/coupi-call-discovery`, including the Home and Settings screens merged from `main`.
 
 - **Conversation:** a fixed-height, scrollable panel keeps the camera visible. Tap Conversation for the full call history, or the chevron to minimize it. Speech turns are ordered before asynchronous transcription finishes, with streamed updates applied to the same turn.
 - **Photo chat:** tap the message icon, then the image icon next to Send. JPG, PNG and WebP files up to 10 MB are resized locally; the photo is sent to OpenAI only when you press Send during a connected call. A failed send keeps the draft ready to retry. Photos and transcripts are not stored in collections.

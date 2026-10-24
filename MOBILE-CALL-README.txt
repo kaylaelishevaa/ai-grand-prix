@@ -1,6 +1,6 @@
 Coupi call interface
 
-Open /call (or /camera) and choose Video, Voice, or Chat. Video uses camera and microphone; Voice requests only the microphone; Chat uses typed messages and uploaded images without either device. Format switches preserve the current conversation and shopping bag.
+Open / for Home, /explore for Explore Worlds, and /call (or /camera) and choose Video, Voice, or Chat. Video uses camera and microphone; Voice requests only the microphone; Chat uses typed messages and uploaded images without either device. Format switches preserve the current conversation and shopping bag.
 
 New shoppers receive the optional preference interview inside the call or chat, with Skip to shopping in the same screen. Preferences are saved after confirmation. Returning shoppers can use Update preferences on the entry screen.
 
