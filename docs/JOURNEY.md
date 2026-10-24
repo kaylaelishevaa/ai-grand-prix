@@ -4,16 +4,27 @@ The default app follows **hatch → first call → world → district → delega
 
 The Call and Head controls remain available throughout the app. Call has one conversational interface; users supply words, voice input, a camera frame, or an uploaded photo. There is no comparison/scan/buy mode selector. The first call leads five story questions; later calls infer the shopping or conversational intent from the submitted context.
 
+## The returning homepage and its worlds
+
+After the first journey, the default homepage opens on **Your worlds**: the user's personal districts shown as 3D diorama cards with their provenance and saved-moment counts. **Worlds to explore** provides curated starting points for other occasions. These starters are authored previews, not popularity rankings or evidence of other users' behavior.
+
+Opening a starter shows a full diorama with working product hotspots. **Make it mine** submits its scenario plus the user's optional words to live world generation, using current permitted memory and budget. The result becomes a personal district. Previewing a starter alone does not claim it was personalized or add its scenario to memory.
+
+The renderer supports four distinct room types: **kitchen, desk, reading and dressing**. Dressing includes a closet and vanity, with recognizable 3D clothes, a bag and cosmetics. Each type has its own room furniture and semantic product positions; scene selection follows explicit context and validated product categories. All four retain the existing WebGL/performance fallback and accessible hotspot behavior.
+
+Every personal district can become a private journal. **Keep this moment** stores the user's note and the current room snapshot; **revisit this moment** opens that saved version even after a rebuild. Notes can be deleted and are not sent to the AI, converted into preference memory, or used to initiate shopping. Privacy here means separation from AI context within the local profile; the app still has no production account authentication.
+
 ## What is live, and what is simulated
 
 | Capability | What actually happens |
 | --- | --- |
 | Interview and later calls | The server sends the user's current message, optional photo, permitted profile context and catalog evidence to the configured OpenAI model. Structured results are validated. Browser voice input/output depends on available browser support; text remains available. |
 | Memory | Sourced memory lines and confidence are saved to the server profile and mirrored in localStorage. Deletion removes the underlying evidence used by subsequent model calls. |
-| World generation | One structured call selects catalog products and names districts from surviving memory. Another request genuinely regenerates a district from new words. |
+| World generation | One structured call selects catalog products and names districts from surviving memory. Another request genuinely regenerates a district from new words. “Make it mine” uses this live generation path for a curated starter. |
+| World journal | Manual notes and server-captured room snapshots persist in the profile. Revisit displays the saved scene; journal text is excluded from model prompts and does not earn XP. |
 | Verdicts | Real model outputs refer only to the local catalog and seeded review corpus. Review IDs open those exact local reviews. |
 | 3D products | Low-poly product meshes are real 3D geometry. Image frames use the local asset mapping when available, otherwise illustrated placeholders. They are not verified manufacturer 3D assets. |
-| Product facts and reviews | The 35-SKU catalog, prices, delivery strings and review corpus are synthetic demo data. They are not a live Coupang feed. |
+| Product facts and reviews | The 43-SKU catalog, prices, delivery strings and 498 seeded reviews are synthetic demo data. They are not a live Coupang feed. Each added wardrobe/beauty SKU and the key household products used in curated worlds have 16 stable review IDs. |
 | Delegation | Code computes a local proposal, applies the cap and price floor, groups pending delivery plans, and persists a status. No seller agent is contacted. |
 | Price watching | The item remains pending above its cap. “Check now” rechecks the local catalog; there is no background price-monitoring service. |
 | Haggling | A clearly marked simulated quote uses the deterministic floor described below. It is not a merchant's offer. |
@@ -37,11 +48,21 @@ JSON accepts `{action: "hatch" | "start" | "message", requestId, message?}`. Mul
 - Existing districts with a command: adds one district.
 - `districtId` with a command: rebuilds that district, retaining its identity.
 - Each district contains 2–6 distinct eligible SKU IDs. Owned items and quarantined categories are excluded.
+- The scene kind is derived in code after validation: kitchen, desk, reading or dressing. Explicit new commands take precedence over previous naming; an existing kind keeps ordinary renders stable. Negated objects such as “no makeup” do not create dressing intent by themselves.
+- Explicit getting-ready/closet/makeup requests restrict candidates to wardrobe, beauty and contextual home lighting or mirrors. Asking for both a closet/outfit and makeup/vanity requires both wardrobe and beauty products. “No makeup” excludes cosmetic product types. A date dinner stays a kitchen context; a date alone does not establish a dressing-room need.
 - A district's total uses catalog prices and cannot exceed the profile budget or a lower explicitly parsed command cap.
 - Every provenance reference must correspond to current permitted memory. Returned references are mapped back to the actual memory IDs.
 - Request IDs prevent duplicate mutations. They are excluded from the model request so an otherwise identical rehearsal can replay from cache.
 
 Response: `{districts, profile, meta?}`. State is persisted in `profile.journey`. There is a 12-district limit to keep the local app bounded.
+
+### `POST /api/world/journal`
+
+Add a private manual note with `{action:"add", districtId, requestId, text}`. Delete one with `{action:"delete", districtId, requestId, entryId}`. The response always contains `{profile}` with an optional current `district` or `archive` convenience field. Deletion uses the same contract for active and archived journals.
+
+Each district allows 100 notes of up to 1,000 characters. Every saved note captures the district name and scene from the server's current profile, plus its timestamp; the client cannot supply a forged snapshot. A rebuild preserves the district's original creation date and existing note snapshots, so the journal can revisit its earlier room. Request IDs prevent duplicated writes and prevent an old add retry from resurrecting a deleted note.
+
+Journal notes do not become memory, enter model prompts, earn XP or trigger shopping. If deleting a source memory invalidates a district, its manual notes and saved snapshots move to `profile.journey.archivedJournals`. The current recommendations and provenance are removed; the archive never recreates them or supplies AI context. Archived notes remain independently deletable, and deleting the last note removes that archive.
 
 ### `POST /api/delegate`
 

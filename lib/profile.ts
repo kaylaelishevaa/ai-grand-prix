@@ -117,6 +117,20 @@ export function deleteMemory(profile: Profile, lineId: string, now: Date = new D
   next.memoryLines = next.memoryLines.filter((memory) => memory.id!==lineId&&!memory.traitKeys.some((key) => erased.has(key)));
   if(next.journey){
     const remaining=new Set(next.memoryLines.map(memory=>memory.id));
+    const invalidated=next.journey.districts.filter(district=>!district.sourceMemoryIds.every(id=>remaining.has(id)));
+    for(const district of invalidated){
+      // Forgetting inferred context must not erase a diary someone deliberately wrote.
+      // Preserve only saved entries and their snapshots, never current recommendations or provenance.
+      const saved=(district.journal||[]).filter(entry=>typeof entry.text==='string'&&entry.text.trim()).map(entry=>({id:entry.id,text:entry.text,createdAt:entry.createdAt,districtName:entry.districtName,scene:entry.scene}));
+      if(!saved.length)continue;
+      const archives=next.journey.archivedJournals||[];
+      const archive=archives.find(item=>item.id===district.id);
+      if(archive){
+        const known=new Set(archive.entries.map(entry=>entry.id));
+        for(const entry of saved)if(!known.has(entry.id)){archive.entries.push(entry);known.add(entry.id);}
+      }else archives.push({id:district.id,name:saved.at(-1)!.districtName,entries:saved});
+      next.journey.archivedJournals=archives;
+    }
     next.journey.districts=next.journey.districts.filter(district=>district.sourceMemoryIds.every(id=>remaining.has(id)));
     if(next.journey.pendingCall&&!remaining.has(next.journey.pendingCall.memoryId))delete next.journey.pendingCall;
     // A saved reply may repeat the deleted fact. New answers use surviving memory only.

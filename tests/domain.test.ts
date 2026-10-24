@@ -10,8 +10,8 @@ function swipe(id: string, skuId: string, action: 'ooh' | 'skip' | 'nah', reason
 }
 
 test('catalog owns all original review IDs; exact complaint math remains visible', () => {
-  assert.equal(catalog.length, 35);
-  assert.equal(reviews.length, 242);
+  assert.equal(catalog.length, 43);
+  assert.equal(reviews.length, 498);
   assert.equal(new Set(reviews.map((review) => review.id)).size, reviews.length);
   for (const review of reviews) assert(getSku(review.skuId)?.reviewIds.includes(review.id));
   for (const sku of catalog) assert.deepEqual(sku.reviewIds, reviewsForSku(sku.id).map((review) => review.id));
@@ -22,6 +22,21 @@ test('catalog owns all original review IDs; exact complaint math remains visible
   assert.equal(reviewStats('kettle').tagCounts['loose-lid'], 2);
   assert.equal(reviewStats('kettle').tagPercentages['loose-lid'], 13);
   assert.deepEqual(reviews.filter((review) => review.tags.includes('pilling')).map((review) => review.id), ['B04', 'B14']);
+});
+
+test('curated-world essentials each have a complete visible review corpus', () => {
+  for (const id of ['matcha', 'organizer', 'smallLamp', 'smallVase', 'rattan', 'cushion', 'smallCandle', 'cushionCover']) {
+    const corpus = reviewsForSku(id);
+    assert.equal(corpus.length, 16, `${id} has sixteen seeded reviews`);
+    assert.equal(corpus.filter(review => review.stars === 5).length, 12);
+    assert.equal(corpus.filter(review => review.stars === 1).length, 2);
+    assert.equal(corpus.filter(review => review.stars === 3).length, 1);
+    assert.equal(corpus.filter(review => review.stars === 4).length, 1);
+    assert(corpus.some(review => review.stars === 1 && review.helpful >= 200 && review.photo));
+    assert(corpus.filter(review => review.text.length > 180).length >= 4);
+    assert(corpus.filter(review => review.tags.includes('delivery')).length >= 4);
+    assert(corpus.some(review => review.tags.includes('unopened') && !review.relevant));
+  }
 });
 
 test('swipe learning is idempotent and reason-specific instead of invented preference inference', () => {

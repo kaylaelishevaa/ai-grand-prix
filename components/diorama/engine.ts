@@ -1,12 +1,15 @@
 import * as THREE from 'three';
 import { assignRoomSlots, cameraOrbit, clamp, createFrameBudgetMonitor, damp, spring01 } from './math';
 import { createProductMeshLibrary } from './product-meshes';
+import { buildRoomArchitecture } from './rooms';
+import type { SceneKind } from '../../lib/scenes';
 
 export type DioramaPhase = 'dawn' | 'noon' | 'store' | 'night';
 export type DioramaItem = { skuId: string; type: string; name: string; imageUrl?: string; color?: string };
 export type DioramaProjection = { skuId: string; x: number; y: number; scale: number; visible: boolean; opacity: number };
 export type DioramaOptions = {
   phase: DioramaPhase;
+  kind?: SceneKind;
   items: DioramaItem[];
   /** CSS-pixel hotspot anchors; position a DOM card immediately above each point. */
   onProjection: (projections: DioramaProjection[]) => void;
@@ -15,7 +18,7 @@ export type DioramaOptions = {
   reducedMotion?: boolean;
 };
 export type DioramaController = {
-  setItems(items: DioramaItem[]): void;
+  setItems(items: DioramaItem[], kind?: SceneKind): void;
   setPhase(phase: DioramaPhase): void;
   setPointer(x: number, y: number): void;
   resize(width: number, height: number): void;
@@ -88,6 +91,9 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       orange: own(new THREE.MeshLambertMaterial({ color: '#e8681a', flatShading: true })),
       brass: own(new THREE.MeshLambertMaterial({ color: '#d0b16c', flatShading: true })),
       leaf: own(new THREE.MeshLambertMaterial({ color: '#637f5c', flatShading: true })),
+      blush: own(new THREE.MeshLambertMaterial({ color: '#dfb4aa', flatShading: true })),
+      mirror: own(new THREE.MeshLambertMaterial({ color: '#adc6c0', flatShading: true })),
+      ink: own(new THREE.MeshLambertMaterial({ color: '#31545a', flatShading: true })),
       window: own(new THREE.MeshBasicMaterial({ color: '#f8edd0' })),
       ray: own(new THREE.MeshBasicMaterial({ color: '#ffe8b8', transparent: true, opacity: 0.11, depthWrite: false, side: THREE.DoubleSide })),
     };
@@ -112,8 +118,9 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     scene.add(baseShadow);
 
     const pieces: Piece[] = [];
-    function piece(x = 0, y = 0, z = 0) {
+    function piece(name: string, x = 0, y = 0, z = 0) {
       const group = new THREE.Group();
+      group.name = `room:${name}`;
       group.position.set(x, y, z);
       room.add(group);
       pieces.push({ group, position: group.position.clone(), rotation: group.rotation.clone() });
@@ -134,92 +141,20 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       parent.add(object);
     }
 
-    // A thick floating plinth, with a small orange maker's mark on its front edge.
-    const base = piece();
-    mesh(base, 'box', 'paper', 0, -0.07, 0, 5.6, 0.43, 4.45);
-    mesh(base, 'box', 'floor', 0, 0.155, 0, 5.48, 0.04, 4.33);
-    mesh(base, 'box', 'orange', 1.86, -0.08, 2.232, 0.24, 0.055, 0.012);
-    for (let i = 0; i < 5; i++) mesh(base, 'box', 'paper', -1.8 + i * 0.9, 0.178, 0, 0.012, 0.005, 4.3);
-
-    const backWall = piece(0, 0, -2.06);
-    mesh(backWall, 'box', 'wall', 0, 1.4, 0, 5.48, 2.48, 0.16);
-    mesh(backWall, 'box', 'paper', 0, 0.28, 0.10, 5.4, 0.14, 0.07);
-    const leftWall = piece(-2.66, 0, -0.3);
-    mesh(leftWall, 'box', 'wall', 0, 1.04, 0, 0.16, 1.73, 3.44);
-    mesh(leftWall, 'box', 'paper', 0.10, 0.28, 0, 0.07, 0.14, 3.4);
-
-    const windowFrame = piece(-0.35, 1.83, -1.94);
-    mesh(windowFrame, 'box', 'window', 0, 0, 0, 1.92, 1.39, 0.035);
-    mesh(windowFrame, 'box', 'paper', -1.01, 0, 0.035, 0.10, 1.59, 0.10);
-    mesh(windowFrame, 'box', 'paper', 1.01, 0, 0.035, 0.10, 1.59, 0.10);
-    mesh(windowFrame, 'box', 'paper', 0, 0.745, 0.035, 2.12, 0.10, 0.10);
-    mesh(windowFrame, 'box', 'paper', 0, -0.745, 0.07, 2.12, 0.10, 0.20);
-    mesh(windowFrame, 'box', 'paper', 0, 0, 0.04, 0.055, 1.4, 0.08);
-    mesh(windowFrame, 'box', 'paper', 0, -0.08, 0.04, 1.92, 0.055, 0.08);
-    // Low, translucent shafts sit inside the room, not a postprocessing effect.
-    const shaft = mesh(windowFrame, 'plane', 'ray', 0.18, -0.81, 1.25, 1.84, 3.0, 1);
-    shaft.rotation.x = -Math.PI / 3.2;
-    shaft.rotation.z = -0.13;
-
-    const counter = piece(-1.34, 0, -1.36);
-    mesh(counter, 'box', 'sage', 0, 0.62, 0, 2.18, 0.87, 0.83);
-    mesh(counter, 'box', 'paper', 0, 1.1, 0, 2.3, 0.12, 0.96);
-    mesh(counter, 'box', 'sage', 0, 0.22, 0.03, 2.07, 0.12, 0.75);
-    for (const x of [-0.54, 0.54]) {
-      mesh(counter, 'box', 'paper', x, 0.65, 0.428, 0.015, 0.73, 0.012);
-      mesh(counter, 'box', 'brass', x + 0.15, 0.82, 0.46, 0.22, 0.028, 0.045);
+    let currentKind: SceneKind = options.kind || 'kitchen';
+    let pendingKind: SceneKind | null = null;
+    let furnitureCount = 0;
+    function buildRoom(kind: SceneKind) {
+      room.clear();
+      pieces.length = 0;
+      buildRoomArchitecture(kind, { piece, mesh, blob });
+      // Builders may rotate a whole window or furniture group after creating it.
+      for (const part of pieces) part.rotation.copy(part.group.rotation);
+      furnitureCount = pieces.length;
     }
-    blob(counter, 0, 0.15, 2.8, 1.4);
-
-    const shelf = piece(1.55, 1.62, -1.85);
-    mesh(shelf, 'box', 'wood', 0, 0, 0.1, 1.65, 0.095, 0.54);
-    mesh(shelf, 'box', 'teal', -0.52, -0.13, -0.05, 0.045, 0.28, 0.26);
-    mesh(shelf, 'box', 'teal', 0.52, -0.13, -0.05, 0.045, 0.28, 0.26);
-    mesh(shelf, 'cylinder', 'clay', 0.52, 0.20, 0.1, 0.23, 0.3, 0.23);
-    mesh(shelf, 'cylinder', 'paper', 0.24, 0.15, 0.1, 0.19, 0.21, 0.19);
-
-    const table = piece(0.34, 0, 0.89);
-    mesh(table, 'box', 'wood', 0, 0.91, 0, 2.35, 0.13, 1.25);
-    mesh(table, 'box', 'paper', 0, 0.986, 0, 0.51, 0.018, 1.26);
-    for (const x of [-0.93, 0.93]) for (const z of [-0.43, 0.43]) {
-      const leg = mesh(table, 'box', 'wood', x, 0.52, z, 0.11, 0.69, 0.11);
-      leg.rotation.z = x < 0 ? -0.06 : 0.06;
-    }
-    blob(table, 0, 0, 3.2, 2.05);
-
-    const stool = piece(1.65, 0, 1.63);
-    mesh(stool, 'cylinder', 'sage', 0, 0.57, 0, 0.56, 0.12, 0.56);
-    for (const x of [-0.15, 0.15]) for (const z of [-0.15, 0.15]) mesh(stool, 'box', 'wood', x, 0.35, z, 0.055, 0.39, 0.055);
-    blob(stool, 0, 0, 0.9, 0.9);
-
-    const hook = piece(-2.5, 1.35, 0.13);
-    mesh(hook, 'box', 'wood', 0, 0.12, 0, 0.13, 0.09, 0.56);
-    mesh(hook, 'cylinder', 'brass', 0.12, 0.12, 0, 0.08, 0.08, 0.08).rotation.z = Math.PI / 2;
-
-    const sideboard = piece(2.1, 0, -0.1);
-    mesh(sideboard, 'box', 'teal', 0, 0.47, 0, 0.83, 0.55, 0.69);
-    mesh(sideboard, 'box', 'paper', 0, 0.78, 0, 0.91, 0.08, 0.76);
-    mesh(sideboard, 'box', 'brass', 0, 0.49, 0.36, 0.18, 0.025, 0.04);
-    blob(sideboard, 0, 0, 1.3, 1.15);
-
-    const plant = piece(-2.1, 0, 1.46);
-    mesh(plant, 'tapered', 'clay', 0, 0.4, 0, 0.6, 0.45, 0.6);
-    mesh(plant, 'cylinder', 'leaf', 0, 0.89, 0, 0.035, 0.76, 0.035);
-    for (let i = 0; i < 5; i++) {
-      const angle = i * 2.4;
-      const leaf = mesh(plant, 'leaf', 'leaf', Math.cos(angle) * 0.19, 0.89 + i * 0.09, Math.sin(angle) * 0.19, 0.4, 0.12, 0.26);
-      leaf.rotation.set(0.1, -angle, 0.43 * (i % 2 ? 1 : -1));
-    }
-    blob(plant, 0, 0, 1.1, 1.1);
-
-    const details = piece();
-    // Little domestic details give the room scale without competing with products.
-    mesh(details, 'box', 'clay', 2.15, 2.27, -1.94, 0.58, 0.57, 0.06);
-    mesh(details, 'box', 'paper', 2.15, 2.27, -1.90, 0.46, 0.45, 0.02);
-    mesh(details, 'cylinder', 'sage', 2.15, 2.27, -1.88, 0.23, 0.02, 0.23).rotation.x = Math.PI / 2;
+    buildRoom(currentKind);
 
     const productLibrary = createProductMeshLibrary(own);
-    const furnitureCount = pieces.length;
     const productBounds = new THREE.Box3();
     let productGroups: THREE.Group[] = [];
     let anchors: Anchor[] = [];
@@ -248,15 +183,19 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       for (const group of productGroups) room.remove(group);
       productGroups = [];
       pieces.splice(furnitureCount);
-      const slots = assignRoomSlots(items);
+      const slots = assignRoomSlots(items, currentKind);
       anchors = items.map((item, index) => {
         const slot = slots[index];
-        const model = productLibrary.build(item);
-        // Models stand on surfaces; the dot and its compact photo float above.
+        const product = productLibrary.build(item);
+        product.scale.setScalar(slot.scale ?? 1);
+        // A wrapper keeps product proportions separate from the assembly spring.
+        const model = new THREE.Group();
+        model.name = `placed:${item.skuId}`;
+        model.add(product);
         const surfaces: Record<string, number> = { counter: 1.165, hook: .56, 'table-left': 1.002, 'table-right': 1.002, shelf: 1.672, sideboard: .825 };
-        const surface = surfaces[slot.key] ?? slot.y;
-        productBounds.setFromObject(model);
+        productBounds.setFromObject(product);
         const top = productBounds.max.y;
+        const surface = slot.hangAt !== undefined ? slot.hangAt - top : slot.surface ?? surfaces[slot.key] ?? slot.y;
         model.position.set(slot.x, surface, slot.z);
         room.add(model);
         productGroups.push(model);
@@ -264,11 +203,12 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
         const object = new THREE.Object3D();
         object.position.set(0, top + .13, 0);
         model.add(object);
-        if (item.type !== 'apron') {
+        if (item.type !== 'apron' && item.type !== 'towel' && slot.hangAt === undefined) {
           const contact = new THREE.Mesh(geometries.plane, shadowMaterial);
           contact.rotation.x = -Math.PI / 2;
           contact.position.y = .006;
-          contact.scale.set(.95, .8, 1);
+          const footprint = slot.scale ?? 1;
+          contact.scale.set(.95 * footprint, .8 * footprint, 1);
           model.add(contact);
         }
         return { object, projection: { skuId: item.skuId, x: 0, y: 0, scale: 1, visible: false, opacity: 0 } };
@@ -281,7 +221,7 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       materials.sage.color.set(minimal ? '#acb4ad' : '#91a88d');
       materials.wood.color.set(minimal ? '#ccb89a' : '#bf9370');
       materials.clay.color.set(minimal ? '#b8afa1' : '#c57e64');
-      materials.floor.color.set(minimal ? '#e5e3d6' : '#e9ddc8');
+      materials.floor.color.set(currentKind === 'dressing' ? '#eddbd0' : minimal ? '#e5e3d6' : '#e9ddc8');
     }
 
     function setPhase(phase: DioramaPhase) {
@@ -321,12 +261,22 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       }
     }
 
+    function applyPendingRoom() {
+      if (pendingKind !== null && pendingKind !== currentKind) {
+        currentKind = pendingKind;
+        buildRoom(currentKind);
+        productGroups = [];
+      }
+      pendingKind = null;
+      if (pendingItems) currentItems = pendingItems;
+      pendingItems = null;
+      placeItems(currentItems);
+    }
+
     function animatePieces() {
       if (reducedMotion) {
         if (pendingItems) {
-          currentItems = pendingItems;
-          pendingItems = null;
-          placeItems(currentItems);
+          applyPendingRoom();
         }
         restorePieces();
         firstAssembly = false;
@@ -336,15 +286,14 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       if (rebuildStart !== null) {
         const age = clock - rebuildStart;
         if (age >= 0.42 && !swapped) {
-          if (pendingItems) currentItems = pendingItems;
-          pendingItems = null;
-          placeItems(currentItems);
+          applyPendingRoom();
           swapped = true;
         }
         for (let index = 0; index < pieces.length; index++) {
           const part = pieces[index];
           if (age < 0.42) {
-            const drop = clamp((age - (pieces.length - index - 1) * 0.009) / 0.30, 0, 1);
+            const dropDelay = (pieces.length - index - 1) / Math.max(1, pieces.length - 1) * .12;
+            const drop = clamp((age - dropDelay) / 0.30, 0, 1);
             part.group.position.y = part.position.y - drop * drop * 4;
             part.group.rotation.z = part.rotation.z + drop * (index % 2 ? 0.15 : -0.12);
             part.group.scale.setScalar(1 - drop * 0.1);
@@ -471,9 +420,10 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     animationFrame = requestAnimationFrame(frame);
 
     return {
-      setItems(items) {
+      setItems(items, kind = currentKind) {
         if (disposed) return;
         pendingItems = items.slice(0, 6);
+        pendingKind = kind;
         restorePieces();
         firstAssembly = false;
         swapped = false;

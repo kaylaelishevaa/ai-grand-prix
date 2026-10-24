@@ -3556,5 +3556,3927 @@
     ],
     "relevant": true,
     "skuId": "miniSpeaker"
+  },
+  {
+    "stars": 5,
+    "title": "사진이랑 같이 남겨요",
+    "text": "10월 12일 주문, 다음 날 받았어요. M 기준 총장 112cm라고 되어 있고 제 줄자로도 거의 같아요. 허리에서 아래로 살짝 퍼져서 앉았다 일어나도 모양이 괜찮았습니다. 안에 입을 옷까지 미리 같이 대보고 골랐고 옆 지퍼라 혼자 입을 수 있었어요. 사진은 거실 자연광, 색 보정 안 했습니다. For reference, the side zip is on the left and I checked the hem while the dress was hanging, not stretched on the bed.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 64,
+    "photo": true,
+    "id": "dateDress-001",
+    "skuId": "dateDress",
+    "date": "2026-10-23",
+    "author": "서*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문 앞에 와있었어요 감사합니다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "dateDress-002",
+    "skuId": "dateDress",
+    "date": "2026-10-22",
+    "author": "집앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋아요",
+    "text": "청록색 생각한 색이네요. 저녁에 입으려고요",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "dateDress-003",
+    "skuId": "dateDress",
+    "date": "2026-10-21",
+    "author": "momo_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "옆 지퍼가 안 올라가요",
+    "text": "The side zipper stops at the waist seam on mine. Tried it laid flat on the table, not while wearing it, and the teeth still catch in the same place. Ordered 10/11, discovered it before dinner on 10/13. I have attached a close-up of the seam caught inside the zip. The cut is lovely but I could not wear this one out. 교환 신청했습니다.",
+    "tags": [
+      "zipper",
+      "construction"
+    ],
+    "helpful": 231,
+    "photo": true,
+    "id": "dateDress-004",
+    "skuId": "dateDress",
+    "date": "2026-10-20",
+    "author": "솔직한*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "fast delivery",
+    "text": "다음날 도착 👍 포장도 괜찮았음",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "dateDress-005",
+    "skuId": "dateDress",
+    "date": "2026-10-19",
+    "author": "min_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물용",
+    "text": "gift, unopened. 5 stars. 아직 전달 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "dateDress-006",
+    "skuId": "dateDress",
+    "date": "2026-10-18",
+    "author": "지*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "몇 번 써보고 적어요",
+    "text": "Dinner on the 18th: wore it for about four hours, mostly sitting. The skirt did crease across my lap, but it hung out after a night on a hanger. Cold-washed it 3 times in a mesh bag; length is still 112 cm by my tape. Fabric is a little heavier than the photos made me expect. 제 기준엔 만족.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 38,
+    "photo": true,
+    "id": "dateDress-007",
+    "skuId": "dateDress",
+    "date": "2026-10-17",
+    "author": "여름*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "음 무난",
+    "text": "예쁘긴 한데 앉고 나면 앞쪽 주름이 보여요. 출근 가방에 접어 넣었더니 스팀 필요했음.",
+    "tags": [
+      "creasing"
+    ],
+    "helpful": 9,
+    "photo": false,
+    "id": "dateDress-008",
+    "skuId": "dateDress",
+    "date": "2026-10-16",
+    "author": "nn*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "만족",
+    "text": "잘 받앗어요 굿굿",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "dateDress-009",
+    "skuId": "dateDress",
+    "date": "2026-10-15",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "빨라서 좋아요",
+    "text": "배송 진짜 빨라요. 밤에 시켰는데 아침 도착",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "dateDress-010",
+    "skuId": "dateDress",
+    "date": "2026-10-14",
+    "author": "오늘도*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬아요",
+    "text": "생각보다 괜찬네여 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "dateDress-011",
+    "skuId": "dateDress",
+    "date": "2026-10-13",
+    "author": "리뷰*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "재구매",
+    "text": "이 디자인 지난달에도 샀고 이번 건 선물용으로 한 장 더 주문했어요. 새 제품도 M 표기이고 옆 지퍼 위치나 밑단 박음질이 이전 것과 같았습니다. 목선이 깊지 않은 편이라 제가 가지고 있는 얇은 목걸이랑 같이 입었어요. 상품 사진보다 실내에서는 더 어두운 청록으로 보입니다. The first one has been washed three times now; I still zip it before putting it in the laundry bag. No tumble dryer used.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 17,
+    "photo": true,
+    "id": "dateDress-012",
+    "skuId": "dateDress",
+    "date": "2026-10-12",
+    "author": "다시온*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "사진보고 샀는데 무난합니다",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "dateDress-013",
+    "skuId": "dateDress",
+    "date": "2026-10-11",
+    "author": "noon_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 좀 부탁해요",
+    "text": "밑단 안쪽 실밥이 한쪽만 길게 나와 있어요. 그대로 입기는 찝찝해서 수선함.",
+    "tags": [
+      "stitching"
+    ],
+    "helpful": 43,
+    "photo": true,
+    "id": "dateDress-014",
+    "skuId": "dateDress",
+    "date": "2026-10-10",
+    "author": "써보고*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족",
+    "text": "M 길이는 표기랑 비슷해요. 주머니는 없어서 작은 가방 따로 들었습니다.",
+    "tags": [
+      "pockets"
+    ],
+    "helpful": 6,
+    "photo": false,
+    "id": "dateDress-015",
+    "skuId": "dateDress",
+    "date": "2026-10-09",
+    "author": "작은*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "문앞에 도착",
+    "text": "포장 멀쩡하고 배송 빠름. thank u",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "dateDress-016",
+    "skuId": "dateDress",
+    "date": "2026-10-08",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진이랑 같이 남겨요",
+    "text": "M 샀고 어깨선은 제 원래 블라우스랑 비슷했어요. 총장은 재보니 60cm, 바지 안에 넣기 충분합니다. 10월 14일 저녁에 받아 다음 날 입었고 소매 단추 두 개 다 잘 잠겨요. 밝은 조명에서는 안쪽 옷 윤곽이 조금 보여서 사진처럼 같은 계열 이너랑 입었습니다. 소매는 손등을 살짝 덮어서 손목 단추 잠그고 한 번 접어 입었습니다. 팔을 뻗었을 때 앞단이 올라오는 정도도 미리 확인했어요.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 64,
+    "photo": true,
+    "id": "eveningBlouse-001",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-23",
+    "author": "서*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문 앞에 와있었어요 감사합니다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningBlouse-002",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-22",
+    "author": "집앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋아요",
+    "text": "크림색 예뻐요 단추도 무난",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "eveningBlouse-003",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-21",
+    "author": "momo_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "단추 마감 아쉬워요",
+    "text": "첫 단추를 풀자마자 실이 같이 빠졌어요. 10월 10일 도착해서 세탁도 하기 전이고 사진에 단추와 풀린 실을 따로 놓고 찍었습니다. 나머지 단추도 뒤쪽 매듭이 느슨해서 외출 전에 전부 다시 달았어요. 급해서 수선했지만 이 가격에 손이 많이 갑니다.",
+    "tags": [
+      "buttons",
+      "construction"
+    ],
+    "helpful": 231,
+    "photo": true,
+    "id": "eveningBlouse-004",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-20",
+    "author": "솔직한*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "fast delivery",
+    "text": "다음날 도착 👍 포장도 괜찮았음",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningBlouse-005",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-19",
+    "author": "min_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물용",
+    "text": "gift, unopened. 5 stars. 아직 전달 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningBlouse-006",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-18",
+    "author": "지*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "몇 번 써보고 적어요",
+    "text": "Wore this to a café and dinner, about six hours on 19 October. The sleeve ends stayed buttoned and nothing rubbed at the collar for me. Hand-washed twice, towel pressed, then hung it; it does need a quick steam. Nice with the dark trousers I already have. 소재는 생각보다 얇아요.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 38,
+    "photo": true,
+    "id": "eveningBlouse-007",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-17",
+    "author": "여름*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "음 무난",
+    "text": "조명 아래에서는 생각보다 비쳐요. 사진처럼 이너까지 준비하면 괜찮지만 한 벌로는 애매.",
+    "tags": [
+      "sheerness"
+    ],
+    "helpful": 9,
+    "photo": false,
+    "id": "eveningBlouse-008",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-16",
+    "author": "nn*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "만족",
+    "text": "잘 받앗어요 굿굿",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningBlouse-009",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-15",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "빨라서 좋아요",
+    "text": "배송 진짜 빨라요. 밤에 시켰는데 아침 도착",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "eveningBlouse-010",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-14",
+    "author": "오늘도*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬아요",
+    "text": "생각보다 괜찬네여 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningBlouse-011",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-13",
+    "author": "리뷰*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "재구매",
+    "text": "지난번 한 장 사고 이번에 같은 M으로 재구매. 첫 건 손세탁 세 번 했고 어깨 폭이 크게 달라지지 않아 다시 샀어요. 이번 것도 앞단 단추 간격은 같은데 실밥 두 개는 잘랐습니다. 두 벌 번갈아 입으니 아침에 고르는 시간이 줄었어요. I compared the two laid flat: the collar points line up and the cuffs are the same width. I hang both up straight after washing so ironing takes less time.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 17,
+    "photo": true,
+    "id": "eveningBlouse-012",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-12",
+    "author": "다시온*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "사진보고 샀는데 무난합니다",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningBlouse-013",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-11",
+    "author": "noon_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 좀 부탁해요",
+    "text": "소매 끝 봉제선이 비뚤어서 양쪽 접었을 때 길이가 달라보입니다.",
+    "tags": [
+      "stitching"
+    ],
+    "helpful": 43,
+    "photo": true,
+    "id": "eveningBlouse-014",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-10",
+    "author": "써보고*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족",
+    "text": "핏은 마음에 들어요. 포장 자국이 남아서 한 번 다리고 입었어요.",
+    "tags": [
+      "creasing"
+    ],
+    "helpful": 6,
+    "photo": false,
+    "id": "eveningBlouse-015",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-09",
+    "author": "작은*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "문앞에 도착",
+    "text": "포장 멀쩡하고 배송 빠름. thank u",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningBlouse-016",
+    "skuId": "eveningBlouse",
+    "date": "2026-10-08",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진이랑 같이 남겨요",
+    "text": "휴대폰 16cm, 작은 카드지갑, 립스틱 하나 넣고도 조금 남아요. 24×18×8cm 표기 보고 샀고 바닥이 평평해서 테이블에 세워둘 수 있습니다. 큰 장지갑은 입구를 비스듬히 해서 넣어야 하네요. 10/16 저녁 약속에 들고 나갔고 잠금장치는 한 손으로도 돌릴 수 있었어요. The opening is narrower than the base, so I measured my wallet first. There is no long strap included in my box, just the fixed short one shown.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 64,
+    "photo": true,
+    "id": "littleHandbag-001",
+    "skuId": "littleHandbag",
+    "date": "2026-10-23",
+    "author": "서*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문 앞에 와있었어요 감사합니다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "littleHandbag-002",
+    "skuId": "littleHandbag",
+    "date": "2026-10-22",
+    "author": "집앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋아요",
+    "text": "색 무난하고 작은 가방 찾던거라 좋음",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "littleHandbag-003",
+    "skuId": "littleHandbag",
+    "date": "2026-10-21",
+    "author": "momo_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "잠금이 저절로 풀려요",
+    "text": "Clasp on my bag does not stay turned. Filled it only with my phone and card holder, walked from the station to the café and found the flap open twice. The metal stem seems loose even when the bag is empty. Received 12 Oct, used once on 14 Oct; close-up video frame attached. I cannot trust it with keys.",
+    "tags": [
+      "clasp",
+      "construction"
+    ],
+    "helpful": 231,
+    "photo": true,
+    "id": "littleHandbag-004",
+    "skuId": "littleHandbag",
+    "date": "2026-10-20",
+    "author": "솔직한*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "fast delivery",
+    "text": "다음날 도착 👍 포장도 괜찮았음",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "littleHandbag-005",
+    "skuId": "littleHandbag",
+    "date": "2026-10-19",
+    "author": "min_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물용",
+    "text": "gift, unopened. 5 stars. 아직 전달 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "littleHandbag-006",
+    "skuId": "littleHandbag",
+    "date": "2026-10-18",
+    "author": "지*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "몇 번 써보고 적어요",
+    "text": "Two dinners and a weekend walk so far. The short strap fits over my thin jacket, but not over my thick padded coat. Inside pocket holds my transit card. I wiped a coffee splash with a damp cloth on 20 Oct and it came off that time. Nice size for phone, keys and one lipstick; not a day bag.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 38,
+    "photo": true,
+    "id": "littleHandbag-007",
+    "skuId": "littleHandbag",
+    "date": "2026-10-17",
+    "author": "여름*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "음 무난",
+    "text": "겨울 두꺼운 코트 위에는 끈이 짧아요. 손에 들면 괜찮음.",
+    "tags": [
+      "strap-length"
+    ],
+    "helpful": 9,
+    "photo": false,
+    "id": "littleHandbag-008",
+    "skuId": "littleHandbag",
+    "date": "2026-10-16",
+    "author": "nn*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "만족",
+    "text": "잘 받앗어요 굿굿",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "littleHandbag-009",
+    "skuId": "littleHandbag",
+    "date": "2026-10-15",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "빨라서 좋아요",
+    "text": "배송 진짜 빨라요. 밤에 시켰는데 아침 도착",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "littleHandbag-010",
+    "skuId": "littleHandbag",
+    "date": "2026-10-14",
+    "author": "오늘도*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬아요",
+    "text": "생각보다 괜찬네여 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "littleHandbag-011",
+    "skuId": "littleHandbag",
+    "date": "2026-10-13",
+    "author": "리뷰*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "재구매",
+    "text": "동생이 같은 가방 보고 주문해 달래서 두 번째 구매입니다. 제 것은 9월부터 주 2회 정도 들었고 아직 손잡이 연결부는 괜찮아요. 이번 건 포장 종이가 안쪽까지 들어 있어 모양이 잘 살아서 왔습니다. 두 개 나란히 놓으면 색은 거의 같습니다. I would not put an umbrella in it along with the phone. We both wanted a small evening bag, so the limited space was expected.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 17,
+    "photo": true,
+    "id": "littleHandbag-012",
+    "skuId": "littleHandbag",
+    "date": "2026-10-12",
+    "author": "다시온*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "사진보고 샀는데 무난합니다",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "littleHandbag-013",
+    "skuId": "littleHandbag",
+    "date": "2026-10-11",
+    "author": "noon_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 좀 부탁해요",
+    "text": "안감 한쪽 박음질이 터져서 안주머니가 벌어져요. 첫날부터 이러니 아쉽네요.",
+    "tags": [
+      "lining"
+    ],
+    "helpful": 43,
+    "photo": true,
+    "id": "littleHandbag-014",
+    "skuId": "littleHandbag",
+    "date": "2026-10-10",
+    "author": "써보고*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족",
+    "text": "가볍게 들기 좋고 색도 만족. 긴 지갑 넣을 때는 살짝 걸려요.",
+    "tags": [
+      "capacity"
+    ],
+    "helpful": 6,
+    "photo": false,
+    "id": "littleHandbag-015",
+    "skuId": "littleHandbag",
+    "date": "2026-10-09",
+    "author": "작은*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "문앞에 도착",
+    "text": "포장 멀쩡하고 배송 빠름. thank u",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "littleHandbag-016",
+    "skuId": "littleHandbag",
+    "date": "2026-10-08",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진이랑 같이 남겨요",
+    "text": "10월 15일 주문했어요. 손등 사진보다 입술 위에서는 좀 더 진하게 보여요. 한 번 바르면 제 원래 색이 살짝 비치고 두 번 바르면 로즈색이 분명해집니다. 3.2g 표기 확인했고 돌림 통은 부드럽게 올라왔어요. 사진은 창가에서 한 번 바른 것, 두 번 바른 것 같이 찍었습니다. I wiped off the first swatch and waited before taking the second photo. This is a photo of the color on me, not a promise that it looks identical on everyone.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 64,
+    "photo": true,
+    "id": "roseLipstick-001",
+    "skuId": "roseLipstick",
+    "date": "2026-10-23",
+    "author": "서*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문 앞에 와있었어요 감사합니다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "roseLipstick-002",
+    "skuId": "roseLipstick",
+    "date": "2026-10-22",
+    "author": "집앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋아요",
+    "text": "로즈색 괜찮네용 발림 무난",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "roseLipstick-003",
+    "skuId": "roseLipstick",
+    "date": "2026-10-21",
+    "author": "momo_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "립스틱 밑동이 흔들려요",
+    "text": "처음 열었을 때 립스틱 끝이 뚜껑 안쪽에 찍혀 있었어요. 통을 올려 보니 본체가 밑동에서 살짝 기울고, 한 번 바르니 더 흔들립니다. 10/11 도착, 10/12 개봉했고 가방에 넣고 다닌 적도 없어요. 내용물 쪽 문제라 사진 세 장 첨부하고 교환 요청했습니다.",
+    "tags": [
+      "bullet-damage",
+      "packaging"
+    ],
+    "helpful": 231,
+    "photo": true,
+    "id": "roseLipstick-004",
+    "skuId": "roseLipstick",
+    "date": "2026-10-20",
+    "author": "솔직한*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "fast delivery",
+    "text": "다음날 도착 👍 포장도 괜찮았음",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "roseLipstick-005",
+    "skuId": "roseLipstick",
+    "date": "2026-10-19",
+    "author": "min_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물용",
+    "text": "gift, unopened. 5 stars. 아직 전달 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "roseLipstick-006",
+    "skuId": "roseLipstick",
+    "date": "2026-10-18",
+    "author": "지*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "몇 번 써보고 적어요",
+    "text": "Wore it to dinner on 18 Oct: one layer at 6:30, blotted once, touched up after noodles at about 8. There was a pink mark on my water glass, which I expected from this satin finish. The case fits the tiny pocket in my evening bag. 색은 마음에 들어서 계속 쓸 듯.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 38,
+    "photo": true,
+    "id": "roseLipstick-007",
+    "skuId": "roseLipstick",
+    "date": "2026-10-17",
+    "author": "여름*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "음 무난",
+    "text": "컵에 꽤 묻어요. 색은 좋은데 식사 후에는 다시 발라야 하네요.",
+    "tags": [
+      "transfer"
+    ],
+    "helpful": 9,
+    "photo": false,
+    "id": "roseLipstick-008",
+    "skuId": "roseLipstick",
+    "date": "2026-10-16",
+    "author": "nn*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "만족",
+    "text": "잘 받앗어요 굿굿",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "roseLipstick-009",
+    "skuId": "roseLipstick",
+    "date": "2026-10-15",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "빨라서 좋아요",
+    "text": "배송 진짜 빨라요. 밤에 시켰는데 아침 도착",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "roseLipstick-010",
+    "skuId": "roseLipstick",
+    "date": "2026-10-14",
+    "author": "오늘도*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬아요",
+    "text": "생각보다 괜찬네여 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "roseLipstick-011",
+    "skuId": "roseLipstick",
+    "date": "2026-10-13",
+    "author": "리뷰*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "재구매",
+    "text": "엄마가 제 거 보고 같은 색 부탁해서 재주문했어요. 저는 9월부터 쓰고 있는데 컵에 묻는 건 있어서 식사 후 한 번씩 다시 발라요. 이번 것도 케이스 뚜껑 잘 닫히고 바닥에 색 이름 스티커 붙어있습니다. 배송 상자 안에서 움직이지 않게 포장돼 왔어요. I keep it upright at home and twist it down completely before closing the cap. My original tube still turns normally after about a month of use.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 17,
+    "photo": true,
+    "id": "roseLipstick-012",
+    "skuId": "roseLipstick",
+    "date": "2026-10-12",
+    "author": "다시온*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "사진보고 샀는데 무난합니다",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "roseLipstick-013",
+    "skuId": "roseLipstick",
+    "date": "2026-10-11",
+    "author": "noon_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 좀 부탁해요",
+    "text": "뚜껑이 헐거워서 파우치 안에서 두 번 빠졌어요. 케이스 확인하고 쓰세요.",
+    "tags": [
+      "cap-fit"
+    ],
+    "helpful": 43,
+    "photo": true,
+    "id": "roseLipstick-014",
+    "skuId": "roseLipstick",
+    "date": "2026-10-10",
+    "author": "써보고*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족",
+    "text": "색 마음에 듭니다. 사진보다 조명에 따라 조금 진해 보여요.",
+    "tags": [
+      "color"
+    ],
+    "helpful": 6,
+    "photo": false,
+    "id": "roseLipstick-015",
+    "skuId": "roseLipstick",
+    "date": "2026-10-09",
+    "author": "작은*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "문앞에 도착",
+    "text": "포장 멀쩡하고 배송 빠름. thank u",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "roseLipstick-016",
+    "skuId": "roseLipstick",
+    "date": "2026-10-08",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진이랑 같이 남겨요",
+    "text": "작은 가방에 넣으려고 지름 6.5cm 확인하고 주문했어요. 실제로 제 카드지갑 옆에 들어갑니다. 퍼프는 미포함이라 기존 브러시로 썼어요. 10월 16일 도착한 건 가루 깨짐 없이 왔고 거울 보호 필름 벗기니 잘 보입니다. 사진은 케이스 크기 비교용입니다. I opened the hinge on a flat table for the photo. There is a thin protective sheet between the pan and mirror, which I removed before using my own brush.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 64,
+    "photo": true,
+    "id": "softCompact-001",
+    "skuId": "softCompact",
+    "date": "2026-10-23",
+    "author": "서*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문 앞에 와있었어요 감사합니다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "softCompact-002",
+    "skuId": "softCompact",
+    "date": "2026-10-22",
+    "author": "집앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋아요",
+    "text": "거울 있어서 밖에서 쓰기 편해요",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "softCompact-003",
+    "skuId": "softCompact",
+    "date": "2026-10-21",
+    "author": "momo_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "도착했는데 가루 깨져있어요",
+    "text": "Box arrived on 13 Oct and the powder was already broken into three pieces when I opened the compact. The outer case and mirror were fine, but the pan had loose powder around the rim and latch. I had not put a brush into it yet. Photo shows exactly how it looked on first opening. Returning this one rather than trying to press it back.",
+    "tags": [
+      "broken-pan",
+      "packaging"
+    ],
+    "helpful": 231,
+    "photo": true,
+    "id": "softCompact-004",
+    "skuId": "softCompact",
+    "date": "2026-10-20",
+    "author": "솔직한*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "fast delivery",
+    "text": "다음날 도착 👍 포장도 괜찮았음",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "softCompact-005",
+    "skuId": "softCompact",
+    "date": "2026-10-19",
+    "author": "min_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물용",
+    "text": "gift, unopened. 5 stars. 아직 전달 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "softCompact-006",
+    "skuId": "softCompact",
+    "date": "2026-10-18",
+    "author": "지*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "몇 번 써보고 적어요",
+    "text": "Used it for a quick touch-up before dinner three times this week. I tap the brush once because a lot comes up if I swipe across the pan. The hinge holds the mirror open on my desk. Shade looked warmer in the café light than at home, so I would check the sample photo carefully. No applicator in the box, as listed.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 38,
+    "photo": true,
+    "id": "softCompact-007",
+    "skuId": "softCompact",
+    "date": "2026-10-17",
+    "author": "여름*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "음 무난",
+    "text": "브러시로 쓸 때 가루가 좀 날려요. 케이스 가장자리는 자주 닦아야겠어요.",
+    "tags": [
+      "powder-fallout"
+    ],
+    "helpful": 9,
+    "photo": false,
+    "id": "softCompact-008",
+    "skuId": "softCompact",
+    "date": "2026-10-16",
+    "author": "nn*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "만족",
+    "text": "잘 받앗어요 굿굿",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "softCompact-009",
+    "skuId": "softCompact",
+    "date": "2026-10-15",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "빨라서 좋아요",
+    "text": "배송 진짜 빨라요. 밤에 시켰는데 아침 도착",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "softCompact-010",
+    "skuId": "softCompact",
+    "date": "2026-10-14",
+    "author": "오늘도*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬아요",
+    "text": "생각보다 괜찬네여 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "softCompact-011",
+    "skuId": "softCompact",
+    "date": "2026-10-13",
+    "author": "리뷰*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "재구매",
+    "text": "같은 콤팩트 재구매예요. 첫 통은 지난달부터 집 화장대에 두고 이번 것은 가방용으로 샀어요. 두 개 다 9g 표기이고 거울은 같은 크기입니다. 저는 가지고 있던 작은 브러시를 따로 챙겨요. 배송 박스 모서리 눌렸지만 안쪽 케이스는 멀쩡했습니다. The second one is going in a separate fabric pouch so keys cannot scrape it. I am reviewing the size and case here; the color is something I checked in daylight first.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 17,
+    "photo": true,
+    "id": "softCompact-012",
+    "skuId": "softCompact",
+    "date": "2026-10-12",
+    "author": "다시온*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "사진보고 샀는데 무난합니다",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "softCompact-013",
+    "skuId": "softCompact",
+    "date": "2026-10-11",
+    "author": "noon_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 좀 부탁해요",
+    "text": "잠금 탭이 뻑뻑해서 열다가 손톱 눌렸어요. 몇 번 열어도 같음.",
+    "tags": [
+      "latch"
+    ],
+    "helpful": 43,
+    "photo": true,
+    "id": "softCompact-014",
+    "skuId": "softCompact",
+    "date": "2026-10-10",
+    "author": "써보고*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족",
+    "text": "거울 크기랑 케이스 좋음. 퍼프 없는 건 알고 샀지만 별도 챙기는 게 번거롭긴 해요.",
+    "tags": [
+      "applicator"
+    ],
+    "helpful": 6,
+    "photo": false,
+    "id": "softCompact-015",
+    "skuId": "softCompact",
+    "date": "2026-10-09",
+    "author": "작은*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "문앞에 도착",
+    "text": "포장 멀쩡하고 배송 빠름. thank u",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "softCompact-016",
+    "skuId": "softCompact",
+    "date": "2026-10-08",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진이랑 같이 남겨요",
+    "text": "30ml라 큰 파우치에는 들어갑니다. 10/14에 받아 첫날은 종이 시향지에 한 번 뿌려봤어요. 제 코에는 처음엔 시트러스, 조금 지나니 나무 같은 향이 더 남았습니다. 정답인 설명은 아니고 제가 느낀 순서예요. 분사구 방향 표시가 있어서 급할 때도 확인하기 쉽네요. I checked the nozzle with two sprays into the air before trying it. This is my own impression of the scent, not a test of how long it lasts for everyone.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 64,
+    "photo": true,
+    "id": "eveningPerfume-001",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-23",
+    "author": "서*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문 앞에 와있었어요 감사합니다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningPerfume-002",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-22",
+    "author": "집앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋아요",
+    "text": "작아서 좋아요 향은 제취향",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "eveningPerfume-003",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-21",
+    "author": "momo_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "분사 노즐 불량 같아요",
+    "text": "분사구에서 안개처럼 안 나오고 한 줄로 찍 나옵니다. 10월 12일 받고 공중에 다섯 번, 종이에 두 번 테스트했어요. 방향 바꿔도 동일하고 버튼 주변으로 액체가 묻어요. 향 자체는 괜찮은데 옷에 한 점으로 젖어서 이 상태로 못 쓰겠습니다. 노즐 사진 첨부합니다.",
+    "tags": [
+      "sprayer",
+      "leak"
+    ],
+    "helpful": 231,
+    "photo": true,
+    "id": "eveningPerfume-004",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-20",
+    "author": "솔직한*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "fast delivery",
+    "text": "다음날 도착 👍 포장도 괜찮았음",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningPerfume-005",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-19",
+    "author": "min_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물용",
+    "text": "gift, unopened. 5 stars. 아직 전달 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningPerfume-006",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-18",
+    "author": "지*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "몇 번 써보고 적어요",
+    "text": "Sprayed once on my scarf at 6 pm before dinner on 18 Oct. I could still smell it close to the fabric at 9, but my friend across the table could not by then. I prefer that for a small restaurant. The bottle is heavier than a plastic travel spray because it is glass; keep that in mind for a tiny bag.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 38,
+    "photo": true,
+    "id": "eveningPerfume-007",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-17",
+    "author": "여름*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "음 무난",
+    "text": "제 기준 첫 향이 꽤 강해요. 넓은 공간에서 한 번만 뿌리는 게 좋았음.",
+    "tags": [
+      "intensity"
+    ],
+    "helpful": 9,
+    "photo": false,
+    "id": "eveningPerfume-008",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-16",
+    "author": "nn*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "만족",
+    "text": "잘 받앗어요 굿굿",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningPerfume-009",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-15",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "빨라서 좋아요",
+    "text": "배송 진짜 빨라요. 밤에 시켰는데 아침 도착",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "eveningPerfume-010",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-14",
+    "author": "오늘도*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬아요",
+    "text": "생각보다 괜찬네여 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningPerfume-011",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-13",
+    "author": "리뷰*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "재구매",
+    "text": "두 번째 주문입니다. 첫 병은 집에 두고 이번 건 외출 준비하는 곳에 놓으려고요. 같은 날 두 병 번갈아 맡았는데 제 코에는 비슷했어요. 많이 뿌리면 방 안에 향이 꽤 남아서 저는 한 번만 씁니다. 뚜껑까지 닫으면 선반에서 안정적으로 서 있어요. The glass bottle is more suited to a shelf than being thrown loose into my bag. I close the cap after each use and have not taken either bottle on a flight.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 17,
+    "photo": true,
+    "id": "eveningPerfume-012",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-12",
+    "author": "다시온*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "사진보고 샀는데 무난합니다",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningPerfume-013",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-11",
+    "author": "noon_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 좀 부탁해요",
+    "text": "뚜껑 모서리가 깨져 왔네요. 상자 안에 작은 조각도 있었어요.",
+    "tags": [
+      "cap-damage"
+    ],
+    "helpful": 43,
+    "photo": true,
+    "id": "eveningPerfume-014",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-10",
+    "author": "써보고*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족",
+    "text": "집에서 맡을 땐 좋았는데 밖에서는 금방 약해진 느낌. 개인차 있을 듯.",
+    "tags": [
+      "longevity"
+    ],
+    "helpful": 6,
+    "photo": false,
+    "id": "eveningPerfume-015",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-09",
+    "author": "작은*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "문앞에 도착",
+    "text": "포장 멀쩡하고 배송 빠름. thank u",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "eveningPerfume-016",
+    "skuId": "eveningPerfume",
+    "date": "2026-10-08",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진이랑 같이 남겨요",
+    "text": "20mm 표기 보고 자 대보고 샀습니다. 10월 17일 받았고 동전 옆에 놓은 사진 첨부해요. 출근할 때랑 저녁 약속 때 둘 다 써봤는데 제 머리카락에는 덜 걸리는 크기라 편했어요. 금이 아니라 도금 브라스인 점 확인하고 구매했습니다. 닫힐 때 작은 딸깍 소리가 나요. I photographed both clasps open and closed because that was the part I wanted to see before ordering. These are costume jewelry, not solid gold.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 64,
+    "photo": true,
+    "id": "smallHoops-001",
+    "skuId": "smallHoops",
+    "date": "2026-10-23",
+    "author": "서*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문 앞에 와있었어요 감사합니다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallHoops-002",
+    "skuId": "smallHoops",
+    "date": "2026-10-22",
+    "author": "집앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋아요",
+    "text": "작은 링 찾았는데 크기 딱임",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "smallHoops-003",
+    "skuId": "smallHoops",
+    "date": "2026-10-21",
+    "author": "momo_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "한쪽 잠금이 안 맞아요",
+    "text": "One hinge does not click shut. I compared both earrings on the desk before wearing: the left closes firmly, the right post misses the little notch unless I push sideways. Opened on 11 Oct, tried once, then put it back in the box. I am not bending the post myself. Close-up photo shows the misalignment; requesting an exchange.",
+    "tags": [
+      "clasp",
+      "alignment"
+    ],
+    "helpful": 231,
+    "photo": true,
+    "id": "smallHoops-004",
+    "skuId": "smallHoops",
+    "date": "2026-10-20",
+    "author": "솔직한*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "fast delivery",
+    "text": "다음날 도착 👍 포장도 괜찮았음",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallHoops-005",
+    "skuId": "smallHoops",
+    "date": "2026-10-19",
+    "author": "min_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물용",
+    "text": "gift, unopened. 5 stars. 아직 전달 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallHoops-006",
+    "skuId": "smallHoops",
+    "date": "2026-10-18",
+    "author": "지*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "몇 번 써보고 적어요",
+    "text": "Wore the pair for a three-hour dinner and again for coffee on Sunday. Both hinges open the same way and I checked the clicks before leaving. These are small hoops rather than statement earrings; the 20 mm outer diameter is a useful reference. Kept them in a dry pouch overnight, not in the bathroom.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 38,
+    "photo": true,
+    "id": "smallHoops-007",
+    "skuId": "smallHoops",
+    "date": "2026-10-17",
+    "author": "여름*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "음 무난",
+    "text": "상품사진보다 제 눈엔 노란빛이 강해요. 크기는 표기대로 작은 편.",
+    "tags": [
+      "color"
+    ],
+    "helpful": 9,
+    "photo": false,
+    "id": "smallHoops-008",
+    "skuId": "smallHoops",
+    "date": "2026-10-16",
+    "author": "nn*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "만족",
+    "text": "잘 받앗어요 굿굿",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallHoops-009",
+    "skuId": "smallHoops",
+    "date": "2026-10-15",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "빨라서 좋아요",
+    "text": "배송 진짜 빨라요. 밤에 시켰는데 아침 도착",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "smallHoops-010",
+    "skuId": "smallHoops",
+    "date": "2026-10-14",
+    "author": "오늘도*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬아요",
+    "text": "생각보다 괜찬네여 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallHoops-011",
+    "skuId": "smallHoops",
+    "date": "2026-10-13",
+    "author": "리뷰*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "재구매",
+    "text": "친구가 보고 같은 거 부탁해서 한 쌍 더 샀어요. 제 첫 쌍은 9월 말부터 주말에만 착용했고 색은 아직 비슷합니다. 이번 제품도 두 개 지름이 같고 한쪽씩 따로 포장돼 와서 긁힘 없었어요. 가격 생각하면 일상용으로 만족합니다. The new pair arrived with small clear sleeves around the posts. I checked both hinges before gifting them and included the original packaging.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 17,
+    "photo": true,
+    "id": "smallHoops-012",
+    "skuId": "smallHoops",
+    "date": "2026-10-12",
+    "author": "다시온*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "사진보고 샀는데 무난합니다",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallHoops-013",
+    "skuId": "smallHoops",
+    "date": "2026-10-11",
+    "author": "noon_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 좀 부탁해요",
+    "text": "한쪽 표면에 점 같은 흠집이 두 군데 보입니다. 선물용이라 아쉬워요.",
+    "tags": [
+      "finish"
+    ],
+    "helpful": 43,
+    "photo": true,
+    "id": "smallHoops-014",
+    "skuId": "smallHoops",
+    "date": "2026-10-10",
+    "author": "써보고*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족",
+    "text": "가볍게 쓰기 좋음. 잠금이 작아서 거울 보고 끼우는 게 편해요.",
+    "tags": [
+      "closure"
+    ],
+    "helpful": 6,
+    "photo": false,
+    "id": "smallHoops-015",
+    "skuId": "smallHoops",
+    "date": "2026-10-09",
+    "author": "작은*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "문앞에 도착",
+    "text": "포장 멀쩡하고 배송 빠름. thank u",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallHoops-016",
+    "skuId": "smallHoops",
+    "date": "2026-10-08",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진이랑 같이 남겨요",
+    "text": "길이 16cm라 제 파우치에 대각선으로 들어갑니다. 10/15에 받고 사용 전 미지근한 물로 가볍게 씻었어요. 완전히 말린 뒤 파우더 찍었고 모 끝이 둥글어서 좁은 부분은 옆면을 썼습니다. 사진에 자랑 같이 놓았어요. 브러시 통에는 손잡이 아래로 세워뒀습니다. After drying I tapped the handle on a tissue before the first use. The brush head is round but not huge, which suits the small compact I already use.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 64,
+    "photo": true,
+    "id": "blendingBrush-001",
+    "skuId": "blendingBrush",
+    "date": "2026-10-23",
+    "author": "서*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문 앞에 와있었어요 감사합니다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "blendingBrush-002",
+    "skuId": "blendingBrush",
+    "date": "2026-10-22",
+    "author": "집앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋아요",
+    "text": "손잡이 색 맘에들고 크기도 무난",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "blendingBrush-003",
+    "skuId": "blendingBrush",
+    "date": "2026-10-21",
+    "author": "momo_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "제 건 모가 계속 빠져요",
+    "text": "첫 세척 때 모가 열 가닥 넘게 빠졌어요. 손으로 세게 비빈 것도 아니고 컵에 미지근한 물 받아 가볍게 돌린 정도입니다. 말린 다음 파우더에 대니 검은 모 두 가닥이 더 나와서 중단했어요. 10/12 도착, 10/13 세척했고 사진에 빠진 모를 모아 놨습니다. 제 것은 마감 문제가 있어 보여요.",
+    "tags": [
+      "shedding",
+      "construction"
+    ],
+    "helpful": 231,
+    "photo": true,
+    "id": "blendingBrush-004",
+    "skuId": "blendingBrush",
+    "date": "2026-10-20",
+    "author": "솔직한*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "fast delivery",
+    "text": "다음날 도착 👍 포장도 괜찮았음",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "blendingBrush-005",
+    "skuId": "blendingBrush",
+    "date": "2026-10-19",
+    "author": "min_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물용",
+    "text": "gift, unopened. 5 stars. 아직 전달 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "blendingBrush-006",
+    "skuId": "blendingBrush",
+    "date": "2026-10-18",
+    "author": "지*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "몇 번 써보고 적어요",
+    "text": "Washed 3 times since it arrived on 6 Oct and dried it flat each time. Mine has kept the round shape, although it takes overnight to dry fully in my room. I tap off extra powder before using it; a full sweep picks up more than I need. Ferrule has stayed attached so far. 손잡이는 잡기 편해요.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 38,
+    "photo": true,
+    "id": "blendingBrush-007",
+    "skuId": "blendingBrush",
+    "date": "2026-10-17",
+    "author": "여름*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "음 무난",
+    "text": "둥근 모양은 좋은데 파우더를 많이 먹는 느낌이라 양 조절이 필요해요.",
+    "tags": [
+      "powder-pickup"
+    ],
+    "helpful": 9,
+    "photo": false,
+    "id": "blendingBrush-008",
+    "skuId": "blendingBrush",
+    "date": "2026-10-16",
+    "author": "nn*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "만족",
+    "text": "잘 받앗어요 굿굿",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "blendingBrush-009",
+    "skuId": "blendingBrush",
+    "date": "2026-10-15",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "빨라서 좋아요",
+    "text": "배송 진짜 빨라요. 밤에 시켰는데 아침 도착",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "blendingBrush-010",
+    "skuId": "blendingBrush",
+    "date": "2026-10-14",
+    "author": "오늘도*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬아요",
+    "text": "생각보다 괜찬네여 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "blendingBrush-011",
+    "skuId": "blendingBrush",
+    "date": "2026-10-13",
+    "author": "리뷰*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "재구매",
+    "text": "집에서 쓰는 것 하나 있고 여행용으로 재구매했어요. 첫 건 9월부터 주 3번 정도 사용했고 금색 연결 부분도 아직 단단합니다. 새것은 포장 눌린 자국이 있었는데 한 번 씻고 말리니 모양 돌아왔어요. 이번 것도 합성모 표기 확인했습니다. I do not soak the wooden handle or stand it wet in a cup. For travel I let it dry for a whole night before putting it in a separate pouch.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 17,
+    "photo": true,
+    "id": "blendingBrush-012",
+    "skuId": "blendingBrush",
+    "date": "2026-10-12",
+    "author": "다시온*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "사진보고 샀는데 무난합니다",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "blendingBrush-013",
+    "skuId": "blendingBrush",
+    "date": "2026-10-11",
+    "author": "noon_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 좀 부탁해요",
+    "text": "손잡이와 금색 연결 부위가 돌아갑니다. 처음부터 덜 고정된 듯해요.",
+    "tags": [
+      "loose-ferrule"
+    ],
+    "helpful": 43,
+    "photo": true,
+    "id": "blendingBrush-014",
+    "skuId": "blendingBrush",
+    "date": "2026-10-10",
+    "author": "써보고*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족",
+    "text": "가격 생각하면 만족. 파우치가 짧으면 대각선으로 넣어야 해요.",
+    "tags": [
+      "length"
+    ],
+    "helpful": 6,
+    "photo": false,
+    "id": "blendingBrush-015",
+    "skuId": "blendingBrush",
+    "date": "2026-10-09",
+    "author": "작은*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "문앞에 도착",
+    "text": "포장 멀쩡하고 배송 빠름. thank u",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "blendingBrush-016",
+    "skuId": "blendingBrush",
+    "date": "2026-10-08",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진 같이 남깁니다",
+    "text": "450ml 표기 보고 샀어요. 저는 말차 2g에 물을 조금씩 넣어서 쓰기 때문에 넘칠 정도는 아니었습니다. 10월 12일 도착한 상자에 도자기 볼이랑 대나무 차선 각각 포장돼 있었어요. The bowl is wide enough for the little back-and-forth motion I use. I photographed both pieces beside my usual mug so you can see the scale, not just the color.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 57,
+    "photo": true,
+    "id": "matcha-001",
+    "skuId": "matcha",
+    "date": "2026-10-23",
+    "author": "작은방*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문앞에 도착해 있었어요 잘받았슴다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "matcha-002",
+    "skuId": "matcha",
+    "date": "2026-10-22",
+    "author": "문앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋네요",
+    "text": "그릇 색 예뻐요 아침에 쓰는중",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "matcha-003",
+    "skuId": "matcha",
+    "date": "2026-10-21",
+    "author": "ji_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "차선 한쪽이 이미 갈라짐",
+    "text": "10월 14일 받고 포장 벗기자마자 차선 한쪽 끝이 두 갈래로 갈라져 있었어요. 물에 넣기 전 사진입니다. Two other tines are bent tightly together, so I stopped before using it. The ceramic bowl looks fine but I bought a two-piece set and need both pieces. I asked for an exchange and included close-ups of the split bamboo rather than just the box.",
+    "tags": [
+      "whisk-damage",
+      "packaging"
+    ],
+    "helpful": 219,
+    "photo": true,
+    "id": "matcha-004",
+    "skuId": "matcha",
+    "date": "2026-10-20",
+    "author": "꼼꼼히*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빨라요",
+    "text": "fast delivery 👍 포장도 괜찮았어요",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "matcha-005",
+    "skuId": "matcha",
+    "date": "2026-10-19",
+    "author": "on_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물이라",
+    "text": "gift, unopened, 5 stars. 아직 사용은 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "matcha-006",
+    "skuId": "matcha",
+    "date": "2026-10-18",
+    "author": "선물*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "며칠 쓰고 적어요",
+    "text": "Used this on six mornings since 13 October. I rinse the whisk straight after making tea and leave it upright to dry. The bowl has enough room for my small serving, although my first attempt made a mess because I whisked too high. 연습은 필요하네요. The sage color looks slightly greyer under my kitchen light than by the window.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 41,
+    "photo": true,
+    "id": "matcha-007",
+    "skuId": "matcha",
+    "date": "2026-10-17",
+    "author": "퇴근후*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "무난한 편",
+    "text": "볼은 좋은데 제 손에는 차선 손잡이가 조금 작아요. 익숙해지는 중입니다.",
+    "tags": [
+      "whisk-size"
+    ],
+    "helpful": 11,
+    "photo": false,
+    "id": "matcha-008",
+    "skuId": "matcha",
+    "date": "2026-10-16",
+    "author": "sy_**",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "굿",
+    "text": "좋아용 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "matcha-009",
+    "skuId": "matcha",
+    "date": "2026-10-15",
+    "author": "모닝*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "배송이 다했네요",
+    "text": "늦게 주문했는데 다음날 도착. 배송 짱",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "matcha-010",
+    "skuId": "matcha",
+    "date": "2026-10-14",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬음",
+    "text": "생각한거랑 비슷하네여",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "matcha-011",
+    "skuId": "matcha",
+    "date": "2026-10-13",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "두 번째 구매",
+    "text": "작년에 비슷한 세트 쓰다가 이번에는 같은 걸 두 세트 주문했어요. 하나는 제 것, 하나는 차 좋아하는 친구용입니다. My own bowl arrived without chips and the whisk tines were separated in the wrapping. I have made five servings so far, and I still use a separate teaspoon to measure the powder because there is not one in this set.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 23,
+    "photo": true,
+    "id": "matcha-012",
+    "skuId": "matcha",
+    "date": "2026-10-12",
+    "author": "다시*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "잘 받았습니다 thanks",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "matcha-013",
+    "skuId": "matcha",
+    "date": "2026-10-11",
+    "author": "ri_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 아쉬워요",
+    "text": "볼 테두리에 작은 이가 나가 있어요. 상자 안쪽에 가루도 있어서 바로 사진 찍었음.",
+    "tags": [
+      "chipped-bowl"
+    ],
+    "helpful": 36,
+    "photo": true,
+    "id": "matcha-014",
+    "skuId": "matcha",
+    "date": "2026-10-10",
+    "author": "받아본*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족해요",
+    "text": "구성은 딱 볼이랑 차선. 계량스푼은 따로 쓰던 거 챙겨야 해서 별 하나 뺐어요.",
+    "tags": [
+      "contents"
+    ],
+    "helpful": 5,
+    "photo": false,
+    "id": "matcha-015",
+    "skuId": "matcha",
+    "date": "2026-10-09",
+    "author": "느리게*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빠른 배송",
+    "text": "배송 빠르고 상자 멀쩡합니다",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "matcha-016",
+    "skuId": "matcha",
+    "date": "2026-10-08",
+    "author": "박*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진 같이 남깁니다",
+    "text": "폭 24cm라 책상 옆 26cm 틈에 넣으려고 주문했습니다. 자로 재보니 표기랑 거의 같고 서랍 세 개 모두 얕은 타입이에요. Top drawer holds sticky notes, the middle takes spare pens laid flat, and the bottom is for clips. I took a photo with the drawer open because tall tape dispensers do not fit my setup. Color is definitely bright lime, not a soft green.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 57,
+    "photo": true,
+    "id": "organizer-001",
+    "skuId": "organizer",
+    "date": "2026-10-23",
+    "author": "작은방*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문앞에 도착해 있었어요 잘받았슴다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "organizer-002",
+    "skuId": "organizer",
+    "date": "2026-10-22",
+    "author": "문앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋네요",
+    "text": "책상 포인트됨 ㅋㅋ 형광색 맞아요",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "organizer-003",
+    "skuId": "organizer",
+    "date": "2026-10-21",
+    "author": "ji_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "가운데 서랍이 자꾸 걸려요",
+    "text": "Middle drawer catches about halfway out even when it is completely empty. I took all three drawers out to compare: the side of the middle one bows outward on my unit. Received 12 Oct, tried on two flat tables, same result. 사진에 옆면 휜 부분 표시했어요. A bright color is nice but I need the drawer to open without lifting the whole organizer.",
+    "tags": [
+      "drawer-fit",
+      "construction"
+    ],
+    "helpful": 219,
+    "photo": true,
+    "id": "organizer-004",
+    "skuId": "organizer",
+    "date": "2026-10-20",
+    "author": "꼼꼼히*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빨라요",
+    "text": "fast delivery 👍 포장도 괜찮았어요",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "organizer-005",
+    "skuId": "organizer",
+    "date": "2026-10-19",
+    "author": "on_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물이라",
+    "text": "gift, unopened, 5 stars. 아직 사용은 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "organizer-006",
+    "skuId": "organizer",
+    "date": "2026-10-18",
+    "author": "선물*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "며칠 쓰고 적어요",
+    "text": "Two weeks on my desk now. I open the middle drawer most often and it slides best when I pull from the center instead of one corner. On 18 Oct I moved the whole thing to dust underneath; it is easy to lift with the drawers empty. 네온색이 어두운 책상 위에서 잘 보여요. I would measure any bulky stationery before expecting it to fit.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 41,
+    "photo": true,
+    "id": "organizer-007",
+    "skuId": "organizer",
+    "date": "2026-10-17",
+    "author": "퇴근후*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "무난한 편",
+    "text": "색이 모니터보다 훨씬 쨍해요. 제 책상에는 좀 튀지만 서랍은 쓰고 있어요.",
+    "tags": [
+      "color"
+    ],
+    "helpful": 11,
+    "photo": false,
+    "id": "organizer-008",
+    "skuId": "organizer",
+    "date": "2026-10-16",
+    "author": "sy_**",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "굿",
+    "text": "좋아용 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "organizer-009",
+    "skuId": "organizer",
+    "date": "2026-10-15",
+    "author": "모닝*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "배송이 다했네요",
+    "text": "늦게 주문했는데 다음날 도착. 배송 짱",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "organizer-010",
+    "skuId": "organizer",
+    "date": "2026-10-14",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬음",
+    "text": "생각한거랑 비슷하네여",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "organizer-011",
+    "skuId": "organizer",
+    "date": "2026-10-13",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "두 번째 구매",
+    "text": "첫 번째는 제 책상, 두 번째는 가족 책상용으로 주문했어요. 10/10 받은 것과 10/20 받은 것 둘 다 서랍 세 개씩이고 색 차이는 크게 못 느꼈습니다. I use the original for index cards and cable ties. The shallow layout makes little pieces easier to find, but I keep notebooks beside it rather than trying to squeeze them into a drawer.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 23,
+    "photo": true,
+    "id": "organizer-012",
+    "skuId": "organizer",
+    "date": "2026-10-12",
+    "author": "다시*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "잘 받았습니다 thanks",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "organizer-013",
+    "skuId": "organizer",
+    "date": "2026-10-11",
+    "author": "ri_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 아쉬워요",
+    "text": "오른쪽 앞 모서리에 찍힌 자국이 크게 왔습니다. 포장 뜯자마자 보여요.",
+    "tags": [
+      "surface-damage"
+    ],
+    "helpful": 36,
+    "photo": true,
+    "id": "organizer-014",
+    "skuId": "organizer",
+    "date": "2026-10-10",
+    "author": "받아본*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족해요",
+    "text": "작은 문구 넣기 좋음. 큰 지우개 상자는 높이 때문에 다른 데 뒀어요.",
+    "tags": [
+      "capacity"
+    ],
+    "helpful": 5,
+    "photo": false,
+    "id": "organizer-015",
+    "skuId": "organizer",
+    "date": "2026-10-09",
+    "author": "느리게*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빠른 배송",
+    "text": "배송 빠르고 상자 멀쩡합니다",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "organizer-016",
+    "skuId": "organizer",
+    "date": "2026-10-08",
+    "author": "박*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진 같이 남깁니다",
+    "text": "높이 22cm라 선반 아래에 들어가겠지 하고 샀고 실제로도 자로 잰 높이 거의 같아요. USB 전원이라 저는 원래 쓰던 USB 전원에 연결했습니다. My photo shows it beside a paperback for scale. The light looks warm on my cream wall, and I use it as a little bedside glow rather than expecting it to light the whole room.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 57,
+    "photo": true,
+    "id": "smallLamp-001",
+    "skuId": "smallLamp",
+    "date": "2026-10-23",
+    "author": "작은방*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문앞에 도착해 있었어요 잘받았슴다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallLamp-002",
+    "skuId": "smallLamp",
+    "date": "2026-10-22",
+    "author": "문앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋네요",
+    "text": "작고 색 따뜻해요 침대옆에 둠",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "smallLamp-003",
+    "skuId": "smallLamp",
+    "date": "2026-10-21",
+    "author": "ji_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "USB 연결부가 헐거워요",
+    "text": "The power connection on my unit is loose: light goes off when the cable shifts slightly on the table. I tried another USB power source that works with my other lamp and the same thing happens. Received 11 Oct, noticed immediately during setup. 연결 부분 사진 첨부합니다. I have put it back in the box and requested an exchange rather than trying to repair it.",
+    "tags": [
+      "power-connection",
+      "construction"
+    ],
+    "helpful": 219,
+    "photo": true,
+    "id": "smallLamp-004",
+    "skuId": "smallLamp",
+    "date": "2026-10-20",
+    "author": "꼼꼼히*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빨라요",
+    "text": "fast delivery 👍 포장도 괜찮았어요",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallLamp-005",
+    "skuId": "smallLamp",
+    "date": "2026-10-19",
+    "author": "on_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물이라",
+    "text": "gift, unopened, 5 stars. 아직 사용은 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallLamp-006",
+    "skuId": "smallLamp",
+    "date": "2026-10-18",
+    "author": "선물*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "며칠 쓰고 적어요",
+    "text": "Used every evening from 14 to 21 Oct while winding down at my bedside table. The small base leaves room for my water glass. I unplug it when moving the table to clean and reconnect afterward. 책 읽을 때는 방 조명도 같이 켜요. In my room the light feels gentle, but this is my personal impression, not a brightness measurement.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 41,
+    "photo": true,
+    "id": "smallLamp-007",
+    "skuId": "smallLamp",
+    "date": "2026-10-17",
+    "author": "퇴근후*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "무난한 편",
+    "text": "생각보다 작아요. 22cm 확인은 했는데 방 전체 밝히는 용도로는 제 기준 부족해요.",
+    "tags": [
+      "size",
+      "brightness"
+    ],
+    "helpful": 11,
+    "photo": false,
+    "id": "smallLamp-008",
+    "skuId": "smallLamp",
+    "date": "2026-10-16",
+    "author": "sy_**",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "굿",
+    "text": "좋아용 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallLamp-009",
+    "skuId": "smallLamp",
+    "date": "2026-10-15",
+    "author": "모닝*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "배송이 다했네요",
+    "text": "늦게 주문했는데 다음날 도착. 배송 짱",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "smallLamp-010",
+    "skuId": "smallLamp",
+    "date": "2026-10-14",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬음",
+    "text": "생각한거랑 비슷하네여",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallLamp-011",
+    "skuId": "smallLamp",
+    "date": "2026-10-13",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "두 번째 구매",
+    "text": "같은 작은 램프 두 번째예요. 첫 건 제 책상 선반, 이번 건 침대 옆에 두려고 샀어요. The two look similar when I turn them on together against the same wall. I wanted the 22 cm version because the taller lamp I already own blocks the lower shelf. The second arrived on 19 Oct with the shade sitting straight on the stem.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 23,
+    "photo": true,
+    "id": "smallLamp-012",
+    "skuId": "smallLamp",
+    "date": "2026-10-12",
+    "author": "다시*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "잘 받았습니다 thanks",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallLamp-013",
+    "skuId": "smallLamp",
+    "date": "2026-10-11",
+    "author": "ri_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 아쉬워요",
+    "text": "갓이 한쪽으로 기울어서 왔어요. 밑면 평평한 곳에 놔도 비뚤어 보여요.",
+    "tags": [
+      "alignment"
+    ],
+    "helpful": 36,
+    "photo": true,
+    "id": "smallLamp-014",
+    "skuId": "smallLamp",
+    "date": "2026-10-10",
+    "author": "받아본*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족해요",
+    "text": "협탁용으로 만족합니다. USB 선 정리할 자리는 따로 잡아야 했어요.",
+    "tags": [
+      "cable"
+    ],
+    "helpful": 5,
+    "photo": false,
+    "id": "smallLamp-015",
+    "skuId": "smallLamp",
+    "date": "2026-10-09",
+    "author": "느리게*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빠른 배송",
+    "text": "배송 빠르고 상자 멀쩡합니다",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallLamp-016",
+    "skuId": "smallLamp",
+    "date": "2026-10-08",
+    "author": "박*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진 같이 남깁니다",
+    "text": "10cm 작은 꽃병이라 식탁 한쪽에 놓으려고 샀어요. 받은 뒤 자 옆에 놓고 찍은 사진입니다. I put one short stem from a larger bunch into it; the opening suits that better than several thick stems together. The stoneware has a little variation around the base, which I like, and the color looks warmer beside my cream mug than on a white shelf.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 57,
+    "photo": true,
+    "id": "smallVase-001",
+    "skuId": "smallVase",
+    "date": "2026-10-23",
+    "author": "작은방*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문앞에 도착해 있었어요 잘받았슴다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallVase-002",
+    "skuId": "smallVase",
+    "date": "2026-10-22",
+    "author": "문앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋네요",
+    "text": "작은 꽃 한송이 넣으니 예쁨",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "smallVase-003",
+    "skuId": "smallVase",
+    "date": "2026-10-21",
+    "author": "ji_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "물이 바닥에 배어나와요",
+    "text": "I filled it halfway on 15 Oct and set it on a dry paper towel. Two hours later there was a wet circle underneath; I repeated it the next morning to check I had not spilled while pouring. 밑부분 사진과 젖은 종이 사진 같이 올립니다. I cannot see a crack from above, but this particular vase is not working for water and flowers, so I requested a return.",
+    "tags": [
+      "seepage",
+      "construction"
+    ],
+    "helpful": 219,
+    "photo": true,
+    "id": "smallVase-004",
+    "skuId": "smallVase",
+    "date": "2026-10-20",
+    "author": "꼼꼼히*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빨라요",
+    "text": "fast delivery 👍 포장도 괜찮았어요",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallVase-005",
+    "skuId": "smallVase",
+    "date": "2026-10-19",
+    "author": "on_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물이라",
+    "text": "gift, unopened, 5 stars. 아직 사용은 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallVase-006",
+    "skuId": "smallVase",
+    "date": "2026-10-18",
+    "author": "선물*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "며칠 쓰고 적어요",
+    "text": "I have used it for one stem at a time since 12 Oct, changing the water every other day. On my own vase I have not seen a wet ring under the base, but I keep a small coaster beneath it anyway. 입구가 작아 안쪽 닦을 때는 가는 솔을 썼어요. The 10 cm height makes it easy to see the person opposite me at the small table.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 41,
+    "photo": true,
+    "id": "smallVase-007",
+    "skuId": "smallVase",
+    "date": "2026-10-17",
+    "author": "퇴근후*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "무난한 편",
+    "text": "입구가 제가 가진 꽃줄기에는 좁았어요. 가는 한 송이만 넣으니 괜찮네요.",
+    "tags": [
+      "opening"
+    ],
+    "helpful": 11,
+    "photo": false,
+    "id": "smallVase-008",
+    "skuId": "smallVase",
+    "date": "2026-10-16",
+    "author": "sy_**",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "굿",
+    "text": "좋아용 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallVase-009",
+    "skuId": "smallVase",
+    "date": "2026-10-15",
+    "author": "모닝*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "배송이 다했네요",
+    "text": "늦게 주문했는데 다음날 도착. 배송 짱",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "smallVase-010",
+    "skuId": "smallVase",
+    "date": "2026-10-14",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬음",
+    "text": "생각한거랑 비슷하네여",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallVase-011",
+    "skuId": "smallVase",
+    "date": "2026-10-13",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "두 번째 구매",
+    "text": "같은 꽃병 재구매해서 책장에도 하나 놓았어요. 첫 번째는 식탁에서 쓰고 있습니다. The two are both about 10 cm tall, though the surface color is not exactly identical side by side. I photographed the bottoms and openings because that is what I wanted to inspect before buying. Both came wrapped separately inside their own boxes.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 23,
+    "photo": true,
+    "id": "smallVase-012",
+    "skuId": "smallVase",
+    "date": "2026-10-12",
+    "author": "다시*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "잘 받았습니다 thanks",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallVase-013",
+    "skuId": "smallVase",
+    "date": "2026-10-11",
+    "author": "ri_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 아쉬워요",
+    "text": "테두리에 흠집 두 개 보여요. 선물하려고 샀는데 교환해야겠어요.",
+    "tags": [
+      "rim-damage"
+    ],
+    "helpful": 36,
+    "photo": true,
+    "id": "smallVase-014",
+    "skuId": "smallVase",
+    "date": "2026-10-10",
+    "author": "받아본*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족해요",
+    "text": "작아서 책장에 놓기 좋아요. 안쪽 청소는 손이 안 들어가서 작은 솔 필요했어요.",
+    "tags": [
+      "cleaning"
+    ],
+    "helpful": 5,
+    "photo": false,
+    "id": "smallVase-015",
+    "skuId": "smallVase",
+    "date": "2026-10-09",
+    "author": "느리게*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빠른 배송",
+    "text": "배송 빠르고 상자 멀쩡합니다",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallVase-016",
+    "skuId": "smallVase",
+    "date": "2026-10-08",
+    "author": "박*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진 같이 남깁니다",
+    "text": "30cm 높이 확인하고 책장 옆 작은 테이블용으로 샀어요. 라탄 갓 짜임 사이로 빛이 보여서 벽 가까이 놓으면 패턴이 생깁니다. My photo is with the room light off and the lamp about a handspan from the wall. The wood-colored base is the part I matched to my shelf; I am not claiming the base is solid wood because the listing only gives its color.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 57,
+    "photo": true,
+    "id": "rattan-001",
+    "skuId": "rattan",
+    "date": "2026-10-23",
+    "author": "작은방*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문앞에 도착해 있었어요 잘받았슴다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "rattan-002",
+    "skuId": "rattan",
+    "date": "2026-10-22",
+    "author": "문앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋네요",
+    "text": "라탄 무늬 벽에 비치는거 좋네요",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "rattan-003",
+    "skuId": "rattan",
+    "date": "2026-10-21",
+    "author": "ji_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "갓 짜임이 한쪽 풀려 왔어요",
+    "text": "Several rattan ends stick out at one side of the shade and one crossing has come loose. This was visible as soon as I removed the wrapping on 13 Oct. I have not trimmed or glued anything because it is a new item. 사진에 같은 부분 앞뒤로 찍었어요. The base looks fine, but the uneven opening is right at eye level on my table, so I am asking for an exchange.",
+    "tags": [
+      "weave-damage",
+      "construction"
+    ],
+    "helpful": 219,
+    "photo": true,
+    "id": "rattan-004",
+    "skuId": "rattan",
+    "date": "2026-10-20",
+    "author": "꼼꼼히*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빨라요",
+    "text": "fast delivery 👍 포장도 괜찮았어요",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "rattan-005",
+    "skuId": "rattan",
+    "date": "2026-10-19",
+    "author": "on_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물이라",
+    "text": "gift, unopened, 5 stars. 아직 사용은 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "rattan-006",
+    "skuId": "rattan",
+    "date": "2026-10-18",
+    "author": "선물*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "며칠 쓰고 적어요",
+    "text": "Switched this on on four evenings since 16 Oct. I moved it farther from the wall after the first night because the woven pattern felt too strong right beside my book. With the room light also on, the texture is still visible but softer. 전구색이 제 방에는 잘 맞아요. I use another light for close reading; this one is mostly for the corner atmosphere.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 41,
+    "photo": true,
+    "id": "rattan-007",
+    "skuId": "rattan",
+    "date": "2026-10-17",
+    "author": "퇴근후*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "무난한 편",
+    "text": "벽에 생기는 무늬가 생각보다 진해요. 위치 바꿔가며 써보는 중.",
+    "tags": [
+      "light-pattern"
+    ],
+    "helpful": 11,
+    "photo": false,
+    "id": "rattan-008",
+    "skuId": "rattan",
+    "date": "2026-10-16",
+    "author": "sy_**",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "굿",
+    "text": "좋아용 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "rattan-009",
+    "skuId": "rattan",
+    "date": "2026-10-15",
+    "author": "모닝*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "배송이 다했네요",
+    "text": "늦게 주문했는데 다음날 도착. 배송 짱",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "rattan-010",
+    "skuId": "rattan",
+    "date": "2026-10-14",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬음",
+    "text": "생각한거랑 비슷하네여",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "rattan-011",
+    "skuId": "rattan",
+    "date": "2026-10-13",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "두 번째 구매",
+    "text": "가족이 제 방에서 보고 같은 제품을 부탁해서 재주문했어요. 제 건 9월부터 저녁에만 사용했고 이번 것은 10/19에 도착했습니다. The weaving is a little different where the strands cross, which is visible when the two shades are side by side. Both measure around the listed 30 cm overall. I checked the bases on the same flat table before gifting the new one.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 23,
+    "photo": true,
+    "id": "rattan-012",
+    "skuId": "rattan",
+    "date": "2026-10-12",
+    "author": "다시*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "잘 받았습니다 thanks",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "rattan-013",
+    "skuId": "rattan",
+    "date": "2026-10-11",
+    "author": "ri_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 아쉬워요",
+    "text": "밑면이 평평하지 않아서 테이블에서 흔들려요. 다른 위치도 동일합니다.",
+    "tags": [
+      "base-stability"
+    ],
+    "helpful": 36,
+    "photo": true,
+    "id": "rattan-014",
+    "skuId": "rattan",
+    "date": "2026-10-10",
+    "author": "받아본*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족해요",
+    "text": "분위기는 만족. 라탄 사이에 먼지가 보이면 부드러운 솔로 하나씩 털어야 해요.",
+    "tags": [
+      "cleaning"
+    ],
+    "helpful": 5,
+    "photo": false,
+    "id": "rattan-015",
+    "skuId": "rattan",
+    "date": "2026-10-09",
+    "author": "느리게*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빠른 배송",
+    "text": "배송 빠르고 상자 멀쩡합니다",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "rattan-016",
+    "skuId": "rattan",
+    "date": "2026-10-08",
+    "author": "박*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진 같이 남깁니다",
+    "text": "커버만 오는 줄 알았는데 상품 설명처럼 솜 포함이고 45×45cm라 소파에 두기 적당했어요. 10월 13일 받아 포장 풀고 모서리까지 솜 모양을 잡았습니다. I photographed it next to my old 45 cm cushion. The cotton cover has a soft, slightly rumpled look rather than a shiny finish, and the sand/terracotta colors fit my own sofa.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 57,
+    "photo": true,
+    "id": "cushion-001",
+    "skuId": "cushion",
+    "date": "2026-10-23",
+    "author": "작은방*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문앞에 도착해 있었어요 잘받았슴다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushion-002",
+    "skuId": "cushion",
+    "date": "2026-10-22",
+    "author": "문앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋네요",
+    "text": "솜 들어있어서 바로 씀 편하네요",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "cushion-003",
+    "skuId": "cushion",
+    "date": "2026-10-21",
+    "author": "ji_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "솜이 한쪽으로 몰려 있어요",
+    "text": "The insert in my cushion has a hard lump in one corner and almost no filling in the opposite corner. I opened the outer cover to check and tried moving the filling through the inner fabric, but it gathers again after I lean on it. 10/12 받았고 하루 써본 상태입니다. Photos show it laid flat before and after fluffing. For this price I expected a more even insert.",
+    "tags": [
+      "uneven-filling",
+      "insert"
+    ],
+    "helpful": 219,
+    "photo": true,
+    "id": "cushion-004",
+    "skuId": "cushion",
+    "date": "2026-10-20",
+    "author": "꼼꼼히*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빨라요",
+    "text": "fast delivery 👍 포장도 괜찮았어요",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushion-005",
+    "skuId": "cushion",
+    "date": "2026-10-19",
+    "author": "on_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물이라",
+    "text": "gift, unopened, 5 stars. 아직 사용은 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushion-006",
+    "skuId": "cushion",
+    "date": "2026-10-18",
+    "author": "선물*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "며칠 쓰고 적어요",
+    "text": "Three weeks in the reading chair now. I fluff it by hand after sitting against it, because the insert compresses a bit where my back rests. I washed the removable cover in cold water three times and let it air dry; mine still goes over the same insert. 세탁 후엔 약간 구김이 남아요. That is how this particular cover has behaved for me, not a wash guarantee.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 41,
+    "photo": true,
+    "id": "cushion-007",
+    "skuId": "cushion",
+    "date": "2026-10-17",
+    "author": "퇴근후*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "무난한 편",
+    "text": "제 기준으로는 생각보다 납작해요. 빵빵한 쿠션 원하면 느낌 다를 듯.",
+    "tags": [
+      "loft"
+    ],
+    "helpful": 11,
+    "photo": false,
+    "id": "cushion-008",
+    "skuId": "cushion",
+    "date": "2026-10-16",
+    "author": "sy_**",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "굿",
+    "text": "좋아용 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushion-009",
+    "skuId": "cushion",
+    "date": "2026-10-15",
+    "author": "모닝*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "배송이 다했네요",
+    "text": "늦게 주문했는데 다음날 도착. 배송 짱",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "cushion-010",
+    "skuId": "cushion",
+    "date": "2026-10-14",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬음",
+    "text": "생각한거랑 비슷하네여",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushion-011",
+    "skuId": "cushion",
+    "date": "2026-10-13",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "두 번째 구매",
+    "text": "첫 번째가 마음에 들어 반대쪽 의자용으로 하나 더 샀습니다. 첫 건 9월, 이번 건 10월 20일 도착했어요. Both arrived with an insert, so I did not need to buy filling separately. I laid them side by side for the photo: the older one has softened a little from use but the size still looks similar. I prefer the slightly relaxed cotton surface.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 23,
+    "photo": true,
+    "id": "cushion-012",
+    "skuId": "cushion",
+    "date": "2026-10-12",
+    "author": "다시*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "잘 받았습니다 thanks",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushion-013",
+    "skuId": "cushion",
+    "date": "2026-10-11",
+    "author": "ri_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 아쉬워요",
+    "text": "옆선 박음질이 벌어진 채로 왔어요. 솜은 포함됐지만 커버부터 교환해야겠네요.",
+    "tags": [
+      "stitching"
+    ],
+    "helpful": 36,
+    "photo": true,
+    "id": "cushion-014",
+    "skuId": "cushion",
+    "date": "2026-10-10",
+    "author": "받아본*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족해요",
+    "text": "컬러랑 촉감 만족. 오래 기대고 있으면 다시 모양 잡아줘야 해요.",
+    "tags": [
+      "loft"
+    ],
+    "helpful": 5,
+    "photo": false,
+    "id": "cushion-015",
+    "skuId": "cushion",
+    "date": "2026-10-09",
+    "author": "느리게*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빠른 배송",
+    "text": "배송 빠르고 상자 멀쩡합니다",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushion-016",
+    "skuId": "cushion",
+    "date": "2026-10-08",
+    "author": "박*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진 같이 남깁니다",
+    "text": "삼나무 향 티라이트 여섯 개 구성 확인하고 샀어요. 10월 15일 받은 상자에 수량 맞게 들어 있었고 왁스 색은 크림색입니다. I opened one first to check the scent before arranging the rest on my shelf. To my nose it is a woody smell, softer than the scented jar I already have. Photo shows the full six-piece set still in the tray.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 57,
+    "photo": true,
+    "id": "smallCandle-001",
+    "skuId": "smallCandle",
+    "date": "2026-10-23",
+    "author": "작은방*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문앞에 도착해 있었어요 잘받았슴다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallCandle-002",
+    "skuId": "smallCandle",
+    "date": "2026-10-22",
+    "author": "문앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋네요",
+    "text": "여섯개 맞게 왔어요 향 무난",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "smallCandle-003",
+    "skuId": "smallCandle",
+    "date": "2026-10-21",
+    "author": "ji_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "심지가 왁스 안으로 파묻혀 있어요",
+    "text": "Three of the six have almost no wick above the wax. I checked all six when the box arrived on 12 Oct and photographed them in a row; the other three have noticeably longer visible wicks. 억지로 파내지는 않았어요. I bought a set of six usable tea lights, so receiving only three that look ready to use is disappointing. Asked for a replacement set.",
+    "tags": [
+      "wick",
+      "construction"
+    ],
+    "helpful": 219,
+    "photo": true,
+    "id": "smallCandle-004",
+    "skuId": "smallCandle",
+    "date": "2026-10-20",
+    "author": "꼼꼼히*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빨라요",
+    "text": "fast delivery 👍 포장도 괜찮았어요",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallCandle-005",
+    "skuId": "smallCandle",
+    "date": "2026-10-19",
+    "author": "on_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물이라",
+    "text": "gift, unopened, 5 stars. 아직 사용은 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallCandle-006",
+    "skuId": "smallCandle",
+    "date": "2026-10-18",
+    "author": "선물*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "며칠 쓰고 적어요",
+    "text": "Tried two of the six tea lights on separate evenings this week, one at a time in the holder I already own. I could smell the cedar close to the table; it did not fill my whole room. 제 코 기준이라 향 세기는 취향차 있을 듯해요. I took the second photo before using the next one so you can see the wick position and wax surface.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 41,
+    "photo": true,
+    "id": "smallCandle-007",
+    "skuId": "smallCandle",
+    "date": "2026-10-17",
+    "author": "퇴근후*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "무난한 편",
+    "text": "가까이에서는 향 나는데 제 방 전체에서는 거의 못 느껴요. 은은한 편인가봐요.",
+    "tags": [
+      "scent-strength"
+    ],
+    "helpful": 11,
+    "photo": false,
+    "id": "smallCandle-008",
+    "skuId": "smallCandle",
+    "date": "2026-10-16",
+    "author": "sy_**",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "굿",
+    "text": "좋아용 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallCandle-009",
+    "skuId": "smallCandle",
+    "date": "2026-10-15",
+    "author": "모닝*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "배송이 다했네요",
+    "text": "늦게 주문했는데 다음날 도착. 배송 짱",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "smallCandle-010",
+    "skuId": "smallCandle",
+    "date": "2026-10-14",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬음",
+    "text": "생각한거랑 비슷하네여",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallCandle-011",
+    "skuId": "smallCandle",
+    "date": "2026-10-13",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "두 번째 구매",
+    "text": "같은 세트 두 번째 구매입니다. 첫 상자는 지난달에 샀고 이번에는 서랍에 여분으로 두려고 주문했어요. I counted six again and none of the cups were bent in this box. The scent before use seems similar to the first batch to me. I like that I can put out one little candle for an evening rather than choosing a big jar, but that is just my routine.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 23,
+    "photo": true,
+    "id": "smallCandle-012",
+    "skuId": "smallCandle",
+    "date": "2026-10-12",
+    "author": "다시*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "잘 받았습니다 thanks",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallCandle-013",
+    "skuId": "smallCandle",
+    "date": "2026-10-11",
+    "author": "ri_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 아쉬워요",
+    "text": "용기 두 개가 찌그러져서 왁스 옆이 갈라져 있어요. 포장 확인 부탁해요.",
+    "tags": [
+      "cup-damage",
+      "packaging"
+    ],
+    "helpful": 36,
+    "photo": true,
+    "id": "smallCandle-014",
+    "skuId": "smallCandle",
+    "date": "2026-10-10",
+    "author": "받아본*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족해요",
+    "text": "작게 쓰기 좋아요. 제 취향에는 향이 조금 약해서 별 하나 뺐습니다.",
+    "tags": [
+      "scent-strength"
+    ],
+    "helpful": 5,
+    "photo": false,
+    "id": "smallCandle-015",
+    "skuId": "smallCandle",
+    "date": "2026-10-09",
+    "author": "느리게*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빠른 배송",
+    "text": "배송 빠르고 상자 멀쩡합니다",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "smallCandle-016",
+    "skuId": "smallCandle",
+    "date": "2026-10-08",
+    "author": "박*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "사진 같이 남깁니다",
+    "text": "45×45cm 솜이 집에 있어서 커버만 샀어요. 표기대로 솜 미포함이고 접혀서 작은 봉투에 왔습니다. I put it over my existing square insert on 14 Oct and pushed the corners in gently before closing it. The sand color looks slightly warmer in the evening photo than in daylight. I included a flat photo before filling so the cotton texture is easier to see.",
+    "tags": [
+      "detail",
+      "size"
+    ],
+    "helpful": 57,
+    "photo": true,
+    "id": "cushionCover-001",
+    "skuId": "cushionCover",
+    "date": "2026-10-23",
+    "author": "작은방*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "배송 빠름",
+    "text": "아침에 문앞에 도착해 있었어요 잘받았슴다",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushionCover-002",
+    "skuId": "cushionCover",
+    "date": "2026-10-22",
+    "author": "문앞*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "좋네요",
+    "text": "커버만 필요했는데 딱임 색무난",
+    "tags": [
+      "appearance"
+    ],
+    "helpful": 2,
+    "photo": false,
+    "id": "cushionCover-003",
+    "skuId": "cushionCover",
+    "date": "2026-10-21",
+    "author": "ji_**",
+    "relevant": true
+  },
+  {
+    "stars": 1,
+    "title": "옆선이 세탁 전에 벌어짐",
+    "text": "The side seam opened about 4 cm while I was putting in my existing 45 cm insert. I had not washed this cover yet, and the insert is soft rather than overfilled. 10월 13일 개봉했고 봉제선 안쪽에 실이 길게 풀린 사진 올립니다. I took it off immediately instead of pulling harder. The color is nice but this one needs a seam repair before I can use it.",
+    "tags": [
+      "stitching",
+      "construction"
+    ],
+    "helpful": 219,
+    "photo": true,
+    "id": "cushionCover-004",
+    "skuId": "cushionCover",
+    "date": "2026-10-20",
+    "author": "꼼꼼히*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빨라요",
+    "text": "fast delivery 👍 포장도 괜찮았어요",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushionCover-005",
+    "skuId": "cushionCover",
+    "date": "2026-10-19",
+    "author": "on_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "선물이라",
+    "text": "gift, unopened, 5 stars. 아직 사용은 안 했어요",
+    "tags": [
+      "gift",
+      "unopened"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushionCover-006",
+    "skuId": "cushionCover",
+    "date": "2026-10-18",
+    "author": "선물*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "며칠 쓰고 적어요",
+    "text": "Washed the cover three times since buying it in September, cold gentle wash and line dry in my case. It still fits my own 45 cm insert, though I smooth the corners out while it is slightly damp to reduce creases. 새 커버처럼 빳빳하진 않고 편하게 쓰는 느낌이에요. I bought it to reuse an insert I already owned, which is exactly how I am using it.",
+    "tags": [
+      "use-report"
+    ],
+    "helpful": 41,
+    "photo": true,
+    "id": "cushionCover-007",
+    "skuId": "cushionCover",
+    "date": "2026-10-17",
+    "author": "퇴근후*",
+    "relevant": true
+  },
+  {
+    "stars": 3,
+    "title": "무난한 편",
+    "text": "접힌 자국이 꽤 선명해요. 한 번 빨고 다림질해서 씌웠습니다.",
+    "tags": [
+      "creasing"
+    ],
+    "helpful": 11,
+    "photo": false,
+    "id": "cushionCover-008",
+    "skuId": "cushionCover",
+    "date": "2026-10-16",
+    "author": "sy_**",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "굿",
+    "text": "좋아용 잘쓸게요",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushionCover-009",
+    "skuId": "cushionCover",
+    "date": "2026-10-15",
+    "author": "모닝*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "배송이 다했네요",
+    "text": "늦게 주문했는데 다음날 도착. 배송 짱",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 1,
+    "photo": false,
+    "id": "cushionCover-010",
+    "skuId": "cushionCover",
+    "date": "2026-10-14",
+    "author": "도착*",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "괜찬음",
+    "text": "생각한거랑 비슷하네여",
+    "tags": [
+      "general"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushionCover-011",
+    "skuId": "cushionCover",
+    "date": "2026-10-13",
+    "author": "ha_**",
+    "relevant": false
+  },
+  {
+    "stars": 5,
+    "title": "두 번째 구매",
+    "text": "첫 커버는 거실, 두 번째는 작업 의자용으로 재구매했어요. 집에 있던 같은 크기 솜 두 개에 각각 씌웠습니다. The new one arrived on 20 Oct and the old one is from September. Side by side the older cotton is a little softer, but both are the sand color I wanted. Remember this order is just the cover; I kept the old inserts rather than ordering more filling.",
+    "tags": [
+      "repeat-purchase"
+    ],
+    "helpful": 23,
+    "photo": true,
+    "id": "cushionCover-012",
+    "skuId": "cushionCover",
+    "date": "2026-10-12",
+    "author": "다시*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "ok",
+    "text": "잘 받았습니다 thanks",
+    "tags": [
+      "delivery"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushionCover-013",
+    "skuId": "cushionCover",
+    "date": "2026-10-11",
+    "author": "ri_**",
+    "relevant": false
+  },
+  {
+    "stars": 1,
+    "title": "검수 아쉬워요",
+    "text": "앞면 한가운데 작은 검은 점이 묻어서 왔어요. 새 제품인데 눈에 띄네요.",
+    "tags": [
+      "mark"
+    ],
+    "helpful": 36,
+    "photo": true,
+    "id": "cushionCover-014",
+    "skuId": "cushionCover",
+    "date": "2026-10-10",
+    "author": "받아본*",
+    "relevant": true
+  },
+  {
+    "stars": 4,
+    "title": "대체로 만족해요",
+    "text": "기존 솜 활용해서 좋네요. 모서리 넣을 때 천천히 정리해야 예쁘게 나옵니다.",
+    "tags": [
+      "fit"
+    ],
+    "helpful": 5,
+    "photo": false,
+    "id": "cushionCover-015",
+    "skuId": "cushionCover",
+    "date": "2026-10-09",
+    "author": "느리게*",
+    "relevant": true
+  },
+  {
+    "stars": 5,
+    "title": "빠른 배송",
+    "text": "배송 빠르고 상자 멀쩡합니다",
+    "tags": [
+      "delivery",
+      "packaging"
+    ],
+    "helpful": 0,
+    "photo": false,
+    "id": "cushionCover-016",
+    "skuId": "cushionCover",
+    "date": "2026-10-08",
+    "author": "박*",
+    "relevant": false
   }
 ]

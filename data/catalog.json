@@ -737,7 +737,24 @@
       "drawers": 3,
       "widthCm": 24
     },
-    "reviewIds": [],
+    "reviewIds": [
+      "organizer-001",
+      "organizer-002",
+      "organizer-003",
+      "organizer-004",
+      "organizer-005",
+      "organizer-006",
+      "organizer-007",
+      "organizer-008",
+      "organizer-009",
+      "organizer-010",
+      "organizer-011",
+      "organizer-012",
+      "organizer-013",
+      "organizer-014",
+      "organizer-015",
+      "organizer-016"
+    ],
     "delivery": "Rocket delivery · tomorrow by 7am"
   },
   {
@@ -766,7 +783,24 @@
       "includes": "ceramic bowl, bamboo whisk",
       "bowlCapacityMl": 450
     },
-    "reviewIds": [],
+    "reviewIds": [
+      "matcha-001",
+      "matcha-002",
+      "matcha-003",
+      "matcha-004",
+      "matcha-005",
+      "matcha-006",
+      "matcha-007",
+      "matcha-008",
+      "matcha-009",
+      "matcha-010",
+      "matcha-011",
+      "matcha-012",
+      "matcha-013",
+      "matcha-014",
+      "matcha-015",
+      "matcha-016"
+    ],
     "delivery": "Rocket delivery · tomorrow by 7am"
   },
   {
@@ -856,7 +890,24 @@
       "light": "warm white",
       "power": "USB"
     },
-    "reviewIds": [],
+    "reviewIds": [
+      "smallLamp-001",
+      "smallLamp-002",
+      "smallLamp-003",
+      "smallLamp-004",
+      "smallLamp-005",
+      "smallLamp-006",
+      "smallLamp-007",
+      "smallLamp-008",
+      "smallLamp-009",
+      "smallLamp-010",
+      "smallLamp-011",
+      "smallLamp-012",
+      "smallLamp-013",
+      "smallLamp-014",
+      "smallLamp-015",
+      "smallLamp-016"
+    ],
     "delivery": "Rocket delivery · tomorrow by 7am"
   },
   {
@@ -885,7 +936,24 @@
       "shadeMaterial": "rattan",
       "light": "warm white"
     },
-    "reviewIds": [],
+    "reviewIds": [
+      "rattan-001",
+      "rattan-002",
+      "rattan-003",
+      "rattan-004",
+      "rattan-005",
+      "rattan-006",
+      "rattan-007",
+      "rattan-008",
+      "rattan-009",
+      "rattan-010",
+      "rattan-011",
+      "rattan-012",
+      "rattan-013",
+      "rattan-014",
+      "rattan-015",
+      "rattan-016"
+    ],
     "delivery": "Rocket delivery · tomorrow by 7am"
   },
   {
@@ -940,7 +1008,24 @@
       "material": "stoneware",
       "heightCm": 10
     },
-    "reviewIds": [],
+    "reviewIds": [
+      "smallVase-001",
+      "smallVase-002",
+      "smallVase-003",
+      "smallVase-004",
+      "smallVase-005",
+      "smallVase-006",
+      "smallVase-007",
+      "smallVase-008",
+      "smallVase-009",
+      "smallVase-010",
+      "smallVase-011",
+      "smallVase-012",
+      "smallVase-013",
+      "smallVase-014",
+      "smallVase-015",
+      "smallVase-016"
+    ],
     "delivery": "Rocket delivery · tomorrow by 7am"
   },
   {
@@ -995,7 +1080,24 @@
       "scent": "cedar",
       "quantity": 6
     },
-    "reviewIds": [],
+    "reviewIds": [
+      "smallCandle-001",
+      "smallCandle-002",
+      "smallCandle-003",
+      "smallCandle-004",
+      "smallCandle-005",
+      "smallCandle-006",
+      "smallCandle-007",
+      "smallCandle-008",
+      "smallCandle-009",
+      "smallCandle-010",
+      "smallCandle-011",
+      "smallCandle-012",
+      "smallCandle-013",
+      "smallCandle-014",
+      "smallCandle-015",
+      "smallCandle-016"
+    ],
     "delivery": "Rocket delivery · tomorrow by 7am"
   },
   {
@@ -1025,7 +1127,24 @@
       "heightCm": 45,
       "insertIncluded": true
     },
-    "reviewIds": [],
+    "reviewIds": [
+      "cushion-001",
+      "cushion-002",
+      "cushion-003",
+      "cushion-004",
+      "cushion-005",
+      "cushion-006",
+      "cushion-007",
+      "cushion-008",
+      "cushion-009",
+      "cushion-010",
+      "cushion-011",
+      "cushion-012",
+      "cushion-013",
+      "cushion-014",
+      "cushion-015",
+      "cushion-016"
+    ],
     "delivery": "Rocket delivery · tomorrow by 7am"
   },
   {
@@ -1054,7 +1173,24 @@
       "heightCm": 45,
       "insertIncluded": false
     },
-    "reviewIds": [],
+    "reviewIds": [
+      "cushionCover-001",
+      "cushionCover-002",
+      "cushionCover-003",
+      "cushionCover-004",
+      "cushionCover-005",
+      "cushionCover-006",
+      "cushionCover-007",
+      "cushionCover-008",
+      "cushionCover-009",
+      "cushionCover-010",
+      "cushionCover-011",
+      "cushionCover-012",
+      "cushionCover-013",
+      "cushionCover-014",
+      "cushionCover-015",
+      "cushionCover-016"
+    ],
     "delivery": "Rocket delivery · tomorrow by 7am"
   },
   {
@@ -1279,5 +1415,436 @@
     "reviewIds": [],
     "delivery": "Rocket delivery · tomorrow by 7am",
     "sensitive": true
+  },
+  {
+    "id": "dateDress",
+    "name": "Evening drape midi dress",
+    "type": "dress",
+    "price": 39900,
+    "category": "wardrobe",
+    "color": "#365B52",
+    "vibeTags": [
+      "date-night",
+      "quiet-evenings",
+      "simple-dressing",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "teal",
+      "forest"
+    ],
+    "aliases": [
+      "date dress",
+      "midi dress",
+      "evening dress",
+      "데이트 원피스",
+      "드레스"
+    ],
+    "description": "A deep teal, sleeveless midi dress with a V neckline and gently flared skirt.",
+    "facts": {
+      "material": "polyester 95%, elastane 5%",
+      "size": "M",
+      "lengthCm": 112,
+      "closure": "side zipper",
+      "care": "cold gentle wash, line dry",
+      "dataOrigin": "synthetic demo catalog; not a verified merchant listing"
+    },
+    "priceBand": "under-70k",
+    "reviewIds": [
+      "dateDress-001",
+      "dateDress-002",
+      "dateDress-003",
+      "dateDress-004",
+      "dateDress-005",
+      "dateDress-006",
+      "dateDress-007",
+      "dateDress-008",
+      "dateDress-009",
+      "dateDress-010",
+      "dateDress-011",
+      "dateDress-012",
+      "dateDress-013",
+      "dateDress-014",
+      "dateDress-015",
+      "dateDress-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am (simulation)"
+  },
+  {
+    "id": "eveningBlouse",
+    "name": "Soft collar evening blouse",
+    "type": "blouse",
+    "price": 29900,
+    "category": "wardrobe",
+    "color": "#E1CFAF",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "simple-dressing",
+      "everyday"
+    ],
+    "palette": [
+      "cream",
+      "sand"
+    ],
+    "aliases": [
+      "blouse",
+      "cream blouse",
+      "date blouse",
+      "블라우스"
+    ],
+    "description": "A cream button-front blouse with a soft collar and long sleeves.",
+    "facts": {
+      "material": "viscose 70%, polyester 30%",
+      "size": "M",
+      "lengthCm": 60,
+      "closure": "front buttons",
+      "care": "cold hand wash, line dry",
+      "dataOrigin": "synthetic demo catalog; not a verified merchant listing"
+    },
+    "priceBand": "under-30k",
+    "reviewIds": [
+      "eveningBlouse-001",
+      "eveningBlouse-002",
+      "eveningBlouse-003",
+      "eveningBlouse-004",
+      "eveningBlouse-005",
+      "eveningBlouse-006",
+      "eveningBlouse-007",
+      "eveningBlouse-008",
+      "eveningBlouse-009",
+      "eveningBlouse-010",
+      "eveningBlouse-011",
+      "eveningBlouse-012",
+      "eveningBlouse-013",
+      "eveningBlouse-014",
+      "eveningBlouse-015",
+      "eveningBlouse-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am (simulation)"
+  },
+  {
+    "id": "littleHandbag",
+    "name": "Little evening shoulder bag",
+    "type": "handbag",
+    "price": 24900,
+    "category": "wardrobe",
+    "color": "#966549",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "compact",
+      "simple-dressing"
+    ],
+    "palette": [
+      "cocoa",
+      "sand"
+    ],
+    "aliases": [
+      "handbag",
+      "small shoulder bag",
+      "date bag",
+      "숄더백",
+      "가방"
+    ],
+    "description": "A cocoa shoulder bag with a flap clasp and a short curved strap.",
+    "facts": {
+      "material": "polyurethane shell, polyester lining",
+      "widthCm": 24,
+      "heightCm": 18,
+      "depthCm": 8,
+      "closure": "metal turn clasp",
+      "strap": "fixed short shoulder strap",
+      "dataOrigin": "synthetic demo catalog; not a verified merchant listing"
+    },
+    "priceBand": "under-30k",
+    "reviewIds": [
+      "littleHandbag-001",
+      "littleHandbag-002",
+      "littleHandbag-003",
+      "littleHandbag-004",
+      "littleHandbag-005",
+      "littleHandbag-006",
+      "littleHandbag-007",
+      "littleHandbag-008",
+      "littleHandbag-009",
+      "littleHandbag-010",
+      "littleHandbag-011",
+      "littleHandbag-012",
+      "littleHandbag-013",
+      "littleHandbag-014",
+      "littleHandbag-015",
+      "littleHandbag-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am (simulation)"
+  },
+  {
+    "id": "roseLipstick",
+    "name": "Evening rose satin lipstick",
+    "type": "lipstick",
+    "price": 12900,
+    "category": "beauty",
+    "color": "#A94F51",
+    "vibeTags": [
+      "date-night",
+      "rose-tones",
+      "small-rituals",
+      "compact"
+    ],
+    "palette": [
+      "rose",
+      "teal"
+    ],
+    "aliases": [
+      "lipstick",
+      "rose lipstick",
+      "satin lipstick",
+      "립스틱",
+      "로즈 립"
+    ],
+    "description": "A rose satin-finish lipstick in a teal twist-up case.",
+    "facts": {
+      "netWeightGrams": 3.2,
+      "shade": "evening rose",
+      "finish": "satin",
+      "format": "twist-up bullet",
+      "case": "teal with gold-tone band",
+      "dataOrigin": "synthetic demo catalog; not a verified merchant listing"
+    },
+    "priceBand": "under-30k",
+    "reviewIds": [
+      "roseLipstick-001",
+      "roseLipstick-002",
+      "roseLipstick-003",
+      "roseLipstick-004",
+      "roseLipstick-005",
+      "roseLipstick-006",
+      "roseLipstick-007",
+      "roseLipstick-008",
+      "roseLipstick-009",
+      "roseLipstick-010",
+      "roseLipstick-011",
+      "roseLipstick-012",
+      "roseLipstick-013",
+      "roseLipstick-014",
+      "roseLipstick-015",
+      "roseLipstick-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am (simulation)"
+  },
+  {
+    "id": "softCompact",
+    "name": "Vanity pressed powder compact",
+    "type": "compact",
+    "price": 18900,
+    "category": "beauty",
+    "color": "#D7B196",
+    "vibeTags": [
+      "date-night",
+      "small-rituals",
+      "warm-neutrals",
+      "compact"
+    ],
+    "palette": [
+      "sand",
+      "rose"
+    ],
+    "aliases": [
+      "compact",
+      "powder compact",
+      "pressed powder",
+      "파우더",
+      "콤팩트"
+    ],
+    "description": "A hinged compact with a mirror and a warm-beige pressed powder pan.",
+    "facts": {
+      "netWeightGrams": 9,
+      "shade": "warm beige",
+      "format": "pressed powder",
+      "mirror": true,
+      "applicatorIncluded": false,
+      "caseDiameterCm": 6.5,
+      "dataOrigin": "synthetic demo catalog; not a verified merchant listing"
+    },
+    "priceBand": "under-30k",
+    "reviewIds": [
+      "softCompact-001",
+      "softCompact-002",
+      "softCompact-003",
+      "softCompact-004",
+      "softCompact-005",
+      "softCompact-006",
+      "softCompact-007",
+      "softCompact-008",
+      "softCompact-009",
+      "softCompact-010",
+      "softCompact-011",
+      "softCompact-012",
+      "softCompact-013",
+      "softCompact-014",
+      "softCompact-015",
+      "softCompact-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am (simulation)"
+  },
+  {
+    "id": "eveningPerfume",
+    "name": "Evening amber pocket perfume",
+    "type": "perfume",
+    "price": 29900,
+    "category": "beauty",
+    "color": "#B78D5B",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "small-rituals",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "amber",
+      "teal"
+    ],
+    "aliases": [
+      "perfume",
+      "amber perfume",
+      "date perfume",
+      "향수"
+    ],
+    "description": "A 30 ml amber-and-cedar eau de toilette in a small glass bottle.",
+    "facts": {
+      "volumeMl": 30,
+      "fragranceNotes": "amber, cedar, soft citrus",
+      "format": "eau de toilette spray",
+      "bottle": "glass with removable teal cap",
+      "dataOrigin": "synthetic demo catalog; not a verified merchant listing"
+    },
+    "priceBand": "under-30k",
+    "reviewIds": [
+      "eveningPerfume-001",
+      "eveningPerfume-002",
+      "eveningPerfume-003",
+      "eveningPerfume-004",
+      "eveningPerfume-005",
+      "eveningPerfume-006",
+      "eveningPerfume-007",
+      "eveningPerfume-008",
+      "eveningPerfume-009",
+      "eveningPerfume-010",
+      "eveningPerfume-011",
+      "eveningPerfume-012",
+      "eveningPerfume-013",
+      "eveningPerfume-014",
+      "eveningPerfume-015",
+      "eveningPerfume-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am (simulation)"
+  },
+  {
+    "id": "smallHoops",
+    "name": "Small everyday gold-tone hoops",
+    "type": "earrings",
+    "price": 9900,
+    "category": "wardrobe",
+    "color": "#C6A166",
+    "vibeTags": [
+      "date-night",
+      "small-details",
+      "warm-neutrals",
+      "simple-dressing"
+    ],
+    "palette": [
+      "gold",
+      "sand"
+    ],
+    "aliases": [
+      "earrings",
+      "hoops",
+      "gold tone hoops",
+      "귀걸이",
+      "링귀걸이"
+    ],
+    "description": "A pair of small, round gold-tone hoop earrings with hinged closures.",
+    "facts": {
+      "pairCount": 1,
+      "outerDiameterMm": 20,
+      "material": "gold-tone plated brass",
+      "closure": "hinged post",
+      "finish": "polished",
+      "dataOrigin": "synthetic demo catalog; not a verified merchant listing"
+    },
+    "priceBand": "under-10k",
+    "reviewIds": [
+      "smallHoops-001",
+      "smallHoops-002",
+      "smallHoops-003",
+      "smallHoops-004",
+      "smallHoops-005",
+      "smallHoops-006",
+      "smallHoops-007",
+      "smallHoops-008",
+      "smallHoops-009",
+      "smallHoops-010",
+      "smallHoops-011",
+      "smallHoops-012",
+      "smallHoops-013",
+      "smallHoops-014",
+      "smallHoops-015",
+      "smallHoops-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am (simulation)"
+  },
+  {
+    "id": "blendingBrush",
+    "name": "Little rounded powder brush",
+    "type": "makeupBrush",
+    "price": 8900,
+    "category": "beauty",
+    "color": "#375950",
+    "vibeTags": [
+      "date-night",
+      "small-rituals",
+      "warm-neutrals",
+      "practical"
+    ],
+    "palette": [
+      "teal",
+      "gold"
+    ],
+    "aliases": [
+      "makeup brush",
+      "powder brush",
+      "blending brush",
+      "브러시",
+      "메이크업 브러쉬"
+    ],
+    "description": "A rounded synthetic-bristle powder brush with a teal handle.",
+    "facts": {
+      "lengthCm": 16,
+      "bristles": "synthetic fibers",
+      "handle": "painted wood",
+      "ferrule": "gold-tone aluminum",
+      "use": "powder application",
+      "dataOrigin": "synthetic demo catalog; not a verified merchant listing"
+    },
+    "priceBand": "under-10k",
+    "reviewIds": [
+      "blendingBrush-001",
+      "blendingBrush-002",
+      "blendingBrush-003",
+      "blendingBrush-004",
+      "blendingBrush-005",
+      "blendingBrush-006",
+      "blendingBrush-007",
+      "blendingBrush-008",
+      "blendingBrush-009",
+      "blendingBrush-010",
+      "blendingBrush-011",
+      "blendingBrush-012",
+      "blendingBrush-013",
+      "blendingBrush-014",
+      "blendingBrush-015",
+      "blendingBrush-016"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am (simulation)"
   }
 ]

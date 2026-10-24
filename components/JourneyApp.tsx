@@ -6,6 +6,10 @@ import CoupiApp, {Art, Button, Meta, Modal, Pet, ReviewRow, Speech, SystemClock,
 import CompanionCall from './CompanionCall';
 import HatchDiorama from './HatchDiorama';
 import SceneDiorama from './SceneDiorama';
+import SceneFallback from './SceneFallback';
+import WorldHome from './WorldHome';
+import WorldJournal from './WorldJournal';
+import {worldTemplates,type WorldTemplate} from '@/data/world-templates';
 import {Glyph} from './Glyph';
 import {catalog, getReview, getSku, reviewsForSku} from '@/lib/catalog';
 import {eligibleCatalog} from '@/lib/profile';
@@ -15,11 +19,11 @@ import type {AskResponse, Profile, SceneResult, Verdict} from '@/lib/types';
 import type {CallResponse, District, WorldResponse} from '@/lib/journey-types';
 import './journey.css';
 
-type View = 'hatch' | 'call' | 'world' | 'district' | 'stroll' | 'head' | 'decisions';
+type View = 'hatch' | 'call' | 'world' | 'district' | 'preview' | 'archive' | 'stroll' | 'head' | 'decisions';
 type Panel = 'verdict' | 'why' | 'review' | 'reviews' | 'delegate' | 'everything';
 const money = (value:number) => '₩' + value.toLocaleString('en-US');
 const uid = () => crypto.randomUUID();
-const captions:Record<View,string> = {hatch:'replaces onboarding',call:'replaces a search box',world:'replaces the homepage',district:'replaces categories',stroll:'replaces endless scrolling',head:'replaces a hidden profile',decisions:'replaces the cart'};
+const captions:Record<View,string> = {hatch:'replaces onboarding',call:'replaces a search box',world:'replaces the homepage',district:'replaces categories',preview:'replaces trend feeds',archive:'replaces a forgotten browsing history',stroll:'replaces endless scrolling',head:'replaces a hidden profile',decisions:'replaces the cart'};
 
 async function api<T>(url:string, body?:unknown):Promise<T> {
   const response = await fetch(url, {method:body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
@@ -29,7 +33,7 @@ async function api<T>(url:string, body?:unknown):Promise<T> {
 }
 
 function RoomFallback({scene,onSelect}:{scene:SceneResult;onSelect:(id:string)=>void}) {
-  return <div className="scene-room"><div className="room-window"><i/><i/><i/><i/></div><div className="room-light"/><div className="room-shelf"/><div className="room-counter"/><div className="room-vase"/>{scene.items.map((item,index)=>{const sku=getSku(item.skuId);return sku?<button className={`scene-object object-${index}`} key={sku.id} onClick={()=>onSelect(sku.id)} aria-label={`Explore ${sku.name}`}><Art sku={sku}/><span className="hotspot"><Glyph name="plus"/></span><span className="object-label">{sku.name}</span></button>:null;})}</div>;
+  return <SceneFallback scene={scene} onSelect={onSelect}/>;
 }
 
 export default function JourneyApp() {
@@ -43,6 +47,11 @@ export default function JourneyApp() {
   const [districtId,setDistrictId] = useState('');
   const [command,setCommand] = useState('');
   const [rebuild,setRebuild] = useState('');
+  const [templateId,setTemplateId] = useState('');
+  const [personalWords,setPersonalWords] = useState('');
+  const [momentId,setMomentId] = useState('');
+  const [archiveId,setArchiveId] = useState('');
+  const [archivedMomentId,setArchivedMomentId] = useState('');
   const [productId,setProductId] = useState<string|null>(null);
   const [verdict,setVerdict] = useState<Verdict|null>(null);
   const [productBusy,setProductBusy] = useState(false);
@@ -55,6 +64,7 @@ export default function JourneyApp() {
   const [delegating,setDelegating] = useState(false);
   const lastView = useRef<View>('world');
   const productRequest = useRef(0);
+  const worldRequest = useRef<{key:string;id:string}|null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout>|null>(null);
   const initial = useRef(false);
   const latestProfile = useRef(profile); latestProfile.current=profile;
@@ -85,10 +95,17 @@ export default function JourneyApp() {
 
   const districts=profile?.journey?.districts||[];
   const district=districts.find(d=>d.id===districtId);
+  const template=worldTemplates.find(item=>item.id===templateId);
+  const moment=district?.journal?.find(entry=>entry.id===momentId);
+  const districtScene=moment?.scene||district?.scene;
+  const archives=profile?.journey?.archivedJournals||[];
+  const archive=archives.find(item=>item.id===archiveId);
+  const archivedMoment=archive?.entries.find(entry=>entry.id===archivedMomentId)||archive?.entries.at(-1);
+  const contextName=view==='preview'?template?.name:view==='district'||view==='stroll'?district?.name:undefined;
   const pending=profile?.decisions.filter(d=>!d.approvedAt)||[];
   const sku=productId?getSku(productId):undefined;
   const phase=profile?.pretend2am?'night':view==='hatch'?'dawn':view==='call'?'store':'noon';
-  const step=view==='hatch'?0:view==='call'&&!profile?.journey?.interviewComplete?1:view==='world'?2:['district','stroll'].includes(view)?3:view==='decisions'?4:2;
+  const step=view==='hatch'?0:view==='call'&&!profile?.journey?.interviewComplete?1:view==='world'?2:['district','preview','stroll'].includes(view)?3:view==='decisions'?4:2;
 
   function changeView(next:View) {setView(next);setError('');window.scrollTo({top:0,behavior:'instant'});}
   function openUtility(next:'call'|'head') {if(view!==next){lastView.current=view;changeView(next);}}
@@ -99,15 +116,20 @@ export default function JourneyApp() {
     setHatched(true);
     await task('A little hello',async()=>{const result=await api<CallResponse>('/api/call',{action:'hatch',requestId:uid()});storeProfile(result.profile);});
   }
-  async function makeWorld(text?:string,rebuildId?:string) {
+  async function makeWorld(text?:string,rebuildId?:string,enterNew=false) {
     if(busy)return;
+    const key=JSON.stringify([text?.trim()||'',rebuildId||'']);
+    if(worldRequest.current?.key!==key)worldRequest.current={key,id:uid()};
     await task(rebuildId?'Making room for a new feeling':districts.length?'Growing your world':'Building a world from your story',async()=>{
-      const result=await api<WorldResponse>('/api/world',{requestId:uid(),...(text?.trim()?{command:text.trim()}:{}),...(rebuildId?{districtId:rebuildId}:{})});
-      storeProfile(result.profile);setCommand('');setRebuild('');
+      const result=await api<WorldResponse>('/api/world',{requestId:worldRequest.current!.id,...(text?.trim()?{command:text.trim()}:{}),...(rebuildId?{districtId:rebuildId}:{})});
+      worldRequest.current=null;
+      storeProfile(result.profile);setCommand('');setRebuild('');setMomentId('');
+      if(enterNew){const added=result.districts.at(-1);if(added){setDistrictId(added.id);setPersonalWords('');changeView('district');}}
     });
   }
   function completeCall() {changeView('world');if(!districts.length)void makeWorld();}
-  function enterDistrict(d:District) {setDistrictId(d.id);setRebuild('');changeView('district');}
+  function enterDistrict(d:District) {setDistrictId(d.id);setRebuild('');setMomentId('');changeView('district');}
+  function previewWorld(t:WorldTemplate) {setTemplateId(t.id);setPersonalWords('');changeView('preview');}
 
   async function openProduct(id:string,existing?:Verdict) {
     const item=getSku(id);if(!item)return;
@@ -116,7 +138,7 @@ export default function JourneyApp() {
     if(existing){setProductBusy(false);return;}
     setProductBusy(true);
     try {
-      const result=await api<AskResponse>('/api/ask',{requestId:uid(),pickSkuId:id,question:`Evaluate ${item.name} (SKU ${id}) for me${district?` in my ${district.name} district`:''}. Explain its fit and a documented drawback. I am inspecting this exact item.`});
+      const result=await api<AskResponse>('/api/ask',{requestId:uid(),pickSkuId:id,question:`Evaluate ${item.name} (SKU ${id}) for me${contextName?` in the ${contextName} world`:''}. Explain its fit and a documented drawback. I am inspecting this exact item.`});
       if(productRequest.current!==sequence)return;
       storeProfile(result.profile);
       if(result.status==='verdict'||result.status==='clarify')setVerdict(result.verdict);
@@ -141,7 +163,7 @@ export default function JourneyApp() {
     if(!sku||delegating)return;
     setDelegating(true);setProductError('');
     try {
-      const result=await api<{profile:Profile;blocked?:string}>('/api/delegate',{action:'assign',skuId:sku.id,budgetCap:cap,...options,source:district?`your ${district.name} district`:'your call'});
+      const result=await api<{profile:Profile;blocked?:string}>('/api/delegate',{action:'assign',skuId:sku.id,budgetCap:cap,...options,source:contextName?`${view==='preview'?'the suggested':'your'} ${contextName} world`:'your call'});
       storeProfile(result.profile);
       if(result.blocked){setProductError(result.blocked);return;}
       closeProduct();changeView('decisions');flash('i’ll take it from here. your yes is still the last step.');
@@ -182,21 +204,26 @@ export default function JourneyApp() {
 
       {profile&&view==='call'&&<CompanionCall profile={profile} offline={status?.offline} onProfile={storeProfile} onComplete={completeCall} onOpenProduct={(id,v)=>void openProduct(id,v)} onDecisions={()=>changeView('decisions')} onClose={closeUtility}/>}
 
-      {profile&&view==='world'&&<section className="screen-surface">
-        <div className="world-heading"><div><p className="eyebrow orange">03 / FROM YOUR STORY</p><h1>a world,<br/><em>in your words.</em></h1></div><div className="world-intro"><Speech>{districts.length?'you told me about your life. these are a few places to start.':'give me a second — i’m building your world.'}</Speech><p>Little places to wander. Each one begins with something you shared.</p></div></div>
-        {!districts.length?<div className="world-building"><span className="world-seed"><Glyph name="scene"/></span><h2>Your story is the blueprint.</h2><p>{busy?'Finding the right pieces, with your context in mind.':'Your first districts are ready to be imagined.'}</p><Button disabled={!!busy||!profile.journey?.interviewComplete} onClick={()=>void makeWorld()}>Build my world <Glyph name="arrow-right"/></Button>{!profile.journey?.interviewComplete&&<Button secondary onClick={()=>changeView('call')}>Finish our first call</Button>}</div>:<div className="district-collection">{districts.map((d,index)=><article className="district-card" key={d.id} style={{animationDelay:`${index*90}ms`}}>
-          <div className="district-miniature" inert><SceneDiorama scene={d.scene} phase={phase} onSelect={()=>{}} fallback={<RoomFallback scene={d.scene} onSelect={()=>{}}/>}/></div>
-          <button className="district-open" onClick={()=>enterDistrict(d)} aria-label={`Wander into ${d.name}`}><span className="district-index">DISTRICT {String(index+1).padStart(2,'0')}</span><span className="district-title">{d.name}</span><span className="district-provenance">{d.provenance}</span><span className="district-enter"><Glyph name="arrow-up"/></span></button>
-        </article>)}</div>}
-        {districts.length>0&&<form className="new-district" onSubmit={e=>{e.preventDefault();void makeWorld(command);}}><span className="new-district-orbit"><Glyph name="plus"/></span><label htmlFor="new-district"><strong>There’s room for more you.</strong><span>A reading corner? Your next little ritual?</span></label><div><input id="new-district" value={command} onChange={e=>setCommand(e.target.value)} maxLength={1000} placeholder="Make a place for…"/><Button type="submit" secondary disabled={!!busy||!command.trim()}>Grow it <Glyph name="arrow-up"/></Button></div></form>}
+      {profile&&view==='world'&&<WorldHome districts={districts} archives={archives} phase={phase} busy={!!busy} complete={!!profile.journey?.interviewComplete} command={command} onCommand={setCommand} onCreate={text=>void makeWorld(text,undefined,!!text)} onEnter={enterDistrict} onPreview={previewWorld} onCall={()=>changeView('call')} onArchive={(id,entryId)=>{setArchiveId(id);setArchivedMomentId(entryId);changeView('archive');}}/>}
+
+      {profile&&view==='archive'&&(archive&&archivedMoment?<section className="district-detail screen-surface"><button className="text-button" onClick={()=>changeView('world')}><Glyph name="arrow-left"/> Your world</button><div className="district-heading"><div><p className="eyebrow orange">KEPT MOMENTS / YOUR OWN WORDS</p><h1>{archivedMoment.districtName}</h1><p>{new Date(archivedMoment.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})} · a room, just as you kept it</p></div></div><div className="moment-return"><span>This world’s recommendations were cleared when you changed your memory.<br/>Your diary remains. It doesn’t enter Coopy’s AI memory.</span></div><div className="full-district"><SceneDiorama scene={archivedMoment.scene} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={archivedMoment.scene} onSelect={id=>void openProduct(id)}/>}/><div className="district-scene-note"><span>SAVED ROOM / Product details use the current demo catalog.</span></div></div><p className="moment-note">{archivedMoment.text}</p><WorldJournal key={archive.id} district={{id:archive.id,name:archive.name,scene:archivedMoment.scene,createdAt:archivedMoment.createdAt,sourceMemoryIds:[],provenance:'from your saved diary',journal:archive.entries}} readOnly archived onProfile={storeProfile} onVisit={id=>{setArchivedMomentId(id);window.scrollTo({top:0,behavior:'smooth'});}}/></section>:<div className="empty-state"><h2>That moment has been put away.</h2><Button secondary onClick={()=>changeView('world')}>Back to your world</Button></div>)}
+
+      {profile&&view==='preview'&&template&&<section className="world-preview screen-surface">
+        <button className="text-button" onClick={()=>changeView('world')}><Glyph name="arrow-left"/> Your world</button>
+        <div className="world-preview-heading"><div><p className="eyebrow orange">CURATED STARTER / {template.chapter}</p><h1>{template.name}</h1></div><p>{template.description}</p></div>
+        <div className="full-district"><SceneDiorama scene={template.scene} phase={template.scene.kind==='dressing'?'dawn':phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={template.scene} onSelect={id=>void openProduct(id)}/>}/><div className="world-preview-note"><span>A little simulation. Tap a dot to look closer.</span><span>CURATED OBJECTS / NOT PERSONALIZED YET</span></div></div>
+        <form className="world-personalize" onSubmit={e=>{e.preventDefault();void makeWorld(template.prompt+(personalWords.trim()?` My own words: ${personalWords.trim()}`:''),undefined,true);}}><div><h2>Same beginning.<br/>Your own story.</h2><p>{template.journalPrompt} Make a version that fits you, then keep your moments inside it.</p></div><div><label htmlFor="personal-world-words">WHAT WOULD MAKE THIS FEEL LIKE YOU? · OPTIONAL</label><textarea id="personal-world-words" value={personalWords} onChange={e=>setPersonalWords(e.target.value)} maxLength={600} placeholder="Your occasion, your mood, your little details…"/><Button type="submit" disabled={!!busy||!profile.journey?.interviewComplete}>Make it mine <Glyph name="arrow-right"/></Button><p>Coopy will rebuild it from your words, current memory and budget.</p></div></form>
       </section>}
 
       {profile&&view==='district'&&(district?<section className="district-detail screen-surface">
         <button className="text-button" onClick={()=>changeView('world')}><Glyph name="arrow-left"/> Your world</button>
-        <div className="district-heading"><div><p className="eyebrow orange">04 / WANDER A LITTLE</p><h1>{district.name}</h1><p>{district.provenance}</p></div><button className="quiet-pill" onClick={()=>changeView('stroll')}><Glyph name="heart"/> walk around <span>optional</span></button></div>
-        <div className="full-district"><SceneDiorama scene={district.scene} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={district.scene} onSelect={id=>void openProduct(id)}/>}/><div className="district-scene-note"><span>Tap a glowing dot. Ask why. Take your time.</span><span>{district.scene.items.length} little finds · {money(district.scene.items.reduce((sum,item)=>sum+(getSku(item.skuId)?.price||0),0))}</span></div></div>
-        <form className="district-rebuild" onSubmit={e=>{e.preventDefault();void makeWorld(rebuild,district.id);}}><Glyph name="spark"/><input aria-label="Change this district" value={rebuild} onChange={e=>setRebuild(e.target.value)} maxLength={1000} placeholder="Change the feeling. Or tell me what’s missing…"/><Button secondary type="submit" disabled={!!busy||!rebuild.trim()}>Reimagine <Glyph name="arrow-up"/></Button></form>
-        <p className="district-explanation">{district.scene.explanation}</p>
+        <div className="district-heading"><div><p className="eyebrow orange">04 / WANDER A LITTLE</p><h1>{moment?.districtName||district.name}</h1><p>{moment?`a moment kept on ${new Date(moment.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:district.provenance}</p></div><button className="quiet-pill" onClick={()=>changeView('stroll')}><Glyph name="heart"/> walk around <span>optional</span></button></div>
+        {moment&&<div className="moment-return"><span>THEN / YOUR SAVED ROOM<br/>Product details still show the current demo catalog.</span><button onClick={()=>setMomentId('')}>Back to now <Glyph name="arrow-right"/></button></div>}
+        <div className="full-district"><SceneDiorama scene={districtScene!} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={districtScene!} onSelect={id=>void openProduct(id)}/>}/><div className="district-scene-note"><span>Tap a glowing dot. Ask why. Take your time.</span><span>{districtScene!.items.length} little finds · {money(districtScene!.items.reduce((sum,item)=>sum+(getSku(item.skuId)?.price||0),0))}</span></div></div>
+        {moment&&<p className="moment-note">{moment.text}</p>}
+        {!moment&&<form className="district-rebuild" onSubmit={e=>{e.preventDefault();void makeWorld(rebuild,district.id);}}><Glyph name="spark"/><input aria-label="Change this district" value={rebuild} onChange={e=>setRebuild(e.target.value)} maxLength={1000} placeholder="Change the feeling. Or tell me what’s missing…"/><Button secondary type="submit" disabled={!!busy||!rebuild.trim()}>Reimagine <Glyph name="arrow-up"/></Button></form>}
+        <p className="district-explanation">{districtScene!.explanation}</p>
+        <WorldJournal key={district.id} district={district} readOnly={!!moment} onProfile={storeProfile} onVisit={id=>{setMomentId(id);window.scrollTo({top:0,behavior:'smooth'});}}/>
       </section>:<div className="empty-state"><h2>This little world has moved.</h2><Button secondary onClick={()=>changeView('world')}>Back to your world</Button></div>)}
 
       {profile&&view==='stroll'&&<CoupiApp embedded initialView="taste" initialDeckMode="stroll" districtSkuIds={district?.scene.items.map(i=>i.skuId)} onProfileChange={storeProfile} onExit={()=>changeView('district')} onOpenProduct={id=>void openProduct(id)}/>}

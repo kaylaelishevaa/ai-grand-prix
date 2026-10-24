@@ -14,6 +14,23 @@ export function createProductMeshLibrary(own: Own) {
   const apron = new THREE.Shape();
   apron.moveTo(-.23, 0); apron.lineTo(.23, 0); apron.lineTo(.19, .43); apron.lineTo(.1, .58);
   apron.lineTo(.1, .74); apron.lineTo(-.1, .74); apron.lineTo(-.1, .58); apron.lineTo(-.19, .43); apron.closePath();
+  const dress = new THREE.Shape();
+  dress.moveTo(-.34, 0); dress.lineTo(.34, 0); dress.lineTo(.15, .65);
+  dress.lineTo(.2, .94); dress.lineTo(.1, 1.04); dress.lineTo(0, .91);
+  dress.lineTo(-.1, 1.04); dress.lineTo(-.2, .94); dress.lineTo(-.15, .65); dress.closePath();
+  const blouse = new THREE.Shape();
+  blouse.moveTo(-.24, 0); blouse.lineTo(.24, 0); blouse.lineTo(.23, .51);
+  blouse.lineTo(.4, .31); blouse.lineTo(.51, .42); blouse.lineTo(.28, .77);
+  blouse.lineTo(.1, .84); blouse.lineTo(0, .74); blouse.lineTo(-.1, .84);
+  blouse.lineTo(-.28, .77); blouse.lineTo(-.51, .42); blouse.lineTo(-.4, .31);
+  blouse.lineTo(-.23, .51); blouse.closePath();
+  // The lipstick's exposed tip is slanted geometry, not a flat picture.
+  const lipstick = new THREE.CylinderGeometry(.5, .5, 1, 12);
+  const bulletPositions = lipstick.getAttribute('position');
+  for (let index = 0; index < bulletPositions.count; index++) {
+    if (bulletPositions.getY(index) > 0) bulletPositions.setY(index, .5 + bulletPositions.getX(index) * .65);
+  }
+  lipstick.computeVertexNormals();
   const geometry = {
     box: own(new THREE.BoxGeometry(1, 1, 1)),
     cylinder: own(new THREE.CylinderGeometry(.5, .5, 1, 12)),
@@ -25,6 +42,9 @@ export function createProductMeshLibrary(own: Own) {
     bowl: own(new THREE.LatheGeometry(bowlProfile, 12)),
     kettle: own(new THREE.LatheGeometry(kettleProfile, 14)),
     apron: own(new THREE.ExtrudeGeometry(apron, { depth: .027, bevelEnabled: false, steps: 1 })),
+    dress: own(new THREE.ExtrudeGeometry(dress, { depth: .065, bevelEnabled: false, steps: 1 })),
+    blouse: own(new THREE.ExtrudeGeometry(blouse, { depth: .055, bevelEnabled: false, steps: 1 })),
+    lipstick: own(lipstick),
   };
   const palette = new Map<string, THREE.MeshLambertMaterial>();
   function paint(color: string) {
@@ -111,6 +131,82 @@ export function createProductMeshLibrary(own: Own) {
         const tie = part('box', main, side * .31, .59, .02, .22, .035, .025); tie.rotation.z = side * .27;
       }
       group.rotation.y = .5;
+    } else if (type === 'dress' || type === 'blouse') {
+      part(type, main, 0, 0, -.035, 1, 1, 1).name = `${type}-fabric`;
+      const shoulderY = type === 'dress' ? 1.05 : .85;
+      for (const side of [-1, 1]) {
+        const hanger = part('box', wood, side * .12, shoulderY + .08, 0, .28, .025, .028);
+        hanger.rotation.z = -side * .35;
+      }
+      ring(metal, 0, shoulderY + .22, 0, .12, .15, .08).name = 'hanger-hook';
+      if (type === 'dress') {
+        part('box', '#47665F', 0, .65, .041, .31, .025, .022).name = 'dress-waist-seam';
+        for (const side of [-1, 0, 1]) {
+          const fold = part('box', '#365B52', side * .13, .29, .042, .017, .55, .025);
+          fold.rotation.z = -side * .16;
+        }
+        for (const side of [-1, 1]) part('box', main, side * .115, 1.05, 0, .025, .13, .035);
+      } else {
+        part('box', '#E8D8C0', 0, .38, .038, .038, .69, .019).name = 'blouse-placket';
+        for (let index = 0; index < 5; index++) cylinder(cream, 0, .12 + index * .12, .058, .025, .015).rotation.x = Math.PI / 2;
+        for (const side of [-1, 1]) {
+          const collar = part('leaf', cream, side * .066, .76, .06, .17, .16, .045);
+          collar.rotation.z = side * .25;
+        }
+      }
+      group.rotation.y = .2;
+    } else if (type === 'handbag') {
+      part('box', main, 0, .25, 0, .64, .43, .27).name = 'handbag-body';
+      part('sphere', main, 0, .25, 0, .75, .5, .34);
+      part('box', '#704735', 0, .39, .153, .58, .19, .035).name = 'handbag-flap';
+      ring(main, 0, .57, 0, .39, .36, .24).name = 'handbag-strap';
+      part('box', '#C6A166', 0, .31, .18, .08, .065, .025).name = 'handbag-clasp';
+      for (const side of [-1, 1]) cylinder('#C6A166', side * .23, .47, .02, .045, .055);
+    } else if (type === 'lipstick') {
+      cylinder(teal, -.07, .17, 0, .21, .34).name = 'lipstick-case';
+      cylinder('#CCA768', -.07, .37, 0, .185, .085);
+      cylinder('#AB8349', -.07, .42, 0, .15, .03);
+      part('lipstick', main, -.07, .54, 0, .13, .28, .13).name = 'lipstick-bullet';
+      cylinder(teal, .2, .19, .035, .22, .38).name = 'lipstick-cap';
+      cylinder('#CCA768', .2, .028, .035, .222, .035);
+      part('box', cream, .2, .21, .15, .055, .04, .012);
+    } else if (type === 'compact') {
+      cylinder(main, 0, .06, .08, .58, .12).name = 'compact-base';
+      cylinder('#B8955F', 0, .125, .08, .48, .025);
+      cylinder('#DDBD93', 0, .145, .08, .43, .025).name = 'compact-powder';
+      const hinge = cylinder('#B8955F', 0, .12, -.18, .055, .3); hinge.rotation.z = Math.PI / 2;
+      const lid = new THREE.Group(); lid.position.set(0, .13, -.18); lid.rotation.x = -.4;
+      // Move the shared meshes into an open, hinged lid group.
+      for (const [color, diameter, depth, z, name] of [[main, .58, .07, 0, 'compact-lid'], ['#B8CCC5', .48, .016, .045, 'compact-mirror']] as const) {
+        const disc = cylinder(color, 0, .28, z, diameter, depth); disc.rotation.x = Math.PI / 2;
+        disc.name = name; lid.add(disc);
+      }
+      const reflection = part('box', '#E8EFE5', -.09, .31, .06, .027, .26, .008); reflection.rotation.z = -.45; lid.add(reflection);
+      group.add(lid);
+    } else if (type === 'perfume') {
+      part('box', '#D4B596', 0, .28, 0, .37, .46, .23).name = 'perfume-bottle';
+      part('box', main, 0, .22, .01, .29, .3, .18).name = 'perfume-liquid';
+      for (const x of [-.17, .17]) part('box', '#E9D4B6', x, .28, .115, .028, .42, .02);
+      part('box', '#FFF3DD', 0, .28, .13, .21, .17, .012).name = 'perfume-label';
+      part('box', teal, 0, .28, .139, .1, .018, .006);
+      cylinder('#C6A166', 0, .54, 0, .12, .08);
+      part('box', teal, 0, .65, 0, .21, .15, .19).name = 'perfume-cap';
+    } else if (type === 'earrings') {
+      for (const side of [-1, 1]) {
+        const hoop = ring(main, side * .17, .2, 0, .25, .31, .17); hoop.name = `earring-hoop-${side}`; hoop.rotation.y = side * .2;
+        part('sphere', '#E6CA8C', side * .17, .355, 0, .065, .065, .065);
+        cylinder(main, side * .17, .35, -.035, .018, .08).rotation.x = Math.PI / 2;
+      }
+    } else if (type === 'makeupbrush') {
+      cylinder(main, 0, .22, 0, .075, .44).name = 'brush-handle';
+      cylinder('#C8A169', 0, .48, 0, .105, .15).name = 'brush-ferrule';
+      part('sphere', '#8D735D', 0, .65, 0, .24, .31, .2).name = 'brush-bristles';
+      for (let index = 0; index < 7; index++) {
+        const angle = index * Math.PI * 2 / 7;
+        const bristle = cylinder('#B69A7B', Math.cos(angle) * .07, .67, Math.sin(angle) * .05, .013, .18);
+        bristle.rotation.z = -Math.cos(angle) * .15;
+      }
+      group.rotation.z = -.12;
     } else if (type === 'speaker') {
       part('box', wood, 0, .27, 0, .75, .5, .31);
       part('box', main, 0, .27, .163, .69, .43, .025);

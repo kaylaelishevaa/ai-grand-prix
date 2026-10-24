@@ -1,3 +1,5 @@
+import type { SceneKind } from '../../lib/scenes';
+
 /** Tiny renderer-independent motion helpers, shared by the room and hatch. */
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -78,7 +80,7 @@ export function createFrameBudgetMonitor({ thresholdFps = 30, durationMs = 3000,
   };
 }
 
-export type RoomSlot = { key: string; x: number; y: number; z: number };
+export type RoomSlot = { key: string; x: number; y: number; z: number; surface?: number; scale?: number; hangAt?: number };
 
 const slots: RoomSlot[] = [
   { key: 'counter', x: -1.35, y: 1.28, z: -1.18 },
@@ -90,7 +92,7 @@ const slots: RoomSlot[] = [
 ];
 
 /** Reserve each product's proper location before placing category duplicates. */
-export function assignRoomSlots(items: { type: string; name: string }[]): RoomSlot[] {
+function assignKitchenSlots(items: { type: string; name: string }[]): RoomSlot[] {
   const used = new Set<number>();
   const preferred = items.map(item => {
     const label = `${item.type} ${item.name}`.toLowerCase();
@@ -126,4 +128,115 @@ export function assignRoomSlots(items: { type: string; name: string }[]): RoomSl
     extraSurfaceItems += 1;
     return { ...slots[2], z: slots[2].z - extraSurfaceItems * .52 };
   });
+}
+
+const deskSlots: RoomSlot[] = [
+  { key: 'desk-left', x: -1.11, y: 1.06, z: -.92, surface: 1.06 },
+  { key: 'desk-right', x: .26, y: 1.06, z: -.83, surface: 1.06 },
+  { key: 'display-shelf', x: 1.76, y: 1.71, z: -1.62, surface: 1.71, scale: .8 },
+  { key: 'desk-cabinet', x: 2.04, y: .81, z: .08, surface: .81 },
+  { key: 'low-table-left', x: -.42, y: .66, z: 1.37, surface: .66, scale: .8 },
+  { key: 'low-table-right', x: .63, y: .66, z: 1.37, surface: .66, scale: .8 },
+];
+
+const readingSlots: RoomSlot[] = [
+  { key: 'reading-side-table', x: .72, y: .88, z: .3, surface: .88, scale: .8 },
+  { key: 'bookcase-high', x: 1.83, y: 1.69, z: -1.55, surface: 1.69, scale: .8 },
+  { key: 'bookcase-low', x: 1.83, y: .91, z: -1.55, surface: .91, scale: .8 },
+  { key: 'ottoman-tray', x: -.81, y: .68, z: 1.4, surface: .68, scale: .8 },
+  { key: 'reading-console', x: -1.36, y: 1.05, z: -1.55, surface: 1.05, scale: .85 },
+  { key: 'reading-stool', x: 1.9, y: .59, z: 1.36, surface: .59, scale: .8 },
+];
+
+const dressingSlots: RoomSlot[] = [
+  { key: 'wardrobe-left', x: -1.94, y: 2.27, z: -1.13, hangAt: 2.27, scale: 1 },
+  { key: 'wardrobe-right', x: -1.05, y: 2.27, z: -1.13, hangAt: 2.27, scale: 1 },
+  { key: 'vanity-left', x: .68, y: 1.055, z: -1.18, surface: 1.055, scale: .58 },
+  { key: 'vanity-right', x: 1.58, y: 1.055, z: -1.18, surface: 1.055, scale: .58 },
+  { key: 'dressing-bench', x: -1.33, y: .64, z: 1.16, surface: .64, scale: .85 },
+  { key: 'accessory-table', x: 1.64, y: .73, z: 1.16, surface: .73, scale: .6 },
+  { key: 'vanity-front-left', x: .65, y: 1.055, z: -.64, surface: 1.055, scale: .58 },
+  { key: 'vanity-front-right', x: 1.57, y: 1.055, z: -.64, surface: 1.055, scale: .58 },
+];
+
+/** Layout semantics match the furniture, including clothes hung from their hook. */
+export function assignRoomSlots(items: { type: string; name: string }[], kind: SceneKind = 'kitchen'): RoomSlot[] {
+  if (kind === 'kitchen') return assignKitchenSlots(items);
+  const layout = kind === 'dressing' ? dressingSlots : kind === 'reading' ? readingSlots : deskSlots;
+  const preferred = items.map(item => {
+    const type = item.type.toLowerCase();
+    const label = `${type} ${item.name}`.toLowerCase();
+    if (kind === 'dressing') {
+      if (/dress|apron/.test(type)) return 0;
+      if (/blouse|shirt|jacket|towel/.test(type)) return 1;
+      if (/handbag|bag|shoes/.test(type)) return 4;
+      if (/earrings|jewelry/.test(type)) return 5;
+      return /lipstick|perfume/.test(type) ? 2 : 3;
+    }
+    if (kind === 'reading') return /lamp|light/.test(label) ? 4 : /speaker|radio/.test(label) ? 1 : /tray|board/.test(label) ? 3 : /book|notebook/.test(label) ? 2 : /mug|cup|matcha/.test(label) ? 0 : 5;
+    return /lamp|light/.test(label) ? 1 : /speaker|radio/.test(label) ? 2 : /notebook|book|organizer|pen/.test(label) ? 0 : /tray|board/.test(label) ? 4 : /mug|cup|coffee|matcha/.test(label) ? 5 : 3;
+  });
+  const used = new Set<number>();
+  // Reserve first choices before duplicates, so an early cosmetic cannot steal a clothes rail.
+  const reserved = preferred.map(index => {
+    if (used.has(index)) return undefined;
+    used.add(index);
+    return { ...layout[index] };
+  });
+  let overflow = 0;
+  return reserved.map((slot, index) => {
+    if (slot) return slot;
+    const clothing = kind === 'dressing' && preferred[index] < 2;
+    const candidates = kind === 'dressing' ? (clothing ? [0, 1] : [2, 3, 6, 7, 5, 4]) : layout.map((_, candidate) => candidate);
+    const available = candidates.find(candidate => !used.has(candidate)) ?? -1;
+    if (available >= 0) {
+      used.add(available);
+      return { ...layout[available] };
+    }
+    overflow++;
+    const base = layout[clothing ? 0 : kind === 'dressing' ? 6 : 4];
+    return { ...base, x: base.x + (clothing ? .27 : .25) * overflow, z: base.z + (clothing ? .22 : .15) * overflow };
+  });
+}
+
+export type BillboardAnchor = { skuId: string; x: number; y: number; width: number; height: number; scale: number };
+export type BillboardLayout = BillboardAnchor & { left: number; top: number; leaderX: number; leaderY: number };
+type Rectangle = { left: number; top: number; width: number; height: number };
+function intersects(a: Rectangle, b: Rectangle, gap = 0) {
+  return a.left < b.left + b.width + gap && a.left + a.width + gap > b.left && a.top < b.top + b.height + gap && a.top + a.height + gap > b.top;
+}
+
+/** Six-label screen-space packing. Physical product dots never move with their labels. */
+export function layoutBillboards(anchors: BillboardAnchor[], width: number, height: number): BillboardLayout[] {
+  const placed: BillboardLayout[] = [];
+  const margin = 10, gap = 7;
+  const markers = anchors.map(anchor => ({left: anchor.x - 10, top: anchor.y - 10, width: 20, height: 20}));
+  for (const anchor of anchors) {
+    const desired = {left: anchor.x - anchor.width / 2, top: anchor.y - anchor.height - 15};
+    const candidates: Rectangle[] = [];
+    const add = (left: number, top: number) => candidates.push({
+      left: clamp(left, margin, Math.max(margin, width - anchor.width - margin)),
+      top: clamp(top, margin, Math.max(margin, height - anchor.height - 28)),
+      width: anchor.width, height: anchor.height,
+    });
+    // Nearby candidates keep the cards attached to their scene context.
+    for (let row = -2; row <= 2; row++) for (let column = -2; column <= 2; column++) {
+      add(desired.left + column * (anchor.width + gap), desired.top + row * (anchor.height + gap));
+    }
+    // A sparse edge-to-edge scan guarantees useful space on narrow district cards.
+    for (let y = margin; y <= height - anchor.height - 28; y += anchor.height + gap) {
+      for (let x = margin; x <= width - anchor.width - margin; x += anchor.width + gap) add(x, y);
+    }
+    let best = candidates[0], bestCost = Infinity;
+    for (const candidate of candidates) {
+      const overlap = placed.filter(other => intersects(candidate, other, gap)).length;
+      const obscuresDot = markers.filter(marker => intersects(candidate, marker, 3)).length;
+      const cost = overlap * 1e9 + obscuresDot * 1e7 + (candidate.left - desired.left) ** 2 + (candidate.top - desired.top) ** 2;
+      if (cost < bestCost) { best = candidate; bestCost = cost; }
+    }
+    const leaderX = clamp(anchor.x, best.left + 4, best.left + best.width - 4);
+    const leaderY = clamp(anchor.y, best.top + 4, best.top + best.height - 4);
+    placed.push({...anchor, ...best, leaderX, leaderY});
+  }
+  return placed;
 }

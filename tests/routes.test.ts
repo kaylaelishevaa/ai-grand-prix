@@ -9,7 +9,7 @@ import { POST as scene } from '../app/api/scene/route';
 import { POST as decisions } from '../app/api/decisions/route';
 import { POST as scan } from '../app/api/scan/route';
 import { GET as getStatus } from '../app/api/status/route';
-import { getReview, getSku } from '../lib/catalog';
+import { getReview, getSku, reviews } from '../lib/catalog';
 import type { Profile } from '../lib/types';
 
 type Handler = (request: Request) => Promise<Response>;
@@ -234,7 +234,7 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       assert.equal(calls.length, before);
       const status = await (await getStatus()).json();
       assert.equal(status.offline, true);
-      assert.equal(status.reviewCount, 242);
+      assert.equal(status.reviewCount, reviews.length);
       assert(!JSON.stringify(status).includes('sk-test'));
     });
     await t.test('a second browser learns offline without inheriting the first profile', async () => {
@@ -302,7 +302,7 @@ test('route evidence failures retry once, then expose raw evidence; malformed re
       assert.equal(response.status, 200);
       assert.equal(response.body.status, 'fallback');
       assert.match(response.body.message, /I’m not sure/);
-      assert.equal(response.body.reviews.length, 242);
+      assert.equal(response.body.reviews.length, reviews.length);
       assert(response.body.catalog.length > 0);
       assert.equal(calls.length - before, 2);
       assert.equal(response.body.profile.xp, 5);
