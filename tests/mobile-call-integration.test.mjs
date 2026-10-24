@@ -19,7 +19,7 @@ class Element {
 }
 function fixture(t,options={}){
   const nodes=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
-  const events=new Element(),docEvents=new Element(),sequence=[],intervals=[];
+  const events=new Element(),docEvents=new Element(),sequence=[],intervals=[],storage=options.storage||new Map();
   nodes.get('vision-consent').checked=true;
   let cameraStarts=0,voiceStarts=0;
   class Camera {
@@ -41,10 +41,12 @@ function fixture(t,options={}){
   class Snapshots {constructor(opts){this.opts=opts;}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
   class Hands {constructor(opts){this.opts=opts;this.running=false;}async start(){this.running=true;}stop(){this.running=false;}reset(){}}
   const context={window:{COUPANG_PRODUCTS:catalog,NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{getElementById:id=>nodes.get(id)||null,createElement:()=>new Element(),addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console};
+  context.window.localStorage=options.blockStorage?{getItem(){throw Error('Storage blocked');}}:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)};
+  context.window.location={href:'/call'};
   vm.createContext(context);vm.runInContext(stateSource,context);vm.runInContext(source,context);
   const mobile=context.window.NookMobile;
   t.after(()=>nodes.get('end-call').onclick());
-  return {...mobile,nodes,context,sequence,docEvents,visionTick:()=>intervals.find(i=>i.ms===3000).fn(),get cameraStarts(){return cameraStarts;},get voiceStarts(){return voiceStarts;}};
+  return {...mobile,nodes,context,sequence,docEvents,events,storage,visionTick:()=>intervals.find(i=>i.ms===3000).fn(),get cameraStarts(){return cameraStarts;},get voiceStarts(){return voiceStarts;}};
 }
 
 test('camera sharing follows consent, pause/resume, camera-off and end while local try-on remains usable',async t=>{
@@ -231,4 +233,29 @@ test('ending while a physical-camera switch is pending cannot restart either cam
   const switching=f.nodes.get('flip-camera').onclick();await tick();f.nodes.get('end-call').onclick();wait.resolve(false);await switching;
   assert.equal(f.camera.starts.length,2);assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
   assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
+});
+
+test('first completed call closes media then returns to Home once',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.nodes.get('end-call').onclick();
+  assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
+  assert.equal(f.storage.get('coupi_first_call_done'),'1');assert.equal(f.context.window.location.href,'/?state=first');
+  const returning=fixture(t,{storage:f.storage});await returning.nodes.get('answer-call').onclick();returning.nodes.get('end-call').onclick();
+  assert.equal(returning.context.window.location.href,'/call');
+});
+
+test('browsing, a cancelled connection, and leaving the page do not complete the first call',async t=>{
+  const browsing=fixture(t);browsing.nodes.get('decline-call').onclick();browsing.nodes.get('end-call').onclick();
+  assert.equal(browsing.storage.has('coupi_first_call_done'),false);
+  const wait=deferred(),connecting=fixture(t,{cameraPermission:()=>wait.promise});
+  const answering=connecting.nodes.get('answer-call').onclick();connecting.nodes.get('end-call').onclick();wait.resolve();await answering;
+  assert.equal(connecting.storage.has('coupi_first_call_done'),false);
+  const leaving=fixture(t);await leaving.nodes.get('answer-call').onclick();leaving.events.emit('pagehide');
+  assert.equal(leaving.storage.has('coupi_first_call_done'),false);assert.equal(leaving.context.window.location.href,'/call');
+  const hidden=fixture(t);await hidden.nodes.get('answer-call').onclick();hidden.context.document.hidden=true;hidden.docEvents.emit('visibilitychange');
+  assert.equal(hidden.storage.has('coupi_first_call_done'),false);
+});
+
+test('first-call Home handoff still works if browser storage is blocked',async t=>{
+  const f=fixture(t,{blockStorage:true});await f.nodes.get('answer-call').onclick();f.nodes.get('end-call').onclick();
+  assert.equal(f.context.window.location.href,'/?state=first');assert.equal(f.camera.running,false);
 });

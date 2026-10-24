@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#edf8fa">
+  <title>What I know about you — Coupi</title>
+  <link rel="icon" type="image/png" href="/assets/coupi.png">
+  <link rel="stylesheet" href="/coupi-shell.css">
+  <link rel="stylesheet" href="/home.css">
+</head>
+<body class="coupi-shell settings-page">
+  <div id="phone-app" class="phone-app shell-frame">
+    <header class="shell-header">
+      <a class="shell-brand" href="/" aria-label="Coupi home"><img src="/assets/coupi.png" alt="" width="36" height="36"><span>coupi</span></a>
+      <h1>What I know about you</h1>
+    </header>
+    <main id="coupi-settings" class="shell-content settings-content" aria-label="Settings">
+      <div class="settings-intro"><span id="settings-avatar"></span><p>You're in charge of what I remember.</p></div>
+      <section class="settings-panel" aria-labelledby="memory-heading"><h2 id="memory-heading">What I remember</h2><div id="settings-memories"></div></section>
+      <section class="settings-panel" aria-labelledby="permission-heading">
+        <h2 id="permission-heading">What I’m allowed to do</h2>
+        <label class="settings-permission"><span>Ask me before buying anything</span><input id="ask-before-buying" type="checkbox" role="switch" checked></label>
+        <label class="settings-permission"><span>Hold late-night buys until morning</span><input id="hold-late-night" type="checkbox" role="switch" checked></label>
+        <label class="settings-permission"><span>Only use my camera during calls</span><input id="camera-only-calls" type="checkbox" role="switch" checked></label>
+      </section>
+      <div class="settings-actions"><button id="pause-memory" class="home-action secondary" aria-pressed="false">Pause memory</button><button id="forget-everything" class="home-action secondary danger">Forget everything</button></div>
+      <p id="memory-status" class="settings-note" role="status"></p>
+    </main>
+    <nav class="app-nav" aria-label="Main navigation">
+      <a href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg><span>Home</span></a>
+      <a href="/call"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Call</span></a>
+      <a href="/explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c5 4 5 12 0 16-5-4-5-12 0-16Z"/></svg><span>Explore</span></a>
+    </nav>
+  </div>
+  <dialog id="forget-dialog" class="home-sheet" aria-labelledby="forget-title"><header><h2 id="forget-title">Forget all memories?</h2><button id="forget-close" class="home-icon" aria-label="Close forget memories">✕</button></header><p>All memories shown here will be removed from this device. Your permission choices stay as they are.</p><div class="home-actions"><button id="forget-confirm" class="home-action">Forget memories</button><button id="forget-cancel" class="home-action secondary">Keep memories</button></div></dialog>
+  <noscript>Enable JavaScript to manage memories and permissions.</noscript>
+  <script src="/coupang-products.js" defer></script>
+  <script src="/home-demo-data.js" defer></script>
+  <script type="module" src="/settings.js"></script>
+</body>
+</html>

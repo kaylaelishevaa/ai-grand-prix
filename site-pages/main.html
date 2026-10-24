@@ -5,22 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#edf8fa">
   <meta name="description" content="Coupi — your shopping companion.">
-  <title>Main — Coupi</title>
+  <title>Home — Coupi</title>
   <link rel="icon" type="image/png" href="/assets/coupi.png">
   <link rel="stylesheet" href="/coupi-shell.css">
+  <link rel="stylesheet" href="/home.css">
 </head>
-<body class="coupi-shell">
+<body class="coupi-shell home-page">
   <div id="phone-app" class="phone-app shell-frame">
     <header class="shell-header">
       <a class="shell-brand" href="/" aria-label="Coupi home"><img src="/assets/coupi.png" alt="" width="36" height="36"><span>coupi</span></a>
-      <h1>Main</h1>
+      <h1 class="home-sr-only">Home</h1>
+      <div class="home-header-actions">
+        <a class="home-icon" href="/settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-1 3-3 1-2 5 2 5 3 1 1 3h6l1-3 3-1 2-5-2-5-3-1-1-3Z"/><circle cx="12" cy="12" r="3"/></svg></a>
+        <button id="home-decisions" class="home-icon" aria-label="Decisions"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 13H4L5 8Z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg><span id="home-count" class="home-count" hidden></span></button>
+      </div>
     </header>
-    <main class="shell-content" aria-label="Main"></main>
+    <main class="shell-content" aria-label="Home">
+      <div id="coupi-home" class="home-content">
+        <div id="home-presenter" class="home-presenter" role="group" aria-label="Home view" hidden>
+          <button id="presenter-normal" aria-pressed="false">Everyday</button>
+          <button id="presenter-problem" aria-pressed="false">Delivery issue</button>
+          <button id="presenter-first" aria-pressed="false">After first call</button>
+          <button id="presenter-night" aria-pressed="false">Night</button>
+        </div>
+        <a id="home-avatar" class="home-avatar" href="/call" aria-label="Call COUPI"></a>
+        <p id="home-brief" class="home-brief" aria-live="polite"></p>
+        <div id="home-cards" class="home-cards" aria-label="Your updates"></div>
+        <p id="home-status" class="home-status" role="status"></p>
+      </div>
+    </main>
     <nav class="app-nav" aria-label="Main navigation">
-      <a href="/" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg><span>Main</span></a>
-      <a href="/call"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Video call</span></a>
-      <a href="/explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c5 4 5 12 0 16-5-4-5-12 0-16Z"/></svg><span>Explore worlds</span></a>
+      <a href="/" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg><span>Home</span></a>
+      <a href="/call"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Call</span></a>
+      <a href="/explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c5 4 5 12 0 16-5-4-5-12 0-16Z"/></svg><span>Explore</span></a>
     </nav>
   </div>
+  <dialog id="home-sheet" class="home-sheet" aria-labelledby="home-sheet-title">
+    <header><h2 id="home-sheet-title"></h2><button id="home-sheet-close" class="home-icon" aria-label="Close">✕</button></header>
+    <div id="home-sheet-body"></div>
+  </dialog>
+  <noscript>Enable JavaScript to see your updates.</noscript>
+  <script src="/coupang-products.js" defer></script>
+  <script src="/home-demo-data.js" defer></script>
+  <script type="module" src="/home.js"></script>
 </body>
 </html>

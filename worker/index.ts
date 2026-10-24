@@ -1,6 +1,7 @@
 import cameraPage from "../site-pages/camera.html?raw";
 import mainPage from "../site-pages/main.html?raw";
 import explorePage from "../site-pages/explore.html?raw";
+import settingsPage from "../site-pages/settings.html?raw";
 import { handleVoiceRequest } from "../lib/nook-voice.mjs";
 import handler from "vinext/server/fetch-handler";
 import { runWithConnectorBinding } from "../lib/connector-context";
@@ -16,7 +17,8 @@ const worker = {
     const pagePath = path.length > 1 ? path.replace(/\/$/, '') : path;
     const page = ['/', '/index.html'].includes(pagePath) ? mainPage
       : ['/call', '/camera', '/camera.html'].includes(pagePath) ? cameraPage
-      : pagePath === '/explore' ? explorePage : null;
+      : pagePath === '/explore' ? explorePage
+      : pagePath === '/settings' ? settingsPage : null;
     if(page !== null) {
       if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405});
       return new Response(request.method==='HEAD'?null:page,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin'}});
