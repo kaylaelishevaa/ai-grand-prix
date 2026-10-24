@@ -36,10 +36,11 @@ function response(body, status = 200, headers = {}) {
 }
 function fixture(t, options = {}) {
   const timerDelays = [];
+  const timers = [];
   const context = {
     window: {isSecureContext: true, fetch: () => {throw Error('Unexpected real network');}},
     navigator: {}, document: {readyState: 'loading', addEventListener() {}},
-    setTimeout: (fn,ms)=>{timerDelays.push(ms);return setTimeout(fn,ms);}, clearTimeout, setInterval, clearInterval, AbortController,
+    setTimeout: (fn,ms)=>{timerDelays.push(ms);const id=setTimeout(fn,ms);timers.push({fn,ms,id});return id;}, clearTimeout, setInterval, clearInterval, AbortController,
     MediaStream: class {}, Audio: class {}, TextEncoder, console,
   };
   vm.createContext(context);
@@ -113,6 +114,7 @@ function fixture(t, options = {}) {
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
+    expireTimer(ms) {const timer=timers.findLast(timer=>timer.ms===ms);assert.ok(timer);clearTimeout(timer.id);timer.fn();},
   };
 }
 const countReplies = channel => channel.sent.filter(event => event.type === 'response.create').length;
@@ -793,7 +795,9 @@ test('checkout tools open one review for each explicit scope and never invoke a 
     const result=JSON.parse(event.item.output);
     assert.equal(result.ok,true);assert.equal(result.review_opened,true);
     assert.equal(result.demo,true);assert.equal(result.payment_processed,false);
-    assert.match(result.instruction,/press the final demo payment button themselves/);
+    assert.match(result.instruction,/press the final payment button themselves/);
+    assert.match(result.instruction,/Do not announce completion until the application sends checkout_complete/);
+    assert.equal(result.order_placed,false);
   }
   assert.equal(f.calls.length,2);assert.equal(f.actions.length,0);
 });
@@ -901,4 +905,152 @@ test('a compatible-caption fallback is observable without disconnecting the call
   assert.equal(f.transcriptionStates.length,1);
   assert.equal(f.transcriptionStates[0].model,'gpt-4o-mini-transcribe');
   assert.equal(f.transcriptionStates[0].compatibilityMode,true);
+});
+
+const completedReceipt = (id='DEMO-ORDER-1') => ({
+  id, item_ids:['lip-pink'], items:[{id:'lip-pink',product:{id:'lip-pink',name:'Pink lip tint',privateNote:'not forwarded'},quantity:2,included:true,unitPrice:5000,lineTotal:10000}],
+  referenceTotal:10000,currency:'KRW',demo:true,payment_processed:false,order_placed:false,paymentMethod:'demo-card',privateNote:'not forwarded',
+});
+const checkoutMessages = channel => channel.sent.filter(event=>event.item?.id?.startsWith('coupi_checkout_'));
+const ackCheckout = (f,event) => f.emit({type:'conversation.item.added',item:event.item});
+
+test('default greeting asks what to buy without presenting categories',async t=>{
+  const f=fixture(t);await connect(f);
+  const greeting=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.includes('The shopper answered'));
+  assert.match(greeting.item.content[0].text,/Begin with this brief greeting: "What do you want to buy\?"/);
+  assert.doesNotMatch(greeting.item.content[0].text,/lipstick|glasses|desk lamp/);
+});
+
+test('confirmed checkout sends bounded system data, waits for ACK, and never fabricates shopper captions',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const before=countReplies(f.channel),captions=f.transcripts.length;
+  const suggestions=[{id:'lip-pink',name:'Already bought'},
+    {id:'glasses-1',name:'Round glasses',productType:'glasses',price:15000,description:'Do not forward me',image:'private image'},
+    {id:'glasses-1',name:'Duplicate'}, {id:'lamp-1',name:'Desk lamp',price:22000},
+    {id:'https://invalid',name:'Invalid'}, {id:'shirt-1',name:'T-shirt'}, {id:'hoodie-1',name:'Fourth suggestion'}];
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt(),suggestions),true);
+  const [event]=checkoutMessages(f.channel);
+  assert.equal(event.type,'conversation.item.create');assert.equal(event.item.role,'system');
+  const data=JSON.parse(event.item.content[0].text.split('\n')[1]);
+  assert.equal(data.event,'checkout_complete');
+  assert.deepEqual(data.receipt,{id:'DEMO-ORDER-1',items:[{id:'lip-pink',name:'Pink lip tint',quantity:2,subtotal:10000}],subtotal:10000,currency:'KRW',demo:true,payment_processed:false,order_placed:false});
+  assert.deepEqual(data.suggestions,[{id:'glasses-1',name:'Round glasses',productType:'glasses',reference_price:15000},{id:'lamp-1',name:'Desk lamp',reference_price:22000},{id:'shirt-1',name:'T-shirt'}]);
+  assert.doesNotMatch(JSON.stringify(data),/private|description|paymentMethod/);
+  await tick();assert.equal(countReplies(f.channel),before);
+  ackCheckout(f,event);await tick();
+  assert.equal(countReplies(f.channel),before+1);
+  assert.equal(f.transcripts.length,captions);
+  assert.equal(f.calls.length,2); // No payment or extra model HTTP endpoint.
+});
+
+test('purchase acknowledgment waits behind an active answer and duplicate receipt or ACK cannot repeat it',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  f.emit({type:'response.created',response:{id:'answer'}});
+  const before=countReplies(f.channel);
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),true);
+  const [event]=checkoutMessages(f.channel);ackCheckout(f,event);await tick();
+  assert.equal(countReplies(f.channel),before);
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),false);
+  assert.equal(checkoutMessages(f.channel).length,1);
+  done(f,'answer');await tick();assert.equal(countReplies(f.channel),before+1);
+  f.emit({type:'response.created',response:{id:'thanks'}});done(f,'thanks');
+  ackCheckout(f,event);f.emit({type:'conversation.item.done',item:event.item});await tick();
+  assert.equal(countReplies(f.channel),before+1);
+});
+
+test('purchase notifications reject incomplete, inconsistent, or real-payment claims',async t=>{
+  const f=fixture(t);assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),false);
+  await connect(f);done(f,'greeting');await tick();
+  const before=f.channel.sent.length;
+  for(const receipt of [null,{}, {...completedReceipt(),id:'bad receipt'}, {...completedReceipt(),id:'DEMO-ORDER-1\n'}, {...completedReceipt(),demo:false},
+    {...completedReceipt(),payment_processed:true}, {...completedReceipt(),order_placed:true},
+    {...completedReceipt(),referenceTotal:1}, {...completedReceipt(),currency:'USD'},
+    {...completedReceipt(),item_ids:['different-id']}, {...completedReceipt(),items:[]},
+    {...completedReceipt(),items:[{...completedReceipt().items[0],quantity:0}]},
+    {...completedReceipt(),items:[{...completedReceipt().items[0],product:{id:'different-id',name:'Other'}}]},
+    {...completedReceipt(),items:[{...completedReceipt().items[0],included:false}]}]) {
+    assert.equal(f.voice.notifyCheckoutComplete(receipt),false);
+  }
+  assert.equal(f.channel.sent.length,before);
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),true);
+});
+
+test('failed sends can retry but rejected or timed-out ACKs never schedule stale purchase speech',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const before=countReplies(f.channel),send=f.channel.send;
+  f.channel.send=()=>{throw Error('Disconnected transport');};
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),false);
+  f.channel.send=send;
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),true);
+  const rejected=checkoutMessages(f.channel).at(-1);
+  f.emit({type:'error',error:{event_id:rejected.event_id,code:'invalid_event',message:'Rejected'}});
+  ackCheckout(f,rejected);await tick();assert.equal(countReplies(f.channel),before);
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt('DEMO-ORDER-2')),true);
+  const expired=checkoutMessages(f.channel).at(-1);
+  f.expireTimer(12000);ackCheckout(f,expired);await tick();
+  assert.equal(countReplies(f.channel),before);
+  assert.equal(f.voice.call.checkoutNotifications.size,0);
+});
+
+test('ending a call discards pending purchase speech and reconnecting never reannounces the same receipt',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const oldChannel=f.channel,oldCall=f.voice.call;
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),true);
+  const event=checkoutMessages(oldChannel)[0],before=countReplies(oldChannel);
+  f.voice.end();
+  assert.equal(oldCall.checkoutNotifications.size,0);
+  oldChannel.emit('message',{data:JSON.stringify({type:'conversation.item.added',item:event.item})});
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt('DEMO-LATE')),false);
+  await tick();assert.equal(countReplies(oldChannel),before);
+  await connect(f);done(f,'greeting-new');await tick();
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),false);
+  f.emit({type:'conversation.item.added',item:event.item});await tick();
+  assert.equal(checkoutMessages(f.channel).length,0);assert.equal(countReplies(f.channel),1);
+});
+
+const purchaseContext = () => ({receipt_id:'DEMO-ORDER-1',item_ids:['lip-pink'],pairing_ids:['glasses-1','lamp-1'],demo:true,payment_processed:false,order_placed:false});
+const initialContext = f => JSON.parse(f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context,')).item.content[0].text.split('App context, not a spoken shopper request: ')[1].split('. The shopper answered')[0]);
+
+test('purchase context preserves exact pairing IDs while stripping unrelated data and invalid flags',async t=>{
+  const original={...purchaseContext(),pairing_ids:['glasses-1','lip-pink','glasses-1','bad id','lamp-1'],private_note:'not for model'};
+  const f=fixture(t,{getContext:()=>({last_purchase:original})});await connect(f);
+  assert.deepEqual(initialContext(f).last_purchase,{...purchaseContext(),pairing_ids_truncated:true});
+  assert.equal(original.pairing_ids.length,5);
+  f.voice.updateContext({last_purchase:{...original,payment_processed:true}});f.expireTimer(350);
+  const update=f.channel.sent.at(-1).item.content[0].text;
+  assert.match(update,/"last_purchase":null/);assert.doesNotMatch(update,/private_note/);
+});
+
+test('oversized purchase context keeps exact recent receipt and pairing references without inventing partial IDs',async t=>{
+  const items=Array.from({length:20},(_,i)=>String(i).padStart(2,'0')+'x'.repeat(78));
+  const pairings=Array.from({length:3},(_,i)=>'p'+i+'y'.repeat(78));
+  const last_purchase={...purchaseContext(),item_ids:items,pairing_ids:pairings};
+  const context={screen:'active',visible_panel:'call',cart_ids:items,comparison_ids:items.slice(0,3),
+    checkout:{step:'complete',item_ids:items,reference_total:900000,demo:true},last_purchase,unused:'x'.repeat(6000)};
+  const f=fixture(t,{getContext:()=>context});await connect(f);
+  const decoded=initialContext(f);
+  assert(JSON.stringify(decoded).length<=1600);
+  assert.equal(decoded.last_purchase.receipt_id,last_purchase.receipt_id);
+  assert.equal(decoded.last_purchase.demo,true);assert.equal(decoded.last_purchase.payment_processed,false);assert.equal(decoded.last_purchase.order_placed,false);
+  assert.equal(decoded.last_purchase.item_ids_truncated,true);
+  assert(decoded.last_purchase.item_ids.every(id=>items.includes(id)));
+  assert.deepEqual(decoded.last_purchase.pairing_ids,pairings);
+});
+
+test('checkout context updates around confirmation preserve the system event and schedule exactly one ACKed response',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const before=countReplies(f.channel);
+  f.voice.updateContext({checkout:{step:'complete'},last_purchase:purchaseContext(),cart_ids:[]});
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt(),[{id:'glasses-1',name:'Round glasses'}]),true);
+  const notification=checkoutMessages(f.channel)[0];
+  f.voice.updateContext({checkout:{step:'complete'},last_purchase:purchaseContext(),visible_panel:'checkout'});
+  f.expireTimer(350);await tick();
+  assert.equal(checkoutMessages(f.channel).length,1);assert.equal(countReplies(f.channel),before);
+  assert.equal(f.channel.sent.some(event=>event.type==='conversation.item.delete'),false);
+  ackCheckout(f,notification);await tick();assert.equal(countReplies(f.channel),before+1);
+  f.emit({type:'response.created',response:{id:'purchase-thanks'}});done(f,'purchase-thanks');
+  f.voice.updateContext({checkout:{step:'idle'},last_purchase:purchaseContext(),visible_panel:'call'});
+  f.expireTimer(350);await tick();
+  assert.equal(countReplies(f.channel),before+1);assert.equal(checkoutMessages(f.channel).length,1);
+  assert.match(f.channel.sent.at(-1).item.content[0].text,/"pairing_ids":\["glasses-1","lamp-1"\]/);
 });

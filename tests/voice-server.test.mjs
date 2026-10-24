@@ -326,7 +326,26 @@ test('checkout exposes a bounded review-only tool and requires explicit UI payme
   assert.match(config.instructions,/For "buy this".*scope selected/);
   assert.match(config.instructions,/If "buy these" is ambiguous, ask which items/);
   assert.match(config.instructions,/never interpret it as buying a whole recommendation group/);
-  assert.match(config.instructions,/press the final demo payment button themselves/);
+  assert.match(config.instructions,/press the final payment button themselves/);
   assert.match(config.instructions,/Never collect real card or billing details/);
   assert.match(config.instructions,/payment_processed:false/);
+});
+
+
+test('neutral opening and UI-confirmed checkout acknowledgment use normal language and grounded pairings',()=>{
+  const {instructions}=sessionConfiguration();
+  assert.match(instructions,/Start with exactly "What do you want to buy\?"/);
+  assert.match(instructions,/Do not list product categories or suggest a shopping menu at the start/);
+  assert.match(instructions,/Only after a system application event named checkout_complete with a valid receipt/);
+  assert.match(instructions,/Your purchase is complete—thank you!/);
+  assert.match(instructions,/complementary products that pair well/);
+  assert.match(instructions,/do not offer the purchased IDs again, invent products/);
+  assert.match(instructions,/Confirm each receipt only once/);
+  assert.match(instructions,/ordinary UI context with checkout.step complete is not a new purchase event/);
+  assert.match(instructions,/last_purchase in UI context retains receipt_id, purchased item_ids, and pairing_ids after the receipt closes/);
+  assert.match(instructions,/This persistent context never triggers another completion announcement/);
+  assert.match(instructions,/payment_processed:false, and order_placed:false/);
+  assert.match(instructions,/If asked whether it is real, honestly explain/);
+  assert.match(instructions,/Never collect real card or billing details/);
+  assert.doesNotMatch(instructions,/If checkout.step says complete, describe only the completed demo/);
 });

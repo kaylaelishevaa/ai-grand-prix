@@ -54,15 +54,25 @@ test('related collections each have six distinct sourced options and lip balm su
 
 test('review summaries require sourced samples; unavailable evidence stays empty and unusable preview photos are explicit',()=>{
  const sourced=catalog.filter(p=>p.reviewEvidence.reviews.length);
- assert.equal(sourced.length,2);
+ assert(sourced.length>=19,'Core recommendation options need real review samples');
+ assert(new Set(sourced.map(p=>p.url.match(/\/products\/(\d+)/)[1])).size>=10,'Review coverage must include distinct product families');
+ for(const id of ['1814412512','7322824636','7185725748','7612276799','6431292464','6285676894']){
+  assert(sourced.some(p=>p.id===id),`Default recommendation needs review samples: ${id}`);
+ }
  for(const p of catalog){
   const e=p.reviewEvidence;assert.equal(new URL(e.sourceUrl).protocol,'https:');
   if(e.status==='unavailable'){
    assert.equal(e.rating,null);assert.equal(e.reviewCount,null);assert.equal(e.summary,null);assert.deepEqual(e.pros,[]);assert.deepEqual(e.cons,[]);assert.deepEqual(e.reviews,[]);
   }else{
    assert.equal(e.summaryKind,'ai-curated');assert.match(e.scopeNote,/sample/i);
-   assert(e.rating>=0&&e.rating<=5);assert(e.reviewCount>=e.reviews.length);
-   for(const r of e.reviews){assert.equal(r.translated,true);assert.equal(r.sourceUrl,e.sourceUrl);assert.match(r.date,/^\d{4}-\d{2}-\d{2}$/);assert(r.text.length>10);}
+   assert(e.rating===null||(Number.isFinite(e.rating)&&e.rating>=1&&e.rating<=5));
+   assert(Number.isInteger(e.reviewCount)&&e.reviewCount>=e.reviews.length);
+   if(e.sourceProductId){
+    assert.equal(new URL(e.sourceCoupangUrl).hostname,'www.coupang.com');
+    assert.equal(e.sourceCoupangUrl.match(/\/products\/(\d+)/)[1],e.sourceProductId);
+    assert.equal(p.url.match(/\/products\/(\d+)/)[1],e.sourceProductId,'Reviews must belong to the same retailer product family');
+   }
+   for(const r of e.reviews){assert.equal(r.translated,true);assert.equal(r.kind,'translated-paraphrase');assert.equal(r.sourceUrl,e.sourceUrl);assert.match(r.date,/^\d{4}-\d{2}-\d{2}$/);assert(r.text.length>10);assert(r.rating>=1&&r.rating<=5);}
   }
   if(p.preview.available===false)assert(p.preview.unavailableReason.length>20);
  }

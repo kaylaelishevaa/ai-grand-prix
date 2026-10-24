@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import catalog from '../data/catalog.json' with {type:'json'};
 const html=readFileSync(new URL('../site-pages/camera.html',import.meta.url),'utf8');
 const stateSource=readFileSync(new URL('../public/mobile-call-state.js',import.meta.url),'utf8');
-const moduleSources=['product-discovery.js','call-conversation.js','product-evidence.js','demo-checkout.js'].map(name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8'));
+const moduleSources=['product-discovery.js','call-conversation.js','product-evidence.js','demo-checkout.js','purchase-pairings.js'].map(name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8'));
 const source=readFileSync(new URL('../public/mobile-call.js',import.meta.url),'utf8');
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
 function deferred(){let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};}
@@ -19,6 +19,7 @@ class Element {
   addEventListener(k,fn){if(!this.listeners.has(k))this.listeners.set(k,[]);this.listeners.get(k).push(fn);}
   emit(k,event={}){for(const fn of this.listeners.get(k)||[])fn(event);}
   showModal(){this.open=true;} close(){this.open=false;this.emit('close');}
+  scrollIntoView(){this.didScrollIntoView=true;}
   click(){return this.onclick?.({target:this,preventDefault(){}});} focus(){} setPointerCapture(){}
   closest(selector){let current=this;while(current){if(selector.split(',').some(s=>s.trim().toUpperCase()===current.tagName))return current;current=current.parentElement;}return null;}
 }
@@ -38,11 +39,12 @@ function fixture(t,options={}){
     async setProduct(product){const token=++this.productGen;if(product&&options.productLoad)await options.productLoad(product);if(token!==this.productGen)return {ok:false,stale:true};this.product=product;return product?{ok:true,productId:product.id,kind:product.category==='makeup'?'lip':product.category==='clothes'?'garment':product.category==='glasses'?'glasses':'object',shadeColor:product.category==='makeup'?'#bc3c57':undefined,shadeEstimated:product.category==='makeup'}:{ok:true};}
   }
   class Voice {
-    constructor(opts){this.opts=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;this.uploads=[];this.sentTexts=[];this.mutes=0;}
+    constructor(opts){this.opts=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;this.uploads=[];this.sentTexts=[];this.mutes=0;this.purchases=[];}
     async start(){sequence.push('voice');voiceStarts++;this.call={ready:true};this.opts.onState({state:'connected',muted:false,connectedAt:Date.now()});return true;}
     end(){this.ends++;this.call=null;this.opts.onState({state:'idle',muted:false,connectedAt:null});}
     updateContext(value){this.contexts.push(value);} mute(){this.mutes++;if(this.call){this.call.muted=!this.call.muted;this.opts.onState({state:'connected',muted:this.call.muted,connectedAt:Date.now()});}} sendText(value){this.sentTexts.push(value);return options.textSend?options.textSend(value):!!this.call;} async sendImage(value){this.uploads.push(value);return options.imageSend?await options.imageSend(value):!!this.call;} async resumeAudio(){}
     sendCameraSnapshot(frame){if(!this.opts.getVisionEnabled())return false;this.images.push(frame);this.opts.onVisionState({state:'received',capturedAt:frame.metadata.capturedAt});return true;}
+    notifyCheckoutComplete(receipt,suggestions){this.purchases.push({receipt,suggestions});return !!this.call?.ready;}
     clearCameraSnapshots(){this.imageClears++;this.opts.onVisionState({state:'paused'});return true;}
   }
   class Snapshots {constructor(opts){this.opts=opts;}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
@@ -375,12 +377,13 @@ test('only explicit payment confirmation completes the demo and removes just the
   f.nodes.get('cart-button').onclick();f.nodes.get('cart-checkout').onclick();
   const third=f.nodes.get('checkout-items').children[2].children[0];third.checked=false;third.onchange({target:third});
   f.nodes.get('checkout-next').onclick();
-  assert.equal(f.checkout.current.receipt,null);assert.equal(f.store.cart.size,3);assert.equal(f.checkout.current.step,'payment');
+  assert.equal(f.checkout.current.receipt,null);assert.equal(f.store.cart.size,3);assert.equal(f.checkout.current.step,'payment');assert.equal(f.voice.purchases.length,0);
   f.nodes.get('checkout-confirm').onclick();
   const receipt=f.checkout.current.receipt;
   assert.equal(f.checkout.current.step,'complete');assert.equal(receipt.demo,true);assert.equal(receipt.payment_processed,false);assert.equal(receipt.order_placed,false);
   assert.deepEqual(Array.from(receipt.item_ids),chosen.slice(0,2).map(p=>p.id));assert.deepEqual(Array.from(f.store.cart.keys()),[chosen[2].id]);
   f.store.cart.set(chosen[0].id,chosen[0]);f.nodes.get('checkout-confirm').onclick();
+  assert.equal(f.voice.purchases.length,1);assert.equal(f.voice.purchases[0].receipt.id,receipt.id);assert(f.voice.purchases[0].suggestions.length>0);assert(f.voice.purchases[0].suggestions.every(p=>!receipt.item_ids.includes(p.id)));assert.equal(f.nodes.get('checkout-pairing-items').children.length,f.voice.purchases[0].suggestions.length);assert.equal(f.voice.opts.getContext().last_purchase.receipt_id,receipt.id);
   assert.equal(f.checkout.current.receipt.id,receipt.id);assert(f.store.cart.has(chosen[0].id),'A duplicate confirm must not apply cart removal again');
   f.nodes.get('checkout-done').onclick();assert.equal(f.nodes.get('checkout-dialog').open,false);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
 });
@@ -516,4 +519,56 @@ test('inline call bar keeps mute and end usable while the collection is visible'
   assert.match(f.nodes.get('inline-call-status').textContent,/mic muted/);assert.equal(f.voice.opts.getContext().visible_panel,'catalog');
   f.nodes.get('inline-end').onclick();assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
   assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.nodes.get('inline-mute').disabled,true);
+});
+
+
+test('the opening question is neutral and reviews are directly accessible',async t=>{
+  const f=fixture(t);assert.equal(f.voice.opts.greeting,'What do you want to buy?');await f.nodes.get('answer-call').onclick();
+  assert.equal(f.store.messages[0].text,'What do you want to buy?');
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.reviewEvidence?.reviews?.length));
+  f.nodes.get('product-details').onclick();
+  assert(f.nodes.get('detail-reviews').textContent.includes('Ratings & reviews'));
+  f.nodes.get('detail-review-shortcut').onclick();assert.equal(f.nodes.get('detail-reviews').didScrollIntoView,true);
+});
+
+test('receipt pairing opens the exact suggested product and never adds it automatically',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='chair'));
+  f.nodes.get('product-buy').onclick();f.nodes.get('checkout-next').onclick();f.nodes.get('checkout-confirm').onclick();
+  const suggested=f.voice.purchases[0].suggestions[0];assert.equal(suggested.productType,'lamp');
+  f.nodes.get('checkout-pairing-items').children[0].onclick();assert.equal(f.nodes.get('checkout-dialog').open,false);assert.equal(f.nodes.get('details-dialog').open,true);assert.equal(f.store.detailProduct.id,suggested.id);assert.equal(f.store.cart.size,0);
+  assert.equal(f.voice.opts.getContext().last_purchase.pairing_ids[0],suggested.id);
+  f.nodes.get('end-call').onclick();assert.equal(f.voice.opts.getContext().last_purchase,null);
+});
+
+
+test('spoken follow-up can open exact pairing details or a fresh checkout after purchase',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='chair'));
+  f.nodes.get('product-buy').onclick();f.nodes.get('checkout-next').onclick();f.nodes.get('checkout-confirm').onclick();
+  const suggestion=f.voice.purchases[0].suggestions[0];
+  await f.voice.opts.onProductAction('details',suggestion.id);assert.equal(f.nodes.get('checkout-dialog').open,false);assert.equal(f.store.detailProduct.id,suggestion.id);
+  f.nodes.get('detail-buy').onclick();assert.equal(f.checkout.current.step,'review');assert.deepEqual(checkoutIds(f),[suggestion.id]);
+  f.nodes.get('checkout-next').onclick();f.nodes.get('checkout-confirm').onclick();
+  const second=f.voice.purchases[1].suggestions[0];
+  f.voice.opts.onCheckout({scope:'products',productIds:[second.id]});assert.equal(f.checkout.current.step,'review');assert.deepEqual(checkoutIds(f),[second.id]);
+});
+
+
+test('voice trying a purchase pairing selects that exact card and closes the receipt',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lipstick'));
+  f.nodes.get('product-buy').onclick();f.nodes.get('checkout-next').onclick();f.nodes.get('checkout-confirm').onclick();
+  const suggestion=f.voice.purchases[0].suggestions.find(p=>p.productType==='glasses');assert(suggestion);
+  await f.voice.opts.onProductAction('try_on',suggestion.id);
+  assert.equal(f.nodes.get('checkout-dialog').open,false);assert.equal(f.camera.product.id,suggestion.id);assert.equal(f.store.current.id,suggestion.id);
+  f.nodes.get('product-buy').onclick();assert.deepEqual(checkoutIds(f),[suggestion.id]);
+});
+
+
+test('a delayed close event from the completed receipt cannot cancel its replacement checkout',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='chair'));
+  f.nodes.get('product-buy').onclick();f.nodes.get('checkout-next').onclick();f.nodes.get('checkout-confirm').onclick();
+  const suggestion=f.voice.purchases[0].suggestions[0],dialog=f.nodes.get('checkout-dialog'),pending=[];
+  dialog.close=function(){this.open=false;pending.push(()=>this.emit('close'));};
+  f.voice.opts.onCheckout({scope:'products',productIds:[suggestion.id]});for(const event of pending.splice(0))event();
+  assert.equal(dialog.open,true);assert.equal(f.checkout.current.step,'review');assert.deepEqual(checkoutIds(f),[suggestion.id]);
+  f.nodes.get('close-checkout').onclick();for(const event of pending.splice(0))event();assert.equal(f.checkout.current.step,'idle');
 });

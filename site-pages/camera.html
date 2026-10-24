@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/call-discovery.css">
   <link rel="stylesheet" href="/checkout.css">
   <link rel="stylesheet" href="/inline-collections.css">
+  <link rel="stylesheet" href="/reviews-detail.css">
 </head>
 <body class="coupi-call-page">
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -134,8 +135,8 @@
     </nav>
     <div id="toast" class="toast" role="status" hidden></div>
     <audio id="voice-audio" autoplay></audio>
-    <dialog id="cart-dialog" class="sheet-dialog" aria-labelledby="cart-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">THE GOOD FINDS</p><h2 id="cart-title">Your bag</h2></div><button id="close-cart" class="sheet-close" aria-label="Close bag"><svg><use href="#i-close"/></svg></button></header><div id="cart-items" class="cart-items"></div><button id="cart-checkout" class="sheet-primary checkout-wide" disabled>Review &amp; checkout</button><p class="sheet-note">Demo bag. Say “pay for my cart” to review these picks.</p></dialog>
-    <dialog id="details-dialog" class="sheet-dialog" aria-labelledby="detail-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><p class="sheet-kicker">A CLOSER LOOK</p><button id="close-details" class="sheet-close" aria-label="Close product details"><svg><use href="#i-close"/></svg></button></header><img id="detail-image" class="detail-image" alt=""><h2 id="detail-title"></h2><div id="detail-body" class="detail-body"></div><p id="detail-preview-note" class="sheet-note"></p><div id="detail-reviews" class="detail-reviews"></div><div class="detail-tools"><button id="detail-compare" class="sheet-secondary">Compare</button><button id="detail-try" class="sheet-primary">Try this product</button><button id="detail-add" class="sheet-secondary">Add to bag</button><button id="detail-buy" class="sheet-primary">Buy this</button></div><div class="detail-actions"><button id="detail-ask" class="sheet-primary"><svg><use href="#i-mic"/></svg> Ask Coupi about it</button><a id="detail-link" class="sheet-secondary" target="_blank" rel="noopener noreferrer">View on Coupang <span>↗</span></a></div><p class="sheet-note">Check current price and availability on Coupang.</p></dialog>
+    <dialog id="cart-dialog" class="sheet-dialog" aria-labelledby="cart-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">THE GOOD FINDS</p><h2 id="cart-title">Your bag</h2></div><button id="close-cart" class="sheet-close" aria-label="Close bag"><svg><use href="#i-close"/></svg></button></header><div id="cart-items" class="cart-items"></div><button id="cart-checkout" class="sheet-primary checkout-wide" disabled>Review &amp; checkout</button><p class="sheet-note">Say “pay for my cart” to review these picks.</p></dialog>
+    <dialog id="details-dialog" class="sheet-dialog" aria-labelledby="detail-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><p class="sheet-kicker">A CLOSER LOOK</p><button id="close-details" class="sheet-close" aria-label="Close product details"><svg><use href="#i-close"/></svg></button></header><div class="detail-product-heading"><img id="detail-image" class="detail-image" alt=""><div><h2 id="detail-title"></h2><button id="detail-review-shortcut" class="detail-review-shortcut">Ratings &amp; reviews ↓</button></div></div><div id="detail-reviews" class="detail-reviews"></div><div id="detail-body" class="detail-body"></div><p id="detail-preview-note" class="sheet-note"></p><div class="detail-tools"><button id="detail-compare" class="sheet-secondary">Compare</button><button id="detail-try" class="sheet-primary">Try this product</button><button id="detail-add" class="sheet-secondary">Add to bag</button><button id="detail-buy" class="sheet-primary">Buy this</button></div><div class="detail-actions"><button id="detail-ask" class="sheet-primary"><svg><use href="#i-mic"/></svg> Ask Coupi about it</button><a id="detail-link" class="sheet-secondary" target="_blank" rel="noopener noreferrer">View on Coupang <span>↗</span></a></div><p class="sheet-note">Check current price and availability on Coupang.</p></dialog>
     <dialog id="catalog-dialog" class="sheet-dialog catalog-dialog" aria-labelledby="catalog-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">CURATED COUPANG PICKS</p><h2 id="catalog-title">Your picks.</h2></div><button id="close-catalog" class="sheet-close" aria-label="Close product catalog"><svg><use href="#i-close"/></svg></button></header><div class="catalog-tabs" role="group" aria-label="Product categories"><button id="type-lipstick">Lipstick</button><button id="type-lipbalm">Lip balm</button><button id="type-sweater">Sweaters</button><button id="type-chair">Chairs</button><button id="type-lamp">Lamps</button><button id="type-tshirt">T-shirts</button><button id="type-hoodie">Hoodies</button><button id="type-glasses">Glasses</button></div><div class="group-toolbar"><p id="catalog-group-label"></p><button id="catalog-save-group">Save collection</button></div><div id="catalog-items" class="catalog-items"></div><button id="catalog-more" class="sheet-secondary load-more">View more</button><p id="catalog-availability" class="sheet-note"></p><div class="catalog-bottom"><button id="catalog-next-style" class="sheet-secondary">Next collection →</button><button id="compare-open" class="sheet-primary" disabled>Compare <span id="compare-count">0</span></button></div><p class="sheet-note">Original listing photos. Approximate previews, not a fit guarantee.</p><a class="catalog-download" href="/product-catalog.csv" download="coupi-coupang-products.csv">Download product names &amp; links</a></dialog>
     <dialog id="chat-history-dialog" class="sheet-dialog chat-history-dialog" aria-labelledby="chat-history-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">THIS CALL</p><h2 id="chat-history-title">Conversation</h2></div><button id="close-chat-history" class="sheet-close" aria-label="Close conversation history">×</button></header><div id="chat-history" class="chat-history" tabindex="0" aria-label="Conversation history"></div><p class="sheet-note">Kept for this call only. Uploaded images are shared when you press Send.</p></dialog>
     <dialog id="collections-dialog" class="sheet-dialog" aria-labelledby="collections-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">COME BACK TO A GOOD FIND</p><h2 id="collections-title">Collections</h2></div><button id="close-collections" class="sheet-close" aria-label="Close collections">×</button></header><div id="collection-items"></div><p class="sheet-note">Product groups saved in this browser. Images and conversations aren't saved here.</p></dialog>
@@ -146,22 +147,24 @@
       <div class="checkout-intro"><p class="sheet-kicker">A LITTLE CLOSER TO YOURS</p><h2 id="checkout-title">Your good finds.</h2><p id="checkout-subtitle">One last look before checkout.</p></div>
       <section id="checkout-review" aria-label="Review your products">
         <div id="checkout-items" class="checkout-items"></div>
-        <div class="checkout-summary"><span>Reference subtotal <small id="checkout-count"></small></span><strong id="checkout-total"></strong></div>
-        <p id="checkout-price-note" class="checkout-note">Listing prices may change. Delivery and other fees aren’t calculated in this demo.</p>
+        <div class="checkout-summary"><span>Subtotal <small id="checkout-count"></small></span><strong id="checkout-total"></strong></div>
+        <p id="checkout-price-note" class="checkout-note">Prices reflect the saved product listings.</p>
         <button id="checkout-next" class="sheet-primary checkout-wide">Continue to payment →</button>
       </section>
-      <section id="checkout-payment" aria-label="Choose demo payment" hidden>
+      <section id="checkout-payment" aria-label="Choose payment" hidden>
         <div id="checkout-payment-items" class="checkout-payment-items"></div>
-        <div class="checkout-summary"><span>Reference subtotal</span><strong id="checkout-payment-total"></strong></div>
-        <h3 class="checkout-label">Choose a demo payment method</h3>
-        <div class="checkout-methods" role="group" aria-label="Demo payment methods"><button id="checkout-card" class="checkout-method" aria-pressed="true"><span class="payment-icon" aria-hidden="true">▤</span><span><strong>Demo card</strong><small>•••• 4242 · sample card</small></span><span class="payment-check" aria-hidden="true">✓</span></button><button id="checkout-wallet" class="checkout-method" aria-pressed="false"><span class="payment-icon" aria-hidden="true">◈</span><span><strong>Demo wallet</strong><small>Simulated one-tap payment</small></span><span class="payment-check" aria-hidden="true">✓</span></button></div>
-        <p class="checkout-note">No real payment details or delivery address are needed. This only demonstrates checkout.</p>
-        <button id="checkout-confirm" class="sheet-primary checkout-wide">Confirm demo payment</button><button id="checkout-back" class="checkout-back">← Back to review</button>
+        <div class="checkout-summary"><span>Subtotal</span><strong id="checkout-payment-total"></strong></div>
+        <h3 class="checkout-label">Payment method</h3>
+        <div class="checkout-methods" role="group" aria-label="Payment methods"><button id="checkout-card" class="checkout-method" aria-pressed="true"><span class="payment-icon" aria-hidden="true">▤</span><span><strong>Card</strong><small>•••• 4242</small></span><span class="payment-check" aria-hidden="true">✓</span></button><button id="checkout-wallet" class="checkout-method" aria-pressed="false"><span class="payment-icon" aria-hidden="true">◈</span><span><strong>Coupi Pay</strong><small>Wallet</small></span><span class="payment-check" aria-hidden="true">✓</span></button></div>
+
+        <button id="checkout-confirm" class="sheet-primary checkout-wide">Pay now</button><button id="checkout-back" class="checkout-back">← Back to review</button>
       </section>
-      <section id="checkout-complete" class="checkout-complete" aria-label="Demo payment confirmation" hidden>
-        <div class="checkout-success" aria-hidden="true">✓</div><p class="checkout-receipt" id="checkout-receipt"></p><p>No money was charged and no order was placed.</p><div id="checkout-receipt-items" class="checkout-payment-items"></div><div class="checkout-summary"><span>Demo subtotal</span><strong id="checkout-receipt-total"></strong></div><p class="checkout-note">Ready for the real thing? Open a product on Coupang to check current options and buy there.</p><div id="checkout-retailer-links" class="checkout-retailer-links"></div><button id="checkout-done" class="sheet-primary checkout-wide">Back to shopping</button>
+      <section id="checkout-complete" class="checkout-complete" aria-label="Purchase confirmation" hidden>
+        <div class="checkout-success" aria-hidden="true">✓</div><p class="checkout-receipt" id="checkout-receipt"></p>
+        <section id="checkout-pairings" class="checkout-pairings" aria-labelledby="checkout-pairings-title"><h3 id="checkout-pairings-title">A little something to go with it?</h3><p>Explore these matching picks with Coupi.</p><div id="checkout-pairing-items"></div></section>
+        <details class="checkout-order-details"><summary>Purchase details</summary><div id="checkout-receipt-items" class="checkout-payment-items"></div><div class="checkout-summary"><span>Subtotal</span><strong id="checkout-receipt-total"></strong></div><div id="checkout-retailer-links" class="checkout-retailer-links"></div></details><button id="checkout-done" class="sheet-primary checkout-wide">Continue shopping</button>
       </section>
-      <p id="checkout-error" class="checkout-error" role="alert" hidden></p><p class="checkout-demo-tag">DEMO CHECKOUT · NO CHARGE</p>
+      <p id="checkout-error" class="checkout-error" role="alert" hidden></p>
     </dialog>
   </main>
   <script src="/coupang-products.js" defer></script>
@@ -176,6 +179,7 @@
   <script src="/call-conversation.js" defer></script>
   <script src="/chat-images.js" defer></script>
   <script src="/demo-checkout.js" defer></script>
+  <script src="/purchase-pairings.js" defer></script>
   <script src="/mobile-call.js" defer></script>
 </body>
 </html>

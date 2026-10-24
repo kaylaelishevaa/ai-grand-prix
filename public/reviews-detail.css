@@ -1,0 +1,22 @@
+/* Review evidence is visible as product content, with source details kept compact. */
+.detail-product-heading{display:flex;align-items:center;gap:14px;margin:0 0 16px;min-width:0}
+.detail-product-heading>#detail-image{display:block;width:76px;height:76px;flex:0 0 76px;object-fit:contain;margin:0;padding:5px;border:1px solid #e2ecee;border-radius:14px;background:#fff;box-sizing:border-box}
+.detail-product-heading>#detail-image[hidden]{display:none}
+.detail-product-heading>div{flex:1;min-width:0}
+.detail-product-heading #detail-title{margin:0 0 9px;font-size:17px;font-weight:600;line-height:1.35;letter-spacing:-.3px;color:#2a5861;overflow-wrap:anywhere}
+.detail-product-heading .detail-review-shortcut{max-width:100%;line-height:1.4;white-space:normal}
+.detail-review-shortcut:focus-visible{outline:2px solid #478d99;outline-offset:3px}
+.detail-reviews{margin-top:16px;padding-top:0;border:0;scroll-margin-top:16px}
+.detail-reviews .review-panel{margin:0;padding:18px;border:1px solid #dcebed;border-radius:20px;background:#f0f8f9;color:#315e66}
+.review-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.detail-reviews .review-panel-heading h3{font-size:18px;line-height:1.2;letter-spacing:-.4px;margin:0;font-weight:650;color:#24535c}
+.review-sample-badge{padding:5px 8px;border-radius:99px;background:#dfedef;color:#547a82;font-size:9px;white-space:nowrap}
+.review-rating-overview{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;padding:2px 0 17px;border-bottom:1px solid #d8e9ec}
+.review-rating-value{font-size:27px;line-height:1.15;letter-spacing:-.7px;color:#2f747b;font-weight:700}.review-total-count{font-size:12px;color:#68868d}.review-rating-missing{font-size:12px;color:#728a91}
+.detail-reviews .review-ai-summary{padding:16px 0 0;background:transparent}.detail-reviews .review-ai-summary>h4{margin:0 0 5px;font-size:13px;color:#286a74;font-weight:650}.detail-reviews .review-ai-summary>p:not(.review-scope){margin:11px 0 15px;font-size:13px;line-height:1.7;color:#365e66}
+.detail-reviews .review-scope{font-size:10px;line-height:1.6;color:#739099;margin:5px 0}
+.detail-reviews .review-pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.review-pros,.review-cons{border-radius:13px;padding:12px;background:#ffffffb8;min-width:0}.detail-reviews .review-pros h4,.detail-reviews .review-cons h4{margin:0 0 7px;font-size:11px;font-weight:650}.detail-reviews .review-pros h4{color:#3e7f70}.detail-reviews .review-cons h4{color:#937c60}.detail-reviews .review-pros ul,.detail-reviews .review-cons ul{margin:0;padding-left:14px}.detail-reviews .review-pros li,.detail-reviews .review-cons li{font-size:11px;line-height:1.6;margin-bottom:4px}.detail-reviews .review-pros .review-unavailable,.detail-reviews .review-cons .review-unavailable{font-size:10px;color:#7e959b;margin:0;line-height:1.6}
+.review-provenance{padding-bottom:13px;border-bottom:1px solid #dcebed}.detail-reviews .review-list-heading{font-size:13px;font-weight:650;margin:18px 0 10px}.review-list{display:grid;gap:9px}.detail-reviews .review-item{padding:13px;background:#fff;border:1px solid #e0ecee;border-radius:14px}.review-item-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}.review-item-label{font-size:10px;font-weight:600;color:#6b858c}.review-item-rating{font-size:10px;font-weight:650;color:#4d7e81}.detail-reviews .review-text{font-size:12px;line-height:1.7;margin:0 0 9px}.detail-reviews .review-meta{font-size:9px;color:#8a9ca1;margin:0 0 4px;line-height:1.5}.detail-reviews .evidence-source{display:inline-block;font-size:10px;color:#4e8189;text-underline-offset:3px;line-height:1.6}.review-panel>.evidence-source{margin-top:14px}
+.review-empty{padding:10px 0 3px}.detail-reviews .review-empty-title{font-size:13px;font-weight:550;margin:0 0 5px;color:#456d75}
+.detail-review-shortcut{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border-radius:10px;background:#e1f1f3;color:#357882;font-size:11px;border:1px solid #d0e7eb;text-align:left}
+@media(max-width:370px){.detail-product-heading{gap:11px}.detail-product-heading #detail-title{font-size:15px}.detail-product-heading .detail-review-shortcut{padding:7px 9px;font-size:10px}.detail-reviews .review-panel{padding:14px}.detail-reviews .review-panel-heading h3{font-size:16px}.detail-reviews .review-pros-cons{grid-template-columns:1fr}.review-rating-value{font-size:25px}}

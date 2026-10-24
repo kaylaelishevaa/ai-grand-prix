@@ -46,16 +46,57 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "d621ac13a506560760a9690d32b5ab5cd9859de18ba461ae108686b914b195a3",
     "reviewEvidence": {
-      "status": "unavailable",
+      "status": "partial",
       "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/1814412512?itemId=3063152900&vendorItemId=71051109229",
+      "reviewCount": 31424,
+      "sourceUrl": "https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/1814412512?itemId=19167758246&vendorItemId=86286064988",
+      "sourceProductId": "1814412512",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set. The mirror has no usable aggregate star score, so none is displayed.",
+      "summary": "Sampled users liked the soft matte color and usefulness as a base. Shell Nude and Pink Sand feedback also mentions dryness or emphasized lip lines.",
+      "pros": [
+        "Useful as a base lip color",
+        "Strong color payoff"
+      ],
+      "cons": [
+        "Dryness reported",
+        "May emphasize lip lines"
+      ],
+      "reviews": [
+        {
+          "id": "romand-20250517-1",
+          "date": "2025-05-17",
+          "rating": 5.0,
+          "text": "Shell Nude and Pink Sand offered soft matte color, lasting wear and good value for this reviewer.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ",
+          "variant": "Shell Nude / Pink Sand"
+        },
+        {
+          "id": "romand-20250510-10",
+          "date": "2025-05-10",
+          "rating": 5.0,
+          "text": "Shell Nude worked well under other colors, but felt dry without lip balm.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ",
+          "variant": "Shell Nude"
+        },
+        {
+          "id": "romand-20250515-2",
+          "date": "2025-05-15",
+          "rating": 4.0,
+          "text": "Pink Sand layered nicely under gloss; the matte finish emphasized dryness and vertical lip lines.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ",
+          "variant": "Pink Sand"
+        }
+      ]
     }
   },
   {
@@ -103,16 +144,47 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "f15b15bc49511b96f1977163d898dff252c21bd7ca1fe7a3228358717dd4a4d3",
     "reviewEvidence": {
-      "status": "unavailable",
+      "status": "partial",
       "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7322824636?itemId=8021226340&vendorItemId=94286012682",
+      "reviewCount": 3685,
+      "sourceUrl": "https://timing.im/product/0MXPXYUTLwa6HDpGwNy1Nurlc8YwD99YW0DFZyOymgs",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7322824636?itemId=10082844317&vendorItemId=94286012683",
+      "sourceProductId": "7322824636",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set. The mirror has no usable aggregate star score, so none is displayed.",
+      "summary": "Mull It Over samples praise the soft powdery feel and layering. Wear time disappoints some reviewers, and the color can look deeper than expected.",
+      "pros": [
+        "Soft powdery feel",
+        "Works alone or layered"
+      ],
+      "cons": [
+        "Can wipe off easily",
+        "May look darker than expected"
+      ],
+      "reviews": [
+        {
+          "id": "mac-20250408-0",
+          "date": "2025-04-08",
+          "rating": 5.0,
+          "text": "Mull It Over applied softly and layered well, but looked deeper than expected and wiped away without much staining.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/0MXPXYUTLwa6HDpGwNy1Nurlc8YwD99YW0DFZyOymgs",
+          "variant": "Mull It Over"
+        },
+        {
+          "id": "mac-20250227-2",
+          "date": "2025-02-27",
+          "rating": 5.0,
+          "text": "The powdery color worked alone or as a base; eating or wiping removed it easily.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/0MXPXYUTLwa6HDpGwNy1Nurlc8YwD99YW0DFZyOymgs",
+          "variant": "Mull It Over"
+        }
+      ]
     }
   },
   {
@@ -161,16 +233,47 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "084e8313062fbb4f2d8162bb54a87f47c717ad1fd6a158cb66e642a28644f373",
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7185725748?itemId=18131895632&vendorItemId=86741104970",
+      "status": "partial",
+      "rating": 4.5,
+      "reviewCount": 1108,
+      "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7185725748?itemId=18131895617&vendorItemId=86741105008",
+      "sourceProductId": "7185725748",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "The sample likes a gentle sheen and comfortable application. A Hit Haze reviewer disliked the plastic-feeling case; a Pink Banana reviewer reported fading after meals.",
+      "pros": [
+        "Subtle sheen",
+        "Comfortable application"
+      ],
+      "cons": [
+        "Case feel disappointed one reviewer",
+        "Color may fade after meals"
+      ],
+      "reviews": [
+        {
+          "id": "kate-20250518-2",
+          "date": "2025-05-18",
+          "rating": 5.0,
+          "text": "Hit Haze had a flattering, restrained sheen for this reviewer, though the case felt like a plastic toy.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+          "variant": "03 Hit Haze"
+        },
+        {
+          "id": "kate-20250502-4",
+          "date": "2025-05-02",
+          "rating": 5.0,
+          "text": "Pink Banana felt comfortable with a natural glossy finish; most color faded after eating.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+          "variant": "02 Pink Banana"
+        }
+      ]
     }
   },
   {
@@ -579,16 +682,47 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "29329808acf90d987ca63e040fff5c517b5affb026fc23dca0298d56d0e7746f",
     "reviewEvidence": {
-      "status": "unavailable",
+      "status": "partial",
       "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/6431292464",
+      "reviewCount": 1214,
+      "sourceUrl": "https://timing.im/product/Pf35lm9P54EfBPQwH-D2b80KmpqONC5rMJXh4ylh3mw",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/6431292464?itemId=13881623490&vendorItemId=81131423497",
+      "sourceProductId": "6431292464",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set. The mirror has no usable aggregate star score, so none is displayed.",
+      "summary": "The sample likes the substantial cotton fabric and relaxed comfort. Other reviewers found shoulders too wide or sizing inconsistent between colors.",
+      "pros": [
+        "Substantial cotton feel",
+        "Comfortable relaxed fit"
+      ],
+      "cons": [
+        "Wide shoulders for some wearers",
+        "Sizing may vary by color"
+      ],
+      "reviews": [
+        {
+          "id": "tshirt-20230822-0",
+          "date": "2023-08-22",
+          "rating": 5.0,
+          "text": "The V-neck and substantial fabric were comfortable; the shirt held its shape after the first wash.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/Pf35lm9P54EfBPQwH-D2b80KmpqONC5rMJXh4ylh3mw",
+          "variant": "White, size not specified"
+        },
+        {
+          "id": "tshirt-20230326-11",
+          "date": "2023-03-26",
+          "rating": 3.0,
+          "text": "The cotton felt soft and opaque, but two colors fit differently and the sleeves felt tight during movement.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/Pf35lm9P54EfBPQwH-D2b80KmpqONC5rMJXh4ylh3mw",
+          "variant": "Two colors including grey, size not specified"
+        }
+      ]
     },
     "collectionStyle": "basic"
   },
@@ -734,16 +868,47 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "ddd62c81fa7b1f83c990e0e0ac13e1ec35c41691918cdb6555c8adc895285f65",
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/6285676894",
+      "status": "partial",
+      "rating": 4.5,
+      "reviewCount": 6059,
+      "sourceUrl": "https://timing.im/product/oZZ3c1BQ5_W8ZWZI_emBJzSv8ycKljyXut7AyxvC1k8",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/6285676894?itemId=12927099196&vendorItemId=90838343335",
+      "sourceProductId": "6285676894",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "The sample praises soft fabric and everyday comfort. Fit varies with body shape; long drawstrings and a thinner fabric or loose hem disappointed some reviewers.",
+      "pros": [
+        "Soft comfortable fabric",
+        "Simple everyday design"
+      ],
+      "cons": [
+        "Long drawstrings",
+        "Thickness and fit may disappoint"
+      ],
+      "reviews": [
+        {
+          "id": "hoodie-20250509-0",
+          "date": "2025-05-09",
+          "rating": 5.0,
+          "text": "The soft fabric and simple design worked for everyday wear, but the drawstrings were too long.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/oZZ3c1BQ5_W8ZWZI_emBJzSv8ycKljyXut7AyxvC1k8",
+          "variant": "Grey, M / S"
+        },
+        {
+          "id": "hoodie-20250318-27",
+          "date": "2025-03-18",
+          "rating": 3.0,
+          "text": "The fabric felt thin and the waist hem could be firmer; size S was large for the reviewer’s child.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/oZZ3c1BQ5_W8ZWZI_emBJzSv8ycKljyXut7AyxvC1k8",
+          "variant": "S, color not specified"
+        }
+      ]
     }
   },
   {
@@ -870,16 +1035,57 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "6df90fbb2d08cef997208771bb4c2574e9532e375c1f5302c905f57b91b1f87c",
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7612276799?itemId=20163776919",
+      "status": "partial",
+      "rating": 5.0,
+      "reviewCount": 225,
+      "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7612276799?itemId=20163776919&vendorItemId=87256176126",
+      "sourceProductId": "7612276799",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "Sampled users liked the frame design, light weight and accessories. Other comments note glare or a hazy view in bright surroundings and smaller-than-expected lenses. This is not evidence of lens protection.",
+      "pros": [
+        "Lightweight frame",
+        "Case and cleaning cloth included"
+      ],
+      "cons": [
+        "Hazy view in bright light reported",
+        "Lenses may feel small"
+      ],
+      "reviews": [
+        {
+          "id": "eyelab-20250316-0",
+          "date": "2025-03-16",
+          "rating": 5.0,
+          "text": "The design and fit were good, but reflections made the view somewhat hazy in bright surroundings.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        },
+        {
+          "id": "eyelab-20241101-2",
+          "date": "2024-11-01",
+          "rating": 5.0,
+          "text": "The reviewer liked the lightweight frame, case and cleaning cloth.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        },
+        {
+          "id": "eyelab-20250507-4",
+          "date": "2025-05-07",
+          "rating": 4.0,
+          "text": "The lenses were much smaller than expected; the reviewer cautioned people with larger faces.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        }
+      ]
     }
   },
   {
@@ -1094,16 +1300,57 @@ window.COUPANG_PRODUCTS = [
       ]
     },
     "reviewEvidence": {
-      "status": "unavailable",
+      "status": "partial",
       "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/1814412512?itemId=3063152898&vendorItemId=71051109185",
+      "reviewCount": 31424,
+      "sourceUrl": "https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/1814412512?itemId=19167758246&vendorItemId=86286064988",
+      "sourceProductId": "1814412512",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set. The mirror has no usable aggregate star score, so none is displayed.",
+      "summary": "Sampled users liked the soft matte color and usefulness as a base. Shell Nude and Pink Sand feedback also mentions dryness or emphasized lip lines.",
+      "pros": [
+        "Useful as a base lip color",
+        "Strong color payoff"
+      ],
+      "cons": [
+        "Dryness reported",
+        "May emphasize lip lines"
+      ],
+      "reviews": [
+        {
+          "id": "romand-20250517-1",
+          "date": "2025-05-17",
+          "rating": 5.0,
+          "text": "Shell Nude and Pink Sand offered soft matte color, lasting wear and good value for this reviewer.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ",
+          "variant": "Shell Nude / Pink Sand"
+        },
+        {
+          "id": "romand-20250510-10",
+          "date": "2025-05-10",
+          "rating": 5.0,
+          "text": "Shell Nude worked well under other colors, but felt dry without lip balm.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ",
+          "variant": "Shell Nude"
+        },
+        {
+          "id": "romand-20250515-2",
+          "date": "2025-05-15",
+          "rating": 4.0,
+          "text": "Pink Sand layered nicely under gloss; the matte finish emphasized dryness and vertical lip lines.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ",
+          "variant": "Pink Sand"
+        }
+      ]
     }
   },
   {
@@ -1154,16 +1401,47 @@ window.COUPANG_PRODUCTS = [
       ]
     },
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/8248027642",
+      "status": "partial",
+      "rating": 5.0,
+      "reviewCount": 2852,
+      "sourceUrl": "https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/8248027642?itemId=20623028083&vendorItemId=87697199698",
+      "sourceProductId": "8248027642",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "The small mixed-shade sample reports comfortable color and good value, but shade intensity and dryness differ between reviewers.",
+      "pros": [
+        "Comfortable feel in Pink Chuchu sample",
+        "Good value mentioned"
+      ],
+      "cons": [
+        "Color can be stronger than expected",
+        "Dryness reported for Baby Coral"
+      ],
+      "reviews": [
+        {
+          "id": "misshagl-20250425-13",
+          "date": "2025-04-25",
+          "rating": 5.0,
+          "text": "Pink Chuchu felt comfortable and moisturizing, but looked stronger than expected.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8",
+          "variant": "Pink Chuchu"
+        },
+        {
+          "id": "misshagl-20250321-1",
+          "date": "2025-03-21",
+          "rating": 5.0,
+          "text": "Baby Coral offered good value, but felt slightly stiff and became dry over time.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8",
+          "variant": "Baby Coral"
+        }
+      ]
     }
   },
   {
@@ -1214,16 +1492,47 @@ window.COUPANG_PRODUCTS = [
       ]
     },
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/8248027642",
+      "status": "partial",
+      "rating": 5.0,
+      "reviewCount": 2852,
+      "sourceUrl": "https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/8248027642?itemId=20623028083&vendorItemId=87697199698",
+      "sourceProductId": "8248027642",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "The small mixed-shade sample reports comfortable color and good value, but shade intensity and dryness differ between reviewers.",
+      "pros": [
+        "Comfortable feel in Pink Chuchu sample",
+        "Good value mentioned"
+      ],
+      "cons": [
+        "Color can be stronger than expected",
+        "Dryness reported for Baby Coral"
+      ],
+      "reviews": [
+        {
+          "id": "misshagl-20250425-13",
+          "date": "2025-04-25",
+          "rating": 5.0,
+          "text": "Pink Chuchu felt comfortable and moisturizing, but looked stronger than expected.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8",
+          "variant": "Pink Chuchu"
+        },
+        {
+          "id": "misshagl-20250321-1",
+          "date": "2025-03-21",
+          "rating": 5.0,
+          "text": "Baby Coral offered good value, but felt slightly stiff and became dry over time.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8",
+          "variant": "Baby Coral"
+        }
+      ]
     }
   },
   {
@@ -1274,16 +1583,47 @@ window.COUPANG_PRODUCTS = [
       ]
     },
     "reviewEvidence": {
-      "status": "unavailable",
+      "status": "partial",
       "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/1547725003",
+      "reviewCount": 3201,
+      "sourceUrl": "https://timing.im/product/81Lj6vx-bqvzwa9VecV4_f3_jDfXFHIBoJaqbbmAytM",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/1547725003?itemId=19167556934&vendorItemId=86285869141",
+      "sourceProductId": "1547725003",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set. The mirror has no usable aggregate star score, so none is displayed.",
+      "summary": "All That Rose samples praise smooth application and a natural sheen. One reviewer wanted longer wear. These samples do not establish the exact appearance of other shades.",
+      "pros": [
+        "Smooth application",
+        "Natural-looking sheen"
+      ],
+      "cons": [
+        "Reapplication may be needed",
+        "Sample covers a different shade"
+      ],
+      "reviews": [
+        {
+          "id": "misshadare-20250315-0",
+          "date": "2025-03-15",
+          "rating": 5.0,
+          "text": "All That Rose felt smooth and comfortable with a natural sheen, but needed reapplication.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/81Lj6vx-bqvzwa9VecV4_f3_jDfXFHIBoJaqbbmAytM",
+          "variant": "All That Rose"
+        },
+        {
+          "id": "misshadare-20250203-16",
+          "date": "2025-02-03",
+          "rating": 4.0,
+          "text": "The reviewer liked the soft application and understated rose-coral color for everyday wear.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/81Lj6vx-bqvzwa9VecV4_f3_jDfXFHIBoJaqbbmAytM",
+          "variant": "All That Rose"
+        }
+      ]
     }
   },
   {
@@ -1559,16 +1899,56 @@ window.COUPANG_PRODUCTS = [
       ]
     },
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7480503353",
+      "status": "partial",
+      "rating": 4.5,
+      "reviewCount": 781,
+      "sourceUrl": "https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro",
+      "sourceName": "Timing public Coupang listing mirror",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a Timing mirror of the Revlon Super Lustrous listing. Reviews span different shades and are not specific to this selected shade; this sample is not the full review set.",
+      "summary": "The mixed-shade sample contains praise for rich color and creamy application, alongside dryness and color-expectation complaints. It cannot establish the exact appearance or performance of Pink in the Afternoon.",
+      "pros": [
+        "Rich color praised in Pink Velvet review",
+        "Creamy texture noted by two reviewers"
+      ],
+      "cons": [
+        "Dryness reported by one reviewer",
+        "Appearance differed from expected color",
+        "Feedback spans different shades"
+      ],
+      "reviews": [
+        {
+          "id": "revlon-20230806",
+          "date": "2023-08-06",
+          "rating": 5,
+          "text": "Pink Velvet felt creamy and moisturizing, with rich color; the reviewer also liked its value.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro",
+          "variant": "Pink Velvet"
+        },
+        {
+          "id": "revlon-20230626",
+          "date": "2023-06-26",
+          "rating": 3,
+          "text": "The finish felt too matte and dry, and color differed from the swatch; lip balm helped.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro",
+          "variant": "Shade not specified"
+        },
+        {
+          "id": "revlon-20250321",
+          "date": "2025-03-21",
+          "rating": 5,
+          "text": "Creamy but firm; the color looked more violet-pink than expected and did not suit the reviewer.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro",
+          "variant": "Shade not specified"
+        }
+      ]
     }
   },
   {
@@ -1620,16 +2000,56 @@ window.COUPANG_PRODUCTS = [
       ]
     },
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7480503353",
+      "status": "partial",
+      "rating": 4.5,
+      "reviewCount": 781,
+      "sourceUrl": "https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro",
+      "sourceName": "Timing public Coupang listing mirror",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a Timing mirror of the Revlon Super Lustrous listing. Reviews span different shades and are not specific to this selected shade; this sample is not the full review set.",
+      "summary": "The mixed-shade sample contains praise for rich color and creamy application, alongside dryness and color-expectation complaints. It cannot establish the exact appearance or performance of Pink in the Afternoon.",
+      "pros": [
+        "Rich color praised in Pink Velvet review",
+        "Creamy texture noted by two reviewers"
+      ],
+      "cons": [
+        "Dryness reported by one reviewer",
+        "Appearance differed from expected color",
+        "Feedback spans different shades"
+      ],
+      "reviews": [
+        {
+          "id": "revlon-20230806",
+          "date": "2023-08-06",
+          "rating": 5,
+          "text": "Pink Velvet felt creamy and moisturizing, with rich color; the reviewer also liked its value.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro",
+          "variant": "Pink Velvet"
+        },
+        {
+          "id": "revlon-20230626",
+          "date": "2023-06-26",
+          "rating": 3,
+          "text": "The finish felt too matte and dry, and color differed from the swatch; lip balm helped.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro",
+          "variant": "Shade not specified"
+        },
+        {
+          "id": "revlon-20250321",
+          "date": "2025-03-21",
+          "rating": 5,
+          "text": "Creamy but firm; the color looked more violet-pink than expected and did not suit the reviewer.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/Yr7iUpVcOvdTHKp4s7L8sv9Y0T8bUmRIHILhZ4iurro",
+          "variant": "Shade not specified"
+        }
+      ]
     }
   },
   {
@@ -1792,16 +2212,57 @@ window.COUPANG_PRODUCTS = [
       "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
     },
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7612276799",
+      "status": "partial",
+      "rating": 5.0,
+      "reviewCount": 225,
+      "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7612276799?itemId=20163776919&vendorItemId=87256176126",
+      "sourceProductId": "7612276799",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "Sampled users liked the frame design, light weight and accessories. Other comments note glare or a hazy view in bright surroundings and smaller-than-expected lenses. This is not evidence of lens protection.",
+      "pros": [
+        "Lightweight frame",
+        "Case and cleaning cloth included"
+      ],
+      "cons": [
+        "Hazy view in bright light reported",
+        "Lenses may feel small"
+      ],
+      "reviews": [
+        {
+          "id": "eyelab-20250316-0",
+          "date": "2025-03-16",
+          "rating": 5.0,
+          "text": "The design and fit were good, but reflections made the view somewhat hazy in bright surroundings.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        },
+        {
+          "id": "eyelab-20241101-2",
+          "date": "2024-11-01",
+          "rating": 5.0,
+          "text": "The reviewer liked the lightweight frame, case and cleaning cloth.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        },
+        {
+          "id": "eyelab-20250507-4",
+          "date": "2025-05-07",
+          "rating": 4.0,
+          "text": "The lenses were much smaller than expected; the reviewer cautioned people with larger faces.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        }
+      ]
     }
   },
   {
@@ -1842,16 +2303,57 @@ window.COUPANG_PRODUCTS = [
       "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
     },
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7612276799",
+      "status": "partial",
+      "rating": 5.0,
+      "reviewCount": 225,
+      "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7612276799?itemId=20163776919&vendorItemId=87256176126",
+      "sourceProductId": "7612276799",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "Sampled users liked the frame design, light weight and accessories. Other comments note glare or a hazy view in bright surroundings and smaller-than-expected lenses. This is not evidence of lens protection.",
+      "pros": [
+        "Lightweight frame",
+        "Case and cleaning cloth included"
+      ],
+      "cons": [
+        "Hazy view in bright light reported",
+        "Lenses may feel small"
+      ],
+      "reviews": [
+        {
+          "id": "eyelab-20250316-0",
+          "date": "2025-03-16",
+          "rating": 5.0,
+          "text": "The design and fit were good, but reflections made the view somewhat hazy in bright surroundings.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        },
+        {
+          "id": "eyelab-20241101-2",
+          "date": "2024-11-01",
+          "rating": 5.0,
+          "text": "The reviewer liked the lightweight frame, case and cleaning cloth.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        },
+        {
+          "id": "eyelab-20250507-4",
+          "date": "2025-05-07",
+          "rating": 4.0,
+          "text": "The lenses were much smaller than expected; the reviewer cautioned people with larger faces.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
+          "variant": "Color not specified"
+        }
+      ]
     }
   },
   {
@@ -2711,16 +3213,47 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "6c08ab19cbb34ce24136e8182640175adb15b1422b208aad26de64a60ecd0195",
     "reviewEvidence": {
-      "status": "unavailable",
+      "status": "partial",
       "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/1547725003",
+      "reviewCount": 3201,
+      "sourceUrl": "https://timing.im/product/81Lj6vx-bqvzwa9VecV4_f3_jDfXFHIBoJaqbbmAytM",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/1547725003?itemId=19167556934&vendorItemId=86285869141",
+      "sourceProductId": "1547725003",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set. The mirror has no usable aggregate star score, so none is displayed.",
+      "summary": "All That Rose samples praise smooth application and a natural sheen. One reviewer wanted longer wear. These samples do not establish the exact appearance of other shades.",
+      "pros": [
+        "Smooth application",
+        "Natural-looking sheen"
+      ],
+      "cons": [
+        "Reapplication may be needed",
+        "Sample covers a different shade"
+      ],
+      "reviews": [
+        {
+          "id": "misshadare-20250315-0",
+          "date": "2025-03-15",
+          "rating": 5.0,
+          "text": "All That Rose felt smooth and comfortable with a natural sheen, but needed reapplication.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/81Lj6vx-bqvzwa9VecV4_f3_jDfXFHIBoJaqbbmAytM",
+          "variant": "All That Rose"
+        },
+        {
+          "id": "misshadare-20250203-16",
+          "date": "2025-02-03",
+          "rating": 4.0,
+          "text": "The reviewer liked the soft application and understated rose-coral color for everyday wear.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/81Lj6vx-bqvzwa9VecV4_f3_jDfXFHIBoJaqbbmAytM",
+          "variant": "All That Rose"
+        }
+      ]
     }
   },
   {
@@ -2995,16 +3528,47 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "86eef15336ec72120aaac40963921d20a04dd20d8c1d4a1bc5e29368076a6e27",
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7185725748",
+      "status": "partial",
+      "rating": 4.5,
+      "reviewCount": 1108,
+      "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7185725748?itemId=18131895617&vendorItemId=86741105008",
+      "sourceProductId": "7185725748",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "The sample likes a gentle sheen and comfortable application. A Hit Haze reviewer disliked the plastic-feeling case; a Pink Banana reviewer reported fading after meals.",
+      "pros": [
+        "Subtle sheen",
+        "Comfortable application"
+      ],
+      "cons": [
+        "Case feel disappointed one reviewer",
+        "Color may fade after meals"
+      ],
+      "reviews": [
+        {
+          "id": "kate-20250518-2",
+          "date": "2025-05-18",
+          "rating": 5.0,
+          "text": "Hit Haze had a flattering, restrained sheen for this reviewer, though the case felt like a plastic toy.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+          "variant": "03 Hit Haze"
+        },
+        {
+          "id": "kate-20250502-4",
+          "date": "2025-05-02",
+          "rating": 5.0,
+          "text": "Pink Banana felt comfortable with a natural glossy finish; most color faded after eating.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+          "variant": "02 Pink Banana"
+        }
+      ]
     }
   },
   {
@@ -3051,16 +3615,47 @@ window.COUPANG_PRODUCTS = [
     },
     "imageSha256": "3433fb59a06b3d6ffb3dae0ac5ca35c2bf6254abfe0ca192a9bcd1225198a231",
     "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7185725748",
+      "status": "partial",
+      "rating": 4.5,
+      "reviewCount": 1108,
+      "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+      "sourceName": "Timing public Coupang listing mirror",
+      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7185725748?itemId=18131895617&vendorItemId=86741105008",
+      "sourceProductId": "7185725748",
       "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      "summaryKind": "ai-curated",
+      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
+      "summary": "The sample likes a gentle sheen and comfortable application. A Hit Haze reviewer disliked the plastic-feeling case; a Pink Banana reviewer reported fading after meals.",
+      "pros": [
+        "Subtle sheen",
+        "Comfortable application"
+      ],
+      "cons": [
+        "Case feel disappointed one reviewer",
+        "Color may fade after meals"
+      ],
+      "reviews": [
+        {
+          "id": "kate-20250518-2",
+          "date": "2025-05-18",
+          "rating": 5.0,
+          "text": "Hit Haze had a flattering, restrained sheen for this reviewer, though the case felt like a plastic toy.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+          "variant": "03 Hit Haze"
+        },
+        {
+          "id": "kate-20250502-4",
+          "date": "2025-05-02",
+          "rating": 5.0,
+          "text": "Pink Banana felt comfortable with a natural glossy finish; most color faded after eating.",
+          "translated": true,
+          "kind": "translated-paraphrase",
+          "sourceUrl": "https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8",
+          "variant": "02 Pink Banana"
+        }
+      ]
     }
   },
   {

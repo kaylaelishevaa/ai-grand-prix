@@ -858,3 +858,57 @@ Reference price: KRW 12500 (not a live offer)
 Brand: Britz / 브리츠; seller identity unverified.
 Try-on: Available as an approximate live preview.
 Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+REVIEW COVERAGE UPDATE — checked 2026-10-25
+Added short English translated paraphrases, AI-curated sample summaries and explicit listing-family scope. Public Timing pages were read directly; each new source links to the exact Coupang family ID. Dates and individual star ratings are copied from the selected sample metadata. Aggregate score 0.0 in the mirror is treated as missing, never a zero-star rating. Historical mirror counts are not live totals. No review texts, star ratings, seller identities or verified-purchase badges were invented.
+
+1814412512 | romand
+Review mirror: https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ
+Verified family link: https://www.coupang.com/vp/products/1814412512?itemId=19167758246&vendorItemId=86286064988
+Paraphrased samples: 2025.05.17 / Shell Nude / Pink Sand, 2025.05.10 / Shell Nude, 2025.05.15 / Pink Sand
+Scope: options across the named family; exact selected option is not guaranteed.
+
+7322824636 | mac
+Review mirror: https://timing.im/product/0MXPXYUTLwa6HDpGwNy1Nurlc8YwD99YW0DFZyOymgs
+Verified family link: https://www.coupang.com/vp/products/7322824636?itemId=10082844317&vendorItemId=94286012683
+Paraphrased samples: 2025.04.08 / Mull It Over, 2025.02.27 / Mull It Over
+Scope: options across the named family; exact selected option is not guaranteed.
+
+7185725748 | kate
+Review mirror: https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8
+Verified family link: https://www.coupang.com/vp/products/7185725748?itemId=18131895617&vendorItemId=86741105008
+Paraphrased samples: 2025.05.18 / 03 Hit Haze, 2025.05.02 / 02 Pink Banana
+Scope: options across the named family; exact selected option is not guaranteed.
+
+7612276799 | eyelab
+Review mirror: https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw
+Verified family link: https://www.coupang.com/vp/products/7612276799?itemId=20163776919&vendorItemId=87256176126
+Paraphrased samples: 2025.03.16 / Color not specified, 2024.11.01 / Color not specified, 2025.05.07 / Color not specified
+Scope: options across the named family; exact selected option is not guaranteed.
+
+6285676894 | hoodie
+Review mirror: https://timing.im/product/oZZ3c1BQ5_W8ZWZI_emBJzSv8ycKljyXut7AyxvC1k8
+Verified family link: https://www.coupang.com/vp/products/6285676894?itemId=12927099196&vendorItemId=90838343335
+Paraphrased samples: 2025.05.09 / Grey, M / S, 2025.03.18 / S, color not specified
+Scope: options across the named family; exact selected option is not guaranteed.
+
+6431292464 | tshirt
+Review mirror: https://timing.im/product/Pf35lm9P54EfBPQwH-D2b80KmpqONC5rMJXh4ylh3mw
+Verified family link: https://www.coupang.com/vp/products/6431292464?itemId=13881623490&vendorItemId=81131423497
+Paraphrased samples: 2023.08.22 / White, size not specified, 2023.03.26 / Two colors including grey, size not specified
+Scope: options across the named family; exact selected option is not guaranteed.
+
+8248027642 | misshagl
+Review mirror: https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8
+Verified family link: https://www.coupang.com/vp/products/8248027642?itemId=20623028083&vendorItemId=87697199698
+Paraphrased samples: 2025.04.25 / Pink Chuchu, 2025.03.21 / Baby Coral
+Scope: options across the named family; exact selected option is not guaranteed.
+
+1547725003 | misshadare
+Review mirror: https://timing.im/product/81Lj6vx-bqvzwa9VecV4_f3_jDfXFHIBoJaqbbmAytM
+Verified family link: https://www.coupang.com/vp/products/1547725003?itemId=19167556934&vendorItemId=86285869141
+Paraphrased samples: 2025.03.15 / All That Rose, 2025.02.03 / All That Rose
+Scope: options across the named family; exact selected option is not guaranteed.
+
+Existing mixed-shade Revlon sample is also exposed on Pink Velvet and Love That Pink, with an explicit family-wide scope note.
+Furniture coverage remains unavailable: the public matched Chairclub MT20 and Duoback DK073B mirrors contained no written reviews. Duplex DP-310LS had no written reviews; the DP-910LS mirror found linked to a different retailer product ID and was not reused. Absence from these mirrors does not establish that Coupang has no reviews.

@@ -21,44 +21,68 @@
   }
   const ratingText=e=>e.rating===null?'Rating unavailable':`${e.rating.toFixed(1)} / 5`;
   const countText=e=>e.count===null?'Review count unavailable':`${e.count.toLocaleString('en-US')} reviews`;
+  function reviewStats(product) {
+    const e=evidence(product),sampleCount=e.reviews.length;
+    const label=e.rating!==null?`★ ${e.rating.toFixed(1)}${e.count!==null?` · ${e.count.toLocaleString('en-US')} reviews`:''}`:
+      e.count!==null?`${e.count.toLocaleString('en-US')} reviews`:sampleCount?`${sampleCount} review ${sampleCount===1?'sample':'samples'}`:'Reviews unavailable';
+    return {available:sampleCount>0,rating:e.rating,count:e.count,sampleCount,label};
+  }
   function list(values,className,emptyText) {
     const entries=(Array.isArray(values)?values:[]).filter(value=>text(value)).slice(0,6);
     if(!entries.length)return node('p','review-unavailable',emptyText);
     const ul=node('ul',className);for(const value of entries)ul.append(node('li','',value));return ul;
   }
   function renderReviews(container,product) {
-    const e=evidence(product),section=node('section','review-summary');
-    section.append(node('h3','','Ratings & reviews'));
-    section.append(node('p','review-rating',`${ratingText(e)} · ${countText(e)}`));
-    if(e.rating!==null||e.count!==null)section.append(node('p','review-scope',`Historical listing snapshot${text(e.raw.checkedAt)?` · checked ${text(e.raw.checkedAt)}`:''}. Check the current listing for updates.`));
-    if(text(e.raw.scopeNote))section.append(node('p','review-scope',e.raw.scopeNote));
-    appendSource(section,e.url,'View ratings and reviews source ↗');
+    const e=evidence(product),section=node('section','review-summary review-panel');
+    const heading=node('div','review-panel-heading');heading.append(node('h3','','Ratings & reviews'));
+    if(e.reviews.length)heading.append(node('span','review-sample-badge',`${e.reviews.length} ${e.reviews.length===1?'sample':'samples'}`));
+    section.append(heading);
+    if(e.rating!==null||e.count!==null) {
+      const rating=node('div','review-rating-overview');
+      if(e.rating!==null){const score=node('strong','review-rating-value',ratingText(e));rating.append(score);}
+      else rating.append(node('span','review-rating-missing','Rating unavailable'));
+      if(e.count!==null)rating.append(node('span','review-total-count',countText(e)));
+      section.append(rating);
+    }
     if(e.reviews.length) {
       const summary=node('section','review-ai-summary');
       summary.append(node('h4','',e.raw.summaryKind==='ai-curated'?'AI review summary':'Review sample summary'));
-      summary.append(node('p','review-scope',`Based on ${e.reviews.length} sourced review ${e.reviews.length===1?'sample':'samples'}, not every review. Opinions reflect these reviewers; individual experiences vary.`));
+      summary.append(node('p','review-scope',`Based on ${e.reviews.length} sourced review ${e.reviews.length===1?'sample':'samples'}, not every review.`));
       if(text(e.raw.summary))summary.append(node('p','',e.raw.summary));
       else summary.append(node('p','review-unavailable','A review summary has not been prepared for this product.'));
       const prosCons=node('div','review-pros-cons');
-      const pros=node('section','review-pros');pros.append(node('h4','','What reviewers liked'),list(e.raw.pros,'comparison-facts','No positive theme established in this sample.'));
-      const cons=node('section','review-cons');cons.append(node('h4','','What to consider'),list(e.raw.cons,'comparison-facts','No recurring concern established in this sample.'));
+      const pros=node('section','review-pros');pros.append(node('h4','','Pros'),list(e.raw.pros,'comparison-facts','Not summarized for this sample.'));
+      const cons=node('section','review-cons');cons.append(node('h4','','Cons'),list(e.raw.cons,'comparison-facts','Not summarized for this sample.'));
       prosCons.append(pros,cons);summary.append(prosCons);section.append(summary);
-      section.append(node('h4','','Sourced review samples'));
-      section.append(node('p','review-scope','Short excerpts or paraphrases from the linked sources. Translated text is identified below.'));
+      const provenance=node('div','review-provenance');
+      if(text(e.raw.scopeNote))provenance.append(node('p','review-scope',e.raw.scopeNote));
+      if(text(e.raw.checkedAt))provenance.append(node('p','review-scope',`Source snapshot checked ${text(e.raw.checkedAt)}.`));
+      appendSource(provenance,e.url,'View review source ↗');section.append(provenance);
+      section.append(node('h4','review-list-heading','Customer review samples'));
       const reviews=node('div','review-list');
-      for(const review of e.reviews) {
+      for(const [index,review] of e.reviews.entries()) {
         const article=node('article','review-item');
-        const parts=[];if(typeof review.rating==='number'&&Number.isFinite(review.rating)&&review.rating>=0&&review.rating<=5)parts.push(`${review.rating.toFixed(1)} / 5`);
-        if(text(review.date))parts.push(text(review.date));
+        const top=node('div','review-item-heading');
+        top.append(node('strong','review-item-label',`Review ${index+1}`));
+        if(typeof review.rating==='number'&&Number.isFinite(review.rating)&&review.rating>=0&&review.rating<=5)top.append(node('span','review-item-rating',`★ ${review.rating.toFixed(1)} / 5`));
+        article.append(top);
+        const parts=[];if(text(review.date))parts.push(text(review.date));
         const kind=text(review.kind||review.format);
         parts.push(review.translated||/translat/i.test(kind)?'Translated paraphrase':/excerpt|quote/i.test(kind)?'Review excerpt':'Review paraphrase');
-        article.append(node('p','review-meta',parts.join(' · ')),node('p','review-text',review.text));
+        article.append(node('p','review-text',review.text),node('p','review-meta',parts.join(' · ')));
         appendSource(article,review.sourceUrl||e.url,'Review source ↗');reviews.append(article);
       }
       section.append(reviews);
     } else {
-      section.append(node('p','review-unavailable','Written reviews could not be verified for this demo. AI summary, review-based pros and cons, and review samples are unavailable.'));
+      const empty=node('div','review-empty');
+      empty.append(node('p','review-empty-title','Reviews not available here yet'),node('p','review-scope','Open the listing to read current customer reviews.'));
+      section.append(empty);
+      if(e.rating!==null||e.count!==null) {
+        section.append(node('p','review-scope',`Rating snapshot${text(e.raw.checkedAt)?` · checked ${text(e.raw.checkedAt)}`:''}. Written review samples are not available here.`));
+        appendSource(section,e.url,'View rating source ↗');
+      }
     }
+    appendSource(section,product?.url,'Read reviews on Coupang ↗');
     if(text(e.raw.note))section.append(node('p','review-scope',e.raw.note));
     container.replaceChildren(section);return section;
   }
@@ -92,5 +116,5 @@
     row('Take a closer look',p=>{const actions=node('div','comparison-actions');for(const [label,callback] of [['Details',onDetails],['Try it',onTry]])if(typeof callback==='function'){const button=node('button','',label);button.type='button';button.onclick=()=>callback(p);actions.append(button);}return actions;});
     table.append(body);container.replaceChildren(table);return table;
   }
-  window.CoupiEvidence={renderReviews,renderComparison};
+  window.CoupiEvidence={renderReviews,renderComparison,reviewStats};
 })();
