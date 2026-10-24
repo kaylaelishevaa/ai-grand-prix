@@ -9,6 +9,8 @@ npm run dev
 
 Open [http://127.0.0.1:3007](http://127.0.0.1:3007). COUPI uses port 3007 to avoid other apps running on 3000. This version needs its local server; double-clicking the old HTML does not launch the live app.
 
+Development uses Webpack, matching the production build. If an older Turbopack process stalls before “Ready”, stop that process with Ctrl+C in its Terminal and run `npm run dev` again. The startup command should include `--webpack`. Restarting does not require deleting profiles, response caches or API keys.
+
 Copy `.env.example` to `.env.local` and set your own `OPENAI_API_KEY` there, server-side, with `OPENAI_MODEL=gpt-5-mini` and `DEMO_OFFLINE=0` for live use. Restart the server after changing these settings. Never prefix the key with `NEXT_PUBLIC_`, put it in browser code, or commit it. `.env*`, `.data/` and `.cache/` are ignored by Git. No key is needed for a fully cached offline replay, but the same model name is still required.
 
 The default journey is now one continuous path:
