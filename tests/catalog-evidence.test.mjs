@@ -27,8 +27,8 @@ test('demo keeps product groups while retired preview listings resolve to distin
  assert.equal(pink.length,10);assert(new Set(pink.map(p=>p.brand)).size>=6);
  assert(catalog.filter(p=>p.tags.includes('optical')).length>=6);
  assert(catalog.filter(p=>p.tags.includes('sunglasses')).length>=3);
- for(const id of ["1814412512", "7322824636", "7185725748", "55518713", "9026994633", "9474375760", "6431292464", "5186051654", "8533828112", "6285676894", "331802095", "7612276799", "6274724147", "8561267958"]) assert(catalog.some(p=>p.id===id),id);
- assert.equal(replacements.length,6);
+ for(const id of ["1814412512", "7322824636", "7185725748", "55518713", "9026994633", "9474375760", "6431292464", "8533828112", "6285676894", "7612276799", "6274724147", "8561267958"]) assert(catalog.some(p=>p.id===id),id);
+ assert.equal(replacements.length,14);
  assert.equal(new Set(replacements.map(p=>p.replacementId)).size,replacements.length);
  for(const replacement of replacements){
   assert(!catalog.some(p=>p.id===replacement.retiredId),'Retired preview must not be recommended');

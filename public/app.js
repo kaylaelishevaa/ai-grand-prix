@@ -19,10 +19,10 @@ const icons = {
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
 };
 const icon = (name, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]||icons.spark}</svg>`;
-const products = (window.COUPANG_PRODUCTS || []).filter(p=>['324548922','5186051654','7608596658'].includes(String(p.id))).map(p => ({
+const products = (window.COUPANG_PRODUCTS || []).filter(p=>['324548922','9604052548','7608596658'].includes(String(p.id))).map(p => ({
  ...p, sku:p.id, mode:p.category,
  id:({desk:'lamp',clothes:'shirt',makeup:'lipstick'})[p.category],
- name:({desk:'Comet clamp LED desk lamp',clothes:'Rafa Club cotton T-shirt',makeup:'Maybelline SuperStay Lip Crayon'})[p.category],
+ name:({desk:'Comet clamp LED desk lamp',clothes:'AAA 1301 cotton T-shirt',makeup:'Maybelline SuperStay Lip Crayon'})[p.category],
  originalName:p.name, category:p.category.toUpperCase(),
  tags:({desk:['minimal','warm'],clothes:['soft','natural'],makeup:['warm','minimal']})[p.category],
  detail:p.sourceNote,reason:({desk:'A clamp-style desk light from Coupang. Check current availability and dimensions.',clothes:'A cotton T-shirt listing from Coupang. Check current size and colour options.',makeup:'A lip crayon listing from Coupang. Exact shade and current stock are unverified.'})[p.category],

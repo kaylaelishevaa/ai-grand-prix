@@ -147,7 +147,7 @@ Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clo
 - `public/camera-engine.js`, `public/product-preview.js`: local tracking and product rendering.
 - `public/voice-call.js`, `lib/nook-voice.mjs`, `worker/index.ts`: Realtime connection, catalog tools, and server routes.
 - `data/catalog.json`, `public/products/`, `public/product-catalog.csv`: 82 listings/options and their images/links.
-- `data/catalog-replacements.json`: six retired-to-replacement mappings for cleaner live previews; original CDN photos and hashes are documented in `VOICE-CATALOG-SOURCES.txt`.
+- `data/catalog-replacements.json`: retired-to-replacement mappings for cleaner live previews; original CDN photos and hashes are documented in `VOICE-CATALOG-SOURCES.txt`.
 - `VOICE-CATALOG-SOURCES.txt`: listing provenance and historical reference prices.
 - `public/product-discovery.js`, `public/inline-collections.css`, `public/product-evidence.js`: inline related collections, saved groups, comparison and sourced review rendering.
 - `public/call-conversation.js`, `public/chat-images.js`: compact transcript rendering and local photo preparation.

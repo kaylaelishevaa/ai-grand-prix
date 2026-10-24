@@ -730,49 +730,52 @@
     "collectionStyle": "basic"
   },
   {
-    "id": "5186051654",
-    "name": "라파클럽 20수 남여공용 라운드 반팔티, M",
+    "id": "9604052548",
+    "name": "트리플에이 반팔 1301 단품 무지 헤비 아메리칸어패럴 AAA 18수 티셔츠, XL",
+    "url": "https://www.coupang.com/vp/products/9604052548?itemId=28670424673&vendorItemId=95612388052",
+    "price": 9900,
+    "image": "/products/9604052548.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/edaa/837e1d4fbe49c0a0db09a9905e39b03bc391ea350a59e173154a1c827880.jpg",
+    "imageSourcePage": "https://fallcent.com/product/QUwmNBKDpWlxL7jMe1C5TNHd4ROm2UZk/",
+    "preview": {
+      "kind": "garment",
+      "image": "/products/9604052548.jpg",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.61,
+      "shoulderY": 0.1
+    },
+    "sourceProductId": "9604052548",
     "category": "clothes",
     "productType": "tshirt",
-    "url": "https://www.coupang.com/vp/products/5186051654",
-    "price": 22800,
     "priceStatus": "reference",
-    "image": "/products/5186051654.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/0dcb/3ee5c1dae78da505be5f491a8d776e2e630b29727748bee7708caef09097.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%B0%98%ED%8C%94%ED%8B%B0",
-    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "sourceNote": "Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Black single front-facing packshot, size XL. Color inferred from exact option source photograph; Fallcent option text only specifies XL. Public mirror price 9,900 KRW. Coupang destination body returns403; actual final destination identifiers verified through ordinary product link.",
     "checkedAt": "2026-10-25",
-    "brand": "Lafa Club / 라파클럽",
+    "brand": "AAA / 트리플에이",
     "aliases": [
-      "Lafa Club 20-count unisex crew neck T-shirt white"
+      "AAA 1301 Heavy Cotton T-Shirt — Black"
     ],
     "tags": [
       "tshirt",
-      "white",
-      "crew neck",
-      "round neck",
+      "black",
+      "front-facing",
       "t-shirt",
       "tee",
       "반팔",
-      "라운드"
+      "basic"
     ],
+    "collectionStyle": "basic",
     "verifiedAttributes": [
-      "Lafa Club 20-count unisex crew neck T-shirt white",
-      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+      "AAA 1301 Heavy Cotton T-Shirt — Black",
+      "Named source option: 트리플에이 반팔 1301 단품 무지 헤비 아메리칸어패럴 AAA 18수 티셔츠, XL",
+      "Pictured color is a visual description, not a verified official color option. Confirm the matching option on Coupang.",
+      "Front-facing source photograph; live preview is a 2D visual guide, not a physical size or fit guarantee."
     ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/5186051654.jpg",
-      "background": "white",
-      "shoulderWidth": 0.55,
-      "shoulderY": 0.18
-    },
-    "imageSha256": "e9f16596283daacab26b0a1a0efbe71449e14dc04fff51808a2455d34e1877a2",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/5186051654",
+      "sourceUrl": "https://www.coupang.com/vp/products/9604052548?itemId=28670424673&vendorItemId=95612388052",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -780,7 +783,7 @@
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
     },
-    "collectionStyle": "basic"
+    "imageSha256": "4331ac01987e0bff082ad956d40e2c6ad119818ca419c02d8eb2ab1d93c27cae"
   },
   {
     "id": "8533828112",
@@ -915,55 +918,63 @@
     }
   },
   {
-    "id": "331802095",
-    "name": "앨빈클로 남녀공용 무지 오버핏 기모 후드티 AVH855, L",
+    "id": "7856352896",
+    "name": "엘라모 3H 라모싸인 후드티, 2XL",
+    "url": "https://www.coupang.com/vp/products/7856352896?itemId=21427199195&vendorItemId=88725729991",
+    "price": 33800,
+    "image": "/products/7856352896.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/3367/46316609b3e866217799bafa31a6c14a4e06f4ecd00159996919e673c6a5.jpg",
+    "imageSourcePage": "https://fallcent.com/product/i79DZCXN2afl5GgL09yYm6MAEZu47hVe/",
+    "preview": {
+      "kind": "garment",
+      "image": "/products/7856352896.jpg",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.59,
+      "shoulderY": 0.235,
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 1,
+        "height": 0.87
+      }
+    },
+    "sourceProductId": "7856352896",
     "category": "clothes",
     "productType": "hoodie",
-    "url": "https://www.coupang.com/vp/products/331802095",
-    "price": 29990,
     "priceStatus": "reference",
-    "image": "/products/331802095.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/1025_amir_coupang_oct_80k/db35/c8cf46ff91443defd39629f3a45babc7c91ecea9d9e28d8e82648068c3db.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%95%A8%EB%B9%88%ED%81%B4%EB%A1%9C%20%ED%9B%84%EB%93%9C%ED%8B%B0",
-    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "sourceNote": "Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Source photo has four color swatches below garment; crop bottom 13% to exclude swatches while preserving complete garment. Price is Fallcent observed reference on 2026-10-25; live Coupang stock/price not independently readable because retailer body returned 403. Exact Coupang product, item, vendor IDs observed via ordinary click of Fallcent retailer link; size2XL named, black is pictured not independently selectable option verified. No ratings/reviews copied or invented.",
     "checkedAt": "2026-10-25",
-    "brand": "Alvinclo / 앨빈클로",
+    "brand": "L.LAMO",
     "aliases": [
-      "Alvinclo AVH855 plain oversized fleece hoodie black"
+      "L.LAMO 3H Lamo Sign hoodie — pictured black, 2XL"
     ],
     "tags": [
       "hoodie",
       "black",
-      "fleece",
-      "oversized",
-      "hoodie",
-      "후드티",
-      "기모"
+      "front-facing",
+      "hooded",
+      "후드티"
     ],
     "verifiedAttributes": [
-      "Alvinclo AVH855 plain oversized fleece hoodie black",
-      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+      "L.LAMO 3H Lamo Sign hoodie — pictured black, 2XL",
+      "Named source option: 엘라모 3H 라모싸인 후드티, 2XL",
+      "Pictured color is a visual description, not a verified official color option. Confirm the matching option on Coupang.",
+      "Front-facing source photograph; live preview is a 2D visual guide, not a physical size or fit guarantee."
     ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/331802095.jpg",
-      "background": "white",
-      "shoulderWidth": 0.54,
-      "shoulderY": 0.27
-    },
-    "imageSha256": "cae493010c41eb77736707d20dc26bb988ece1d3cf07c38be4276ba35e7e9bba",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/331802095",
+      "sourceUrl": "https://www.coupang.com/vp/products/7856352896?itemId=21427199195&vendorItemId=88725729991",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
       "cons": [],
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
+    },
+    "imageSha256": "463a1ea5e3923993cc62bf2a738bb120c9f2f67c3ef428cffd54e88402d5294d"
   },
   {
     "id": "7612276799",
@@ -4172,50 +4183,57 @@
     }
   },
   {
-    "id": "8610766199",
-    "sourceProductId": "8610766199",
-    "name": "앨빈클로 남녀공용 레귤러핏 무지 후드티 AVH632, M",
+    "id": "8391704299",
+    "name": "챔피온 남녀공용 US Powerblend 스크립트 로고 러버 프린트 후드티, XL",
+    "url": "https://www.coupang.com/vp/products/8391704299",
+    "price": 66920,
+    "image": "/products/8391704299.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2024/10/11/15/2/3b0a6955-f907-482b-991d-292430375b34.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B1%94%ED%94%BC%EC%98%A8%20%ED%9B%84%EB%93%9C%ED%8B%B0",
+    "preview": {
+      "kind": "garment",
+      "image": "/products/8391704299.jpg",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.56,
+      "shoulderY": 0.295
+    },
+    "sourceProductId": "8391704299",
     "category": "clothes",
     "productType": "hoodie",
-    "url": "https://www.coupang.com/vp/products/8610766199",
-    "price": 27410,
     "priceStatus": "reference",
-    "image": "/products/8610766199.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2025/03/10/17/8/f30c088f-582a-4f01-8f68-da18ea3ccc72.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%95%A8%EB%B9%88%ED%81%B4%EB%A1%9C%20%ED%9B%84%EB%93%9C%ED%8B%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified. The hoodie source photo is slightly angled; its live 2D preview retains that source view and does not establish fit.",
+    "sourceNote": "Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Exact product family verified from matching title in public indexed Coupang search linked to8391704299; linked item24257770727/vendor91274519180 is a search default, not independently confirmed XL gray. Family-level URL deliberately omits unverified option IDs. Photo, named XL option and66920reference price jointly sourced on Fallcent search result. Detail link currently missing; live price/stock not independently readable. No ratings/reviews copied or invented.",
     "checkedAt": "2026-10-25",
-    "brand": "Alvinclo / 앨빈클로",
+    "brand": "Champion",
     "aliases": [
-      "Alvinclo AVH632 regular-fit plain hoodie"
+      "Champion US Powerblend rubber-print hoodie — pictured gray, XL"
     ],
     "tags": [
       "hoodie",
-      "brown"
+      "gray",
+      "front-facing",
+      "hooded",
+      "후드티"
     ],
     "verifiedAttributes": [
-      "Alvinclo AVH632 regular-fit plain hoodie",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+      "Champion US Powerblend rubber-print hoodie — pictured gray, XL",
+      "Named source option: 챔피온 남녀공용 US Powerblend 스크립트 로고 러버 프린트 후드티, XL",
+      "Pictured color is a visual description, not a verified official color option. Confirm the matching option on Coupang.",
+      "Front-facing source photograph; live preview is a 2D visual guide, not a physical size or fit guarantee."
     ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/8610766199.jpg",
-      "background": "white",
-      "available": true
-    },
-    "imageSha256": "6c221223dad00069b42d10da94c499b61b6a4a619df661a4018307d87622c5b5",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/8610766199",
+      "sourceUrl": "https://www.coupang.com/vp/products/8391704299",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
       "cons": [],
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
+    },
+    "imageSha256": "feb57304d8377c22a7e1c93c4f4bed23c53502384e4da6ec5f590a3bad98edad"
   },
   {
     "id": "8391704457",
@@ -4314,45 +4332,52 @@
     }
   },
   {
-    "id": "215801766",
-    "sourceProductId": "215801766",
-    "name": "무지 반팔티 20수 라운드 면티 커플 레이어드 데일리 티셔츠, XL",
+    "id": "8310483629-brown",
+    "name": "유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, M",
+    "url": "https://www.coupang.com/vp/products/8310483629",
+    "price": 10900,
+    "image": "/products/8310483629-brown.png",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/e73e/c54b1e4b51c3e03eed60bb882c37c5bd1e9ea7f27f67ef20138425f26308.png",
+    "imageSourcePage": "https://fallcent.com/product/0JJQpywf7vgeKnV983JAQUTaysZcYLCM/",
+    "preview": {
+      "kind": "garment",
+      "image": "/products/8310483629-brown.png",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.56,
+      "shoulderY": 0.1
+    },
+    "sourceProductId": "8310483629",
     "category": "clothes",
     "productType": "tshirt",
-    "url": "https://www.coupang.com/vp/products/215801766",
-    "price": 7900,
     "priceStatus": "reference",
-    "image": "/products/215801766.png",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/b865/ea243c08012219df7f0fcd15f68b6f51492fe9b9dbae7fe8f7104306fe4b.png",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%AC%B4%EC%A7%80%20%EB%B0%98%ED%8C%94%ED%8B%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. The source page explicitly groups the brown M, olive XL and muted-blue L photos as options of the same United Athle 17-count model. The exact Korean model title matches indexed Coupang family 8310483629. Exact color/item IDs are not verified; select the matching pictured color and named size on Coupang. These are options of one product family, not separate sellers.",
     "checkedAt": "2026-10-25",
-    "brand": null,
+    "brand": "United Athle",
     "aliases": [
-      "Plain 20-count cotton crew-neck short-sleeve tee"
+      "United Athle 17-count Cotton T-Shirt — Brown"
     ],
     "tags": [
       "tshirt",
-      "white",
+      "brown",
+      "front-facing",
+      "t-shirt",
+      "tee",
+      "반팔",
       "basic"
     ],
+    "collectionStyle": "basic",
     "verifiedAttributes": [
-      "Plain 20-count cotton crew-neck short-sleeve tee",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+      "United Athle 17-count Cotton T-Shirt — Brown",
+      "Named source option: 유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, M",
+      "Pictured color is a visual description, not a verified official color option. Confirm the matching option on Coupang.",
+      "Front-facing source photograph; live preview is a 2D visual guide, not a physical size or fit guarantee."
     ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/215801766.png",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "b4b58ca48e043034d379bce4aca3f0938789e3268c25e5d09c4a086edcb616fe",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/215801766",
+      "sourceUrl": "https://www.coupang.com/vp/products/8310483629",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -4360,48 +4385,55 @@
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
     },
-    "collectionStyle": "basic"
+    "imageSha256": "3bcdb9cb6acb498a87b54ecc91b1aa99472fa651eb367da6e50e592a3462d837"
   },
   {
-    "id": "7735720128",
-    "sourceProductId": "7735720128",
-    "name": "캐럿 통기성 기본 반팔 티셔츠 3장, L (100)",
+    "id": "8310483629-olive",
+    "name": "유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, XL",
+    "url": "https://www.coupang.com/vp/products/8310483629",
+    "price": 10900,
+    "image": "/products/8310483629-olive.png",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/cf80/0095624db28d6117f9f8254fdc061ef0fbc0adc6fd77131a0fa47f3f7457.png",
+    "imageSourcePage": "https://fallcent.com/product/0JJQpywf7vgeKnV983JAQUTaysZcYLCM/",
+    "preview": {
+      "kind": "garment",
+      "image": "/products/8310483629-olive.png",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.56,
+      "shoulderY": 0.1
+    },
+    "sourceProductId": "8310483629",
     "category": "clothes",
     "productType": "tshirt",
-    "url": "https://www.coupang.com/vp/products/7735720128",
-    "price": 11900,
     "priceStatus": "reference",
-    "image": "/products/7735720128.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/1202179759801288-e6051a9b-8888-4412-b09d-bb6a321b8954.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%BA%90%EB%9F%BF%20%EB%B0%98%ED%8C%94%ED%8B%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. The source page explicitly groups the brown M, olive XL and muted-blue L photos as options of the same United Athle 17-count model. The exact Korean model title matches indexed Coupang family 8310483629. Exact color/item IDs are not verified; select the matching pictured color and named size on Coupang. These are options of one product family, not separate sellers.",
     "checkedAt": "2026-10-25",
-    "brand": "Carrot / 캐럿",
+    "brand": "United Athle",
     "aliases": [
-      "Carrot basic short-sleeve T-shirt three-pack"
+      "United Athle 17-count Cotton T-Shirt — Olive"
     ],
     "tags": [
       "tshirt",
-      "white",
+      "olive",
+      "front-facing",
+      "t-shirt",
+      "tee",
+      "반팔",
       "basic"
     ],
+    "collectionStyle": "basic",
     "verifiedAttributes": [
-      "Carrot basic short-sleeve T-shirt three-pack",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+      "United Athle 17-count Cotton T-Shirt — Olive",
+      "Named source option: 유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, XL",
+      "Pictured color is a visual description, not a verified official color option. Confirm the matching option on Coupang.",
+      "Front-facing source photograph; live preview is a 2D visual guide, not a physical size or fit guarantee."
     ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/7735720128.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "901b5e96759b75be6ca5dc5f4dd80eb5e54909905ab3df6dfdd416decbb835b2",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7735720128",
+      "sourceUrl": "https://www.coupang.com/vp/products/8310483629",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -4409,48 +4441,55 @@
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
     },
-    "collectionStyle": "basic"
+    "imageSha256": "5206ba02cbe860ea1b36a6779c570bdf2c29909ab09328998590ae92d291c102"
   },
   {
-    "id": "6271725686",
-    "sourceProductId": "6271725686",
-    "name": "베이직하우스 순면 헤비웨이트 반팔 티셔츠 3P, 100",
+    "id": "8310483629-blue",
+    "name": "유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, L",
+    "url": "https://www.coupang.com/vp/products/8310483629",
+    "price": 10900,
+    "image": "/products/8310483629-blue.png",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/c8e8/c2bda9607af4ceb508f4024311d51682d2898a3c18d04735ea5ff5366edd.png",
+    "imageSourcePage": "https://fallcent.com/product/0JJQpywf7vgeKnV983JAQUTaysZcYLCM/",
+    "preview": {
+      "kind": "garment",
+      "image": "/products/8310483629-blue.png",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.56,
+      "shoulderY": 0.1
+    },
+    "sourceProductId": "8310483629",
     "category": "clothes",
     "productType": "tshirt",
-    "url": "https://www.coupang.com/vp/products/6271725686",
-    "price": 18990,
     "priceStatus": "reference",
-    "image": "/products/6271725686.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/884316411339122-ab09f490-ddc4-43b9-a662-96e31f7a6443.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%B2%A0%EC%9D%B4%EC%A7%81%ED%95%98%EC%9A%B0%EC%8A%A4%20%EB%B0%98%ED%8C%94%ED%8B%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. The source page explicitly groups the brown M, olive XL and muted-blue L photos as options of the same United Athle 17-count model. The exact Korean model title matches indexed Coupang family 8310483629. Exact color/item IDs are not verified; select the matching pictured color and named size on Coupang. These are options of one product family, not separate sellers.",
     "checkedAt": "2026-10-25",
-    "brand": "BASIC HOUSE",
+    "brand": "United Athle",
     "aliases": [
-      "Basic House heavyweight cotton T-shirt three-pack"
+      "United Athle 17-count Cotton T-Shirt — Muted Blue"
     ],
     "tags": [
       "tshirt",
-      "white",
+      "blue",
+      "front-facing",
+      "t-shirt",
+      "tee",
+      "반팔",
       "basic"
     ],
+    "collectionStyle": "basic",
     "verifiedAttributes": [
-      "Basic House heavyweight cotton T-shirt three-pack",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+      "United Athle 17-count Cotton T-Shirt — Muted Blue",
+      "Named source option: 유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, L",
+      "Pictured color is a visual description, not a verified official color option. Confirm the matching option on Coupang.",
+      "Front-facing source photograph; live preview is a 2D visual guide, not a physical size or fit guarantee."
     ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/6271725686.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "07a293c901f535430c4fc5b0aa7d0a6195b672e8efff22ba955e9e36e641715b",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/6271725686",
+      "sourceUrl": "https://www.coupang.com/vp/products/8310483629",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -4458,7 +4497,7 @@
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
     },
-    "collectionStyle": "basic"
+    "imageSha256": "1d50977fe346e46d8afba2934a7c0f38138aca4c2d6663c6dc824a50ed9e4025"
   },
   {
     "id": "5976056",
@@ -4606,45 +4645,52 @@
     "collectionStyle": "branded"
   },
   {
-    "id": "8832206567",
-    "sourceProductId": "8832206567",
-    "name": "챔피온 남성 반팔티셔츠 빅로고스크립트 GT23 블랙, L(105)",
+    "id": "7187298300",
+    "name": "(남여공용) 챔피온 반팔 로고 그래픽 티셔츠 GT23H, M",
+    "url": "https://www.coupang.com/vp/products/7187298300?itemId=18139243548&vendorItemId=85289794531",
+    "price": 16400,
+    "image": "/products/7187298300.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/3e17/d1905bf760bc5348439ee8b80da20fbd494b5d4ac192ef5f8542a1e60668.jpg",
+    "imageSourcePage": "https://fallcent.com/product/ToOrJD0DuhHLzRlQwUv16gnmtb3B9jpG/",
+    "preview": {
+      "kind": "garment",
+      "image": "/products/7187298300.jpg",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.56,
+      "shoulderY": 0.155
+    },
+    "sourceProductId": "7187298300",
     "category": "clothes",
     "productType": "tshirt",
-    "url": "https://www.coupang.com/vp/products/8832206567",
-    "price": 13500,
     "priceStatus": "reference",
-    "image": "/products/8832206567.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/image_audit/stage/manual/e66678b7680ba1abd4e23210493da891e291190bd33d31a300e61e72a6ae_1776759472349.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B1%94%ED%94%BC%EC%98%A8%20%EB%B0%98%ED%8C%94%ED%8B%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Front-on light-gray garment photo visually inspected; source names size M but does not specify an official color name. Exact product, item and vendor IDs verified through source ordinary purchase redirect. Coupang destination returns 403, so live stock/current price cannot be independently confirmed. Price 16,400 KRW observed on Fallcent source; may change. No review data provided.",
     "checkedAt": "2026-10-25",
     "brand": "Champion",
     "aliases": [
-      "Champion GT23 black script-logo T-shirt"
+      "Champion GT23H Logo T-shirt (M)"
     ],
     "tags": [
       "tshirt",
-      "black",
+      "gray",
+      "front-facing",
+      "t-shirt",
+      "tee",
+      "반팔",
       "branded"
     ],
+    "collectionStyle": "branded",
     "verifiedAttributes": [
-      "Champion GT23 black script-logo T-shirt",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+      "Champion GT23H Logo T-shirt (M)",
+      "Named source option: (남여공용) 챔피온 반팔 로고 그래픽 티셔츠 GT23H, M",
+      "Pictured color is a visual description, not a verified official color option. Confirm the matching option on Coupang.",
+      "Front-facing source photograph; live preview is a 2D visual guide, not a physical size or fit guarantee."
     ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/8832206567.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "bc9d0fddd93717ff48a6f687ade3cfec4c1aee4ea8be61d68baac8cbf95afb3b",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/8832206567",
+      "sourceUrl": "https://www.coupang.com/vp/products/7187298300?itemId=18139243548&vendorItemId=85289794531",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -4652,48 +4698,55 @@
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
     },
-    "collectionStyle": "branded"
+    "imageSha256": "d44c6efd78850088b51fbb2796bce33a3e8a17f32570a1f39a5c226a00cf9feb"
   },
   {
-    "id": "240870751",
-    "sourceProductId": "240870751",
-    "name": "챔피온 T425 무지 반팔티, S",
+    "id": "7411084109",
+    "name": "챔피온 US 스크립트 로고 Powerblend 반팔티셔츠, 00S",
+    "url": "https://www.coupang.com/vp/products/7411084109?itemId=19202293986&vendorItemId=86319613091",
+    "price": 24300,
+    "image": "/products/7411084109.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2023/06/19/17/6/6520e4b8-5138-4914-ba7d-930c6c12df74.jpg",
+    "imageSourcePage": "https://fallcent.com/product/pAZgm0PoeBmjkru59bhHDz6Q1fp2FsIL/",
+    "preview": {
+      "kind": "garment",
+      "image": "/products/7411084109.jpg",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.62,
+      "shoulderY": 0.08
+    },
+    "sourceProductId": "7411084109",
     "category": "clothes",
     "productType": "tshirt",
-    "url": "https://www.coupang.com/vp/products/240870751",
-    "price": 8900,
     "priceStatus": "reference",
-    "image": "/products/240870751.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/5b67/f1d268874508be1979a873955d713b7a385a44eb6a1e3e811c04d77b3e25.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B1%94%ED%94%BC%EC%98%A8%20%EB%B0%98%ED%8C%94%ED%8B%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified. The try-on selects only the pictured black front T-shirt from the multi-colour source photo; this is a preview variant, not a multi-shirt bundle.",
+    "sourceNote": "Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Front-on charcoal garment photo visually inspected; source names size 00S but does not specify an official color name. Exact product, item and vendor IDs verified through source ordinary purchase redirect. Coupang destination returns 403, so live stock/current price cannot be independently confirmed. Price 24,300 KRW observed on Fallcent source; may change. No review data provided.",
     "checkedAt": "2026-10-25",
     "brand": "Champion",
     "aliases": [
-      "Champion T425 short-sleeve T-shirt"
+      "Champion US Script Powerblend T-shirt (00S)"
     ],
     "tags": [
       "tshirt",
-      "black",
+      "charcoal",
+      "front-facing",
+      "t-shirt",
+      "tee",
+      "반팔",
       "branded"
     ],
+    "collectionStyle": "branded",
     "verifiedAttributes": [
-      "Champion T425 short-sleeve T-shirt",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang.",
-      "Try-on preview shows the pictured black front T-shirt only. Confirm black and the desired size on Coupang."
+      "Champion US Script Powerblend T-shirt (00S)",
+      "Named source option: 챔피온 US 스크립트 로고 Powerblend 반팔티셔츠, 00S",
+      "Pictured color is a visual description, not a verified official color option. Confirm the matching option on Coupang.",
+      "Front-facing source photograph; live preview is a 2D visual guide, not a physical size or fit guarantee."
     ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/240870751.jpg",
-      "background": "white",
-      "available": true
-    },
-    "imageSha256": "19f558502194d4e747c2b7d7b4d841dc4f232621126239f60fd9b1e8a90caa10",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/240870751",
+      "sourceUrl": "https://www.coupang.com/vp/products/7411084109?itemId=19202293986&vendorItemId=86319613091",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -4701,7 +4754,7 @@
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
     },
-    "collectionStyle": "branded"
+    "imageSha256": "f20d43b373bd0e69747d9a1967aa229a558db311a6b258dedf786f250237e600"
   },
   {
     "id": "8715669911",
