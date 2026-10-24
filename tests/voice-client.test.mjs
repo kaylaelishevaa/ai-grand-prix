@@ -72,7 +72,7 @@ function fixture(t, options = {}) {
   }
   const mic = microphone();
   const audio = {srcObject: null, play: async () => {}, pause() {this.paused = true;}};
-  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], visionStates = [], captures = [];
+  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], checkouts = [], visionStates = [], captures = [];
   let permissions = 0;
   const voice = new context.window.NookVoiceSession({
     audio, PeerConnection: Peer, greeting: options.greeting,
@@ -103,10 +103,11 @@ function fixture(t, options = {}) {
     onRecommendations: (products, message, metadata) => recommendations.push({products, message, metadata}),
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return {ok:true,action,product_id:product_id || "324548922",purchased:false};},
+    onCheckout: options.checkoutUnavailable?undefined:async value=>{checkouts.push(value);return options.onCheckout?options.onCheckout(value):{ok:true,item_ids:['324548922']};},
   });
   t.after(() => voice.end());
   return {
-    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, timerDelays, visionStates, captures,
+    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, checkouts, timerDelays, visionStates, captures,
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
@@ -770,4 +771,100 @@ test('hidden frames and function output during interruption never displace a pen
   f.emit({type:'response.output_audio_transcript.delta',response_id:'r3',item_id:'a2',delta:'A different style'});
   assert.deepEqual(latestTranscript(f).map(row=>row.key),['u1','a1','u2','a2']);
   assert.equal(latestTranscript(f).find(row=>row.key==='u2').pending,true);
+});
+
+test('checkout tools open one review for each explicit scope and never invoke a payment endpoint',async t=>{
+  const f=fixture(t);await connect(f);
+  for(const [index,scope] of ['selected','comparison','cart','products'].entries()) {
+    const args={scope,...(scope==='products'?{product_ids:['324548922','lamp-pink','324548922']}:{})};
+    const item=tool(f,'checkout-'+index,'start_checkout',args,'r-checkout-'+index);
+    done(f,'r-checkout-'+index,[item]);await tick();
+    // Repeated completion events must not open a second review.
+    done(f,'r-checkout-'+index,[item]);await tick();
+  }
+  assert.equal(f.checkouts.length,4);
+  assert.deepEqual(f.checkouts.map(value=>value.scope),['selected','comparison','cart','products']);
+  assert.deepEqual(JSON.parse(JSON.stringify(f.checkouts[3])),{scope:'products',productIds:['324548922','lamp-pink']});
+  assert.equal(f.checkouts[0].productIds,undefined);
+  assert.equal(toolOutputs(f.channel).length,4);
+  for(const event of toolOutputs(f.channel)) {
+    const result=JSON.parse(event.item.output);
+    assert.equal(result.ok,true);assert.equal(result.review_opened,true);
+    assert.equal(result.demo,true);assert.equal(result.payment_processed,false);
+    assert.match(result.instruction,/press the final demo payment button themselves/);
+  }
+  assert.equal(f.calls.length,2);assert.equal(f.actions.length,0);
+});
+
+test('invalid checkout scopes, IDs, mixed selectors and payment commands never reach UI controls',async t=>{
+  const f=fixture(t);await connect(f);
+  const invalid=[{}, {scope:'pay'}, {scope:'all'}, {scope:'products'}, {scope:'products',product_ids:[]},
+    {scope:'products',product_ids:['https://attacker.test']}, {scope:'products',product_ids:[4]},
+    {scope:'products',product_ids:['x'.repeat(81)]}, {scope:'products',product_ids:['a\nb']}, {scope:'products',product_ids:['a\n']},
+    {scope:'products',product_ids:Array.from({length:11},(_,i)=>String(i))},
+    {scope:'selected',product_ids:['324548922']}, {scope:'cart',confirm:true}, {scope:'cart',payment:'charge'}];
+  const items=invalid.map((args,i)=>tool(f,'invalid-checkout-'+i,'start_checkout',args,'r-checkout-invalid'));
+  items.push(tool(f,'automatic-pay','confirm_payment',{},'r-checkout-invalid'));
+  done(f,'r-checkout-invalid',items);await tick();
+  assert.equal(f.checkouts.length,0);
+  assert.equal(toolOutputs(f.channel).length,items.length);
+  assert(toolOutputs(f.channel).every(event=>JSON.parse(event.item.output).ok===false));
+});
+
+test('checkout callback failures, missing controls and invalid success results remain failures',async t=>{
+  for(const settings of [{checkoutUnavailable:true},{onCheckout:async()=>{throw Error('Selection changed.');}},
+    {onCheckout:async()=>({ok:false,error:'Your bag is empty.'})},{onCheckout:async()=>undefined},
+    {onCheckout:async()=>({ok:true,review_opened:false})},{onCheckout:async()=>({ok:true,payment_processed:true})},{onCheckout:async()=>({ok:true,demo:false})}]) {
+    const f=fixture(t,settings);await connect(f);
+    const item=tool(f,'checkout-failed','start_checkout',{scope:'cart'},'r-checkout-failed');
+    done(f,'r-checkout-failed',[item]);await tick();
+    const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);
+    assert.equal(result.ok,false);assert.notEqual(result.review_opened,true);
+    assert.match(result.instruction,/Do not invent/);
+  }
+});
+
+test('ending a call suppresses late checkout results and stale tools cannot open a review',async t=>{
+  const pending=deferred();const f=fixture(t,{onCheckout:()=>pending.promise});await connect(f);
+  const oldCall=f.voice.call,channel=f.channel;
+  const item=tool(f,'pending-checkout','start_checkout',{scope:'selected'},'r-checkout-pending');
+  done(f,'r-checkout-pending',[item]);
+  assert.equal(f.checkouts.length,1);
+  f.voice.end();
+  pending.resolve({ok:true});await tick();
+  assert.equal(toolOutputs(channel).length,0);
+  await f.voice._tool(oldCall,{call_id:'stale-checkout',name:'start_checkout',arguments:'{"scope":"cart"}'});
+  assert.equal(f.checkouts.length,1);
+});
+
+test('long UI context retains checkout state and exact cart and comparison IDs',async t=>{
+  const context={mode:'glasses',screen:'active',visible_panel:'comparison',cameraRunning:true,
+    cart_ids:['324548922','lamp-pink'],comparison_ids:['chair-black','chair-white'],
+    visible_product:{id:'lamp-pink',title:'long '.repeat(1000)},
+    checkout:{step:'review',item_ids:['lamp-pink'],reference_total:29000,demo:true},unused:'x'.repeat(6000)};
+  const f=fixture(t,{getContext:()=>context});await connect(f);
+  const greeting=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context,'));
+  const encoded=greeting.item.content[0].text.split('App context, not a spoken shopper request: ')[1].split('. The shopper answered')[0];
+  assert(encoded.length<=1600);
+  const decoded=JSON.parse(encoded);
+  assert.deepEqual(decoded.checkout,context.checkout);
+  assert.deepEqual(decoded.cart_ids,context.cart_ids);
+  assert.deepEqual(decoded.comparison_ids,context.comparison_ids);
+  assert.equal(decoded.visible_product.id,'lamp-pink');assert.equal(decoded.screen,'active');
+  assert.equal(decoded.visible_panel,'comparison');
+});
+
+test('oversized checkout context stays bounded without changing any exact product ID',async t=>{
+  const ids=Array.from({length:10},(_,i)=>String(i)+'x'.repeat(79));
+  const context={mode:'desk',screen:'comparison',cart_ids:ids,comparison_ids:ids.slice(0,3),
+    checkout:{step:'review',item_ids:ids,reference_total:900000,demo:true},unused:'x'.repeat(6000)};
+  const f=fixture(t,{getContext:()=>context});await connect(f);
+  const greeting=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context,'));
+  const encoded=greeting.item.content[0].text.split('App context, not a spoken shopper request: ')[1].split('. The shopper answered')[0];
+  assert(encoded.length<=1600);
+  const decoded=JSON.parse(encoded);
+  assert.equal(decoded.screen,'comparison');assert.equal(decoded.checkout.step,'review');
+  assert.equal(decoded.checkout.demo,true);assert.equal(decoded.checkout.reference_total,900000);
+  assert(decoded.cart_ids_truncated || decoded.comparison_ids_truncated || decoded.checkout.item_ids_truncated);
+  assert([...decoded.cart_ids,...decoded.comparison_ids,...decoded.checkout.item_ids].every(id=>ids.includes(id)));
 });

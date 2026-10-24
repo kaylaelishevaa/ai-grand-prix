@@ -6,6 +6,7 @@
   const PERMISSION_MS = 60000;
   const IMAGE_ACK_MS = 12000;
   const MAX_IMAGE_DATA_LENGTH = 55000;
+  const PRODUCT_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}(?![\s\S])/;
   const bounded = (value, low, high) => Math.min(high, Math.max(low, Number(value)));
   function contextText(value) {
     try {
@@ -14,13 +15,25 @@
       const safe=JSON.parse(serialized),short=value=>typeof value==='string'?value.slice(0,120):['number','boolean'].includes(typeof value)?value:undefined;
       const product=value=>value&&typeof value==='object'?Object.fromEntries(['id','title','category','productType','price','preview_kind','shade_color','shade_estimated'].filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
       const fields=(value,keys)=>value&&typeof value==='object'?Object.fromEntries(keys.filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
-      const compact={mode:short(safe.mode),screen:short(safe.screen),cameraRunning:safe.cameraRunning===true,
+      const ids=value=>Array.isArray(value)?[...new Set(value.filter(id=>typeof id==='string'&&PRODUCT_ID.test(id)))].slice(0,10):[];
+      const compact={mode:short(safe.mode),screen:short(safe.screen),visible_panel:short(safe.visible_panel),cameraRunning:safe.cameraRunning===true,
         vision:fields(safe.vision,['enabled','last_image_at','state']),
         tried_product:product(safe.tried_product),overlay:fields(safe.overlay,['color','opacity','scale','x','y','rotation','mirror']),
-        visible_product:product(safe.visible_product),comparison_ids:Array.isArray(safe.comparison_ids)?safe.comparison_ids.slice(0,3).map(id=>String(id).slice(0,80)):[],group_label:typeof safe.group_label==='string'?safe.group_label.slice(0,120):undefined,cart_count:Array.isArray(safe.cart_ids)?safe.cart_ids.length:0};
+        visible_product:product(safe.visible_product),comparison_ids:ids(safe.comparison_ids).slice(0,3),cart_ids:ids(safe.cart_ids),group_label:typeof safe.group_label==='string'?safe.group_label.slice(0,120):undefined,cart_count:Array.isArray(safe.cart_ids)?safe.cart_ids.length:0,
+        checkout:safe.checkout&&typeof safe.checkout==='object'?{...fields(safe.checkout,['step','reference_total','demo']),item_ids:ids(safe.checkout.item_ids)}:null};
+      if(safe.checkout?.reference_total===null&&compact.checkout)compact.checkout.reference_total=null;
+      if(Array.isArray(safe.cart_ids)&&safe.cart_ids.length>compact.cart_ids.length)compact.cart_ids_truncated=true;
+      if(Array.isArray(safe.comparison_ids)&&safe.comparison_ids.length>compact.comparison_ids.length)compact.comparison_ids_truncated=true;
+      if(Array.isArray(safe.checkout?.item_ids)&&safe.checkout.item_ids.length>compact.checkout.item_ids.length)compact.checkout.item_ids_truncated=true;
       if(JSON.stringify(compact).length>1600){if(compact.tried_product)delete compact.tried_product.title;if(compact.visible_product)delete compact.visible_product.title;}
-      if(JSON.stringify(compact).length>1600){delete compact.vision;delete compact.visible_product;}
+      if(JSON.stringify(compact).length>1600){delete compact.vision;compact.visible_product=fields(safe.visible_product,['id','productType']);}
       if(JSON.stringify(compact).length>1600){delete compact.overlay;compact.tried_product=fields(safe.tried_product,['id','productType']);}
+      if(JSON.stringify(compact).length>1600){delete compact.group_label;delete compact.tried_product;}
+      // Preserve exact IDs: flag partial lists rather than cutting an ID into a different product.
+      for(const key of ['cart_ids','comparison_ids','item_ids']) {
+        const owner=key==='item_ids'?compact.checkout:compact;
+        while(JSON.stringify(compact).length>1600 && owner?.[key]?.length){owner[key].pop();owner[key+'_truncated']=true;}
+      }
       return JSON.stringify(compact);
     } catch {return '{}';}
   }
@@ -386,7 +399,7 @@
     }
     async _tool(c,event) {
       const callId=event.call_id;
-      if(!callId || c.tools.has(callId))return;
+      if(!this._current(c) || !callId || c.tools.has(callId))return;
       const task={done:false};c.tools.set(callId,task);
       let result;
       try {
@@ -430,7 +443,21 @@
           if(!this.options.onProductAction)throw new Error('Product card controls are unavailable on this page.');
           result=await this.options.onProductAction(args.action,args.product_id);
           if(!result || typeof result!=='object')throw new Error('The product action did not return a verified result.');
-        } else throw new Error('Unknown tool. Only camera snapshots, catalog search, product cards and live preview controls are supported.');
+        } else if(event.name==='start_checkout') {
+          if(Object.keys(args).some(key=>!['scope','product_ids'].includes(key)))throw new Error('Checkout only accepts a scope and optional exact product IDs. Payment cannot be submitted by voice.');
+          if(!['selected','comparison','cart','products'].includes(args.scope))throw new Error('Choose selected, comparison, cart, or products to open the demo order review.');
+          if(args.scope!=='products'&&args.product_ids!==undefined)throw new Error('Only the products scope accepts explicit IDs; other scopes use the current UI selection.');
+          let productIds;
+          if(args.scope==='products') {
+            if(!Array.isArray(args.product_ids)||args.product_ids.length<1||args.product_ids.length>10||args.product_ids.some(id=>typeof id!=='string'||!PRODUCT_ID.test(id)))throw new Error('Choose 1–10 exact catalog product IDs.');
+            productIds=[...new Set(args.product_ids)];
+          }
+          if(!this.options.onCheckout)throw new Error('The demo checkout is unavailable on this page.');
+          const opened=await this.options.onCheckout({scope:args.scope,productIds});
+          if(!opened || typeof opened!=='object' || Array.isArray(opened) || opened.ok!==true || opened.review_opened===false)throw new Error(opened?.error || 'The order review could not be opened.');
+          if(opened.payment_processed===true || opened.purchased===true || opened.demo===false)throw new Error('Checkout returned an invalid result. Voice can only open a demo order review.');
+          result={...opened,ok:true,review_opened:true,demo:true,payment_processed:false,instruction:'The demo order review is open. Ask the shopper to review it; they must press the final demo payment button themselves. No real order or payment is made.'};
+        } else throw new Error('Unknown tool. Only camera snapshots, catalog search, product cards, live preview controls and opening demo checkout review are supported.');
       } catch(error) {result={ok:false,error:error.name==='AbortError'?'The tool request timed out or the call ended.':error.message || 'Tool failed.',products:[],instruction:'Tell the shopper about the limitation. Do not invent products, prices, availability, or successful changes.'};}
       task.done=true;
       if(!this._current(c))return;

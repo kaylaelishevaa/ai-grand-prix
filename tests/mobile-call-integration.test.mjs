@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import catalog from '../data/catalog.json' with {type:'json'};
 const html=readFileSync(new URL('../site-pages/camera.html',import.meta.url),'utf8');
 const stateSource=readFileSync(new URL('../public/mobile-call-state.js',import.meta.url),'utf8');
-const moduleSources=['product-discovery.js','call-conversation.js','product-evidence.js'].map(name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8'));
+const moduleSources=['product-discovery.js','call-conversation.js','product-evidence.js','demo-checkout.js'].map(name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8'));
 const source=readFileSync(new URL('../public/mobile-call.js',import.meta.url),'utf8');
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
 function deferred(){let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};}
@@ -311,4 +311,124 @@ test('new transcript turns do not drag a shopper away from an earlier scroll pos
   f.voice.opts.onTranscript({key:'turn-8',role:'assistant',order:8,delta:'New message'});
   assert.equal(transcript.scrollTop,20);assert.equal(f.nodes.get('chat-latest').hidden,false);
   f.nodes.get('chat-latest').onclick();assert.equal(transcript.scrollTop,transcript.scrollHeight);assert.equal(f.nodes.get('chat-latest').hidden,true);
+});
+
+const checkoutIds=f=>Array.from(f.checkout.current.selectedItems,item=>item.id);
+function descendants(node){return node.children.flatMap(child=>[child,...descendants(child)]);}
+function checkoutButton(f,label){const button=descendants(f.nodes.get('checkout-items')).find(node=>node.getAttribute('aria-label')===label);assert(button,`Missing checkout button: ${label}`);return button;}
+
+test('buy selected and buy from details review the exact intended product while the call stays active',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'));
+  const first=f.store.current;f.nodes.get('product-buy').onclick();
+  assert.equal(f.nodes.get('checkout-dialog').open,true);assert.equal(f.checkout.current.step,'review');
+  assert.deepEqual(checkoutIds(f),[first.id]);assert.equal(f.store.cart.size,0);
+  f.nodes.get('close-checkout').onclick();assert.equal(f.checkout.current.step,'idle');
+  f.nodes.get('catalog-button').onclick();const second=f.discovery.visible[1];
+  f.nodes.get('catalog-items').children[1].children[1].children.find(button=>button.textContent==='Details').onclick();
+  assert.equal(f.store.current.id,first.id,'Opening row details must not change the selected camera product');
+  f.nodes.get('detail-buy').onclick();
+  assert.deepEqual(checkoutIds(f),[second.id]);assert.equal(f.nodes.get('details-dialog').open,false);
+  assert.equal(f.camera.running,true);assert.equal(f.voice.call.ready,true);assert.equal(f.voiceStarts,1);
+});
+
+test('buy comparison reviews every compared product without changing the bag',async t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('catalog-button').onclick();
+  const chosen=f.discovery.visible.slice(0,3);
+  for(let i=0;i<3;i++)f.nodes.get('catalog-items').children[i].children[1].children.find(button=>button.textContent==='Compare').onclick();
+  f.nodes.get('compare-open').onclick();assert.equal(f.nodes.get('compare-dialog').open,true);
+  f.nodes.get('compare-buy').onclick();
+  assert.equal(f.nodes.get('compare-dialog').open,false);assert.equal(f.nodes.get('checkout-dialog').open,true);
+  assert.deepEqual(checkoutIds(f),Array.from(chosen,p=>p.id));assert.equal(f.checkout.current.source,'comparison');assert.equal(f.store.cart.size,0);
+});
+
+test('cart checkout keeps quantity and subset changes through Back and Cancel preserves the entire bag',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const chosen=catalog.filter(p=>p.price!==null&&Number.isSafeInteger(p.price)).slice(0,3);
+  for(const product of chosen)f.store.cart.set(product.id,product);
+  f.nodes.get('cart-button').onclick();f.nodes.get('cart-checkout').onclick();
+  assert.deepEqual(checkoutIds(f),chosen.map(p=>p.id));assert.equal(f.nodes.get('cart-dialog').open,false);
+  checkoutButton(f,'Increase quantity — '+chosen[0].name).onclick();
+  let third=f.nodes.get('checkout-items').children[2].children[0];third.checked=false;third.onchange({target:third});
+  assert.equal(f.checkout.current.totalQuantity,3);assert.equal(f.checkout.current.referenceTotal,chosen[0].price*2+chosen[1].price);
+  f.nodes.get('checkout-next').onclick();assert.equal(f.checkout.current.step,'payment');assert.equal(f.store.cart.size,3);
+  f.nodes.get('checkout-wallet').onclick();f.nodes.get('checkout-back').onclick();
+  assert.equal(f.checkout.current.step,'review');assert.equal(f.checkout.current.items[0].quantity,2);assert.equal(f.checkout.current.items[2].included,false);
+  assert.equal(f.checkout.current.paymentMethod,'demo-wallet');
+  f.nodes.get('close-checkout').onclick();
+  assert.equal(f.checkout.current.step,'idle');assert.deepEqual(Array.from(f.store.cart.keys()),chosen.map(p=>p.id));
+  assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
+});
+
+test('only explicit payment confirmation completes the demo and removes just the included cart items once',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const chosen=catalog.filter(p=>Number.isSafeInteger(p.price)).slice(0,3);
+  for(const product of chosen)f.store.cart.set(product.id,product);
+  f.nodes.get('cart-button').onclick();f.nodes.get('cart-checkout').onclick();
+  const third=f.nodes.get('checkout-items').children[2].children[0];third.checked=false;third.onchange({target:third});
+  f.nodes.get('checkout-next').onclick();
+  assert.equal(f.checkout.current.receipt,null);assert.equal(f.store.cart.size,3);assert.equal(f.checkout.current.step,'payment');
+  f.nodes.get('checkout-confirm').onclick();
+  const receipt=f.checkout.current.receipt;
+  assert.equal(f.checkout.current.step,'complete');assert.equal(receipt.demo,true);assert.equal(receipt.payment_processed,false);assert.equal(receipt.order_placed,false);
+  assert.deepEqual(Array.from(receipt.item_ids),chosen.slice(0,2).map(p=>p.id));assert.deepEqual(Array.from(f.store.cart.keys()),[chosen[2].id]);
+  f.store.cart.set(chosen[0].id,chosen[0]);f.nodes.get('checkout-confirm').onclick();
+  assert.equal(f.checkout.current.receipt.id,receipt.id);assert(f.store.cart.has(chosen[0].id),'A duplicate confirm must not apply cart removal again');
+  f.nodes.get('checkout-done').onclick();assert.equal(f.nodes.get('checkout-dialog').open,false);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
+});
+
+test('checkout gates hand swipes and ending the call cancels an unfinished checkout without altering the bag',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'));
+  const product=f.store.current;f.store.cart.set(product.id,product);assert.equal(f.hands.opts.isEnabled(),true);
+  f.nodes.get('product-buy').onclick();assert.equal(f.hands.opts.isEnabled(),false);
+  f.nodes.get('checkout-next').onclick();assert.equal(f.hands.opts.isEnabled(),false);
+  f.nodes.get('end-call').onclick();
+  assert.equal(f.nodes.get('checkout-dialog').open,false);assert.equal(f.checkout.current.step,'idle');assert.equal(f.store.cart.size,1);
+  assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
+});
+
+test('spoken buy and pay-cart requests only open the matching review; the agent sees checkout context',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'));
+  const selected=f.store.current;
+  await f.voice.opts.onCheckout({scope:'selected',productIds:[]});
+  assert.equal(f.checkout.current.step,'review');assert.deepEqual(checkoutIds(f),[selected.id]);
+  let context=f.voice.opts.getContext();assert.equal(context.visible_panel,'checkout');assert.equal(context.checkout.step,'review');
+  assert.equal(f.checkout.current.receipt,null);assert.equal(f.store.cart.size,0);
+  f.nodes.get('close-checkout').onclick();
+  const products=catalog.slice(0,2);for(const product of products)f.store.cart.set(product.id,product);
+  await f.voice.opts.onCheckout({scope:'cart',productIds:[]});
+  assert.equal(f.checkout.current.source,'cart');assert.deepEqual(checkoutIds(f),products.map(p=>p.id));
+  f.nodes.get('checkout-next').onclick();context=f.voice.opts.getContext();
+  assert.equal(context.checkout.step,'payment');assert.equal(f.checkout.current.receipt,null);assert.equal(f.store.cart.size,2);
+  assert.equal(f.voice.call.ready,true);
+});
+
+test('spoken explicit-product checkout rejects invented or out-of-context products instead of silently buying a subset',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'));
+  const known=f.store.current,unseen=catalog.find(p=>p.productType==='chair');
+  for(const productIds of [[known.id,'invented'],[unseen.id]]){
+    await assert.rejects(Promise.resolve().then(()=>f.voice.opts.onCheckout({scope:'products',productIds})));
+    assert.equal(f.nodes.get('checkout-dialog').open,false);assert.equal(f.store.cart.size,0);assert.equal(f.checkout.current.receipt,null);
+  }
+  await f.voice.opts.onCheckout({scope:'products',productIds:[known.id]});
+  assert.deepEqual(checkoutIds(f),[known.id]);assert.equal(f.checkout.current.step,'review');
+});
+
+test('an incoming voice checkout cannot replace a quote awaiting the shopper’s payment confirmation',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'));
+  const selected=f.store.current;await f.voice.opts.onCheckout({scope:'selected',productIds:[]});
+  checkoutButton(f,'Increase quantity — '+selected.name).onclick();f.nodes.get('checkout-next').onclick();
+  const before=JSON.parse(JSON.stringify(f.checkout.current));
+  await assert.rejects(Promise.resolve().then(()=>f.voice.opts.onCheckout({scope:'products',productIds:[f.discovery.visible[1].id]})),/already open/);
+  assert.deepEqual(JSON.parse(JSON.stringify(f.checkout.current)),before);
+  assert.equal(f.nodes.get('checkout-dialog').open,true);assert.equal(f.checkout.current.receipt,null);
+  assert.equal(f.voice.opts.getContext().checkout.reference_total,selected.price*2);
+});
+
+test('empty bag and fully deselected checkout cannot proceed to payment',async t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('cart-button').onclick();
+  assert.equal(f.nodes.get('cart-checkout').disabled,true);
+  await assert.rejects(Promise.resolve().then(()=>f.voice.opts.onCheckout({scope:'cart',productIds:[]})));
+  assert.equal(f.nodes.get('checkout-dialog').open,false);f.nodes.get('close-cart').onclick();
+  f.nodes.get('product-buy').onclick();const checkbox=f.nodes.get('checkout-items').children[0].children[0];checkbox.checked=false;checkbox.onchange({target:checkbox});
+  assert.equal(f.nodes.get('checkout-next').disabled,true);assert.equal(f.checkout.current.referenceTotal,0);
+  f.nodes.get('checkout-next').onclick();assert.equal(f.checkout.current.step,'review');assert.equal(f.nodes.get('checkout-error').hidden,false);
+  assert.equal(f.checkout.current.receipt,null);assert.equal(f.store.cart.size,0);
 });

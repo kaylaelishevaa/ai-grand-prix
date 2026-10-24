@@ -85,6 +85,16 @@ For the richest demo, ask for **pink lipsticks**, open **View more**, then inspe
 
 Design references: [NN/g comparison tables](https://www.nngroup.com/articles/comparison-tables/) and [Baymard comparison selection](https://baymard.com/research-articles/provide-comparison-features). The compact selection tray and explicit per-item actions adapt these patterns to the call interface.
 
+## Demo checkout
+
+During a connected call, say **“buy this”** for the product being viewed, **“buy these products”** for an explicitly chosen comparison, or **“pay for my cart”** for all bag items. If the selection is unclear, Coupi asks which items you mean. You can also use **Buy this**, **Buy these products** in comparison, or **Review & checkout** in the bag without an API key.
+
+1. **Review:** select items, change quantities (1–9), or remove them from this checkout. Reference prices come from the catalog; delivery and other fees are not calculated.
+2. **Payment:** choose the sample demo card or demo wallet. The call remains connected. Go back to revise the selection, or press **Confirm demo payment** yourself.
+3. **Confirmation:** see a demo receipt and individual Coupang links. Only completed items are removed from your demo bag. Canceling leaves the bag unchanged.
+
+This flow collects no card numbers or delivery addresses, creates no merchant order, and charges nothing. Voice can open review but cannot confirm payment. Review, payment, and receipt state stay in memory and disappear on closing checkout or refreshing. Real purchases must be completed separately on Coupang with its current price, stock and delivery details.
+
 ## Phone camera testing
 
 `localhost` on a phone refers to the phone, not your laptop. The default development server listens on the laptop's loopback address. A plain LAN address such as `http://192.168.x.x:5173` is not a complete phone setup: camera/microphone access requires a [secure context](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#privacy_and_security).
@@ -115,7 +125,7 @@ npm run build
 
 ## Current scope and source files
 
-Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clothing fit, colour, physical scale, and room perspective are approximate. There is no generated-photo workflow, checkout, live price/stock feed, or persistent shopping profile.
+Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clothing fit, colour, physical scale, and room perspective are approximate. Checkout is a local simulation; no order is sent to Coupang and no payment is processed. There is no generated-photo workflow, live price/stock feed, or persistent shopping profile.
 
 - `site-pages/main.html`, `site-pages/explore.html`, `public/coupi-shell.css`: empty page shells and shared navigation.
 - `site-pages/camera.html`, `public/mobile-call.*`, `public/coupi-call.css`: mobile call interface and Coupi theme.
@@ -125,4 +135,5 @@ Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clo
 - `VOICE-CATALOG-SOURCES.txt`: listing provenance and historical reference prices.
 - `public/product-discovery.js`, `public/product-evidence.js`: grouped browsing, collections, comparison and sourced review rendering.
 - `public/call-conversation.js`, `public/chat-images.js`: compact transcript rendering and local photo preparation.
+- `public/demo-checkout.js`, `public/checkout.css`: local checkout state and review/payment/receipt UI.
 - `tests/`: automated checks.
