@@ -1,2 +1,2 @@
-import CoupiApp from '@/components/CoupiApp';
-export default function Page(){return <CoupiApp/>;}
+import JourneyApp from '@/components/JourneyApp';
+export default function Page(){return <JourneyApp/>;}

@@ -115,6 +115,13 @@ export function deleteMemory(profile: Profile, lineId: string, now: Date = new D
   for (const swipe of next.swipes) for (const key of erased) delete swipe.contributions[key];
   // Removing just the display sentence would leave the algorithm remembering it. Erase linked sentences too.
   next.memoryLines = next.memoryLines.filter((memory) => memory.id!==lineId&&!memory.traitKeys.some((key) => erased.has(key)));
+  if(next.journey){
+    const remaining=new Set(next.memoryLines.map(memory=>memory.id));
+    next.journey.districts=next.journey.districts.filter(district=>district.sourceMemoryIds.every(id=>remaining.has(id)));
+    if(next.journey.pendingCall&&!remaining.has(next.journey.pendingCall.memoryId))delete next.journey.pendingCall;
+    // A saved reply may repeat the deleted fact. New answers use surviving memory only.
+    delete next.journey.lastReply;
+  }
   if(removed.some(memory=>memory.id.startsWith('chapter:')))delete next.chapterAnswer;
   next.forgottenTraitKeys = [...new Set([...next.forgottenTraitKeys, ...erased])].sort();
   return touch(next, now);

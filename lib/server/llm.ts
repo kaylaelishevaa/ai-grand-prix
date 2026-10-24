@@ -3,7 +3,7 @@ import type {CallMeta} from '../types';
 import {ResponseCache,requestHash} from './cache';
 import {AppError} from './errors';
 const RESPONSE_URL='https://api.openai.com/v1/responses';
-export interface StructuredRequest<T>{operation:string;instructions:string;input:unknown;schema:Record<string,unknown>;validate:(value:unknown)=>T;image?:{dataUrl:string;sha256:string};maxAttempts?:number;maxOutputTokens?:number;}
+export interface StructuredRequest<T>{operation:string;instructions:string;input:unknown;schema:Record<string,unknown>;validate:(value:unknown)=>T;image?:{dataUrl:string;sha256:string};maxAttempts?:number;maxOutputTokens?:number;retryInstructions?:string;}
 interface Dependencies{fetch?:typeof fetch;cache?:ResponseCache;env?:NodeJS.ProcessEnv;}
 export async function structuredCall<T>(request:StructuredRequest<T>,deps:Dependencies={}):Promise<{data:T;meta:CallMeta}>{
  if(typeof window!=='undefined')throw new Error('Server only');
@@ -32,7 +32,7 @@ export async function structuredCall<T>(request:StructuredRequest<T>,deps:Depend
   if(parts.some(p=>p.type==='refusal'))throw new AppError('MODEL_REFUSAL','I’m not sure I can help with that request. Try a specific shopping question or inspect the catalog.',422);
   let data:T;
   try{if(payload.status==='incomplete')throw new Error('Incomplete structured output');const text=parts.filter(p=>p.type==='output_text').map(p=>p.text||'').join('');data=request.validate(JSON.parse(text));}
-  catch{console.info('[coupi:model]',JSON.stringify({operation:request.operation,model,attempt:attempt+1,inputTokens,outputTokens,latencyMs:Math.round(performance.now()-start),status:'invalid-output'}));if(attempt+1<attempts){correction='\nYour previous output failed validation. Return only valid catalog IDs and review IDs from the provided data. All citations must belong to compared products. Do not invent missing facts. If uncertain, ask one clarifying question.';continue;}throw new AppError('INVALID_MODEL_OUTPUT','I’m not sure — here’s everything. The answer did not pass evidence validation.',422);}
+  catch{console.info('[coupi:model]',JSON.stringify({operation:request.operation,model,attempt:attempt+1,inputTokens,outputTokens,latencyMs:Math.round(performance.now()-start),status:'invalid-output'}));if(attempt+1<attempts){correction='\nYour previous output failed validation. Return only valid catalog IDs and review IDs from the provided data. All citations must belong to compared products. Do not invent missing facts. If uncertain, ask one clarifying question.'+(request.retryInstructions?'\n'+request.retryInstructions:'');continue;}throw new AppError('INVALID_MODEL_OUTPUT','I’m not sure — here’s everything. The answer did not pass evidence validation.',422);}
   const meta:CallMeta={cached:false,offline:false,model,inputTokens,outputTokens,latencyMs:Math.round(performance.now()-start),cacheKey};
   await cache.set(cacheKey,{version:1,output:data,meta,createdAt:new Date().toISOString()});
   console.info('[coupi:model]',JSON.stringify({operation:request.operation,...meta}));return{data,meta};

@@ -1,6 +1,7 @@
 import { getSku } from './catalog';
 import type { Decision, OwnedItem, Profile } from './types';
 import {remember} from './memory';
+import {decisionApprovalIssue} from './delegation-policy';
 
 export function validatedTimezone(timezone: string): string {
   try { new Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date(0)); return timezone; }
@@ -102,6 +103,10 @@ export function approveDecisions(profile: Profile, ids: string[], now: Date = ne
     if (decision.approvedAt) continue;
     if (isDecisionLocked(next, decision, now)) { blocked.push(`${getSku(decision.skuId)?.name || 'Item'}: held until 7:00 AM. Your morning self gets a vote.`); continue; }
     if (ownsSku(next, decision.skuId)) { blocked.push(ownedMessage(next, decision.skuId, now)); continue; }
+    const sku=getSku(decision.skuId);
+    if(!sku||sku.sensitive||next.quarantine.some(item=>item.sensitive&&item.category===sku.category)){blocked.push('This item is unavailable or quarantined.');continue;}
+    const delegationIssue=decisionApprovalIssue(decision);
+    if(delegationIssue){blocked.push(delegationIssue);continue;}
     decision.approvedAt = now.toISOString();
     next.owned.push({ skuId: decision.skuId, acquiredAt: now.toISOString(), source: 'approved' });
     approved.push(decision.id);

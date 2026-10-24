@@ -8,7 +8,8 @@
     "start": "next start --hostname 127.0.0.1 --port 3007",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
-    "rehearse": "node --env-file=.env.local --import tsx scripts/rehearse.ts"
+    "rehearse": "node --env-file=.env.local --import tsx scripts/rehearse.ts",
+    "rehearse:journey": "node --env-file=.env.local --import tsx scripts/rehearse-journey.ts"
   },
   "dependencies": {
     "next": "16.2.5",
