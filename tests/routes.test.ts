@@ -10,6 +10,7 @@ import { POST as decisions } from '../app/api/decisions/route';
 import { POST as scan } from '../app/api/scan/route';
 import { GET as getStatus } from '../app/api/status/route';
 import { getReview, getSku, reviews } from '../lib/catalog';
+import {comparisonGroupForSku} from '../lib/comparison-groups';
 import type { Profile } from '../lib/types';
 
 type Handler = (request: Request) => Promise<Response>;
@@ -198,8 +199,8 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       const response = await browser.photo();
       assert.equal(response.status, 200);
       assert.equal(calls.length, before + 1);
-      assert.deepEqual(response.body.mappedSkuIds, ['milk', 'greens']);
-      const rows = response.body.profile.decisions.filter((item: Json) => ['milk', 'greens'].includes(item.skuId));
+      assert.deepEqual(response.body.mappedSkuIds.map((id:string)=>comparisonGroupForSku(getSku(id)!)), ['oat-milk', 'spinach']);
+      const rows = response.body.profile.decisions.filter((item: Json) => response.body.mappedSkuIds.includes(item.skuId));
       assert.equal(rows.length, 2);
       assert(rows.every((item: Json) => item.source === 'photo scan' && item.lockedUntil));
       const files = await readdir(path.join(root, 'responses'));
@@ -226,7 +227,7 @@ test('live route loop persists learning, grounds evidence, enforces guardrails a
       const scanReplay = await browser.photo();
       assert.equal(scanReplay.status, 200);
       assert.equal(scanReplay.body.meta.cached, true);
-      assert.equal(scanReplay.body.profile.decisions.filter((item: Json) => item.skuId === 'milk').length, 1);
+      for(const skuId of scanReplay.body.mappedSkuIds)assert.equal(scanReplay.body.profile.decisions.filter((item: Json) => item.skuId === skuId).length, 1);
       const missing = await browser.send(ask, '/api/ask', { question: 'A new path I never rehearsed.', requestId: 'cache-miss' });
       assert.equal(missing.status, 503);
       assert.equal(missing.body.code, 'OFFLINE_CACHE_MISS');
@@ -390,7 +391,7 @@ test('ask, swap, scene, scan, call and scripted chapter share immediately editab
     const count=calls.length;
     const call=await browser.send(postProfile,'/api/profile',{action:'callStatement',id:'small-counter',text:'I cook for one and have a small counter.'});
     const line=call.body.profile.memoryLines.find((line:Json)=>line.kind==='call');
-    assert.equal(line.source,'from your call statement');
+    assert.match(line.source,/^from your call, \d{1,2} [A-Za-z]{3} \d{4}$/);
     const confirmed=await browser.send(postProfile,'/api/profile',{action:'confirmMemory',lineId:line.id});
     assert.equal(confirmed.body.profile.memoryLines.find((m:Json)=>m.id===line.id).confidence,0.98);
     const scripted=await browser.send(postProfile,'/api/profile',{action:'guidedCall',id:'store-call-1',chapter:'store'});

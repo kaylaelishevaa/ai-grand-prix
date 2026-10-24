@@ -1,12 +1,18 @@
 # Coopy's five-step journey
 
-The default app follows **hatch → first call → world → district → delegation → approval**. The last two actions belong to the fifth step: Coopy prepares work and the customer approves it. `/guided` retains the optional day-story and its scripted future chapters.
+The default app follows **hatch → first call → world → district → delegation → approval**. The last two actions stay inside the product verdict sheet: Coopy prepares work and the customer explicitly approves that item. There is no separate Decisions or Head page in the current UI. `/guided` retains the optional day-story and its scripted future chapters.
 
-The Call and Head controls remain available throughout the app. Call has one conversational interface; users supply words, voice input, a camera frame, or an uploaded photo. There is no comparison/scan/buy mode selector. The first call leads five story questions; later calls infer the shopping or conversational intent from the submitted context.
+The Call and Your world controls remain available throughout the app. The first call leads five story questions using the existing structured conversation. Later calls default to the teammate's Realtime camera and try-on experience; “Type instead” retains structured words/photo calls and the shared verdict. There is no comparison/scan/buy mode selector. See [the teammate integration](teammate-voice.md) for the separate sourced catalog, media consent and offline boundaries.
+
+## Approval stays with the product
+
+“Let Coopy handle it” creates a pending, guarded plan and returns to the same verdict. Its quote, cap, watching/haggled/ready status and nighttime hold appear there. “Approve this plan” is a separate explicit action through `/api/decisions`; it never runs automatically after assignment. A watching plan can be refreshed or adjusted, and a pending plan can be removed. Approved items show a local receipt and cannot be bought again. Reopening the same world hotspot or call card restores the saved plan or receipt.
+
+The Head and Decisions navigation entries, utility routes and guided beats are removed for now. Memory, ownership, proposals and approval records remain in the profile, and all server guardrails and profile-management APIs remain intact. Calls and comparison evidence still show sourced memory. There is no new global cart page; pending items remain attached to their product cards.
 
 ## The returning homepage and its worlds
 
-After the first journey, the default homepage opens on **Your worlds**: the user's personal districts shown as 3D diorama cards with their provenance and saved-moment counts. **Worlds to explore** provides curated starting points for other occasions. These starters are authored previews, not popularity rankings or evidence of other users' behavior.
+After the first journey, the default homepage opens on **Your worlds**: the user's personal districts shown as destinations in one connected 3D landscape with their provenance and saved-moment counts. **Worlds to explore** provides curated starting points for other occasions. These starters are authored previews, not popularity rankings or evidence of other users' behavior.
 
 Opening a starter shows a full diorama with working product hotspots. **Make it mine** submits its scenario plus the user's optional words to live world generation, using current permitted memory and budget. The result becomes a personal district. Previewing a starter alone does not claim it was personalized or add its scenario to memory.
 
@@ -18,17 +24,18 @@ Every personal district can become a private journal. **Keep this moment** store
 
 | Capability | What actually happens |
 | --- | --- |
-| Interview and later calls | The server sends the user's current message, optional photo, permitted profile context and catalog evidence to the configured OpenAI model. Structured results are validated. Browser voice input/output depends on available browser support; text remains available. |
+| Interview and typed calls | The server sends the user's current message, optional photo, permitted profile context and catalog evidence to the configured OpenAI model. Structured results are validated. Browser voice input/output depends on available browser support; text remains available. |
+| Live camera call | After an explicit start, WebRTC sends microphone audio to OpenAI. Camera snapshots require a separate opt-in. Try-on tracking runs in the browser; 18 sourced listing references are separate from synthetic reviews. Offline mode disables this transport and uses the cached typed path. |
 | Memory | Sourced memory lines and confidence are saved to the server profile and mirrored in localStorage. Deletion removes the underlying evidence used by subsequent model calls. |
 | World generation | One structured call selects catalog products and names districts from surviving memory. Another request genuinely regenerates a district from new words. “Make it mine” uses this live generation path for a curated starter. |
 | World journal | Manual notes and server-captured room snapshots persist in the profile. Revisit displays the saved scene; journal text is excluded from model prompts and does not earn XP. |
 | Verdicts | Real model outputs refer only to the local catalog and seeded review corpus. Review IDs open those exact local reviews. |
-| 3D products | Low-poly product meshes are real 3D geometry. Image frames use the local asset mapping when available, otherwise illustrated placeholders. They are not verified manufacturer 3D assets. |
-| Product facts and reviews | The 43-SKU catalog, prices, delivery strings and 498 seeded reviews are synthetic demo data. They are not a live Coupang feed. Each added wardrobe/beauty SKU and the key household products used in curated worlds have 16 stable review IDs. |
-| Delegation | Code computes a local proposal, applies the cap and price floor, groups pending delivery plans, and persists a status. No seller agent is contacted. |
+| 3D products | Low-poly product meshes are real 3D geometry with accessible hotspot dots. They are not verified manufacturer 3D assets. |
+| Product facts and reviews | The synthetic world catalog contains 87 SKUs and 1,202 seeded reviews, including the preserved original 43 SKUs and 498 reviews. It is not a live Coupang feed. Sourced camera-reference listings have no seeded reviews. |
+| Delegation | Code computes a local proposal, applies the cap and price floor, groups pending delivery plans, and persists a status displayed within the product sheet. No seller agent is contacted. |
 | Price watching | The item remains pending above its cap. “Check now” rechecks the local catalog; there is no background price-monitoring service. |
 | Haggling | A clearly marked simulated quote uses the deterministic floor described below. It is not a merchant's offer. |
-| Approval | The local approval ledger and owned list update only after an explicit approval. No payment, Coupang order, seller negotiation or carrier reservation is executed. |
+| Approval | The local approval ledger and owned list update only after an explicit approval from the same product sheet or guided card. No payment, Coupang order, seller negotiation or carrier reservation is executed. |
 
 ## API contracts
 
@@ -132,3 +139,12 @@ The photo call may return a grounded inventory, comparison, verdict or one clari
 `tests/world.test.ts`, `tests/delegation.test.ts` and `tests/world-routes.test.ts` cover grounded district references, hard budgets, deletion and quarantine, additions/rebuilds, idempotency, simulated price floors, approval bypass attempts, ownership, nighttime locks, persistence and offline cache replay with no network request.
 
 These tests use provider fixtures; they do not establish a live merchant connection or real-world model quality.
+
+
+## Contextual landscapes and shared comparisons
+
+`SceneResult.context` stores `{type, setting, label}` independently of `kind`. `lib/world-context.ts` resolves explicit occasion/place commands before saved context and uses conservative generic scene labels. Six curated starters cover events, indoor spaces, outdoors and a café. The atlas and full scene share geometry and mood helpers; keyboard-accessible beacons open destinations, while the wayfinding strip stays outside the canvas.
+
+`components/VerdictComparison.tsx` is shared by JourneyApp, CompanionCall and CoupiApp. `lib/comparison.ts` computes contender badges and five evidence dimensions from the finite catalog and surviving memory. No model invents dimension scores. Functional groups separate products such as lipstick and powder brushes, or spinach and mushrooms. Review averages include the complete corpus, including delivery-only and unopened-gift reviews; they do not purport to be a product-only quality score. Price-per-use is shown only where the catalog supplies a common explicit assumption, never as a durability guarantee.
+
+`POST /api/compare` accepts `{fromSkuId, skuId, requestId, origin}` where origin is `scene`, `ask` or `call`, and returns `{verdict, profile}`. It validates eligibility and functional comparability, regenerates dissent from the chosen product's visible evidence, and records an observed swap memory. It makes no provider request, including in offline mode. Selection is not checkout; ownership, quarantine, spending and morning locks remain code-enforced at approval.

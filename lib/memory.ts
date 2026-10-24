@@ -37,7 +37,7 @@ export function confirmMemory(profile:Profile,id:string,now=new Date()):Profile 
 }
 
 export function rememberWords(profile:Profile,text:string,id:string,kind:'ask'|'scene'|'call',now=new Date()):Profile {
-  const source=kind==='ask'?'from your words':kind==='scene'?'from your scene rebuild':'from your call statement';
+  const source=kind==='ask'?'from your words':kind==='scene'?'from your scene rebuild':'from your call, '+now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
   const positive=(pattern:RegExp)=>text.split(/[.!?;—]/).some(clause=>pattern.test(clause)&&! /\b(not|never|don't|do not|no longer)\b/i.test(clause));
   const pricey=positive(/\b(cheap(?:est|er)?|budget|affordable|price[- ]sensitive|under\s*[₩$\d]|less expensive|lowest price|price (?:over|above|before) reviews)\b/i);
   const reviews=positive(/\b(reviews? (?:over|above|before) price|best[- ]reviewed|better reviews)\b/i);

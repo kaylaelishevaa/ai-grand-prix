@@ -6,7 +6,8 @@ import path from 'node:path';
 import {POST as callRoute} from '../app/api/call/route';
 import {POST as profileRoute} from '../app/api/profile/route';
 import {createProfile,deleteMemory,eligibleCatalog} from '../lib/profile';
-import {getReview} from '../lib/catalog';
+import {getReview,getSku} from '../lib/catalog';
+import {comparisonGroupForSku} from '../lib/comparison-groups';
 import {handleCall,journeyFor,validateCallOutput,mapCallGaps,FIRST_CALL_QUESTIONS,WORLD_BUILDING_MESSAGE} from '../lib/server/call';
 import type {CallResponse} from '../lib/journey-types';
 import type {Profile} from '../lib/types';
@@ -140,13 +141,13 @@ test('one photo call inventories a shelf or fridge and code maps supported gaps 
   await fixture(async({root,calls,setOutput})=>{
     setOutput(()=>({intent:'scan',message:'Milk looks low. The label on the other container is unclear.',memories:[],verdict:null,inventory:{items:[{name:'oat milk',quantity:'small visible amount',status:'low'}],lowOrMissing:[{name:'oat milk',reason:'visible low amount',confidence:'high'},{name:'spinach',reason:'unclear bag',confidence:'low'},{name:'unknown widget',reason:'not in this catalog',confidence:'medium'}],uncertainties:['I cannot read the other label.']}}));
     const result=await handleCall(completed(),{action:'message',requestId:'fridge',message:'Can you look at this?',image:{buffer:png,mime:'image/png'}},now);
-    assert.deepEqual(result.proposedSkuIds,['milk']);
+    assert.deepEqual(result.proposedSkuIds.map(id=>comparisonGroupForSku(getSku(id)!)),['oat-milk']);
     assert.equal(result.inventory?.items[0].name,'oat milk');
     assert(calls[0].body.input[0].content.some((part:Json)=>part.type==='input_image'));
     assert(result.memories.some(line=>line.kind==='inventory'&&line.source==='from your call, 25 Oct 2026'));
     for(const file of await readdir(path.join(root,'responses')))assert(!(await readFile(path.join(root,'responses',file),'utf8')).includes(png.toString('base64')));
     const desk=mapCallGaps({items:[],lowOrMissing:[{name:'desktop organizer',reason:'user requested storage for the visible desk',confidence:'high'}],uncertainties:[]},completed());
-    assert(desk.includes('organizer'));
+    assert(desk.some(id=>comparisonGroupForSku(getSku(id)!)==='desktop-organizer'));
   });
 });
 

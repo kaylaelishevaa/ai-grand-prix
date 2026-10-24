@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Illustration of a chair"><defs>
+ <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#eee9df"/><stop offset="1" stop-color="#d7d4c7"/></linearGradient>
+ <linearGradient id="cloth" x2="1" y2="1"><stop stop-color="#f3f0e5"/><stop offset=".5" stop-color="#e7e1d4"/><stop offset="1" stop-color="#c9c4b7"/></linearGradient>
+ <linearGradient id="wood" x2="1" y2=".2"><stop stop-color="#a57243"/><stop offset=".25" stop-color="#d1a472"/><stop offset=".7" stop-color="#b78351"/><stop offset="1" stop-color="#845831"/></linearGradient>
+ <linearGradient id="sage" x2=".5" y2="1"><stop stop-color="#a9b49b"/><stop offset=".4" stop-color="#82977e"/><stop offset="1" stop-color="#526b56"/></linearGradient>
+ <linearGradient id="pot" x2="1" y2=".2"><stop stop-color="#b89975"/><stop offset=".5" stop-color="#d1b795"/><stop offset="1" stop-color="#9c7b58"/></linearGradient>
+ <linearGradient id="leaf" x2="1" y2="1"><stop stop-color="#8b9d68"/><stop offset="1" stop-color="#3d604a"/></linearGradient>
+ <radialGradient id="light"><stop stop-color="#fff6d2" stop-opacity=".6"/><stop offset="1" stop-color="#fff6d2" stop-opacity="0"/></radialGradient>
+ <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+ <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#514535" flood-opacity=".13"/></filter>
+ <pattern id="weave" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 1h7M1 0v7" stroke="#8b8068" stroke-opacity=".09" stroke-width=".7"/></pattern>
+ </defs><rect width="600" height="600" fill="#f1eee6"/><g>
+ <ellipse cx="300" cy="504" rx="174" ry="26" fill="#655b48" opacity=".13" filter="url(#shadow)"/>
+ <path d="M167 393 158 503Q159 510 170 506L197 402M411 394l27 112q8 5 11-4l-9-114" fill="url(#wood)"/>
+ <path d="M222 414 225 480h11l16-72M366 410l17 73h11l-1-77" fill="#997046"/>
+ <path d="M177 300q-15-109 3-155 10-31 52-35l125-1q43 0 57 35 19 45 10 157z" fill="url(#cloth)" stroke="#ccc6ba" stroke-width="1"/>
+ <path d="M196 290q-7-100 7-137 7-20 28-23l124 1q22 2 30 23 16 46 10 134" fill="#eeeadf"/>
+ <path d="M205 149q76-10 179 0M208 275q79-11 177 0" stroke="#d6cfc1" fill="none" stroke-width="2" opacity=".6"/>
+ <path d="M146 278q1-33 26-34 26 0 30 32l13 108h-64zM389 280q0-36 25-37 30-2 34 33l-5 113h-57z" fill="url(#cloth)"/>
+ <path d="M177 313q115-40 244-2l-9 86q-114 31-224 0z" fill="#d3cdbf"/>
+ <path d="M191 299q97-23 207 0 15 4 17 18l-8 43q-99 26-213-2l-11-40q-3-11 8-19z" fill="url(#cloth)"/>
+ <path d="M195 355q96 21 210 1" fill="none" stroke="#c9c1b3" stroke-width="2"/>
+ <path d="M151 318q0-18 20-18 24 0 27 19l11 64q-1 24-25 25-29 2-31-24zM399 319q0-20 19-21 27-1 27 19l-3 70q-2 21-24 20-23 0-24-23z" fill="url(#cloth)"/>
+ <path d="M155 383q6 19 28 18M399 382q3 20 22 19" stroke="#c5bcae" stroke-width="1.5" fill="none"/>
+ </g></svg>

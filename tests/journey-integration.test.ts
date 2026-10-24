@@ -6,7 +6,7 @@ import path from 'node:path';
 import {answerQuestion} from '../lib/server/services';
 import {createProfile,deleteMemory} from '../lib/profile';
 import {remember,REVIEW_TRAIT} from '../lib/memory';
-import {reviewsForSku} from '../lib/catalog';
+import {comparisonCandidatesForSku,reviewsForSku} from '../lib/catalog';
 import type {District} from '../lib/journey-types';
 import type {Verdict} from '../lib/types';
 
@@ -26,6 +26,9 @@ test('opening a specific hotspot cannot silently swap its verdict, even under a 
   globalThis.fetch=(async(_url,init)=>{
     calls++;const body=JSON.parse(String(init?.body)),input=JSON.parse(body.input[0].content[0].text);
     assert.equal(input.inspectedSkuId,'socksBudget');
+    const expectedIds=['socksBudget',...comparisonCandidatesForSku('socksBudget').map(sku=>sku.id)].sort();
+    assert.deepEqual(input.catalog.map((sku:{id:string})=>sku.id).sort(),expectedIds,'Hotspot evidence contains only this product and its same-purpose substitutes');
+    assert(input.reviews.every((review:{skuId:string})=>expectedIds.includes(review.skuId)),'Unrelated review corpora must not consume the inspected-product request');
     const wrong=mode==='wrong-always'||(mode==='wrong-once'&&calls===1);
     const output=wrong?socksVerdict('socksRunner','socksBudget'):socksVerdict();
     return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(output)}]}],usage:{input_tokens:10,output_tokens:10}});

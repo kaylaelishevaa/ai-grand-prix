@@ -1,29 +1,14 @@
 'use client';
 
-import {useEffect,useRef,useState} from 'react';
-import SceneDiorama from './SceneDiorama';
-import SceneFallback from './SceneFallback';
+import {useEffect,useMemo,useState} from 'react';
 import {Button,Speech} from './CoupiApp';
 import {Glyph} from './Glyph';
 import {worldTemplates,type WorldTemplate} from '@/data/world-templates';
 import type {District} from '@/lib/journey-types';
-import type {SceneResult} from '@/lib/types';
 import type {DioramaPhase} from './diorama/engine';
-import './world-home.css';
+import WorldAtlas,{type WorldPlace} from './WorldAtlas';
 import KeptMoments,{type JournalArchive} from './KeptMoments';
-
-/** Only rooms close to the viewport own a WebGL context. Offscreen worlds stay lightweight. */
-function WorldMiniature({scene,phase}:{scene:SceneResult;phase:DioramaPhase}) {
-  const host=useRef<HTMLDivElement>(null);
-  const [visible,setVisible]=useState(false);
-  useEffect(()=>{
-    if(!host.current)return;
-    const observer=new IntersectionObserver(([entry])=>setVisible(entry.isIntersecting),{rootMargin:'100px'});
-    observer.observe(host.current);return()=>observer.disconnect();
-  },[]);
-  const fallback=<SceneFallback scene={scene} onSelect={()=>{}}/>;
-  return <div ref={host} className="district-miniature" inert aria-hidden="true">{visible?<SceneDiorama scene={scene} phase={phase} onSelect={()=>{}} fallback={fallback}/>:fallback}</div>;
-}
+import './world-home.css';
 
 export default function WorldHome({districts,archives,phase,busy,complete,command,onCommand,onCreate,onEnter,onPreview,onCall,onArchive}:{
   districts:District[];phase:DioramaPhase;busy:boolean;complete:boolean;command:string;
@@ -31,26 +16,22 @@ export default function WorldHome({districts,archives,phase,busy,complete,comman
   onCommand:(text:string)=>void;onCreate:(text?:string)=>void;onEnter:(d:District)=>void;
   onPreview:(template:WorldTemplate)=>void;onCall:()=>void;
 }) {
+  const [mode,setMode]=useState<'personal'|'explore'>('personal'),[page,setPage]=useState(0),[compact,setCompact]=useState(false);
+  useEffect(()=>{const media=window.matchMedia('(max-width:640px)');const change=()=>{setCompact(media.matches);setPage(0);};change();media.addEventListener('change',change);return()=>media.removeEventListener('change',change);},[]);
   const moments=districts.reduce((sum,d)=>sum+(d.journal?.length||0),0)+archives.reduce((sum,a)=>sum+a.entries.length,0);
-  return <section className="world-home screen-surface">
-    <div className="world-heading"><div><p className="eyebrow orange">YOUR WORLD / STILL BECOMING</p><h1>a little world,<br/><em>a lot of you.</em></h1></div><div className="world-intro"><Speech>{districts.length?'make a place for your life. i’ll remember where we left off.':'your story first. then a little world to call your own.'}</Speech><p>Places for your rituals, your next chapter, and the days in between.</p></div></div>
-    <nav className="world-chapters" aria-label="Explore your homepage"><a href="#your-worlds">Your worlds <span>{String(districts.length).padStart(2,'0')}</span></a><a href="#worlds-to-explore">Worlds to explore <Glyph name="arrow-up"/></a><span>{moments} {moments===1?'moment':'moments'} kept</span></nav>
-    <section id="your-worlds" className="personal-worlds" aria-labelledby="your-worlds-title">
-      <div className="world-section-heading"><div><span className="eyebrow">01 / PERSONAL</span><h2 id="your-worlds-title">Your worlds.</h2></div><p>Made from your story.<br/>Growing with the life you put into them.</p></div>
-      {!districts.length?<div className="world-building"><span className="world-seed"><Glyph name="scene"/></span><h2>Your story is the blueprint.</h2><p>{busy?'Finding the right pieces, with your context in mind.':'Your first districts are ready to be imagined.'}</p><Button disabled={busy||!complete} onClick={()=>onCreate()}>Build my world <Glyph name="arrow-right"/></Button>{!complete&&<Button secondary onClick={onCall}>Finish our first call</Button>}</div>:<div className="district-collection">{districts.map((d,index)=><article className="district-card" key={d.id} style={{animationDelay:`${Math.min(index,3)*90}ms`}}>
-        <WorldMiniature scene={d.scene} phase={phase}/>
-        <button className="district-open" onClick={()=>onEnter(d)} aria-label={`Wander into ${d.name}`}><span className="district-index">YOUR WORLD {String(index+1).padStart(2,'0')} <span>{d.journal?.length?`${d.journal.length} ${d.journal.length===1?'moment':'moments'} kept`:'a story just beginning'}</span></span><span className="district-title">{d.name}</span><span className="district-provenance">{d.provenance}</span><span className="district-enter"><Glyph name="arrow-up"/></span></button>
-      </article>)}</div>}
-      {districts.length>0&&<form className="new-district" onSubmit={e=>{e.preventDefault();onCreate(command);}}><span className="new-district-orbit"><Glyph name="plus"/></span><label htmlFor="new-district"><strong>There’s room for more you.</strong><span>A place for a ritual. A trip. A new chapter.</span></label><div><input id="new-district" value={command} onChange={e=>onCommand(e.target.value)} maxLength={1000} placeholder="Make a place for…"/><Button type="submit" secondary disabled={busy||!command.trim()}>Grow it <Glyph name="arrow-up"/></Button></div></form>}
-    </section>
+  const places=useMemo<WorldPlace[]>(()=>mode==='personal'?districts.map(d=>({id:d.id,name:d.name,scene:d.scene,subtitle:d.provenance,moments:d.journal?.length})):worldTemplates.map(template=>({id:template.id,name:template.name,scene:template.scene,subtitle:template.subtitle})),[districts,mode]);
+  const size=compact?1:4,pages=Math.max(1,Math.ceil(places.length/size)),currentPage=Math.min(page,pages-1);
+  const visible=useMemo(()=>places.slice(currentPage*size,(currentPage+1)*size),[places,currentPage,size]);
+  function enter(id:string){if(mode==='personal'){const district=districts.find(d=>d.id===id);if(district)onEnter(district);}else{const template=worldTemplates.find(t=>t.id===id);if(template)onPreview(template);}}
+  return <section className="world-home screen-surface" data-atlas-mode={mode} data-phase={phase}>
+    <div className="world-heading"><div><p className="eyebrow orange">YOUR LIFE / IN LITTLE PLACES</p><h1>a world <em>of you.</em></h1></div><div className="world-intro"><Speech>{mode==='personal'?'a morning. a first date. a little pause. where shall we go?':'a few beginnings. the rest of the story is yours.'}</Speech></div></div>
+    <div className="world-atlas-navigation"><div role="tablist" aria-label="Choose your world landscape"><button id="personal-worlds-tab" type="button" role="tab" aria-selected={mode==='personal'} aria-controls="world-landscape" onClick={()=>{setMode('personal');setPage(0);}}>Your worlds <span>{String(districts.length).padStart(2,'0')}</span></button><button id="suggested-worlds-tab" type="button" role="tab" aria-selected={mode==='explore'} aria-controls="world-landscape" onClick={()=>{setMode('explore');setPage(0);}}>Worlds to explore <Glyph name="spark"/></button></div><span className="world-moment-count"><Glyph name="clock"/>{moments} {moments===1?'moment':'moments'} kept</span></div>
+    <div id="world-landscape" role="tabpanel" aria-labelledby={mode==='personal'?'personal-worlds-tab':'suggested-worlds-tab'}>
+      {places.length?<><div className="atlas-context"><span>{mode==='personal'?'FROM YOUR OWN STORY':'CURATED BEGINNINGS / MAKE ONE YOURS'}</span><span>{mode==='personal'?'each place holds a little of your life':'sunshine, butterflies, rainy afternoons'}</span></div><WorldAtlas places={visible} compact={compact} onEnter={enter}/></>:<div className="world-building"><span className="world-seed"><Glyph name="scene"/></span><h2>Your story is the landscape.</h2><p>{busy?'Finding the right places, from everything you shared.':'A few little places are waiting to become yours.'}</p><Button disabled={busy||!complete} onClick={()=>onCreate()}>Build my world <Glyph name="arrow-right"/></Button>{!complete&&<Button secondary onClick={onCall}>Finish our first call</Button>}<button className="text-button" onClick={()=>{setMode('explore');setPage(0);}}>Wander through a few beginnings <Glyph name="arrow-up"/></button></div>}
+      {pages>1&&<nav className="atlas-pagination" aria-label="More places in your world"><button disabled={currentPage===0} onClick={()=>setPage(p=>p-1)} aria-label="Previous places"><Glyph name="arrow-left"/></button><span>CHAPTER {String(currentPage+1).padStart(2,'0')} <i>/</i> {String(pages).padStart(2,'0')}</span><button disabled={currentPage>=pages-1} onClick={()=>setPage(p=>p+1)} aria-label="Next places"><Glyph name="arrow-right"/></button></nav>}
+    </div>
+    {districts.length>0&&<form className="new-district" onSubmit={e=>{e.preventDefault();onCreate(command);}}><span className="new-district-orbit"><Glyph name="plus"/></span><label htmlFor="new-district"><strong>Where does your story go next?</strong><span>A place for a ritual. A trip. A new chapter.</span></label><div><input id="new-district" value={command} onChange={e=>onCommand(e.target.value)} maxLength={1000} placeholder="Make a place for…"/><Button type="submit" secondary disabled={busy||!command.trim()}>Grow it <Glyph name="arrow-up"/></Button></div></form>}
     <KeptMoments archives={archives} onVisit={onArchive}/>
-    <section id="worlds-to-explore" className="suggested-worlds" aria-labelledby="explore-worlds-title">
-      <div className="world-section-heading"><div><span className="eyebrow">02 / A LITTLE INSPIRATION</span><h2 id="explore-worlds-title">Worlds to explore.</h2></div><p>Curated starting points.<br/>Step inside. Then make one yours.</p></div>
-      <div className="suggested-collection">{worldTemplates.map(template=><article className="suggested-world district-card" key={template.id}>
-        <WorldMiniature scene={template.scene} phase={template.scene.kind==='dressing'?'dawn':phase}/>
-        <button className="district-open" onClick={()=>onPreview(template)} aria-label={`Explore ${template.name}`}><span className="district-index">CURATED STARTER</span><span className="district-title">{template.name}</span><span className="suggested-subtitle">{template.subtitle}</span><span className="district-enter"><Glyph name="arrow-up"/></span></button>
-      </article>)}</div>
-      <div className="world-journal-invitation"><Glyph name="clock"/><p><strong>A world can become a diary.</strong> Keep a moment in a room. Revisit how it looked. Let it change as you do.</p><span>YOUR WORDS / YOUR PACE</span></div>
-    </section>
+    <div className="world-journal-invitation"><Glyph name="clock"/><p><strong>Some places become part of your story.</strong> Keep a moment inside a world. Come back to how it felt. Let the scenery change with you.</p><span>YOUR WORDS / YOUR PACE</span></div>
   </section>;
 }

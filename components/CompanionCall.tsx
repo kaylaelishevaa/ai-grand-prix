@@ -6,6 +6,7 @@ import type {CallResponse} from '@/lib/journey-types';
 import type {Profile, Verdict} from '@/lib/types';
 import {Glyph} from './Glyph';
 import {productArt} from './art';
+import VerdictComparison from './VerdictComparison';
 import './companion-call.css';
 
 interface CompanionCallProps {
@@ -14,7 +15,6 @@ interface CompanionCallProps {
   onProfile(profile: Profile): void;
   onComplete(): void;
   onOpenProduct(skuId: string, verdict?: Verdict): void;
-  onDecisions(): void;
   onClose(): void;
 }
 interface TranscriptTurn {
@@ -61,6 +61,8 @@ export default function CompanionCall(props: CompanionCallProps) {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState('');
   const [busy, setBusy] = useState(true);
+  const [comparisonBusy, setComparisonBusy] = useState(false);
+  const comparisonPending = useRef(false);
   const [started, setStarted] = useState(false);
   const [error, setError] = useState('');
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -142,6 +144,26 @@ export default function CompanionCall(props: CompanionCallProps) {
     setTurns(current => [...current, {id: id + '-reply', role: 'coopy', text: responseText, response: data}]);
     speak(responseText);
   }
+  function replaceVerdict(turnId: string, previous: Verdict, verdict: Verdict, profile: Profile) {
+    // A comparison changes this card without ending the call or rewriting the
+    // user's transcript. The server has already updated the decision queue.
+    const previousStillPending = profile.decisions.some(item => item.skuId === previous.pickSkuId && !item.approvedAt);
+    const update = (response: CallResponse): CallResponse => ({
+      ...response, verdict, profile,
+      // The server deliberately preserves delegated or unrelated proposals.
+      // Keep those visible rather than hiding them when this card changes.
+      proposedSkuIds: [...new Set([...response.proposedSkuIds.filter(id => id !== previous.pickSkuId || previousStillPending), verdict.pickSkuId].filter((id): id is string => !!id))],
+    });
+    setTurns(current => current.map(turn => turn.id === turnId && turn.response ? {...turn, response: update(turn.response)} : turn));
+    setLatest(current => current?.verdict === previous ? update(current) : current);
+    comparisonWorking(false);
+    callbacks.current.onProfile(profile);
+  }
+  function comparisonWorking(value: boolean) {
+    comparisonPending.current = value;
+    setComparisonBusy(value);
+    if (value) stopRecognition();
+  }
   async function begin() {
     if (busyRef.current) return;
     busyRef.current = true; setBusy(true); setError('');
@@ -188,14 +210,14 @@ export default function CompanionCall(props: CompanionCallProps) {
   useEffect(() => {
     const element = transcript.current;
     if (element) element.scrollTo({top: element.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
-  }, [turns, busy]);
+  }, [turns.length, busy]);
   useEffect(() => {
     if (cameraOpen && video.current && stream.current) {video.current.srcObject = stream.current; void video.current.play().catch(() => {});}
   }, [cameraOpen]);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (busyRef.current || !started || (!draft.trim() && !photo)) return;
+    if (busyRef.current || comparisonPending.current || !started || (!draft.trim() && !photo)) return;
     stopRecognition(); stopSpeech();
     const message = draft.trim(), chosenPhoto = photo;
     const fingerprint = JSON.stringify([message, chosenPhoto?.name, chosenPhoto?.size, chosenPhoto?.lastModified]);
@@ -292,19 +314,18 @@ export default function CompanionCall(props: CompanionCallProps) {
         <div ref={transcript} className="call-transcript" role="log" aria-label="Your conversation" aria-live="polite" aria-relevant="additions">
           {turns.map(turn => <article className={`call-turn from-${turn.role}`} key={turn.id}><span className="call-speaker">{turn.role === 'you' ? 'YOU' : 'COOPY'}</span>{turn.text && <p className="call-turn-text">{turn.text}</p>}{turn.photo && <span className="call-photo-receipt"><Glyph name="image"/> one frame shared</span>}
             {turn.response?.inventory && <div className="call-inventory"><span className="eyebrow">WHAT I CAN SEE</span>{turn.response.inventory.items.map((item, i) => <div key={i}><Glyph name={item.status === 'present' ? 'check' : item.status === 'low' ? 'minus' : 'help'}/><b>{item.name}</b><span>{item.quantity || item.status}</span></div>)}{turn.response.inventory.uncertainties.map((line, i) => <p className="call-uncertainty" key={i}>{line}</p>)}</div>}
-            {turn.response?.verdict?.pickSkuId && (() => {const verdict = turn.response.verdict, sku = getSku(verdict.pickSkuId!); return sku ? <section className="call-verdict"><div className="call-verdict-art" dangerouslySetInnerHTML={{__html: productArt(sku.type, sku.color)}}/><div className="call-verdict-content"><span className="eyebrow">MY PICK FOR YOU</span><h3>{sku.name}</h3><strong>{money(sku.price)}</strong><p>{verdict.reason}</p>{verdict.dissent && <p className="call-verdict-dissent">{verdict.dissent}</p>}<div className="call-citations">{verdict.citations.map(id => {const review = getReview(id); return review ? <details key={id}><summary>{id} <Glyph name="arrow-up"/></summary><div><b>{review.stars} / 5 · {review.title}</b><p>{review.text}</p><small>{review.author} · {review.date} · seeded review</small></div></details> : null;})}</div><button className="text-button" onClick={() => leave(() => props.onOpenProduct(sku.id, verdict))}>Look closer & delegate <Glyph name="arrow-right"/></button></div></section> : null;})()}
-            {(turn.response?.proposedSkuIds || []).filter(id => id !== turn.response?.verdict?.pickSkuId).map(id => {const sku = getSku(id); return sku ? <button className="call-filler-card" key={id} onClick={() => leave(() => props.onOpenProduct(id))}><span className="call-filler-art" dangerouslySetInnerHTML={{__html: productArt(sku.type, sku.color)}}/><span><b>{sku.name}</b><small>in Decisions · awaiting your approval</small></span><strong>{money(sku.price)}</strong><Glyph name="arrow-up"/></button> : null;})}
-            {!!turn.response?.proposedSkuIds.length && <button className="call-decisions-link text-button" onClick={() => leave(props.onDecisions)}><Glyph name="check"/>{turn.response.proposedSkuIds.length} proposal{turn.response.proposedSkuIds.length === 1 ? '' : 's'} in Decisions <Glyph name="arrow-right"/></button>}
+            {turn.response?.verdict?.pickSkuId && (() => {const verdict = turn.response.verdict, sku = getSku(verdict.pickSkuId!); return sku ? <section className="call-verdict"><div className="call-verdict-art" dangerouslySetInnerHTML={{__html: productArt(sku.type, sku.color)}}/><div className="call-verdict-content"><span className="eyebrow">MY PICK FOR YOU</span><h3>{sku.name}</h3><strong>{money(sku.price)}</strong><p>{verdict.reason}</p>{verdict.dissent && <p className="call-verdict-dissent">{verdict.dissent}</p>}<div className="call-citations">{verdict.citations.map(id => {const review = getReview(id); return review ? <details key={id}><summary>{id} <Glyph name="arrow-up"/></summary><div><b>{review.stars} / 5 · {review.title}</b><p>{review.text}</p><small>{review.author} · {review.date} · seeded review</small></div></details> : null;})}</div><VerdictComparison profile={props.profile} pickSkuId={sku.id} verdict={verdict} origin="call" disabled={busy||comparisonBusy||props.profile.owned.some(item=>item.skuId===sku.id)} onBusyChange={comparisonWorking} onChange={(next,profile)=>replaceVerdict(turn.id,verdict,next,profile)}/><button className="text-button" disabled={comparisonBusy} onClick={() => leave(() => props.onOpenProduct(sku.id, verdict))}>Look closer & delegate <Glyph name="arrow-right"/></button></div></section> : null;})()}
+            {(turn.response?.proposedSkuIds || []).filter(id => id !== turn.response?.verdict?.pickSkuId).map(id => {const sku = getSku(id); return sku ? <button className="call-filler-card" disabled={comparisonBusy} key={id} onClick={() => leave(() => props.onOpenProduct(id))}><span className="call-filler-art" dangerouslySetInnerHTML={{__html: productArt(sku.type, sku.color)}}/><span><b>{sku.name}</b><small>pending your approval · open to review</small></span><strong>{money(sku.price)}</strong><Glyph name="arrow-up"/></button> : null;})}
             {turn.response?.meta && <small className="call-response-meta">{turn.response.meta.offline ? 'CACHED REPLAY' : turn.response.meta.cached ? 'FROM CACHE' : 'LIVE RESPONSE'} · {(turn.response.meta.latencyMs / 1000).toFixed(1)}S</small>}
           </article>)}
           {busy && <div className="call-thinking" role="status"><i/><i/><i/><span>{started ? 'a second, I’m with you…' : 'pulling up a chair…'}</span></div>}
         </div>
-        {error && <div className="call-error" role="alert"><Glyph name="help"/><span>{error}</span>{!started && <button className="text-button" onClick={() => void begin()} disabled={busy}>Try again</button>}</div>}
+        {error && <div className="call-error" role="alert"><Glyph name="help"/><span>{error}</span>{!started && <button className="text-button" onClick={() => void begin()} disabled={busy||comparisonBusy}>Try again</button>}</div>}
         {cameraOpen && <section className="call-camera-preview" aria-label="Your camera preview"><video ref={video} autoPlay muted playsInline/><div><span>PREVIEW · ONLY A CAPTURED FRAME IS SENT</span><button className="call-capture" onClick={() => void capture()} aria-label="Capture this frame"><Glyph name="camera"/> Capture frame</button><button className="call-icon-button" onClick={stopCamera} aria-label="Close camera"><Glyph name="close"/></button></div></section>}
         {finishedFirstCall ? <div className="call-complete"><p>five stories. the beginning of something that feels like you.</p><button className="button" onClick={() => leave(props.onComplete)}>Build my world <Glyph name="arrow-right"/></button><small>Every district starts with what you shared.</small></div> : <form className="call-composer" onSubmit={submit}>
-          {photoUrl && <div className="call-attached-photo"><img src={photoUrl} alt="The frame you are about to share with Coopy"/><div><b>A little context.</b><small>Sent only when you send your message.</small></div><button type="button" onClick={() => {setPhoto(null); if (fileInput.current) fileInput.current.value = '';}} aria-label="Remove attached photo" disabled={busy}><Glyph name="close"/></button></div>}
-          <label className="sr-only" htmlFor="coopy-call-answer">{complete ? 'Tell or ask Coopy something' : 'Your answer to Coopy'}</label><textarea id="coopy-call-answer" ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} disabled={!started || busy} rows={3} placeholder={listening ? 'listening…' : complete ? 'tell me what’s on your mind…' : 'tell me a little…'} onKeyDown={event => {if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {event.preventDefault(); event.currentTarget.form?.requestSubmit();}}}/>
-          <div className="call-composer-tools"><div><button type="button" className={`call-icon-button ${listening ? 'mic-listening' : ''}`} disabled={props.offline || !voiceSupported || busy || !started} onClick={toggleMicrophone} aria-label={listening ? 'Stop voice input' : 'Speak your answer'} aria-pressed={listening} title={props.offline ? 'Offline rehearsal uses typing' : voiceSupported ? 'Speak your answer' : 'Voice input unavailable; type your answer'}><Glyph name={listening ? 'stop' : 'mic'}/></button><button type="button" className="call-icon-button" disabled={busy || !started} onClick={() => fileInput.current?.click()} aria-label="Attach a photo"><Glyph name="image"/></button><button type="button" className={`call-icon-button ${cameraOpen ? 'camera-is-open' : ''}`} disabled={busy || !started} onClick={() => void openCamera()} aria-label={cameraOpen ? 'Close camera' : cameraPending ? 'Cancel opening camera' : 'Open your camera'} aria-pressed={cameraOpen}><Glyph name="camera"/></button></div><button className="button call-send" type="submit" disabled={busy || !started || (!draft.trim() && !photo)}>Send <Glyph name="arrow-up"/></button></div>
+          {photoUrl && <div className="call-attached-photo"><img src={photoUrl} alt="The frame you are about to share with Coopy"/><div><b>A little context.</b><small>Sent only when you send your message.</small></div><button type="button" onClick={() => {setPhoto(null); if (fileInput.current) fileInput.current.value = '';}} aria-label="Remove attached photo" disabled={busy||comparisonBusy}><Glyph name="close"/></button></div>}
+          <label className="sr-only" htmlFor="coopy-call-answer">{complete ? 'Tell or ask Coopy something' : 'Your answer to Coopy'}</label><textarea id="coopy-call-answer" ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} disabled={!started || busy || comparisonBusy} rows={3} placeholder={listening ? 'listening…' : complete ? 'tell me what’s on your mind…' : 'tell me a little…'} onKeyDown={event => {if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {event.preventDefault(); event.currentTarget.form?.requestSubmit();}}}/>
+          <div className="call-composer-tools"><div><button type="button" className={`call-icon-button ${listening ? 'mic-listening' : ''}`} disabled={props.offline || !voiceSupported || busy || comparisonBusy || !started} onClick={toggleMicrophone} aria-label={listening ? 'Stop voice input' : 'Speak your answer'} aria-pressed={listening} title={props.offline ? 'Offline rehearsal uses typing' : voiceSupported ? 'Speak your answer' : 'Voice input unavailable; type your answer'}><Glyph name={listening ? 'stop' : 'mic'}/></button><button type="button" className="call-icon-button" disabled={busy || comparisonBusy || !started} onClick={() => fileInput.current?.click()} aria-label="Attach a photo"><Glyph name="image"/></button><button type="button" className={`call-icon-button ${cameraOpen ? 'camera-is-open' : ''}`} disabled={busy || comparisonBusy || !started} onClick={() => void openCamera()} aria-label={cameraOpen ? 'Close camera' : cameraPending ? 'Cancel opening camera' : 'Open your camera'} aria-pressed={cameraOpen}><Glyph name="camera"/></button></div><button className="button call-send" type="submit" disabled={busy || comparisonBusy || !started || (!draft.trim() && !photo)}>Send <Glyph name="arrow-up"/></button></div>
           <input ref={fileInput} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" tabIndex={-1} onChange={event => selectPhoto(event.target.files?.[0])}/>
           <p className="call-input-note">{props.offline ? 'Offline rehearsal · type your answer. Browser voice is off.' : listening ? 'Voice fills this box. Read it, then send.' : !voiceSupported ? 'Voice input isn’t available in this browser. Typing works.' : 'Speak, type, or share a frame. No need to choose a mode.'}</p>
         </form>}

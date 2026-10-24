@@ -1,0 +1,2276 @@
+[
+  {
+    "id": "compare-kettle-1",
+    "name": "Everyday straight-spout kettle · 1 L",
+    "type": "kettle",
+    "color": "#BFC4B9",
+    "price": 24900,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "slow-mornings",
+      "minimal"
+    ],
+    "palette": [
+      "steel",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "everyday straight-spout kettle · 1 l",
+      "kettle",
+      "kettle alternative"
+    ],
+    "description": "Everyday straight-spout kettle · 1 L. capacityL: 1; material: brushed stainless steel; pourStyle: straight spout; heatSource: stovetop. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "capacityL": 1,
+      "material": "brushed stainless steel",
+      "pourStyle": "straight spout",
+      "heatSource": "stovetop",
+      "comparisonGroup": "kettle",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-kettle-1-R01",
+      "compare-kettle-1-R02",
+      "compare-kettle-1-R03",
+      "compare-kettle-1-R04",
+      "compare-kettle-1-R05",
+      "compare-kettle-1-R06",
+      "compare-kettle-1-R07",
+      "compare-kettle-1-R08",
+      "compare-kettle-1-R09",
+      "compare-kettle-1-R10",
+      "compare-kettle-1-R11",
+      "compare-kettle-1-R12",
+      "compare-kettle-1-R13",
+      "compare-kettle-1-R14",
+      "compare-kettle-1-R15",
+      "compare-kettle-1-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-rice-cooker-1",
+    "name": "Small-table rice cooker · 4 cups",
+    "type": "cooker",
+    "color": "#D7D9BC",
+    "price": 54900,
+    "category": "kitchen",
+    "vibeTags": [
+      "compact",
+      "practical",
+      "minimal"
+    ],
+    "palette": [
+      "cream",
+      "sage"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "small-table rice cooker · 4 cups",
+      "rice cooker",
+      "cooker alternative"
+    ],
+    "description": "Small-table rice cooker · 4 cups. capacityCups: 4; widthCm: 25; idealHousehold: 1–3 people; controls: cook and keep-warm switch. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "capacityCups": 4,
+      "widthCm": 25,
+      "idealHousehold": "1–3 people",
+      "controls": "cook and keep-warm switch",
+      "comparisonGroup": "rice-cooker",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-rice-cooker-1-R01",
+      "compare-rice-cooker-1-R02",
+      "compare-rice-cooker-1-R03",
+      "compare-rice-cooker-1-R04",
+      "compare-rice-cooker-1-R05",
+      "compare-rice-cooker-1-R06",
+      "compare-rice-cooker-1-R07",
+      "compare-rice-cooker-1-R08",
+      "compare-rice-cooker-1-R09",
+      "compare-rice-cooker-1-R10",
+      "compare-rice-cooker-1-R11",
+      "compare-rice-cooker-1-R12",
+      "compare-rice-cooker-1-R13",
+      "compare-rice-cooker-1-R14",
+      "compare-rice-cooker-1-R15",
+      "compare-rice-cooker-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-drinkware-1",
+    "name": "Daily porcelain mug duo · 300 ml",
+    "type": "mugs",
+    "color": "#DDE2D7",
+    "price": 12900,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "slow-mornings",
+      "natural"
+    ],
+    "palette": [
+      "cream",
+      "blue"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "daily porcelain mug duo · 300 ml",
+      "drinkware",
+      "mugs alternative"
+    ],
+    "description": "Daily porcelain mug duo · 300 ml. quantity: 2; capacityMlEach: 300; material: glazed porcelain; handle: true. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "quantity": 2,
+      "capacityMlEach": 300,
+      "material": "glazed porcelain",
+      "handle": true,
+      "comparisonGroup": "drinkware",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-drinkware-1-R01",
+      "compare-drinkware-1-R02",
+      "compare-drinkware-1-R03",
+      "compare-drinkware-1-R04",
+      "compare-drinkware-1-R05",
+      "compare-drinkware-1-R06",
+      "compare-drinkware-1-R07",
+      "compare-drinkware-1-R08",
+      "compare-drinkware-1-R09",
+      "compare-drinkware-1-R10",
+      "compare-drinkware-1-R11",
+      "compare-drinkware-1-R12",
+      "compare-drinkware-1-R13",
+      "compare-drinkware-1-R14",
+      "compare-drinkware-1-R15",
+      "compare-drinkware-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-apron-1",
+    "name": "Canvas workday apron",
+    "type": "apron",
+    "color": "#879176",
+    "price": 19900,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "natural",
+      "slow-mornings"
+    ],
+    "palette": [
+      "olive",
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "canvas workday apron",
+      "apron",
+      "apron alternative"
+    ],
+    "description": "Canvas workday apron. material: cotton canvas; lengthCm: 78; adjustableNeck: true; pockets: 2. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "cotton canvas",
+      "lengthCm": 78,
+      "adjustableNeck": true,
+      "pockets": 2,
+      "comparisonGroup": "apron",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-apron-1-R01",
+      "compare-apron-1-R02",
+      "compare-apron-1-R03",
+      "compare-apron-1-R04",
+      "compare-apron-1-R05",
+      "compare-apron-1-R06",
+      "compare-apron-1-R07",
+      "compare-apron-1-R08",
+      "compare-apron-1-R09",
+      "compare-apron-1-R10",
+      "compare-apron-1-R11",
+      "compare-apron-1-R12",
+      "compare-apron-1-R13",
+      "compare-apron-1-R14",
+      "compare-apron-1-R15",
+      "compare-apron-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-tray-1",
+    "name": "Easy-clean oval serving tray",
+    "type": "tray",
+    "color": "#E1D5B8",
+    "price": 9900,
+    "category": "kitchen",
+    "vibeTags": [
+      "warm-neutrals",
+      "natural",
+      "slow-mornings"
+    ],
+    "palette": [
+      "cream",
+      "sand"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "easy-clean oval serving tray",
+      "tray",
+      "tray alternative"
+    ],
+    "description": "Easy-clean oval serving tray. material: polypropylene; widthCm: 30; depthCm: 20; care: hand wash; shape: oval. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "polypropylene",
+      "widthCm": 30,
+      "depthCm": 20,
+      "care": "hand wash",
+      "shape": "oval",
+      "comparisonGroup": "tray",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-tray-1-R01",
+      "compare-tray-1-R02",
+      "compare-tray-1-R03",
+      "compare-tray-1-R04",
+      "compare-tray-1-R05",
+      "compare-tray-1-R06",
+      "compare-tray-1-R07",
+      "compare-tray-1-R08",
+      "compare-tray-1-R09",
+      "compare-tray-1-R10",
+      "compare-tray-1-R11",
+      "compare-tray-1-R12",
+      "compare-tray-1-R13",
+      "compare-tray-1-R14",
+      "compare-tray-1-R15",
+      "compare-tray-1-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-portable-speaker-1",
+    "name": "Pebble portable speaker",
+    "type": "speaker",
+    "color": "#B97D68",
+    "price": 34900,
+    "category": "electronics",
+    "vibeTags": [
+      "compact",
+      "slow-mornings",
+      "natural"
+    ],
+    "palette": [
+      "terracotta",
+      "cream"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "pebble portable speaker",
+      "portable speaker",
+      "speaker alternative"
+    ],
+    "description": "Pebble portable speaker. connection: Bluetooth; widthCm: 9; charging: USB-C; finish: textured plastic shell. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "connection": "Bluetooth",
+      "widthCm": 9,
+      "charging": "USB-C",
+      "finish": "textured plastic shell",
+      "comparisonGroup": "portable-speaker",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-portable-speaker-1-R01",
+      "compare-portable-speaker-1-R02",
+      "compare-portable-speaker-1-R03",
+      "compare-portable-speaker-1-R04",
+      "compare-portable-speaker-1-R05",
+      "compare-portable-speaker-1-R06",
+      "compare-portable-speaker-1-R07",
+      "compare-portable-speaker-1-R08",
+      "compare-portable-speaker-1-R09",
+      "compare-portable-speaker-1-R10",
+      "compare-portable-speaker-1-R11",
+      "compare-portable-speaker-1-R12",
+      "compare-portable-speaker-1-R13",
+      "compare-portable-speaker-1-R14",
+      "compare-portable-speaker-1-R15",
+      "compare-portable-speaker-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-desktop-organizer-1",
+    "name": "Open bamboo desk organizer",
+    "type": "organizer",
+    "color": "#C0A479",
+    "price": 17900,
+    "category": "home",
+    "vibeTags": [
+      "playful",
+      "bold",
+      "organized"
+    ],
+    "palette": [
+      "bamboo",
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "open bamboo desk organizer",
+      "desktop organizer",
+      "organizer alternative"
+    ],
+    "description": "Open bamboo desk organizer. material: bamboo; widthCm: 22; depthCm: 12; compartments: 4; drawers: 0. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "bamboo",
+      "widthCm": 22,
+      "depthCm": 12,
+      "compartments": 4,
+      "drawers": 0,
+      "comparisonGroup": "desktop-organizer",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-desktop-organizer-1-R01",
+      "compare-desktop-organizer-1-R02",
+      "compare-desktop-organizer-1-R03",
+      "compare-desktop-organizer-1-R04",
+      "compare-desktop-organizer-1-R05",
+      "compare-desktop-organizer-1-R06",
+      "compare-desktop-organizer-1-R07",
+      "compare-desktop-organizer-1-R08",
+      "compare-desktop-organizer-1-R09",
+      "compare-desktop-organizer-1-R10",
+      "compare-desktop-organizer-1-R11",
+      "compare-desktop-organizer-1-R12",
+      "compare-desktop-organizer-1-R13",
+      "compare-desktop-organizer-1-R14",
+      "compare-desktop-organizer-1-R15",
+      "compare-desktop-organizer-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-desktop-organizer-2",
+    "name": "Soft-grey modular desk drawers",
+    "type": "organizer",
+    "color": "#B9BFBA",
+    "price": 21900,
+    "category": "home",
+    "vibeTags": [
+      "playful",
+      "bold",
+      "organized"
+    ],
+    "palette": [
+      "grey",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "soft-grey modular desk drawers",
+      "desktop organizer",
+      "organizer alternative"
+    ],
+    "description": "Soft-grey modular desk drawers. material: polypropylene; widthCm: 26; depthCm: 16; drawers: 2; finish: matte. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "polypropylene",
+      "widthCm": 26,
+      "depthCm": 16,
+      "drawers": 2,
+      "finish": "matte",
+      "comparisonGroup": "desktop-organizer",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-desktop-organizer-2-R01",
+      "compare-desktop-organizer-2-R02",
+      "compare-desktop-organizer-2-R03",
+      "compare-desktop-organizer-2-R04",
+      "compare-desktop-organizer-2-R05",
+      "compare-desktop-organizer-2-R06",
+      "compare-desktop-organizer-2-R07",
+      "compare-desktop-organizer-2-R08",
+      "compare-desktop-organizer-2-R09",
+      "compare-desktop-organizer-2-R10",
+      "compare-desktop-organizer-2-R11",
+      "compare-desktop-organizer-2-R12",
+      "compare-desktop-organizer-2-R13",
+      "compare-desktop-organizer-2-R14",
+      "compare-desktop-organizer-2-R15",
+      "compare-desktop-organizer-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-matcha-set-1",
+    "name": "Everyday matcha bowl and whisk",
+    "type": "matcha",
+    "color": "#D6D1AD",
+    "price": 19900,
+    "category": "kitchen",
+    "vibeTags": [
+      "slow-mornings",
+      "natural",
+      "tea-ritual"
+    ],
+    "palette": [
+      "cream",
+      "sage"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "everyday matcha bowl and whisk",
+      "matcha set",
+      "matcha alternative"
+    ],
+    "description": "Everyday matcha bowl and whisk. contents: ceramic bowl + bamboo whisk; bowlCapacityMl: 400; whiskHolderIncluded: false. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "contents": "ceramic bowl + bamboo whisk",
+      "bowlCapacityMl": 400,
+      "whiskHolderIncluded": false,
+      "comparisonGroup": "matcha-set",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-matcha-set-1-R01",
+      "compare-matcha-set-1-R02",
+      "compare-matcha-set-1-R03",
+      "compare-matcha-set-1-R04",
+      "compare-matcha-set-1-R05",
+      "compare-matcha-set-1-R06",
+      "compare-matcha-set-1-R07",
+      "compare-matcha-set-1-R08",
+      "compare-matcha-set-1-R09",
+      "compare-matcha-set-1-R10",
+      "compare-matcha-set-1-R11",
+      "compare-matcha-set-1-R12",
+      "compare-matcha-set-1-R13",
+      "compare-matcha-set-1-R14",
+      "compare-matcha-set-1-R15",
+      "compare-matcha-set-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-matcha-set-2",
+    "name": "Speckled matcha ritual set",
+    "type": "matcha",
+    "color": "#9CA991",
+    "price": 34900,
+    "category": "kitchen",
+    "vibeTags": [
+      "slow-mornings",
+      "natural",
+      "tea-ritual"
+    ],
+    "palette": [
+      "sage",
+      "stone"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "speckled matcha ritual set",
+      "matcha set",
+      "matcha alternative"
+    ],
+    "description": "Speckled matcha ritual set. contents: stoneware bowl + bamboo whisk + whisk holder; bowlCapacityMl: 500; whiskHolderIncluded: true. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "contents": "stoneware bowl + bamboo whisk + whisk holder",
+      "bowlCapacityMl": 500,
+      "whiskHolderIncluded": true,
+      "comparisonGroup": "matcha-set",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-matcha-set-2-R01",
+      "compare-matcha-set-2-R02",
+      "compare-matcha-set-2-R03",
+      "compare-matcha-set-2-R04",
+      "compare-matcha-set-2-R05",
+      "compare-matcha-set-2-R06",
+      "compare-matcha-set-2-R07",
+      "compare-matcha-set-2-R08",
+      "compare-matcha-set-2-R09",
+      "compare-matcha-set-2-R10",
+      "compare-matcha-set-2-R11",
+      "compare-matcha-set-2-R12",
+      "compare-matcha-set-2-R13",
+      "compare-matcha-set-2-R14",
+      "compare-matcha-set-2-R15",
+      "compare-matcha-set-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-stovetop-coffee-1",
+    "name": "Little moka pot and cup · 3 cups",
+    "type": "espresso",
+    "color": "#BAC3BF",
+    "price": 29900,
+    "category": "kitchen",
+    "vibeTags": [
+      "coffee-ritual",
+      "practical",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "steel",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "little moka pot and cup · 3 cups",
+      "stovetop coffee",
+      "espresso alternative"
+    ],
+    "description": "Little moka pot and cup · 3 cups. contents: aluminium moka pot + ceramic cup; capacityCups: 3; requires: compatible gas or electric stovetop; inductionCompatible: false. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "contents": "aluminium moka pot + ceramic cup",
+      "capacityCups": 3,
+      "requires": "compatible gas or electric stovetop",
+      "inductionCompatible": false,
+      "comparisonGroup": "stovetop-coffee",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-stovetop-coffee-1-R01",
+      "compare-stovetop-coffee-1-R02",
+      "compare-stovetop-coffee-1-R03",
+      "compare-stovetop-coffee-1-R04",
+      "compare-stovetop-coffee-1-R05",
+      "compare-stovetop-coffee-1-R06",
+      "compare-stovetop-coffee-1-R07",
+      "compare-stovetop-coffee-1-R08",
+      "compare-stovetop-coffee-1-R09",
+      "compare-stovetop-coffee-1-R10",
+      "compare-stovetop-coffee-1-R11",
+      "compare-stovetop-coffee-1-R12",
+      "compare-stovetop-coffee-1-R13",
+      "compare-stovetop-coffee-1-R14",
+      "compare-stovetop-coffee-1-R15",
+      "compare-stovetop-coffee-1-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-stovetop-coffee-2",
+    "name": "Steel moka pot and cup · 4 cups",
+    "type": "espresso",
+    "color": "#7F9490",
+    "price": 59900,
+    "category": "kitchen",
+    "vibeTags": [
+      "coffee-ritual",
+      "practical",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "steel",
+      "teal"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "steel moka pot and cup · 4 cups",
+      "stovetop coffee",
+      "espresso alternative"
+    ],
+    "description": "Steel moka pot and cup · 4 cups. contents: stainless-steel moka pot + ceramic cup; capacityCups: 4; requires: compatible stovetop; inductionCompatible: true. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "contents": "stainless-steel moka pot + ceramic cup",
+      "capacityCups": 4,
+      "requires": "compatible stovetop",
+      "inductionCompatible": true,
+      "comparisonGroup": "stovetop-coffee",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-stovetop-coffee-2-R01",
+      "compare-stovetop-coffee-2-R02",
+      "compare-stovetop-coffee-2-R03",
+      "compare-stovetop-coffee-2-R04",
+      "compare-stovetop-coffee-2-R05",
+      "compare-stovetop-coffee-2-R06",
+      "compare-stovetop-coffee-2-R07",
+      "compare-stovetop-coffee-2-R08",
+      "compare-stovetop-coffee-2-R09",
+      "compare-stovetop-coffee-2-R10",
+      "compare-stovetop-coffee-2-R11",
+      "compare-stovetop-coffee-2-R12",
+      "compare-stovetop-coffee-2-R13",
+      "compare-stovetop-coffee-2-R14",
+      "compare-stovetop-coffee-2-R15",
+      "compare-stovetop-coffee-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-vase-1",
+    "name": "Simple glass stem vase",
+    "type": "vase",
+    "color": "#ADC4B6",
+    "price": 12900,
+    "category": "home",
+    "vibeTags": [
+      "natural",
+      "minimal",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "clear",
+      "sage"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "simple glass stem vase",
+      "vase",
+      "vase alternative"
+    ],
+    "description": "Simple glass stem vase. material: clear glass; heightCm: 16; openingDiameterCm: 4. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "clear glass",
+      "heightCm": 16,
+      "openingDiameterCm": 4,
+      "comparisonGroup": "vase",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-vase-1-R01",
+      "compare-vase-1-R02",
+      "compare-vase-1-R03",
+      "compare-vase-1-R04",
+      "compare-vase-1-R05",
+      "compare-vase-1-R06",
+      "compare-vase-1-R07",
+      "compare-vase-1-R08",
+      "compare-vase-1-R09",
+      "compare-vase-1-R10",
+      "compare-vase-1-R11",
+      "compare-vase-1-R12",
+      "compare-vase-1-R13",
+      "compare-vase-1-R14",
+      "compare-vase-1-R15",
+      "compare-vase-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-scented-candle-1",
+    "name": "Cedar evenings tin candle",
+    "type": "candle",
+    "color": "#CBAB72",
+    "price": 19900,
+    "category": "home",
+    "vibeTags": [
+      "quiet-evenings",
+      "warm-neutrals",
+      "slow-living"
+    ],
+    "palette": [
+      "cream",
+      "amber"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "cedar evenings tin candle",
+      "scented candle",
+      "candle alternative"
+    ],
+    "description": "Cedar evenings tin candle. scent: cedar and orange peel; waxGrams: 120; container: metal tin; quantity: 1. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "scent": "cedar and orange peel",
+      "waxGrams": 120,
+      "container": "metal tin",
+      "quantity": 1,
+      "comparisonGroup": "scented-candle",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-scented-candle-1-R01",
+      "compare-scented-candle-1-R02",
+      "compare-scented-candle-1-R03",
+      "compare-scented-candle-1-R04",
+      "compare-scented-candle-1-R05",
+      "compare-scented-candle-1-R06",
+      "compare-scented-candle-1-R07",
+      "compare-scented-candle-1-R08",
+      "compare-scented-candle-1-R09",
+      "compare-scented-candle-1-R10",
+      "compare-scented-candle-1-R11",
+      "compare-scented-candle-1-R12",
+      "compare-scented-candle-1-R13",
+      "compare-scented-candle-1-R14",
+      "compare-scented-candle-1-R15",
+      "compare-scented-candle-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-filled-cushion-1",
+    "name": "Everyday cotton cushion · filled",
+    "type": "cushion",
+    "color": "#DED2B6",
+    "price": 25900,
+    "category": "home",
+    "vibeTags": [
+      "warm-neutrals",
+      "soft",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "cream",
+      "oat"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "everyday cotton cushion · filled",
+      "filled cushion",
+      "cushion alternative"
+    ],
+    "description": "Everyday cotton cushion · filled. material: cotton cover; sizeCm: 45 × 45; insertIncluded: true; filling: polyester; closure: zip. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "cotton cover",
+      "sizeCm": "45 × 45",
+      "insertIncluded": true,
+      "filling": "polyester",
+      "closure": "zip",
+      "comparisonGroup": "filled-cushion",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-filled-cushion-1-R01",
+      "compare-filled-cushion-1-R02",
+      "compare-filled-cushion-1-R03",
+      "compare-filled-cushion-1-R04",
+      "compare-filled-cushion-1-R05",
+      "compare-filled-cushion-1-R06",
+      "compare-filled-cushion-1-R07",
+      "compare-filled-cushion-1-R08",
+      "compare-filled-cushion-1-R09",
+      "compare-filled-cushion-1-R10",
+      "compare-filled-cushion-1-R11",
+      "compare-filled-cushion-1-R12",
+      "compare-filled-cushion-1-R13",
+      "compare-filled-cushion-1-R14",
+      "compare-filled-cushion-1-R15",
+      "compare-filled-cushion-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-filled-cushion-2",
+    "name": "Washed linen cushion · filled",
+    "type": "cushion",
+    "color": "#AAB398",
+    "price": 49900,
+    "category": "home",
+    "vibeTags": [
+      "warm-neutrals",
+      "soft",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "sage",
+      "sand"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "washed linen cushion · filled",
+      "filled cushion",
+      "cushion alternative"
+    ],
+    "description": "Washed linen cushion · filled. material: linen cover; sizeCm: 45 × 45; insertIncluded: true; filling: polyester; closure: zip. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "linen cover",
+      "sizeCm": "45 × 45",
+      "insertIncluded": true,
+      "filling": "polyester",
+      "closure": "zip",
+      "comparisonGroup": "filled-cushion",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-filled-cushion-2-R01",
+      "compare-filled-cushion-2-R02",
+      "compare-filled-cushion-2-R03",
+      "compare-filled-cushion-2-R04",
+      "compare-filled-cushion-2-R05",
+      "compare-filled-cushion-2-R06",
+      "compare-filled-cushion-2-R07",
+      "compare-filled-cushion-2-R08",
+      "compare-filled-cushion-2-R09",
+      "compare-filled-cushion-2-R10",
+      "compare-filled-cushion-2-R11",
+      "compare-filled-cushion-2-R12",
+      "compare-filled-cushion-2-R13",
+      "compare-filled-cushion-2-R14",
+      "compare-filled-cushion-2-R15",
+      "compare-filled-cushion-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-cushion-cover-1",
+    "name": "Plain cotton cushion cover",
+    "type": "cushion",
+    "color": "#E1D3B7",
+    "price": 14900,
+    "category": "home",
+    "vibeTags": [
+      "warm-neutrals",
+      "soft",
+      "practical"
+    ],
+    "palette": [
+      "cream",
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "plain cotton cushion cover",
+      "cushion cover",
+      "cushion alternative"
+    ],
+    "description": "Plain cotton cushion cover. material: cotton; sizeCm: 45 × 45; insertIncluded: false; closure: zip. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "cotton",
+      "sizeCm": "45 × 45",
+      "insertIncluded": false,
+      "closure": "zip",
+      "comparisonGroup": "cushion-cover",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-cushion-cover-1-R01",
+      "compare-cushion-cover-1-R02",
+      "compare-cushion-cover-1-R03",
+      "compare-cushion-cover-1-R04",
+      "compare-cushion-cover-1-R05",
+      "compare-cushion-cover-1-R06",
+      "compare-cushion-cover-1-R07",
+      "compare-cushion-cover-1-R08",
+      "compare-cushion-cover-1-R09",
+      "compare-cushion-cover-1-R10",
+      "compare-cushion-cover-1-R11",
+      "compare-cushion-cover-1-R12",
+      "compare-cushion-cover-1-R13",
+      "compare-cushion-cover-1-R14",
+      "compare-cushion-cover-1-R15",
+      "compare-cushion-cover-1-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-cushion-cover-2",
+    "name": "Linen stripe cushion cover",
+    "type": "cushion",
+    "color": "#A5AD92",
+    "price": 29900,
+    "category": "home",
+    "vibeTags": [
+      "warm-neutrals",
+      "soft",
+      "practical"
+    ],
+    "palette": [
+      "sage",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "linen stripe cushion cover",
+      "cushion cover",
+      "cushion alternative"
+    ],
+    "description": "Linen stripe cushion cover. material: linen; sizeCm: 45 × 45; insertIncluded: false; closure: zip. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "linen",
+      "sizeCm": "45 × 45",
+      "insertIncluded": false,
+      "closure": "zip",
+      "comparisonGroup": "cushion-cover",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-cushion-cover-2-R01",
+      "compare-cushion-cover-2-R02",
+      "compare-cushion-cover-2-R03",
+      "compare-cushion-cover-2-R04",
+      "compare-cushion-cover-2-R05",
+      "compare-cushion-cover-2-R06",
+      "compare-cushion-cover-2-R07",
+      "compare-cushion-cover-2-R08",
+      "compare-cushion-cover-2-R09",
+      "compare-cushion-cover-2-R10",
+      "compare-cushion-cover-2-R11",
+      "compare-cushion-cover-2-R12",
+      "compare-cushion-cover-2-R13",
+      "compare-cushion-cover-2-R14",
+      "compare-cushion-cover-2-R15",
+      "compare-cushion-cover-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-oat-milk-1",
+    "name": "Everyday unsweetened oat drink · 1 L",
+    "type": "milk",
+    "color": "#D8D2B0",
+    "price": 3200,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "cream",
+      "oat"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "everyday unsweetened oat drink · 1 l",
+      "oat milk",
+      "milk alternative"
+    ],
+    "description": "Everyday unsweetened oat drink · 1 L. pack: 1 L; volumeMl: 1000; quantity: 1; sweetened: false; storage: refrigerate after opening. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "1 L",
+      "volumeMl": 1000,
+      "quantity": 1,
+      "sweetened": false,
+      "storage": "refrigerate after opening",
+      "comparisonGroup": "oat-milk",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-oat-milk-1-R01",
+      "compare-oat-milk-1-R02",
+      "compare-oat-milk-1-R03",
+      "compare-oat-milk-1-R04",
+      "compare-oat-milk-1-R05",
+      "compare-oat-milk-1-R06",
+      "compare-oat-milk-1-R07",
+      "compare-oat-milk-1-R08",
+      "compare-oat-milk-1-R09",
+      "compare-oat-milk-1-R10",
+      "compare-oat-milk-1-R11",
+      "compare-oat-milk-1-R12",
+      "compare-oat-milk-1-R13",
+      "compare-oat-milk-1-R14",
+      "compare-oat-milk-1-R15",
+      "compare-oat-milk-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-oat-milk-2",
+    "name": "Barista oat drink · 1 L",
+    "type": "milk",
+    "color": "#BDB98F",
+    "price": 4900,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "oat",
+      "teal"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "barista oat drink · 1 l",
+      "oat milk",
+      "milk alternative"
+    ],
+    "description": "Barista oat drink · 1 L. pack: 1 L; volumeMl: 1000; quantity: 1; style: barista blend; storage: refrigerate after opening. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "1 L",
+      "volumeMl": 1000,
+      "quantity": 1,
+      "style": "barista blend",
+      "storage": "refrigerate after opening",
+      "comparisonGroup": "oat-milk",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-oat-milk-2-R01",
+      "compare-oat-milk-2-R02",
+      "compare-oat-milk-2-R03",
+      "compare-oat-milk-2-R04",
+      "compare-oat-milk-2-R05",
+      "compare-oat-milk-2-R06",
+      "compare-oat-milk-2-R07",
+      "compare-oat-milk-2-R08",
+      "compare-oat-milk-2-R09",
+      "compare-oat-milk-2-R10",
+      "compare-oat-milk-2-R11",
+      "compare-oat-milk-2-R12",
+      "compare-oat-milk-2-R13",
+      "compare-oat-milk-2-R14",
+      "compare-oat-milk-2-R15",
+      "compare-oat-milk-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-spinach-1",
+    "name": "Baby spinach leaves · 100 g",
+    "type": "greens",
+    "color": "#789C66",
+    "price": 2200,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "green",
+      "sage"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "baby spinach leaves · 100 g",
+      "spinach",
+      "greens alternative"
+    ],
+    "description": "Baby spinach leaves · 100 g. pack: 100 g; weightG: 100; quantity: 1; storage: refrigerated; preWashed: false. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "100 g",
+      "weightG": 100,
+      "quantity": 1,
+      "storage": "refrigerated",
+      "preWashed": false,
+      "comparisonGroup": "spinach",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-spinach-1-R01",
+      "compare-spinach-1-R02",
+      "compare-spinach-1-R03",
+      "compare-spinach-1-R04",
+      "compare-spinach-1-R05",
+      "compare-spinach-1-R06",
+      "compare-spinach-1-R07",
+      "compare-spinach-1-R08",
+      "compare-spinach-1-R09",
+      "compare-spinach-1-R10",
+      "compare-spinach-1-R11",
+      "compare-spinach-1-R12",
+      "compare-spinach-1-R13",
+      "compare-spinach-1-R14",
+      "compare-spinach-1-R15",
+      "compare-spinach-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-spinach-2",
+    "name": "Baby spinach leaves · 250 g",
+    "type": "greens",
+    "color": "#648856",
+    "price": 4300,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "green",
+      "olive"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "baby spinach leaves · 250 g",
+      "spinach",
+      "greens alternative"
+    ],
+    "description": "Baby spinach leaves · 250 g. pack: 250 g; weightG: 250; quantity: 1; storage: refrigerated; preWashed: false. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "250 g",
+      "weightG": 250,
+      "quantity": 1,
+      "storage": "refrigerated",
+      "preWashed": false,
+      "comparisonGroup": "spinach",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-spinach-2-R01",
+      "compare-spinach-2-R02",
+      "compare-spinach-2-R03",
+      "compare-spinach-2-R04",
+      "compare-spinach-2-R05",
+      "compare-spinach-2-R06",
+      "compare-spinach-2-R07",
+      "compare-spinach-2-R08",
+      "compare-spinach-2-R09",
+      "compare-spinach-2-R10",
+      "compare-spinach-2-R11",
+      "compare-spinach-2-R12",
+      "compare-spinach-2-R13",
+      "compare-spinach-2-R14",
+      "compare-spinach-2-R15",
+      "compare-spinach-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-enoki-1",
+    "name": "Enoki mushrooms · single pack",
+    "type": "greens",
+    "color": "#DBD3B6",
+    "price": 1100,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "cream",
+      "oat"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "enoki mushrooms · single pack",
+      "enoki",
+      "greens alternative"
+    ],
+    "description": "Enoki mushrooms · single pack. pack: 1 pack · 150 g; weightG: 150; quantity: 1; storage: refrigerated. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "1 pack · 150 g",
+      "weightG": 150,
+      "quantity": 1,
+      "storage": "refrigerated",
+      "comparisonGroup": "enoki",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-enoki-1-R01",
+      "compare-enoki-1-R02",
+      "compare-enoki-1-R03",
+      "compare-enoki-1-R04",
+      "compare-enoki-1-R05",
+      "compare-enoki-1-R06",
+      "compare-enoki-1-R07",
+      "compare-enoki-1-R08",
+      "compare-enoki-1-R09",
+      "compare-enoki-1-R10",
+      "compare-enoki-1-R11",
+      "compare-enoki-1-R12",
+      "compare-enoki-1-R13",
+      "compare-enoki-1-R14",
+      "compare-enoki-1-R15",
+      "compare-enoki-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-enoki-2",
+    "name": "Enoki mushrooms · three packs",
+    "type": "greens",
+    "color": "#D6CAAA",
+    "price": 2400,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "cream",
+      "sand"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "enoki mushrooms · three packs",
+      "enoki",
+      "greens alternative"
+    ],
+    "description": "Enoki mushrooms · three packs. pack: 3 packs · 150 g each; weightGEach: 150; quantity: 3; storage: refrigerated. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "3 packs · 150 g each",
+      "weightGEach": 150,
+      "quantity": 3,
+      "storage": "refrigerated",
+      "comparisonGroup": "enoki",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-enoki-2-R01",
+      "compare-enoki-2-R02",
+      "compare-enoki-2-R03",
+      "compare-enoki-2-R04",
+      "compare-enoki-2-R05",
+      "compare-enoki-2-R06",
+      "compare-enoki-2-R07",
+      "compare-enoki-2-R08",
+      "compare-enoki-2-R09",
+      "compare-enoki-2-R10",
+      "compare-enoki-2-R11",
+      "compare-enoki-2-R12",
+      "compare-enoki-2-R13",
+      "compare-enoki-2-R14",
+      "compare-enoki-2-R15",
+      "compare-enoki-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-cherry-tomatoes-1",
+    "name": "Cherry tomatoes · small punnet",
+    "type": "tomato",
+    "color": "#C56D52",
+    "price": 2900,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "red",
+      "green"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "cherry tomatoes · small punnet",
+      "cherry tomatoes",
+      "tomato alternative"
+    ],
+    "description": "Cherry tomatoes · small punnet. pack: 300 g; weightG: 300; quantity: 1; container: vented punnet. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "300 g",
+      "weightG": 300,
+      "quantity": 1,
+      "container": "vented punnet",
+      "comparisonGroup": "cherry-tomatoes",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-cherry-tomatoes-1-R01",
+      "compare-cherry-tomatoes-1-R02",
+      "compare-cherry-tomatoes-1-R03",
+      "compare-cherry-tomatoes-1-R04",
+      "compare-cherry-tomatoes-1-R05",
+      "compare-cherry-tomatoes-1-R06",
+      "compare-cherry-tomatoes-1-R07",
+      "compare-cherry-tomatoes-1-R08",
+      "compare-cherry-tomatoes-1-R09",
+      "compare-cherry-tomatoes-1-R10",
+      "compare-cherry-tomatoes-1-R11",
+      "compare-cherry-tomatoes-1-R12",
+      "compare-cherry-tomatoes-1-R13",
+      "compare-cherry-tomatoes-1-R14",
+      "compare-cherry-tomatoes-1-R15",
+      "compare-cherry-tomatoes-1-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-cherry-tomatoes-2",
+    "name": "Cherry tomatoes · family punnet",
+    "type": "tomato",
+    "color": "#B95E49",
+    "price": 6900,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "red",
+      "green"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "cherry tomatoes · family punnet",
+      "cherry tomatoes",
+      "tomato alternative"
+    ],
+    "description": "Cherry tomatoes · family punnet. pack: 1 kg; weightG: 1000; quantity: 1; container: vented punnet. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "1 kg",
+      "weightG": 1000,
+      "quantity": 1,
+      "container": "vented punnet",
+      "comparisonGroup": "cherry-tomatoes",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-cherry-tomatoes-2-R01",
+      "compare-cherry-tomatoes-2-R02",
+      "compare-cherry-tomatoes-2-R03",
+      "compare-cherry-tomatoes-2-R04",
+      "compare-cherry-tomatoes-2-R05",
+      "compare-cherry-tomatoes-2-R06",
+      "compare-cherry-tomatoes-2-R07",
+      "compare-cherry-tomatoes-2-R08",
+      "compare-cherry-tomatoes-2-R09",
+      "compare-cherry-tomatoes-2-R10",
+      "compare-cherry-tomatoes-2-R11",
+      "compare-cherry-tomatoes-2-R12",
+      "compare-cherry-tomatoes-2-R13",
+      "compare-cherry-tomatoes-2-R14",
+      "compare-cherry-tomatoes-2-R15",
+      "compare-cherry-tomatoes-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-soft-tofu-1",
+    "name": "Soft tofu · single pack",
+    "type": "tofu",
+    "color": "#DAD8BE",
+    "price": 1400,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "cream",
+      "sage"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "soft tofu · single pack",
+      "soft tofu",
+      "tofu alternative"
+    ],
+    "description": "Soft tofu · single pack. pack: 1 pack · 300 g; weightG: 300; quantity: 1; storage: refrigerated. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "1 pack · 300 g",
+      "weightG": 300,
+      "quantity": 1,
+      "storage": "refrigerated",
+      "comparisonGroup": "soft-tofu",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-soft-tofu-1-R01",
+      "compare-soft-tofu-1-R02",
+      "compare-soft-tofu-1-R03",
+      "compare-soft-tofu-1-R04",
+      "compare-soft-tofu-1-R05",
+      "compare-soft-tofu-1-R06",
+      "compare-soft-tofu-1-R07",
+      "compare-soft-tofu-1-R08",
+      "compare-soft-tofu-1-R09",
+      "compare-soft-tofu-1-R10",
+      "compare-soft-tofu-1-R11",
+      "compare-soft-tofu-1-R12",
+      "compare-soft-tofu-1-R13",
+      "compare-soft-tofu-1-R14",
+      "compare-soft-tofu-1-R15",
+      "compare-soft-tofu-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-soft-tofu-2",
+    "name": "Soft tofu · family three-pack",
+    "type": "tofu",
+    "color": "#D1D2B3",
+    "price": 3600,
+    "category": "groceries",
+    "vibeTags": [
+      "practical",
+      "weeknight-cooking"
+    ],
+    "palette": [
+      "cream",
+      "green"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "soft tofu · family three-pack",
+      "soft tofu",
+      "tofu alternative"
+    ],
+    "description": "Soft tofu · family three-pack. pack: 3 packs · 300 g each; weightGEach: 300; quantity: 3; storage: refrigerated. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "pack": "3 packs · 300 g each",
+      "weightGEach": 300,
+      "quantity": 3,
+      "storage": "refrigerated",
+      "comparisonGroup": "soft-tofu",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-soft-tofu-2-R01",
+      "compare-soft-tofu-2-R02",
+      "compare-soft-tofu-2-R03",
+      "compare-soft-tofu-2-R04",
+      "compare-soft-tofu-2-R05",
+      "compare-soft-tofu-2-R06",
+      "compare-soft-tofu-2-R07",
+      "compare-soft-tofu-2-R08",
+      "compare-soft-tofu-2-R09",
+      "compare-soft-tofu-2-R10",
+      "compare-soft-tofu-2-R11",
+      "compare-soft-tofu-2-R12",
+      "compare-soft-tofu-2-R13",
+      "compare-soft-tofu-2-R14",
+      "compare-soft-tofu-2-R15",
+      "compare-soft-tofu-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-midi-dress-1",
+    "name": "Soft jersey midi dress",
+    "type": "dress",
+    "color": "#876675",
+    "price": 29900,
+    "category": "wardrobe",
+    "vibeTags": [
+      "date-night",
+      "quiet-evenings",
+      "simple-dressing",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "plum",
+      "rose"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "soft jersey midi dress",
+      "midi dress",
+      "dress alternative"
+    ],
+    "description": "Soft jersey midi dress. material: 95% cotton, 5% elastane; size: M; lengthCm: 110; closure: pull-on; care: cold gentle wash, line dry. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "95% cotton, 5% elastane",
+      "size": "M",
+      "lengthCm": 110,
+      "closure": "pull-on",
+      "care": "cold gentle wash, line dry",
+      "comparisonGroup": "midi-dress",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-midi-dress-1-R01",
+      "compare-midi-dress-1-R02",
+      "compare-midi-dress-1-R03",
+      "compare-midi-dress-1-R04",
+      "compare-midi-dress-1-R05",
+      "compare-midi-dress-1-R06",
+      "compare-midi-dress-1-R07",
+      "compare-midi-dress-1-R08",
+      "compare-midi-dress-1-R09",
+      "compare-midi-dress-1-R10",
+      "compare-midi-dress-1-R11",
+      "compare-midi-dress-1-R12",
+      "compare-midi-dress-1-R13",
+      "compare-midi-dress-1-R14",
+      "compare-midi-dress-1-R15",
+      "compare-midi-dress-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-midi-dress-2",
+    "name": "Linen-blend wrap midi dress",
+    "type": "dress",
+    "color": "#9CAA91",
+    "price": 59900,
+    "category": "wardrobe",
+    "vibeTags": [
+      "date-night",
+      "quiet-evenings",
+      "simple-dressing",
+      "warm-neutrals"
+    ],
+    "palette": [
+      "sage",
+      "cream"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "linen-blend wrap midi dress",
+      "midi dress",
+      "dress alternative"
+    ],
+    "description": "Linen-blend wrap midi dress. material: 55% linen, 45% viscose; size: M; lengthCm: 115; closure: side tie; care: cold hand wash, line dry. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "55% linen, 45% viscose",
+      "size": "M",
+      "lengthCm": 115,
+      "closure": "side tie",
+      "care": "cold hand wash, line dry",
+      "comparisonGroup": "midi-dress",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-midi-dress-2-R01",
+      "compare-midi-dress-2-R02",
+      "compare-midi-dress-2-R03",
+      "compare-midi-dress-2-R04",
+      "compare-midi-dress-2-R05",
+      "compare-midi-dress-2-R06",
+      "compare-midi-dress-2-R07",
+      "compare-midi-dress-2-R08",
+      "compare-midi-dress-2-R09",
+      "compare-midi-dress-2-R10",
+      "compare-midi-dress-2-R11",
+      "compare-midi-dress-2-R12",
+      "compare-midi-dress-2-R13",
+      "compare-midi-dress-2-R14",
+      "compare-midi-dress-2-R15",
+      "compare-midi-dress-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-blouse-1",
+    "name": "Easy cotton evening blouse",
+    "type": "blouse",
+    "color": "#E0D8C1",
+    "price": 21900,
+    "category": "wardrobe",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "simple-dressing",
+      "everyday"
+    ],
+    "palette": [
+      "cream",
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "easy cotton evening blouse",
+      "blouse",
+      "blouse alternative"
+    ],
+    "description": "Easy cotton evening blouse. material: 100% cotton; size: M; lengthCm: 61; closure: front buttons; care: cold gentle wash, line dry. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "100% cotton",
+      "size": "M",
+      "lengthCm": 61,
+      "closure": "front buttons",
+      "care": "cold gentle wash, line dry",
+      "comparisonGroup": "blouse",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-blouse-1-R01",
+      "compare-blouse-1-R02",
+      "compare-blouse-1-R03",
+      "compare-blouse-1-R04",
+      "compare-blouse-1-R05",
+      "compare-blouse-1-R06",
+      "compare-blouse-1-R07",
+      "compare-blouse-1-R08",
+      "compare-blouse-1-R09",
+      "compare-blouse-1-R10",
+      "compare-blouse-1-R11",
+      "compare-blouse-1-R12",
+      "compare-blouse-1-R13",
+      "compare-blouse-1-R14",
+      "compare-blouse-1-R15",
+      "compare-blouse-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-blouse-2",
+    "name": "Draped satin evening blouse",
+    "type": "blouse",
+    "color": "#A27B89",
+    "price": 42900,
+    "category": "wardrobe",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "simple-dressing",
+      "everyday"
+    ],
+    "palette": [
+      "plum",
+      "rose"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "draped satin evening blouse",
+      "blouse",
+      "blouse alternative"
+    ],
+    "description": "Draped satin evening blouse. material: 100% polyester satin; size: M; lengthCm: 62; closure: front buttons; care: cold hand wash, line dry. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "100% polyester satin",
+      "size": "M",
+      "lengthCm": 62,
+      "closure": "front buttons",
+      "care": "cold hand wash, line dry",
+      "comparisonGroup": "blouse",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-blouse-2-R01",
+      "compare-blouse-2-R02",
+      "compare-blouse-2-R03",
+      "compare-blouse-2-R04",
+      "compare-blouse-2-R05",
+      "compare-blouse-2-R06",
+      "compare-blouse-2-R07",
+      "compare-blouse-2-R08",
+      "compare-blouse-2-R09",
+      "compare-blouse-2-R10",
+      "compare-blouse-2-R11",
+      "compare-blouse-2-R12",
+      "compare-blouse-2-R13",
+      "compare-blouse-2-R14",
+      "compare-blouse-2-R15",
+      "compare-blouse-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-shoulder-bag-1",
+    "name": "Little nylon evening shoulder bag",
+    "type": "handbag",
+    "color": "#496962",
+    "price": 17900,
+    "category": "wardrobe",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "compact",
+      "simple-dressing"
+    ],
+    "palette": [
+      "teal",
+      "forest"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "little nylon evening shoulder bag",
+      "shoulder bag",
+      "handbag alternative"
+    ],
+    "description": "Little nylon evening shoulder bag. material: nylon with polyester lining; widthCm: 23; heightCm: 16; depthCm: 7; closure: zip; strap: adjustable shoulder strap. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "nylon with polyester lining",
+      "widthCm": 23,
+      "heightCm": 16,
+      "depthCm": 7,
+      "closure": "zip",
+      "strap": "adjustable shoulder strap",
+      "comparisonGroup": "shoulder-bag",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-shoulder-bag-1-R01",
+      "compare-shoulder-bag-1-R02",
+      "compare-shoulder-bag-1-R03",
+      "compare-shoulder-bag-1-R04",
+      "compare-shoulder-bag-1-R05",
+      "compare-shoulder-bag-1-R06",
+      "compare-shoulder-bag-1-R07",
+      "compare-shoulder-bag-1-R08",
+      "compare-shoulder-bag-1-R09",
+      "compare-shoulder-bag-1-R10",
+      "compare-shoulder-bag-1-R11",
+      "compare-shoulder-bag-1-R12",
+      "compare-shoulder-bag-1-R13",
+      "compare-shoulder-bag-1-R14",
+      "compare-shoulder-bag-1-R15",
+      "compare-shoulder-bag-1-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-shoulder-bag-2",
+    "name": "Structured vegan-leather shoulder bag",
+    "type": "handbag",
+    "color": "#A68468",
+    "price": 39900,
+    "category": "wardrobe",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "compact",
+      "simple-dressing"
+    ],
+    "palette": [
+      "cocoa",
+      "cream"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "structured vegan-leather shoulder bag",
+      "shoulder bag",
+      "handbag alternative"
+    ],
+    "description": "Structured vegan-leather shoulder bag. material: PU with polyester lining; widthCm: 26; heightCm: 19; depthCm: 9; closure: magnetic flap; strap: adjustable shoulder strap. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "material": "PU with polyester lining",
+      "widthCm": 26,
+      "heightCm": 19,
+      "depthCm": 9,
+      "closure": "magnetic flap",
+      "strap": "adjustable shoulder strap",
+      "comparisonGroup": "shoulder-bag",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-shoulder-bag-2-R01",
+      "compare-shoulder-bag-2-R02",
+      "compare-shoulder-bag-2-R03",
+      "compare-shoulder-bag-2-R04",
+      "compare-shoulder-bag-2-R05",
+      "compare-shoulder-bag-2-R06",
+      "compare-shoulder-bag-2-R07",
+      "compare-shoulder-bag-2-R08",
+      "compare-shoulder-bag-2-R09",
+      "compare-shoulder-bag-2-R10",
+      "compare-shoulder-bag-2-R11",
+      "compare-shoulder-bag-2-R12",
+      "compare-shoulder-bag-2-R13",
+      "compare-shoulder-bag-2-R14",
+      "compare-shoulder-bag-2-R15",
+      "compare-shoulder-bag-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-lipstick-1",
+    "name": "Everyday rose cream lipstick",
+    "type": "lipstick",
+    "color": "#B57578",
+    "price": 8900,
+    "category": "beauty",
+    "vibeTags": [
+      "date-night",
+      "rose-tones",
+      "small-rituals",
+      "compact"
+    ],
+    "palette": [
+      "rose",
+      "cream"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "everyday rose cream lipstick",
+      "lipstick",
+      "lipstick alternative"
+    ],
+    "description": "Everyday rose cream lipstick. weightG: 3; shade: dusty rose; finish: cream; format: twist-up bullet; packaging: plastic case. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "weightG": 3,
+      "shade": "dusty rose",
+      "finish": "cream",
+      "format": "twist-up bullet",
+      "packaging": "plastic case",
+      "comparisonGroup": "lipstick",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-lipstick-1-R01",
+      "compare-lipstick-1-R02",
+      "compare-lipstick-1-R03",
+      "compare-lipstick-1-R04",
+      "compare-lipstick-1-R05",
+      "compare-lipstick-1-R06",
+      "compare-lipstick-1-R07",
+      "compare-lipstick-1-R08",
+      "compare-lipstick-1-R09",
+      "compare-lipstick-1-R10",
+      "compare-lipstick-1-R11",
+      "compare-lipstick-1-R12",
+      "compare-lipstick-1-R13",
+      "compare-lipstick-1-R14",
+      "compare-lipstick-1-R15",
+      "compare-lipstick-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-lipstick-2",
+    "name": "Soft berry satin lipstick",
+    "type": "lipstick",
+    "color": "#9F5B72",
+    "price": 19900,
+    "category": "beauty",
+    "vibeTags": [
+      "date-night",
+      "rose-tones",
+      "small-rituals",
+      "compact"
+    ],
+    "palette": [
+      "berry",
+      "teal"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "soft berry satin lipstick",
+      "lipstick",
+      "lipstick alternative"
+    ],
+    "description": "Soft berry satin lipstick. weightG: 3.5; shade: soft berry; finish: satin; format: twist-up bullet; packaging: metal case. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "weightG": 3.5,
+      "shade": "soft berry",
+      "finish": "satin",
+      "format": "twist-up bullet",
+      "packaging": "metal case",
+      "comparisonGroup": "lipstick",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-lipstick-2-R01",
+      "compare-lipstick-2-R02",
+      "compare-lipstick-2-R03",
+      "compare-lipstick-2-R04",
+      "compare-lipstick-2-R05",
+      "compare-lipstick-2-R06",
+      "compare-lipstick-2-R07",
+      "compare-lipstick-2-R08",
+      "compare-lipstick-2-R09",
+      "compare-lipstick-2-R10",
+      "compare-lipstick-2-R11",
+      "compare-lipstick-2-R12",
+      "compare-lipstick-2-R13",
+      "compare-lipstick-2-R14",
+      "compare-lipstick-2-R15",
+      "compare-lipstick-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-pressed-powder-1",
+    "name": "Everyday pressed powder compact",
+    "type": "compact",
+    "color": "#D4BA99",
+    "price": 12900,
+    "category": "beauty",
+    "vibeTags": [
+      "date-night",
+      "small-rituals",
+      "warm-neutrals",
+      "compact"
+    ],
+    "palette": [
+      "sand",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "everyday pressed powder compact",
+      "pressed powder",
+      "compact alternative"
+    ],
+    "description": "Everyday pressed powder compact. weightG: 8; shade: warm beige; format: pressed powder; mirrorIncluded: true; applicatorIncluded: true; diameterCm: 6. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "weightG": 8,
+      "shade": "warm beige",
+      "format": "pressed powder",
+      "mirrorIncluded": true,
+      "applicatorIncluded": true,
+      "diameterCm": 6,
+      "comparisonGroup": "pressed-powder",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-pressed-powder-1-R01",
+      "compare-pressed-powder-1-R02",
+      "compare-pressed-powder-1-R03",
+      "compare-pressed-powder-1-R04",
+      "compare-pressed-powder-1-R05",
+      "compare-pressed-powder-1-R06",
+      "compare-pressed-powder-1-R07",
+      "compare-pressed-powder-1-R08",
+      "compare-pressed-powder-1-R09",
+      "compare-pressed-powder-1-R10",
+      "compare-pressed-powder-1-R11",
+      "compare-pressed-powder-1-R12",
+      "compare-pressed-powder-1-R13",
+      "compare-pressed-powder-1-R14",
+      "compare-pressed-powder-1-R15",
+      "compare-pressed-powder-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-pressed-powder-2",
+    "name": "Fine-matte powder compact",
+    "type": "compact",
+    "color": "#C6AB88",
+    "price": 25900,
+    "category": "beauty",
+    "vibeTags": [
+      "date-night",
+      "small-rituals",
+      "warm-neutrals",
+      "compact"
+    ],
+    "palette": [
+      "sand",
+      "teal"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "fine-matte powder compact",
+      "pressed powder",
+      "compact alternative"
+    ],
+    "description": "Fine-matte powder compact. weightG: 10; shade: neutral beige; format: pressed powder; mirrorIncluded: true; applicatorIncluded: false; diameterCm: 7. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "weightG": 10,
+      "shade": "neutral beige",
+      "format": "pressed powder",
+      "mirrorIncluded": true,
+      "applicatorIncluded": false,
+      "diameterCm": 7,
+      "comparisonGroup": "pressed-powder",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-pressed-powder-2-R01",
+      "compare-pressed-powder-2-R02",
+      "compare-pressed-powder-2-R03",
+      "compare-pressed-powder-2-R04",
+      "compare-pressed-powder-2-R05",
+      "compare-pressed-powder-2-R06",
+      "compare-pressed-powder-2-R07",
+      "compare-pressed-powder-2-R08",
+      "compare-pressed-powder-2-R09",
+      "compare-pressed-powder-2-R10",
+      "compare-pressed-powder-2-R11",
+      "compare-pressed-powder-2-R12",
+      "compare-pressed-powder-2-R13",
+      "compare-pressed-powder-2-R14",
+      "compare-pressed-powder-2-R15",
+      "compare-pressed-powder-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-perfume-1",
+    "name": "Cedar pocket eau de toilette",
+    "type": "perfume",
+    "color": "#CBA66D",
+    "price": 19900,
+    "category": "beauty",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "small-rituals",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "amber",
+      "cream"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "cedar pocket eau de toilette",
+      "perfume",
+      "perfume alternative"
+    ],
+    "description": "Cedar pocket eau de toilette. volumeMl: 20; notes: cedar and dry citrus; format: eau de toilette spray; bottle: glass with plastic cap. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "volumeMl": 20,
+      "notes": "cedar and dry citrus",
+      "format": "eau de toilette spray",
+      "bottle": "glass with plastic cap",
+      "comparisonGroup": "perfume",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-perfume-1-R01",
+      "compare-perfume-1-R02",
+      "compare-perfume-1-R03",
+      "compare-perfume-1-R04",
+      "compare-perfume-1-R05",
+      "compare-perfume-1-R06",
+      "compare-perfume-1-R07",
+      "compare-perfume-1-R08",
+      "compare-perfume-1-R09",
+      "compare-perfume-1-R10",
+      "compare-perfume-1-R11",
+      "compare-perfume-1-R12",
+      "compare-perfume-1-R13",
+      "compare-perfume-1-R14",
+      "compare-perfume-1-R15",
+      "compare-perfume-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-perfume-2",
+    "name": "Soft amber eau de toilette",
+    "type": "perfume",
+    "color": "#B88C58",
+    "price": 42900,
+    "category": "beauty",
+    "vibeTags": [
+      "date-night",
+      "warm-neutrals",
+      "small-rituals",
+      "quiet-evenings"
+    ],
+    "palette": [
+      "amber",
+      "plum"
+    ],
+    "priceBand": "under-70k",
+    "aliases": [
+      "soft amber eau de toilette",
+      "perfume",
+      "perfume alternative"
+    ],
+    "description": "Soft amber eau de toilette. volumeMl: 50; notes: amber, cedar and vanilla; format: eau de toilette spray; bottle: glass with metal cap. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "volumeMl": 50,
+      "notes": "amber, cedar and vanilla",
+      "format": "eau de toilette spray",
+      "bottle": "glass with metal cap",
+      "comparisonGroup": "perfume",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-perfume-2-R01",
+      "compare-perfume-2-R02",
+      "compare-perfume-2-R03",
+      "compare-perfume-2-R04",
+      "compare-perfume-2-R05",
+      "compare-perfume-2-R06",
+      "compare-perfume-2-R07",
+      "compare-perfume-2-R08",
+      "compare-perfume-2-R09",
+      "compare-perfume-2-R10",
+      "compare-perfume-2-R11",
+      "compare-perfume-2-R12",
+      "compare-perfume-2-R13",
+      "compare-perfume-2-R14",
+      "compare-perfume-2-R15",
+      "compare-perfume-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-hoop-earrings-1",
+    "name": "Little gold-tone hoop pair",
+    "type": "earrings",
+    "color": "#C6A666",
+    "price": 6900,
+    "category": "wardrobe",
+    "vibeTags": [
+      "date-night",
+      "small-details",
+      "warm-neutrals",
+      "simple-dressing"
+    ],
+    "palette": [
+      "gold",
+      "cream"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "little gold-tone hoop pair",
+      "hoop earrings",
+      "earrings alternative"
+    ],
+    "description": "Little gold-tone hoop pair. quantity: 1 pair; diameterMm: 16; material: gold-tone plated brass; closure: hinged post; finish: polished. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "quantity": "1 pair",
+      "diameterMm": 16,
+      "material": "gold-tone plated brass",
+      "closure": "hinged post",
+      "finish": "polished",
+      "comparisonGroup": "hoop-earrings",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-hoop-earrings-1-R01",
+      "compare-hoop-earrings-1-R02",
+      "compare-hoop-earrings-1-R03",
+      "compare-hoop-earrings-1-R04",
+      "compare-hoop-earrings-1-R05",
+      "compare-hoop-earrings-1-R06",
+      "compare-hoop-earrings-1-R07",
+      "compare-hoop-earrings-1-R08",
+      "compare-hoop-earrings-1-R09",
+      "compare-hoop-earrings-1-R10",
+      "compare-hoop-earrings-1-R11",
+      "compare-hoop-earrings-1-R12",
+      "compare-hoop-earrings-1-R13",
+      "compare-hoop-earrings-1-R14",
+      "compare-hoop-earrings-1-R15",
+      "compare-hoop-earrings-1-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-hoop-earrings-2",
+    "name": "Rounded gold-tone hoop pair",
+    "type": "earrings",
+    "color": "#C8AD75",
+    "price": 15900,
+    "category": "wardrobe",
+    "vibeTags": [
+      "date-night",
+      "small-details",
+      "warm-neutrals",
+      "simple-dressing"
+    ],
+    "palette": [
+      "gold",
+      "sand"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "rounded gold-tone hoop pair",
+      "hoop earrings",
+      "earrings alternative"
+    ],
+    "description": "Rounded gold-tone hoop pair. quantity: 1 pair; diameterMm: 24; material: gold-tone plated stainless steel; closure: hinged post; finish: brushed. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "quantity": "1 pair",
+      "diameterMm": 24,
+      "material": "gold-tone plated stainless steel",
+      "closure": "hinged post",
+      "finish": "brushed",
+      "comparisonGroup": "hoop-earrings",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-hoop-earrings-2-R01",
+      "compare-hoop-earrings-2-R02",
+      "compare-hoop-earrings-2-R03",
+      "compare-hoop-earrings-2-R04",
+      "compare-hoop-earrings-2-R05",
+      "compare-hoop-earrings-2-R06",
+      "compare-hoop-earrings-2-R07",
+      "compare-hoop-earrings-2-R08",
+      "compare-hoop-earrings-2-R09",
+      "compare-hoop-earrings-2-R10",
+      "compare-hoop-earrings-2-R11",
+      "compare-hoop-earrings-2-R12",
+      "compare-hoop-earrings-2-R13",
+      "compare-hoop-earrings-2-R14",
+      "compare-hoop-earrings-2-R15",
+      "compare-hoop-earrings-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  },
+  {
+    "id": "compare-powder-brush-1",
+    "name": "Everyday rounded powder brush",
+    "type": "makeupBrush",
+    "color": "#C4B499",
+    "price": 5900,
+    "category": "beauty",
+    "vibeTags": [
+      "date-night",
+      "small-rituals",
+      "warm-neutrals",
+      "practical"
+    ],
+    "palette": [
+      "cream",
+      "sand"
+    ],
+    "priceBand": "under-10k",
+    "aliases": [
+      "everyday rounded powder brush",
+      "powder brush",
+      "makeupBrush alternative"
+    ],
+    "description": "Everyday rounded powder brush. lengthCm: 15; bristles: synthetic fibers; handle: plastic; ferrule: aluminium; use: powder application. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "lengthCm": 15,
+      "bristles": "synthetic fibers",
+      "handle": "plastic",
+      "ferrule": "aluminium",
+      "use": "powder application",
+      "comparisonGroup": "powder-brush",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-powder-brush-1-R01",
+      "compare-powder-brush-1-R02",
+      "compare-powder-brush-1-R03",
+      "compare-powder-brush-1-R04",
+      "compare-powder-brush-1-R05",
+      "compare-powder-brush-1-R06",
+      "compare-powder-brush-1-R07",
+      "compare-powder-brush-1-R08",
+      "compare-powder-brush-1-R09",
+      "compare-powder-brush-1-R10",
+      "compare-powder-brush-1-R11",
+      "compare-powder-brush-1-R12",
+      "compare-powder-brush-1-R13",
+      "compare-powder-brush-1-R14",
+      "compare-powder-brush-1-R15",
+      "compare-powder-brush-1-R16"
+    ],
+    "delivery": "Rocket delivery · tomorrow by 7am"
+  },
+  {
+    "id": "compare-powder-brush-2",
+    "name": "Dense rounded powder brush",
+    "type": "makeupBrush",
+    "color": "#59726B",
+    "price": 14900,
+    "category": "beauty",
+    "vibeTags": [
+      "date-night",
+      "small-rituals",
+      "warm-neutrals",
+      "practical"
+    ],
+    "palette": [
+      "teal",
+      "gold"
+    ],
+    "priceBand": "under-30k",
+    "aliases": [
+      "dense rounded powder brush",
+      "powder brush",
+      "makeupBrush alternative"
+    ],
+    "description": "Dense rounded powder brush. lengthCm: 17; bristles: synthetic fibers; handle: painted wood; ferrule: aluminium; use: powder application. Synthetic comparison catalog item for this concept demo.",
+    "facts": {
+      "lengthCm": 17,
+      "bristles": "synthetic fibers",
+      "handle": "painted wood",
+      "ferrule": "aluminium",
+      "use": "powder application",
+      "comparisonGroup": "powder-brush",
+      "dataOrigin": "Synthetic demo catalog; not a verified merchant listing"
+    },
+    "reviewIds": [
+      "compare-powder-brush-2-R01",
+      "compare-powder-brush-2-R02",
+      "compare-powder-brush-2-R03",
+      "compare-powder-brush-2-R04",
+      "compare-powder-brush-2-R05",
+      "compare-powder-brush-2-R06",
+      "compare-powder-brush-2-R07",
+      "compare-powder-brush-2-R08",
+      "compare-powder-brush-2-R09",
+      "compare-powder-brush-2-R10",
+      "compare-powder-brush-2-R11",
+      "compare-powder-brush-2-R12",
+      "compare-powder-brush-2-R13",
+      "compare-powder-brush-2-R14",
+      "compare-powder-brush-2-R15",
+      "compare-powder-brush-2-R16"
+    ],
+    "delivery": "Standard delivery · in 3 days (simulation)"
+  }
+]

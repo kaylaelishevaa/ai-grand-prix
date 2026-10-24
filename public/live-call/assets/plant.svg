@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Illustration of a plant"><defs>
+ <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#eee9df"/><stop offset="1" stop-color="#d7d4c7"/></linearGradient>
+ <linearGradient id="cloth" x2="1" y2="1"><stop stop-color="#f3f0e5"/><stop offset=".5" stop-color="#e7e1d4"/><stop offset="1" stop-color="#c9c4b7"/></linearGradient>
+ <linearGradient id="wood" x2="1" y2=".2"><stop stop-color="#a57243"/><stop offset=".25" stop-color="#d1a472"/><stop offset=".7" stop-color="#b78351"/><stop offset="1" stop-color="#845831"/></linearGradient>
+ <linearGradient id="sage" x2=".5" y2="1"><stop stop-color="#a9b49b"/><stop offset=".4" stop-color="#82977e"/><stop offset="1" stop-color="#526b56"/></linearGradient>
+ <linearGradient id="pot" x2="1" y2=".2"><stop stop-color="#b89975"/><stop offset=".5" stop-color="#d1b795"/><stop offset="1" stop-color="#9c7b58"/></linearGradient>
+ <linearGradient id="leaf" x2="1" y2="1"><stop stop-color="#8b9d68"/><stop offset="1" stop-color="#3d604a"/></linearGradient>
+ <radialGradient id="light"><stop stop-color="#fff6d2" stop-opacity=".6"/><stop offset="1" stop-color="#fff6d2" stop-opacity="0"/></radialGradient>
+ <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+ <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#514535" flood-opacity=".13"/></filter>
+ <pattern id="weave" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 1h7M1 0v7" stroke="#8b8068" stroke-opacity=".09" stroke-width=".7"/></pattern>
+ </defs><rect width="600" height="600" fill="#f1eee6"/><g>
+ <ellipse cx="300" cy="511" rx="113" ry="20" fill="#65563e" opacity=".15" filter="url(#shadow)"/>
+ <path d="M301 391q-15-171 19-299M298 328q-85-80-78-138M301 292q51-64 80-128M309 223q-54-44-60-83M297 355q67-25 111-76" stroke="#5b714a" stroke-width="6" fill="none"/>
+ <path d="M320 155q-55-27-24-87 48 11 24 87M312 211q36-71 90-61-10 72-90 61M305 271q-81-21-95-77 68-2 95 77M304 335q40-79 105-59-12 58-105 59M296 356q-82-7-104-61 67-17 104 61M308 230q-73-28-68-90 53 12 68 90" fill="url(#leaf)"/>
+ <path d="m317 152-7-61m5 114 66-42m-82 103-68-58m74 122 84-43m-94 64-84-45m92-82-50-66" fill="none" stroke="#b2b997" stroke-width="1.3" opacity=".6"/>
+ <path d="M217 383q82-29 165 0l-22 112q-60 30-121 0z" fill="url(#pot)"/>
+ <ellipse cx="299" cy="383" rx="83" ry="21" fill="#b59c7c"/>
+ <ellipse cx="299" cy="383" rx="69" ry="13" fill="#675b44"/>
+ <path d="M299 391v-31" stroke="#63764c" stroke-width="6"/>
+ <path d="M233 399q-1 52 16 89M250 404l11 90M270 406l6 93M290 407v96M310 407l-2 96M330 405l-7 94M350 403l-12 91M367 398l-15 89" stroke="#ecd5b8" opacity=".23" stroke-width="2"/>
+ </g></svg>

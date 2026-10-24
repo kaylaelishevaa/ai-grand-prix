@@ -3,6 +3,10 @@ import assert from 'node:assert/strict';
 import { catalog, reviews, getSku, reviewStats, reviewsForSku } from '../lib/catalog';
 import { applySwipe, createProfile, deleteMemory, eligibleCatalog, installMemoryLines, markQuestionAnswered, sanitizeProfileForAI, scoreSku } from '../lib/profile';
 import { addDecision, approveDecisions, detectOwnedRequest, effectiveNow, isDecisionLocked, localClock, lockUntilMorning, ownedMessage } from '../lib/guardrails';
+import originalCatalog from '../data/catalog.json';
+import originalReviews from '../data/reviews.json';
+import comparisonCatalog from '../data/comparison-catalog.json';
+import comparisonReviews from '../data/comparison-reviews.json';
 
 const morning = new Date('2026-10-24T01:00:00.000Z'); // 10 AM Seoul.
 function swipe(id: string, skuId: string, action: 'ooh' | 'skip' | 'nah', reason?: 'too pricey' | 'not my style' | 'have one') {
@@ -10,8 +14,12 @@ function swipe(id: string, skuId: string, action: 'ooh' | 'skip' | 'nah', reason
 }
 
 test('catalog owns all original review IDs; exact complaint math remains visible', () => {
-  assert.equal(catalog.length, 43);
-  assert.equal(reviews.length, 498);
+  assert.equal(originalCatalog.length, 43);
+  assert.equal(originalReviews.length, 498);
+  assert.equal(catalog.length, originalCatalog.length + comparisonCatalog.length);
+  assert.equal(reviews.length, originalReviews.length + comparisonReviews.length);
+  assert.deepEqual(catalog.slice(0, originalCatalog.length), originalCatalog);
+  assert.deepEqual(reviews.slice(0, originalReviews.length), originalReviews);
   assert.equal(new Set(reviews.map((review) => review.id)).size, reviews.length);
   for (const review of reviews) assert(getSku(review.skuId)?.reviewIds.includes(review.id));
   for (const sku of catalog) assert.deepEqual(sku.reviewIds, reviewsForSku(sku.id).map((review) => review.id));

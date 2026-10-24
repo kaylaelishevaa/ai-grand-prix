@@ -1,19 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { buildRoomArchitecture, type RoomKit, type RoomGeometry, type RoomMaterial } from '../components/diorama/rooms';
+import { buildRoomArchitecture, createRoomGeometries, type RoomKit, type RoomGeometry, type RoomMaterial } from '../components/diorama/rooms';
 import { assignRoomSlots, cameraOrbit, layoutBillboards } from '../components/diorama/math';
 import { createProductMeshLibrary } from '../components/diorama/product-meshes';
 import type { SceneKind } from '../lib/scenes';
+import {SCENE_MOODS,getSceneMood} from '../lib/scene-moods';
+import type {SceneContext} from '../lib/world-context';
 
 const kinds: SceneKind[] = ['kitchen', 'desk', 'reading', 'dressing'];
 function fixture() {
   const scene = new THREE.Group();
-  const geometries: Record<RoomGeometry, THREE.BufferGeometry> = {
-    box: new THREE.BoxGeometry(), cylinder: new THREE.CylinderGeometry(.5, .5, 1, 10),
-    tapered: new THREE.CylinderGeometry(.45, .32, 1, 10), sphere: new THREE.IcosahedronGeometry(.5, 1),
-    leaf: new THREE.IcosahedronGeometry(.5, 0), plane: new THREE.PlaneGeometry(),
-  };
+  const geometries=createRoomGeometries();
   const materials = new Map<RoomMaterial, THREE.MeshBasicMaterial>();
   const kit: RoomKit = {
     piece(name, x = 0, y = 0, z = 0) {
@@ -48,7 +46,9 @@ test('each district builds a genuinely different, complete room from pooled geom
     for (let pass = 0; pass < 3; pass++) for (const kind of kinds) {
       scene.clear();
       buildRoomArchitecture(kind, kit);
-      for (const name of ['floating-base', 'back-wall', ...required[kind]]) assert.ok(scene.getObjectByName(`room:${name}`), `${kind}: ${name}`);
+      for (const name of ['organic-island', 'arrival-stones', ...required[kind]]) assert.ok(scene.getObjectByName(`room:${name}`), `${kind}: ${name}`);
+      assert.equal(scene.getObjectByName('room:back-wall'),undefined,'open landscapes have no shared box wall');
+      assert.equal(scene.getObjectByName('room:floating-base'),undefined,'terrain must not use the old rectangular tray');
       if (kind !== 'kitchen') assert.equal(scene.getObjectByName('room:counter'), undefined, `${kind} must not reuse a kitchen counter`);
       let meshCount = 0;
       scene.traverse(object => {
@@ -57,11 +57,11 @@ test('each district builds a genuinely different, complete room from pooled geom
         assert.ok(Object.values(geometries).includes(object.geometry), 'no per-furniture GPU geometry');
         assert.ok([...materials.values()].includes(object.material as THREE.MeshBasicMaterial), 'no per-furniture GPU material');
       });
-      assert.ok(meshCount >= 40 && meshCount < 150, `${kind}: restrained mesh budget (${meshCount})`);
+      assert.ok(meshCount >= 40 && meshCount < 200, `${kind}: restrained mesh budget (${meshCount})`);
       const bounds = new THREE.Box3().setFromObject(scene);
-      assert.ok(bounds.max.y <= 2.85, `${kind}: stays below the camera's headroom`);
+      assert.ok(bounds.max.y <= 3.6, `${kind}: stays below the camera's headroom`);
     }
-    assert.ok(materials.size <= 15);
+    assert.ok(materials.size <= 16);
   } finally { dispose(); }
 });
 
@@ -98,7 +98,7 @@ test('room slots sit on actual furniture surfaces, never float over an empty kit
   } finally { dispose(); }
 });
 
-test('six products per room keep their floating cards inside mobile and desktop camera framing', () => {
+test('six product hotspots stay inside the expanded scenic camera at mobile and desktop sizes', () => {
   const resources = new Set<{dispose(): void}>();
   const products = createProductMeshLibrary(resource => { resources.add(resource); return resource; });
   const roomTypes: Record<SceneKind, string[]> = {
@@ -111,15 +111,15 @@ test('six products per room keep their floating cards inside mobile and desktop 
     for (const kind of kinds) {
       const items = roomTypes[kind].map(type => ({skuId: type, type, name: type}));
       const slots = assignRoomSlots(items, kind);
-      for (const [width, height] of [[390, 420], [660, 560]]) {
+      for (const [width, height] of [[390, 520], [1180, 660]]) {
         const aspect = width / height;
-        const viewHeight = Math.max(7.8, 7.65 / aspect);
+        const viewHeight = Math.max(6.3, 8.6 / aspect);
         const camera = new THREE.OrthographicCamera(-viewHeight * aspect / 2, viewHeight * aspect / 2, viewHeight / 2, -viewHeight / 2, .1, 60);
         for (const pointer of [-1, 0, 1]) {
           const orbit = cameraOrbit(6, pointer, pointer);
           const yaw = Math.PI / 4 + orbit.yaw, pitch = Math.atan(1 / Math.sqrt(2)) + orbit.pitch;
-          camera.position.set(Math.sin(yaw) * Math.cos(pitch) * 12, 1.55 + Math.sin(pitch) * 12, Math.cos(yaw) * Math.cos(pitch) * 12);
-          camera.lookAt(0, 1.55, 0); camera.updateMatrixWorld();
+          camera.position.set(Math.sin(yaw) * Math.cos(pitch) * 12, 1.15 + Math.sin(pitch) * 12, Math.cos(yaw) * Math.cos(pitch) * 12);
+          camera.lookAt(0, 1.15, 0); camera.updateMatrixWorld();
           items.forEach((item, index) => {
             const slot = slots[index];
             const model = products.build(item); model.scale.setScalar(slot.scale ?? 1);
@@ -129,8 +129,8 @@ test('six products per room keep their floating cards inside mobile and desktop 
             const point = new THREE.Vector3(slot.x, y + .13, slot.z).project(camera);
             const xPx = (point.x * .5 + .5) * width, yPx = (-point.y * .5 + .5) * height;
             const scale = Math.max(.67, Math.min(1, width / 660));
-            assert.ok(xPx > 40 * scale && xPx < width - 40 * scale, `${kind}/${item.type}: card horizontal fit at ${width}px`);
-            assert.ok(yPx > 120 * scale && yPx < height - 12, `${kind}/${item.type}: card vertical fit at ${width}px (${yPx})`);
+            assert.ok(xPx > 16 && xPx < width - 16, `${kind}/${item.type}: card horizontal fit at ${width}px`);
+            assert.ok(yPx > 16 && yPx < height - 16, `${kind}/${item.type}: card vertical fit at ${width}px (${yPx})`);
           });
         }
       }
@@ -157,4 +157,32 @@ test('clustered vanity cards fan out without moving dots, overlapping each other
     }
     assert.deepEqual(layouts, layoutBillboards(anchors, width, height), 'packing is stable for identical camera projections');
   }
+});
+
+
+test('each landscape has its own color, light, weather and recognizable environmental anchor',()=>{
+  assert.equal(new Set(kinds.map(kind=>SCENE_MOODS[kind].background)).size,4);
+  assert.equal(new Set(kinds.map(kind=>SCENE_MOODS[kind].palette.floor)).size,4);
+  assert.equal(new Set(kinds.map(kind=>SCENE_MOODS[kind].atmosphere)).size,4);
+  const landmarks:Record<SceneKind,string[]>={kitchen:['garden-pergola','citrus-fruit'],dressing:['evening-curtain-arch','distant-city','evening-light-string'],reading:['forest-pond','rain-shelter'],desk:['coral-studio-arch','ideas-in-the-air']};
+  const {scene,kit,dispose}=fixture();
+  try{for(const kind of kinds){scene.clear();buildRoomArchitecture(kind,kit);for(const landmark of landmarks[kind])assert(scene.getObjectByName('room:'+landmark));}}finally{dispose();}
+});
+
+
+test('one furniture vocabulary can become an indoor room, a rooftop occasion, or a riverside picnic',()=>{
+  const {scene,kit,dispose}=fixture();
+  const contexts:SceneContext[]=[{type:'space',setting:'home',label:'home'},{type:'event',setting:'rooftop',label:'dinner'},{type:'outdoor',setting:'riverside',label:'picnic'},{type:'place',setting:'cafe',label:'cafe'}];
+  const expected=['curved-home-interior','rooftop-balustrade','riverside-water','striped-cafe-awning'];
+  try{
+    contexts.forEach((context,i)=>{
+      scene.clear();buildRoomArchitecture(i===3?'reading':'kitchen',kit,context);
+      assert(scene.getObjectByName('room:'+expected[i]));
+      assert.equal(scene.getObjectByName('room:garden-pergola'),undefined);
+      if(i<3)assert(scene.getObjectByName('room:counter'));
+      assert.notEqual(getSceneMood('kitchen',context).subtitle,SCENE_MOODS.kitchen.subtitle);
+    });
+    assert.notDeepEqual(getSceneMood('kitchen',contexts[0]).palette,getSceneMood('kitchen',contexts[1]).palette);
+    assert.notDeepEqual(getSceneMood('kitchen',contexts[1]).palette,getSceneMood('kitchen',contexts[2]).palette);
+  }finally{dispose();}
 });
