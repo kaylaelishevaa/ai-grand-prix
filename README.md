@@ -57,7 +57,7 @@ Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers two s
 
 This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
-To check that the server loaded your configuration, open [the local voice status endpoint](http://127.0.0.1:5173/api/voice/status). With a nonempty key, it should report `ready: true` and `catalogCount: 36`. This check makes no OpenAI request: it confirms that a key is present, not that the key, credits, or model access are valid. Starting an actual call exercises those checks and incurs API usage.
+To check that the server loaded your configuration, open [the local voice status endpoint](http://127.0.0.1:5173/api/voice/status). With a nonempty key, it should report `ready: true` and `catalogCount: 82`. This check makes no OpenAI request: it confirms that a key is present, not that the key, credits, or model access are valid. Starting an actual call exercises those checks and incurs API usage.
 
 ## 4. Try the demo
 
@@ -147,6 +147,7 @@ Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clo
 - `public/camera-engine.js`, `public/product-preview.js`: local tracking and product rendering.
 - `public/voice-call.js`, `lib/nook-voice.mjs`, `worker/index.ts`: Realtime connection, catalog tools, and server routes.
 - `data/catalog.json`, `public/products/`, `public/product-catalog.csv`: 82 listings/options and their images/links.
+- `data/catalog-replacements.json`: six retired-to-replacement mappings for cleaner live previews; original CDN photos and hashes are documented in `VOICE-CATALOG-SOURCES.txt`.
 - `VOICE-CATALOG-SOURCES.txt`: listing provenance and historical reference prices.
 - `public/product-discovery.js`, `public/inline-collections.css`, `public/product-evidence.js`: inline related collections, saved groups, comparison and sourced review rendering.
 - `public/call-conversation.js`, `public/chat-images.js`: compact transcript rendering and local photo preparation.

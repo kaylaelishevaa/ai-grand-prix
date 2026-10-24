@@ -258,7 +258,7 @@ test('overlay tool and camera prompt disclose per-mode engine limits',()=>{
 });
 
 test('specific English and Korean requests cannot cross product types within shared camera modes',()=>{
-  const requests={lipstick:['lipstick','립스틱'],chair:['desk chair','책상 의자'],lamp:['desk lamp','책상 조명'],tshirt:['T-shirt','반팔 티셔츠'],hoodie:['hoodie','후드티']};
+  const requests={lipstick:['lipstick','립스틱'],chair:['chair','의자'],lamp:['desk lamp','책상 조명'],tshirt:['T-shirt','반팔 티셔츠'],hoodie:['hoodie','후드티']};
   for(const [type,queries] of Object.entries(requests)){
     for(const query of queries){
       const result=searchProducts({query,category:'all',max_price:null});
@@ -308,6 +308,25 @@ test('explicit optical and sunglasses requests cannot silently substitute the ot
   for(const query of ['normal glasses','eyeglasses','optical glasses','일반 안경'])assert.deepEqual(searchProducts({query,category:'glasses'},fixtures).products.map(p=>p.id),['optical']);
   for(const query of ['sunglasses','선글라스'])assert.deepEqual(searchProducts({query,category:'glasses'},fixtures).products.map(p=>p.id),['sun']);
   assert.equal(searchProducts({query:'glasses',category:'glasses'},fixtures).products.length,3);
+});
+
+test('sourced chair searches preserve office, floor and dining compatibility instead of matching caution text',()=>{
+  const expected={office:['7330605115','7395651009'],floor:['6908241889','8491783776'],dining:['6775922884','6775922884-gray']};
+  for(const [style,queries] of Object.entries({office:['office chair','desk chair','책상 의자','사무용 의자'],floor:['floor chair','좌식의자'],dining:['dining chair','식탁 의자']})){
+    for(const query of queries){
+      const result=searchProducts({query,category:'desk'});
+      assert.deepEqual(result.products.map(p=>p.id).sort(),expected[style],query);
+      assert(result.products.every(p=>p.chairStyle===style),query);
+      assert.deepEqual(result.constraints.chair.include,[style]);
+    }
+  }
+  const broad=searchProducts({query:'chair',category:'desk'});assert.equal(broad.products.length,6);
+  for(const query of ['chairs without floor chairs','좌식의자 말고 의자']){
+    const result=searchProducts({query,category:'desk'});assert.equal(result.products.length,4);assert(result.products.every(p=>p.chairStyle!=='floor'));
+  }
+  assert.equal(searchProducts({query:'office chair',category:'desk',max_price:30000}).products.length,0,'cheap floor chairs must not fill an unavailable office-chair budget');
+  const unknown={...catalog.find(p=>p.chairStyle==='floor'),id:'unknown-chair',chairStyle:undefined,name:'Office desk chair'};
+  assert.equal(searchProducts({query:'office chair',category:'desk'},[unknown]).products.length,0,'the product name cannot replace verified chairStyle metadata');
 });
 
 test('shopping prompt grounds comparisons and review summaries while allowing explicit image messages',()=>{

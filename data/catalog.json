@@ -276,153 +276,166 @@
     }
   },
   {
-    "id": "7950092256",
-    "name": "체어클럽 서울대의자 팔걸이형 화이트바디, 다크그레이",
+    "id": "6775922884",
+    "sourceProductId": "6775922884",
+    "name": "도리퍼니처 Edgar 식탁 의자 2p, 옐로우",
     "category": "desk",
     "productType": "chair",
-    "url": "https://www.coupang.com/vp/products/7950092256",
-    "price": 87430,
+    "url": "https://www.coupang.com/vp/products/6775922884?itemId=15921708097",
+    "price": 111860,
     "priceStatus": "reference",
-    "image": "/products/7950092256.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/rs_quotation_api/kvv1vlho/974d7482e680400d892a5e2b995cbdf4.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90",
-    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "image": "/products/6775922884.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2022/09/15/10/9/a2c340e4-74ce-4aba-b729-06d8fe8aa38b.jpg",
+    "imageSourcePage": "https://fallcent.com/product/?item_id=15921708097&product_id=6775922884",
+    "sourceNote": "Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Show the right-hand chair only. Listing is a two-chair set; preview represents one chair. Source marked sold out; live Coupang availability unverified.",
     "checkedAt": "2026-10-25",
-    "brand": "ChairClub / 체어클럽",
+    "brand": "Dori Furniture / 도리퍼니처",
     "aliases": [
-      "ChairClub Seoul armrest chair white frame dark gray"
+      "Dori Furniture Edgar dining chairs — yellow, set of 2"
     ],
     "tags": [
       "chair",
-      "white",
-      "gray",
-      "office chair",
-      "desk chair",
-      "armrest",
-      "의자",
-      "책상의자"
+      "yellow",
+      "dining chair",
+      "식탁의자"
     ],
     "verifiedAttributes": [
-      "ChairClub Seoul armrest chair white frame dark gray",
-      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+      "Dori Furniture Edgar dining chairs — yellow, set of 2",
+      "Show the right-hand chair only. Listing is a two-chair set; preview represents one chair. Source marked sold out; live Coupang availability unverified.",
+      "The preview shows the sourced product photo as a 2D placement guide, not verified physical scale."
     ],
     "preview": {
       "kind": "object",
-      "image": "/products/7950092256.jpg",
-      "background": "white"
+      "image": "/products/6775922884.jpg",
+      "background": "white",
+      "available": true,
+      "crop": {
+        "x": 0.54,
+        "y": 0.12,
+        "width": 0.46,
+        "height": 0.76
+      }
     },
-    "imageSha256": "127e66397f0500043b8630de994556b6c82975347ec102d9353e07d9e5bc52e6",
+    "imageSha256": "996fd6ddd78f375169507b4808198f7f24e17edc571c2e6e0789316d95bbe3f1",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7950092256",
+      "sourceUrl": "https://www.coupang.com/vp/products/6775922884?itemId=15921708097",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
       "cons": [],
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
+    },
+    "chairStyle": "dining"
   },
   {
-    "id": "7950092244",
-    "name": "체어클럽 서울대의자 팔걸이형 블랙바디, 다크그레이",
+    "id": "8491783776",
+    "sourceProductId": "8491783776",
+    "name": "가구느낌 체스 좌식의자, 블랙, 1개",
     "category": "desk",
     "productType": "chair",
-    "url": "https://www.coupang.com/vp/products/7950092244",
-    "price": 87430,
+    "url": "https://www.coupang.com/vp/products/8491783776?itemId=20141153675",
+    "price": 26650,
     "priceStatus": "reference",
-    "image": "/products/7950092244.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/rs_quotation_api/e1olgdcb/a7c0ef43bd3540a28bb3ae0301429799.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90",
-    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "image": "/products/8491783776.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2023/09/19/10/5/fc1887e5-dad7-4f6d-b356-e64a4c7a52b1.jpg",
+    "imageSourcePage": "https://fallcent.com/product/?item_id=20141153675&product_id=8491783776",
+    "sourceNote": "Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Floor-level seat for room placement; do not describe as a desk-height office chair. Source marked sold out; live Coupang availability unverified.",
     "checkedAt": "2026-10-25",
-    "brand": "ChairClub / 체어클럽",
+    "brand": "Gagu Feeling / 가구느낌",
     "aliases": [
-      "ChairClub Seoul armrest chair black frame dark gray"
+      "Gagu Feeling Chess floor chair — black"
     ],
     "tags": [
       "chair",
       "black",
-      "gray",
-      "office chair",
-      "desk chair",
-      "armrest",
-      "의자",
-      "책상의자"
+      "floor chair",
+      "좌식의자"
     ],
     "verifiedAttributes": [
-      "ChairClub Seoul armrest chair black frame dark gray",
-      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+      "Gagu Feeling Chess floor chair — black",
+      "Floor-level seat for room placement; do not describe as a desk-height office chair. Source marked sold out; live Coupang availability unverified.",
+      "The preview shows the sourced product photo as a 2D placement guide, not verified physical scale."
     ],
     "preview": {
       "kind": "object",
-      "image": "/products/7950092244.jpg",
-      "background": "white"
+      "image": "/products/8491783776.jpg",
+      "background": "white",
+      "available": true
     },
-    "imageSha256": "c4ba967c7585cc8888ffe82f4e2c4d45e1433f9834482e5e338e866d2195779d",
+    "imageSha256": "2f4a1bede5fdbe3d4c0028e8fd876a91fb38a6b39cfe44fffc2b1530586f5ff7",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7950092244",
+      "sourceUrl": "https://www.coupang.com/vp/products/8491783776?itemId=20141153675",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
       "cons": [],
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
+    },
+    "chairStyle": "floor"
   },
   {
-    "id": "20145368",
-    "name": "체어클럽 오피스팝 의자 MT20, 블랙",
+    "id": "6775922884-gray",
+    "sourceProductId": "6775922884",
+    "name": "도리퍼니처 Edgar 식탁 의자 2p, 그레이",
     "category": "desk",
     "productType": "chair",
-    "url": "https://www.coupang.com/vp/products/20145368",
-    "price": 79900,
+    "url": "https://www.coupang.com/vp/products/6775922884",
+    "price": 111860,
     "priceStatus": "reference",
-    "image": "/products/20145368.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/54011254577332-fabdaa82-c5aa-406f-9792-10d1c661d379.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90",
-    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "image": "/products/6775922884-gray.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/09/15/10/3/9c2394d7-cf3d-4497-8be3-e1f8f5dbc3e5.jpg",
+    "imageSourcePage": "https://fallcent.com/product/?item_id=15921708097&product_id=6775922884",
+    "sourceNote": "Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Show the right-hand chair only. Listing is a two-chair set; preview represents one chair. Gray option and photo are explicitly listed in the family source page. Exact gray item ID unavailable; select the named gray option on Coupang. Live Coupang availability unverified.",
     "checkedAt": "2026-10-25",
-    "brand": "ChairClub / 체어클럽",
+    "brand": "Dori Furniture / 도리퍼니처",
     "aliases": [
-      "ChairClub OfficePop MT20 black office chair"
+      "Dori Furniture Edgar dining chairs — gray, set of 2"
     ],
     "tags": [
       "chair",
-      "black",
-      "mesh",
-      "office chair",
-      "desk chair",
-      "의자",
-      "메쉬"
+      "gray",
+      "dining chair",
+      "식탁의자"
     ],
     "verifiedAttributes": [
-      "ChairClub OfficePop MT20 black office chair",
-      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+      "Dori Furniture Edgar dining chairs — gray, set of 2",
+      "Show the right-hand chair only. Listing is a two-chair set; preview represents one chair. Gray option and photo are explicitly listed in the family source page. Exact gray item ID unavailable; select the named gray option on Coupang. Live Coupang availability unverified.",
+      "The preview shows the sourced product photo as a 2D placement guide, not verified physical scale."
     ],
     "preview": {
       "kind": "object",
-      "image": "/products/20145368.jpg",
-      "background": "white"
+      "image": "/products/6775922884-gray.jpg",
+      "background": "white",
+      "available": true,
+      "crop": {
+        "x": 0.52,
+        "y": 0.1,
+        "width": 0.48,
+        "height": 0.76
+      }
     },
-    "imageSha256": "a4c7cb7ae2d2ab26e02ae8b5fd2957299c1715ff28278132675b301a6ef3e47a",
+    "imageSha256": "0f521bc4e2cc1a92333cc5ee291d7b857e4f8ff0037abc298bb90518190ab8aa",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/20145368",
+      "sourceUrl": "https://www.coupang.com/vp/products/6775922884",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
       "cons": [],
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
+    },
+    "chairStyle": "dining"
   },
   {
     "id": "55518713",
@@ -531,56 +544,47 @@
     }
   },
   {
-    "id": "7143578845",
-    "name": "이케아 TARNABY 테르나뷔 탁상스탠드, 실버 105.150.65",
+    "id": "6520241489",
+    "sourceProductId": "6520241489",
+    "name": "파파 LED 와이드 스탠드 PA-800B, 블랙",
     "category": "desk",
     "productType": "lamp",
-    "url": "https://www.coupang.com/vp/products/7143578845?itemId=17944161156&vendorItemId=85102013349",
-    "price": null,
-    "priceStatus": "unverified",
-    "image": "/products/7143578845.jpg",
-    "sourceImageUrl": "https://thumbnail7.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/257f/35c7a30bd8aa99fb9f3809461bf8fcd77dd7131fa5135aef5c5c15697f6a.jpg",
-    "imageSourcePage": "https://www.coupang.com/vp/products/7143578845?itemId=17944161156&vendorItemId=85102013349",
-    "sourceNote": "Exact public indexed Coupang listing named option Silver 105.150.65 and marked it not currently sold/out of stock in that historical snapshot. No price was available, so price is null. Original listing photo shows three color variants; preview crop selects the rightmost silver lamp without altering the source photo. Current availability is unverified.",
+    "url": "https://www.coupang.com/vp/products/6520241489?itemId=16799395438",
+    "price": 52140,
+    "priceStatus": "reference",
+    "image": "/products/6520241489.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2025/10/28/14/6/a984dbbb-712b-4d63-9f0e-58f4fc0f3f99.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%ED%8C%8C%ED%8C%8C%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C",
+    "sourceNote": "Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Exact black option. The source photo shows one lamp and no background scene. Current seller and availability are unverified.",
     "checkedAt": "2026-10-25",
-    "brand": "IKEA / 이케아",
+    "brand": "PAPA / 파파",
     "aliases": [
-      "IKEA Tarnaby silver table lamp 105.150.65",
-      "IKEA TARNABY silver desk lamp"
+      "PAPA PA-800B wide LED desk lamp — black"
     ],
     "tags": [
       "lamp",
-      "silver",
-      "glass",
-      "table lamp",
+      "black",
       "desk lamp",
       "스탠드",
-      "탁상스탠드",
-      "테르나뷔",
-      "실버"
+      "책상"
     ],
     "verifiedAttributes": [
-      "Single silver lamp (105.150.65). The listing photo includes other color references; this is not a three-lamp bundle.",
-      "Indexed listing option: Silver 105.150.65",
-      "Listing title describes a 25 cm table lamp; preview is not rendered at a verified physical scale."
+      "PAPA PA-800B wide LED desk lamp — black",
+      "Exact black option. The source photo shows one lamp and no background scene. Current seller and availability are unverified.",
+      "The preview shows the sourced product photo as a 2D placement guide, not verified physical scale."
     ],
     "preview": {
       "kind": "object",
-      "image": "/products/7143578845.jpg",
       "background": "white",
-      "crop": {
-        "x": 0.67,
-        "y": 0.18,
-        "width": 0.33,
-        "height": 0.62
-      }
+      "image": "/products/6520241489.jpg",
+      "available": true
     },
-    "imageSha256": "04e53eea8c812effb3ed0e4846511d95ff3acecfd280a4eb61e44f5ca131d220",
+    "imageSha256": "636ae7e2b79125aa1d1eb3edcfc920a413c6e9296bbfe949e17f55cb73842b06",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7143578845?itemId=17944161156&vendorItemId=85102013349",
+      "sourceUrl": "https://www.coupang.com/vp/products/6520241489?itemId=16799395438",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -3802,69 +3806,71 @@
     }
   },
   {
-    "id": "6331079250",
-    "sourceProductId": "6331079250",
-    "name": "리끌로우 선글라스 E03, FREE",
+    "id": "8539057200",
+    "sourceProductId": "8539057200",
+    "name": "리끌로우 남녀공용 옐린 블랙 선글라스, FREE(146 x 154 x 41 mm)",
     "category": "glasses",
     "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/6331079250",
-    "price": 14220,
+    "url": "https://www.coupang.com/vp/products/8539057200?itemId=24798781673&vendorItemId=91806510370",
+    "price": 23210,
     "priceStatus": "reference",
-    "image": "/products/6331079250.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/02/09/15/7/f275b47d-8127-4690-ba8e-1aa8046e3314.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A6%AC%EB%81%8C%EB%A1%9C%EC%9A%B0%20%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "image": "/products/8539057200.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/rs_quotation_api/4jbx1des/42acc57adf0c4f99946eda6e66e419eb.jpg",
+    "imageSourcePage": "https://fallcent.com/product/MAX3dJhmCQlSxHaGbvO7dwFnBDKLYEzf/",
+    "sourceNote": "Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Frontal black frame with pictured green lenses. Lens translucency is approximate; the preview does not demonstrate UV protection.",
     "checkedAt": "2026-10-25",
     "brand": "RECLOW",
     "aliases": [
-      "Reclow E03 sunglasses pictured beige frame"
+      "RECLOW YLeen black sunglasses"
     ],
     "tags": [
       "glasses",
       "sunglasses",
-      "beige"
+      "black",
+      "선글라스"
     ],
     "verifiedAttributes": [
-      "Reclow E03 sunglasses pictured beige frame",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+      "RECLOW YLeen black sunglasses",
+      "Frontal black frame with pictured green lenses. Lens translucency is approximate; the preview does not demonstrate UV protection.",
+      "The preview shows the sourced product photo as a 2D placement guide, not verified physical scale."
     ],
     "preview": {
       "kind": "glasses",
-      "image": "/products/6331079250.jpg",
+      "image": "/products/8539057200.jpg",
       "background": "white",
-      "available": true,
       "crop": {
-        "x": 0.04,
-        "y": 0.285,
-        "width": 0.86,
-        "height": 0.37
+        "x": 0.055,
+        "y": 0.34,
+        "width": 0.89,
+        "height": 0.32
       },
-      "bridgeX": 0.49,
-      "bridgeY": 0.317,
-      "frameWidth": 0.95,
       "lensClear": true,
-      "lensTint": "#8c8273",
+      "frameWidth": 0.95,
+      "bridgeX": 0.5,
+      "bridgeY": 0.4,
       "lensMasks": [
         {
-          "x": 0.249,
+          "x": 0.265,
           "y": 0.52,
-          "rx": 0.175,
-          "ry": 0.37
+          "rx": 0.15,
+          "ry": 0.355
         },
         {
-          "x": 0.735,
+          "x": 0.732,
           "y": 0.52,
-          "rx": 0.175,
-          "ry": 0.37
+          "rx": 0.15,
+          "ry": 0.355
         }
-      ]
+      ],
+      "lensTint": "#343c36",
+      "available": true
     },
-    "imageSha256": "8a1f2c719f7a001e053e2ef9eb65978755ca8069707b7a0817e21dd773d281b6",
+    "imageSha256": "0616dc644b7728d7318fab8581bfd3fae25cbe8e27679b5a575e5808c1e2c253",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/6331079250",
+      "sourceUrl": "https://www.coupang.com/vp/products/8539057200?itemId=24798781673&vendorItemId=91806510370",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -4790,7 +4796,8 @@
       "cons": [],
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
+    },
+    "chairStyle": "office"
   },
   {
     "id": "7395651009",
@@ -4837,53 +4844,58 @@
       "cons": [],
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
+    },
+    "chairStyle": "office"
   },
   {
-    "id": "9086958339",
-    "sourceProductId": "9086958339",
-    "name": "듀오백 메쉬 의자 Q7-05HLDA-M 방문설치, 블랙",
+    "id": "6908241889",
+    "sourceProductId": "6908241889",
+    "name": "코멧 5단 각도조절 패브릭 좌식의자, 그레이",
     "category": "desk",
     "productType": "chair",
-    "url": "https://www.coupang.com/vp/products/9086958339",
-    "price": 278000,
+    "url": "https://www.coupang.com/vp/products/6908241889?itemId=16639822845",
+    "price": 22990,
     "priceStatus": "reference",
-    "image": "/products/9086958339.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2025/09/24/17/9/34c9fc9d-237e-4524-b6ec-2c4598b60694.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%EC%98%A4%EB%B0%B1%20%EC%9D%98%EC%9E%90",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "image": "/products/6908241889.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/537881800080394-3a08e091-49c1-4977-a6dd-e43857e05b7c.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%A2%8C%EC%8B%9D%EC%9D%98%EC%9E%90",
+    "sourceNote": "Actual Coupang listing and pictured gray option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. This is one floor-level chair.",
     "checkedAt": "2026-10-25",
-    "brand": "Duoback / 듀오백",
+    "brand": "Comet / 코멧",
     "aliases": [
-      "Duoback Q7-05HLDA-M mesh office chair black"
+      "Comet adjustable fabric floor chair — gray"
     ],
     "tags": [
       "chair",
-      "black"
+      "gray",
+      "floor chair",
+      "좌식의자"
     ],
     "verifiedAttributes": [
-      "Duoback Q7-05HLDA-M mesh office chair black",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+      "Comet adjustable fabric floor chair — gray",
+      "Single gray floor-level seat.",
+      "The preview shows a 2D placement guide, not verified physical scale."
     ],
     "preview": {
       "kind": "object",
-      "image": "/products/9086958339.jpg",
+      "image": "/products/6908241889.jpg",
       "background": "white",
       "available": true
     },
-    "imageSha256": "3a6bf67dee11f13947a3c0c3c57c2ee47662af231fb90af80de79e51dc5337b9",
+    "imageSha256": "09d5a7d5fa2e2a2cc4999ff1ab5b855bd86e616143e4df5f09d3c1127d34d711",
     "reviewEvidence": {
       "status": "unavailable",
       "rating": null,
       "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/9086958339",
+      "sourceUrl": "https://www.coupang.com/vp/products/6908241889?itemId=16639822845",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
       "cons": [],
       "reviews": [],
       "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
+    },
+    "chairStyle": "floor"
   },
   {
     "id": "15089160",

@@ -1,0 +1,44 @@
+[
+  {
+    "retiredId": "7950092256",
+    "replacementId": "6775922884",
+    "productType": "chair",
+    "name": "도리퍼니처 Edgar 식탁 의자 2p, 옐로우",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "20145368",
+    "replacementId": "6775922884-gray",
+    "productType": "chair",
+    "name": "도리퍼니처 Edgar 식탁 의자 2p, 그레이",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "7950092244",
+    "replacementId": "8491783776",
+    "productType": "chair",
+    "name": "가구느낌 체스 좌식의자, 블랙, 1개",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "6331079250",
+    "replacementId": "8539057200",
+    "productType": "glasses",
+    "name": "리끌로우 남녀공용 옐린 블랙 선글라스, FREE(146 x 154 x 41 mm)",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "7143578845",
+    "replacementId": "6520241489",
+    "productType": "lamp",
+    "name": "파파 LED 와이드 스탠드 PA-800B, 블랙",
+    "reason": "Selected a simpler, isolated product photo and verified it with the existing runtime renderer."
+  },
+  {
+    "retiredId": "9086958339",
+    "replacementId": "6908241889",
+    "productType": "chair",
+    "name": "코멧 5단 각도조절 패브릭 좌식의자, 그레이",
+    "reason": "Solid armless silhouette replaces mesh; a simple runtime outline excludes the photographed floor shadow."
+  }
+]

@@ -10,6 +10,7 @@
   };
   const STYLE = {sunglasses:['sunglasses','선글라스'],optical:['optical','eyeglasses','spectacles','clear lenses','normal glasses','regular glasses','일반 안경','투명 렌즈']};
   const APPAREL={basic:['basic','plain','solid','unbranded','무지','베이직'],branded:['branded','logo','브랜드','로고']};
+  const CHAIR={office:['office','desk','study','computer','사무용 의자','사무용의자','사무 의자','사무의자','책상 의자','책상의자','컴퓨터 의자','컴퓨터의자','공부 의자','공부의자','독서실 의자','독서실의자','사무용','사무','책상','컴퓨터','공부','독서실'],floor:['floor','좌식 의자','좌식의자','바닥 의자','바닥의자','좌식','바닥'],dining:['dining','식탁 의자','식탁의자','식탁']};
   const TYPE_FACETS={lipbalm:['lip balm','lip balms','lipbalm','립밤'],lipstick:['lipstick','lipsticks','lip tint','립스틱','립틴트','틴트'],sweater:['sweater','sweaters','knit','pullover','니트','스웨터'],hoodie:['hoodie','hoodies','후드','후드티'],tshirt:['t-shirt','t-shirts','tshirt','tshirts','tee','티셔츠','반팔'],glasses:['glasses','eyeglasses','eyewear','안경'],chair:['chair','chairs','의자'],lamp:['lamp','lamps','스탠드','조명']};
   const clean = value => typeof value === 'string' ? value.trim().slice(0,300) : '';
   const unique = values => [...new Set(values)];
@@ -22,16 +23,21 @@
       const expression=new RegExp(/[a-z]/i.test(term)?`\\b${escaped}\\b`:escaped,'giu');
       for(const match of query.matchAll(expression)){
         const before=query.slice(0,match.index).replace(/[’']/g,' '),after=query.slice(match.index+match[0].length);
-        const negative=/(?:not|no|except|excluding|without|don t want|do not want)\s+(?:a\s+)?$/u.test(before)||/^\s*(?:색)?\s*(?:말고|제외|빼고)/u.test(after);
+        // "좌식의자 말고" excludes floor seating, not the entire chair category.
+        const styledChair=map===TYPE_FACETS&&key==='chair'&&/(?:\b(?:office|desk|study|computer|floor|dining)|사무용?|책상|컴퓨터|공부|독서실|좌식|바닥|식탁)\s*$/u.test(before);
+        const negative=!styledChair&&(/(?:not|no|except|excluding|without|don t want|do not want)\s+(?:a\s+)?$/u.test(before)||/^\s*(?:색)?\s*(?:말고|제외|빼고)/u.test(after));
         (negative?exclude:include).push(key);
       }
     }
     return {include:unique(include).filter(key=>!exclude.includes(key)),exclude:unique(exclude)};
   }
   function constraintsFor(query,supplied) {
-    const result={};for(const [key,map] of [['colors',COLORS],['eyewear',STYLE],['apparel',APPAREL],['types',TYPE_FACETS]]){
+    const result={};for(const [key,map] of [['colors',COLORS],['eyewear',STYLE],['apparel',APPAREL],['chair',CHAIR],['types',TYPE_FACETS]]){
       const provided=supplied?.[key];result[key]=provided&&Array.isArray(provided.include)&&Array.isArray(provided.exclude)?{include:unique(provided.include.filter(value=>Object.hasOwn(map,value))),exclude:unique(provided.exclude.filter(value=>Object.hasOwn(map,value)))}:requested(query,map);
     }return result;
+  }
+  function matchesChairStyle(product,rule) {
+    return product.productType!=='chair'||(!rule.include.length||rule.include.includes(product.chairStyle))&&!rule.exclude.includes(product.chairStyle);
   }
   function facets(product) {
     const text=[...(product.tags||[]),product.color,product.colour,product.style].filter(x=>typeof x==='string').join(' ').toLowerCase();
@@ -55,7 +61,7 @@
       .replace(/[\d,.]+\s*(?:원|won|krw)?\s*(?:이하|미만)/g,' ')
       .replace(/\b(show|find|me|my|some|a|an|the|i|want|like|please|recommend|looking|for|can|could|would|you|need|trying|try|to|buy|not|no|except|excluding|without|don|do|products?|options?|different|normal|everyday|brands?|sellers?|and|or|of|with)\b/g,' ')
       .replace(/추천|찾아|보여|주세요|제품|상품|일반|말고|제외|빼고/g,' ');
-    for(const words of [...Object.values(COLORS),...Object.values(STYLE),...Object.values(APPAREL)])for(const word of words)value=/[a-z]/i.test(word)?value.replace(new RegExp(`\\b${word}\\b`,'g'),' '):value.replaceAll(word,' ');
+    for(const words of [...Object.values(COLORS),...Object.values(STYLE),...Object.values(APPAREL),...(typeFrom(query)==='chair'?Object.values(CHAIR):[])])for(const word of words)value=/[a-z]/i.test(word)?value.replace(new RegExp(`\\b${word}\\b`,'g'),' '):value.replaceAll(word,' ');
     value=value.replace(/lip balms?|lipbalms?|sweaters?|knit|pullovers?|립밤|스웨터|니트|lipsticks?|lip tints?|t-?shirts?|hoodies?|chairs?|desk lamps?|table lamps?|lamps?|glasses|립스틱|립틴트|틴트|티셔츠|반팔|후드티?|의자|스탠드|조명|안경|선글라스/g,' ');
     return value.split(/[^\p{L}\p{N}-]+/u).filter(word=>word.length>1).slice(0,12);
   }
@@ -89,6 +95,8 @@
     get collections() {return this._collections.map(item=>({...item,ids:[...item.ids],products:item.ids.map(id=>this.catalog.get(id)).filter(Boolean),productCount:item.ids.length}));}
     snapshot() {return {label:this.label,query:this.query,theme:this.theme,productType:this.productType,collectionStyle:this.collectionStyle,category:this.category,maxPrice:this.maxPrice,total:this.total,hasMore:this.hasMore,limit:this.limit,products:[...this.products],visible:this.visible,current:this.current,selectedId:this.selectedId};}
     _matches(product,theme=this.theme,ignoreIncludes=this.themeChanged) {
+      // Chair height/use is a compatibility constraint, retained even on Skip.
+      if(!matchesChairStyle(product,this.constraints.chair))return false;
       if(this.constraints.types.exclude.includes(product.productType))return false;
       if(this.collectionStyle&&product.collectionStyle!==this.collectionStyle)return false;
       if(this.productType && product.productType!==this.productType)return false;
@@ -97,7 +105,7 @@
       const values=facets(product);
       if(theme && !values.includes(theme))return false;
       for(const [kind,rule] of Object.entries(this.constraints)){
-        if(kind==='types')continue;
+        if(kind==='types'||kind==='chair')continue;
         if(kind==='apparel'&&product.productType!=='tshirt')continue;
         if(kind==='eyewear'&&product.productType!=='glasses')continue;
         if(rule.exclude.some(value=>values.includes(value)))return false;
@@ -200,7 +208,7 @@
     restoreCollection(id) {
       const item=this._collections.find(entry=>entry.id===String(id));if(!item)return null;
       this.query=item.query;this.productType=item.productType;this.category=item.category;this.theme=item.theme;this.collectionStyle=item.collectionStyle||'';this.mixed=item.mixed===true&&item.sourceOnly===true;this.groupLabel=this.mixed?clean(item.groupLabel):'';this.collectionTrail=[];this.maxPrice=item.maxPrice;this.sourceOnly=item.sourceOnly===true;this.themeChanged=item.themeChanged===true;this.constraints=constraintsFor(this.query,item.constraints);this.terms=Array.isArray(item.terms)?item.terms.filter(term=>typeof term==='string').slice(0,12):this.sourceOnly?[]:queryTerms(this.query);
-      this.products=item.ids.map(productId=>this.catalog.get(productId)).filter(Boolean);
+      this.products=item.ids.map(productId=>this.catalog.get(productId)).filter(p=>p&&matchesChairStyle(p,this.constraints.chair));
       this.limit=item.limit===10?10:6;this.selectedId=this.products.some(p=>String(p.id)===item.selectedId)?item.selectedId:this.products[0]?String(this.products[0].id):null;
       return this.snapshot();
     }

@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 import catalog from '../data/catalog.json' with {type:'json'};
+import replacements from '../data/catalog-replacements.json' with {type:'json'};
 const root=new URL('../',import.meta.url);
 
 test('source catalog and public catalog agree; every listing retains an unchanged local source image',async()=>{
@@ -21,12 +22,21 @@ test('source catalog and public catalog agree; every listing retains an unchange
  }
 });
 
-test('demo has ten sourced pink options, optical alternatives, sunglasses and all original catalog IDs',()=>{
+test('demo keeps product groups while retired preview listings resolve to distinct sourced replacements',()=>{
  const pink=catalog.filter(p=>p.productType==='lipstick'&&p.tags.includes('pink'));
  assert.equal(pink.length,10);assert(new Set(pink.map(p=>p.brand)).size>=6);
  assert(catalog.filter(p=>p.tags.includes('optical')).length>=6);
  assert(catalog.filter(p=>p.tags.includes('sunglasses')).length>=3);
- for(const id of ["1814412512", "7322824636", "7185725748", "7950092256", "7950092244", "20145368", "55518713", "9026994633", "7143578845", "9474375760", "6431292464", "5186051654", "8533828112", "6285676894", "331802095", "7612276799", "6274724147", "8561267958"]) assert(catalog.some(p=>p.id===id),id);
+ for(const id of ["1814412512", "7322824636", "7185725748", "55518713", "9026994633", "9474375760", "6431292464", "5186051654", "8533828112", "6285676894", "331802095", "7612276799", "6274724147", "8561267958"]) assert(catalog.some(p=>p.id===id),id);
+ assert.equal(replacements.length,6);
+ assert.equal(new Set(replacements.map(p=>p.replacementId)).size,replacements.length);
+ for(const replacement of replacements){
+  assert(!catalog.some(p=>p.id===replacement.retiredId),'Retired preview must not be recommended');
+  const current=catalog.find(p=>p.id===replacement.replacementId);
+  assert(current,replacement.replacementId);
+  assert.equal(current.productType,replacement.productType);
+  assert.equal(current.preview.available,true);
+ }
  for(const p of pink){assert.equal(p.preview.available,true);assert.match(p.preview.color,/^#[a-f0-9]{6}$/);assert.equal(p.preview.shadeVerified,false);assert.equal(p.preview.sampleRegionPixels.length,4);}
 });
 

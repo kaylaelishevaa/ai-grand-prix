@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
+import sourcedCatalog from '../data/catalog.json' with {type:'json'};
+import {searchProducts} from '../lib/nook-voice.mjs';
 
 const source=readFileSync(new URL('../public/product-discovery.js',import.meta.url),'utf8');
 const catalog=[
@@ -23,6 +25,29 @@ function setup(saved=storage(),products=catalog) {
   return new context.window.CoupiDiscovery(products,{storage:saved});
 }
 const ids=products=>Array.from(products,p=>p.id);
+
+test('chair discovery preserves requested use through voice results, browsing, skip and saved collections',()=>{
+  const expected={office:['7330605115','7395651009'],floor:['6908241889','8491783776'],dining:['6775922884','6775922884-gray']};
+  for(const [style,queries] of Object.entries({office:['office chair','desk chair','책상 의자'],floor:['floor chair','좌식의자'],dining:['dining chair','식탁의자']}))for(const query of queries){
+    const saved=storage(),d=setup(saved,sourcedCatalog),voice=searchProducts({query,category:'desk'});
+    for(const options of [{query},{...voice,sourceOnly:true}]){
+      d.recommend(sourcedCatalog.filter(p=>p.productType==='chair'),options);
+      assert.deepEqual(ids(d.products).sort(),expected[style],query);
+      d.viewMore();assert(d.visible.every(p=>p.chairStyle===style));
+    }
+    const record=d.saveCollection(),restored=setup(saved,sourcedCatalog);restored.restoreCollection(record.id);
+    assert.deepEqual(ids(restored.products).sort(),expected[style]);
+    restored.nextTheme();assert(restored.products.every(p=>p.chairStyle===style));
+    restored.nextCollection();assert.equal(restored.productType,'lamp');
+    restored.nextCollection();assert.equal(restored.productType,'chair');assert(restored.products.every(p=>p.chairStyle===style),'skip must not reintroduce incompatible chair heights');
+  }
+  const d=setup(storage(),sourcedCatalog);
+  d.recommend([],{query:'chair'});assert.equal(d.total,6);
+  d.recommend([],{query:'office chair under 30000'});assert.equal(d.total,0,'do not pad an unavailable office-chair budget with floor seats');
+  for(const query of ['chairs without floor chairs','좌식의자 말고 의자']){
+    d.recommend([],{query});assert.equal(d.total,4);assert(d.products.every(p=>p.chairStyle!=='floor'));
+  }
+});
 
 test('initial six and expanded ten retain explicit selection without duplicate or invented catalog items',()=>{
   const d=setup();d.recommend([catalog[2],catalog[2],{id:'invented'}],{query:'show me pink lipsticks'});
