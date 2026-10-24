@@ -1153,7 +1153,7 @@ test('optional voice preferences open a confirmed draft without saving or invent
   assert.equal(f.preferences.length,1);assert.equal(f.preferences[0].action,'draft');assert.deepEqual(JSON.parse(JSON.stringify(f.preferences[0].preferences)),preferenceDraft());
   const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);
   assert.equal(result.ok,true);assert.equal(result.draft_ready,true);assert.equal(result.confirmation_required,true);assert.equal(result.saved,false);
-  assert.match(result.instruction,/tap Build my worlds/);assert.equal(f.transcripts.length,before);
+  assert.match(result.instruction,/tap Save preferences/);assert.match(result.instruction,/same call stays connected/);assert.equal(f.transcripts.length,before);
   tool(f,'preferences-1','draft_preferences',preferenceDraft());await tick();assert.equal(f.preferences.length,1,'duplicate tool event must not reopen review');
 });
 
