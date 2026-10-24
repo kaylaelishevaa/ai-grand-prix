@@ -1,15 +1,12 @@
-Nook catalog provenance — checked 2026-10-25 (Asia/Singapore)
+Coupi catalog provenance — checked 2026-10-25 (Asia/Singapore)
 
-Scope: 18 actual Coupang products: three each of lipstick, chair, desk lamp, T-shirt, hoodie and glasses.
-Direct automated Coupang page retrieval returned HTTP 403. No access-control bypass was attempted. Product titles/IDs were recovered from public indexed Coupang pages and public price-comparison indexes. Original images were downloaded unchanged from public Coupang CDN URLs surfaced by matching named listings on Fallcent, or directly from the indexed Coupang listing.
+Scope: 82 sourced Coupang listings or named options: 22 lipsticks, 10 lip balms, 14 glasses, 12 T-shirts, and six each of sweaters, hoodies, chairs and desk lamps. Every related collection retains at least six named options. Variant-suffixed IDs are local keys; sourceProductId identifies the numeric retailer family. Seller identities are not independently verified.
 
-All numeric prices are reference prices from the named indexed listing, not live offers. Tarnaby silver had no available price and has price=null. Stock, delivery, available colors/sizes and seller options must be checked on Coupang. Listing photos do not establish real-world dimensions, fit, material properties or calibrated cosmetic color.
+Fourteen unsuitable preview listings were replaced with simpler sourced products; see data/catalog-replacements.json for the old-to-new mapping. Four mesh chairs were replaced by two Edgar dining-chair sets and two solid floor chairs. RECLOW YLeen black sunglasses replace the pale E03 frame. PAPA PA-800B black replaces the clear-glass Tarnaby collage. Source photos were downloaded unchanged from the matching Coupang CDN URLs; local hashes below verify the bytes. Six tee options and two hoodies now use isolated front-facing photographs instead of tags, collages or asymmetric sleeve poses. The three United Athle color options share one verified product family. Rejected candidate photos were not added to the catalog.
 
-Try-on treatment: original card photos are unchanged. The browser may remove near-white background and crop preview framing. Garment and object previews are 2D approximations, not 3D reconstructions or a guarantee of size/fit. Lip color estimates are sampled from visible pigment/swatch regions, excluding packaging; named shades are sourced but shadeVerified=false means the displayed color is not calibrated. Lafa shirts retain their original retail hanger/tag in the source photo. Tertial preview crop excludes an IKEA corner logo; Tarnaby preview crop selects a single silver lamp (105.150.65) from a three-variant reference photo, not a three-lamp bundle. Duplex DP-310LS uses backgroundTolerance=0 to preserve its bright curved stem while removing pure-white border background.
+Direct Coupang retrieval may return HTTP 403. Product IDs/options were verified from indexed public retailer listings or ordinary public Fallcent product links. Matching named Fallcent entries provide image/price evidence. No access-control bypass was attempted. All numeric prices are historical references, not live offers. Stock, seller, delivery and selected options must be confirmed on Coupang; some source snapshots report sold-out stock. For family-only links, select the exact named option.
 
-Additional product-ID evidence:
-https://alltimeprice.com/product/?pid=7950092244-88985518070
-https://alltimeprice.com/product/?pid=7950092256-88985518155
+Preview treatment: card photos remain original. The existing renderer removes edge-connected neutral background and uses verified masks where needed. The replacement Comet chair has a simple solid outline to exclude its photographed floor shadow. The new L.LAMO hoodie preview excludes detached color swatches below the hem; all eight new garment previews use the existing neutral-background extraction with shoulder anchors calibrated to their source photos. Edgar listings sell two chairs; the preview crops to one chair from that set. Chess and Comet are floor-level seats, not desk-height office chairs. The front-facing YLeen frame uses the existing approximate lens-translucency treatment. All object/garment previews are 2D guides, not physical size or fit guarantees. No reviews or ratings were transferred from retired products to their replacements. Existing sourced reviews retain their product-family scope and source URLs in data/catalog.json.
 
 1814412512 | lipstick | 롬앤 제로 매트 립스틱, 1개, 09 쉘 누드
 Coupang listing: https://www.coupang.com/vp/products/1814412512?itemId=3063152900&vendorItemId=71051109229
@@ -38,32 +35,32 @@ SHA-256: 084e8313062fbb4f2d8162bb54a87f47c717ad1fd6a158cb66e642a28644f373
 Reference price (KRW): 19920
 Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified. The shade name is sourced; preview color is an estimate sampled from visible pigment in the listing photo, not a calibrated shade match.
 
-7950092256 | chair | 체어클럽 서울대의자 팔걸이형 화이트바디, 다크그레이
-Coupang listing: https://www.coupang.com/vp/products/7950092256
-Image/price source page: https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90
-Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/rs_quotation_api/kvv1vlho/974d7482e680400d892a5e2b995cbdf4.jpg
-Local original: public/products/7950092256.jpg
-SHA-256: 127e66397f0500043b8630de994556b6c82975347ec102d9353e07d9e5bc52e6
-Reference price (KRW): 87430
-Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.
+6775922884 | chair | 도리퍼니처 Edgar 식탁 의자 2p, 옐로우
+Coupang listing: https://www.coupang.com/vp/products/6775922884?itemId=15921708097
+Image/price source page: https://fallcent.com/product/?item_id=15921708097&product_id=6775922884
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2022/09/15/10/9/a2c340e4-74ce-4aba-b729-06d8fe8aa38b.jpg
+Local original: public/products/6775922884.jpg
+SHA-256: 996fd6ddd78f375169507b4808198f7f24e17edc571c2e6e0789316d95bbe3f1
+Reference price (KRW): 111860
+Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Show the right-hand chair only. Listing is a two-chair set; preview represents one chair. Source marked sold out; live Coupang availability unverified.
 
-7950092244 | chair | 체어클럽 서울대의자 팔걸이형 블랙바디, 다크그레이
-Coupang listing: https://www.coupang.com/vp/products/7950092244
-Image/price source page: https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90
-Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/rs_quotation_api/e1olgdcb/a7c0ef43bd3540a28bb3ae0301429799.jpg
-Local original: public/products/7950092244.jpg
-SHA-256: c4ba967c7585cc8888ffe82f4e2c4d45e1433f9834482e5e338e866d2195779d
-Reference price (KRW): 87430
-Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.
+8491783776 | chair | 가구느낌 체스 좌식의자, 블랙, 1개
+Coupang listing: https://www.coupang.com/vp/products/8491783776?itemId=20141153675
+Image/price source page: https://fallcent.com/product/?item_id=20141153675&product_id=8491783776
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2023/09/19/10/5/fc1887e5-dad7-4f6d-b356-e64a4c7a52b1.jpg
+Local original: public/products/8491783776.jpg
+SHA-256: 2f4a1bede5fdbe3d4c0028e8fd876a91fb38a6b39cfe44fffc2b1530586f5ff7
+Reference price (KRW): 26650
+Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Floor-level seat for room placement; do not describe as a desk-height office chair. Source marked sold out; live Coupang availability unverified.
 
-20145368 | chair | 체어클럽 오피스팝 의자 MT20, 블랙
-Coupang listing: https://www.coupang.com/vp/products/20145368
-Image/price source page: https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90
-Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/54011254577332-fabdaa82-c5aa-406f-9792-10d1c661d379.jpg
-Local original: public/products/20145368.jpg
-SHA-256: a4c7cb7ae2d2ab26e02ae8b5fd2957299c1715ff28278132675b301a6ef3e47a
-Reference price (KRW): 79900
-Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.
+6775922884-gray | chair | 도리퍼니처 Edgar 식탁 의자 2p, 그레이
+Coupang listing: https://www.coupang.com/vp/products/6775922884
+Image/price source page: https://fallcent.com/product/?item_id=15921708097&product_id=6775922884
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/09/15/10/3/9c2394d7-cf3d-4497-8be3-e1f8f5dbc3e5.jpg
+Local original: public/products/6775922884-gray.jpg
+SHA-256: 0f521bc4e2cc1a92333cc5ee291d7b857e4f8ff0037abc298bb90518190ab8aa
+Reference price (KRW): 111860
+Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Show the right-hand chair only. Listing is a two-chair set; preview represents one chair. Gray option and photo are explicitly listed in the family source page. Exact gray item ID unavailable; select the named gray option on Coupang. Live Coupang availability unverified.
 
 55518713 | lamp | 듀플렉스 LED 데스크스탠드 DP-310LS, 단일색상
 Coupang listing: https://www.coupang.com/vp/products/55518713?itemId=193122958&vendorItemId=3457057654
@@ -83,14 +80,14 @@ SHA-256: 0e65f012e45c8f832e9917755489288453e3abbb9244a84c4208ee7c981c076e
 Reference price (KRW): 38500
 Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.
 
-7143578845 | lamp | 이케아 TARNABY 테르나뷔 탁상스탠드, 실버 105.150.65
-Coupang listing: https://www.coupang.com/vp/products/7143578845?itemId=17944161156&vendorItemId=85102013349
-Image/price source page: https://www.coupang.com/vp/products/7143578845?itemId=17944161156&vendorItemId=85102013349
-Original CDN image: https://thumbnail7.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/257f/35c7a30bd8aa99fb9f3809461bf8fcd77dd7131fa5135aef5c5c15697f6a.jpg
-Local original: public/products/7143578845.jpg
-SHA-256: 04e53eea8c812effb3ed0e4846511d95ff3acecfd280a4eb61e44f5ca131d220
-Reference price (KRW): None
-Exact public indexed Coupang listing named option Silver 105.150.65 and marked it not currently sold/out of stock in that historical snapshot. No price was available, so price is null. Original listing photo shows three color variants; preview crop selects the rightmost silver lamp without altering the source photo. Current availability is unverified.
+6520241489 | lamp | 파파 LED 와이드 스탠드 PA-800B, 블랙
+Coupang listing: https://www.coupang.com/vp/products/6520241489?itemId=16799395438
+Image/price source page: https://fallcent.com/product/search/?keyword=%ED%8C%8C%ED%8C%8C%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2025/10/28/14/6/a984dbbb-712b-4d63-9f0e-58f4fc0f3f99.jpg
+Local original: public/products/6520241489.jpg
+SHA-256: 636ae7e2b79125aa1d1eb3edcfc920a413c6e9296bbfe949e17f55cb73842b06
+Reference price (KRW): 52140
+Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Exact black option. The source photo shows one lamp and no background scene. Current seller and availability are unverified.
 
 9474375760 | tshirt | 뉴에라 반팔티 남녀공용 커플티 워드마크 로고 베이직 오버핏 티셔츠 올리브 그린, L
 Coupang listing: https://www.coupang.com/vp/products/9474375760
@@ -110,14 +107,14 @@ SHA-256: 29329808acf90d987ca63e040fff5c517b5affb026fc23dca0298d56d0e7746f
 Reference price (KRW): 24800
 Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.
 
-5186051654 | tshirt | 라파클럽 20수 남여공용 라운드 반팔티, M
-Coupang listing: https://www.coupang.com/vp/products/5186051654
-Image/price source page: https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%B0%98%ED%8C%94%ED%8B%B0
-Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/0dcb/3ee5c1dae78da505be5f491a8d776e2e630b29727748bee7708caef09097.jpg
-Local original: public/products/5186051654.jpg
-SHA-256: e9f16596283daacab26b0a1a0efbe71449e14dc04fff51808a2455d34e1877a2
-Reference price (KRW): 22800
-Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.
+9604052548 | tshirt | 트리플에이 반팔 1301 단품 무지 헤비 아메리칸어패럴 AAA 18수 티셔츠, XL
+Coupang listing: https://www.coupang.com/vp/products/9604052548?itemId=28670424673&vendorItemId=95612388052
+Image/price source page: https://fallcent.com/product/QUwmNBKDpWlxL7jMe1C5TNHd4ROm2UZk/
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/edaa/837e1d4fbe49c0a0db09a9905e39b03bc391ea350a59e173154a1c827880.jpg
+Local original: public/products/9604052548.jpg
+SHA-256: 4331ac01987e0bff082ad956d40e2c6ad119818ca419c02d8eb2ab1d93c27cae
+Reference price (KRW): 9900
+Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Black single front-facing packshot, size XL. Color inferred from exact option source photograph; Fallcent option text only specifies XL. Public mirror price 9,900 KRW. Coupang destination body returns403; actual final destination identifiers verified through ordinary product link.
 
 8533828112 | hoodie | 엠씨티 문컬렉션 시그니처 쭈리면 피그먼트 워싱 오버핏 후드티, XL
 Coupang listing: https://www.coupang.com/vp/products/8533828112
@@ -137,16 +134,14 @@ SHA-256: ddd62c81fa7b1f83c990e0e0ac13e1ec35c41691918cdb6555c8adc895285f65
 Reference price (KRW): 21800
 Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.
 
-331802095 | hoodie | 앨빈클로 남녀공용 무지 오버핏 기모 후드티 AVH855, L
-Coupang listing: https://www.coupang.com/vp/products/331802095
-Image/price source page: https://fallcent.com/product/search/?keyword=%EC%95%A8%EB%B9%88%ED%81%B4%EB%A1%9C%20%ED%9B%84%EB%93%9C%ED%8B%B0
-Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/1025_amir_coupang_oct_80k/db35/c8cf46ff91443defd39629f3a45babc7c91ecea9d9e28d8e82648068c3db.jpg
-Local original: public/products/331802095.jpg
-SHA-256: cae493010c41eb77736707d20dc26bb988ece1d3cf07c38be4276ba35e7e9bba
-Reference price (KRW): 29990
-Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.
-
-Glasses added 2026-10-25. Preview crops isolate frame fronts; bright clear-lens interiors may be made transparent in the browser so the shopper’s own eyes remain visible. Original preview-card photos are unchanged. Eyewear alignment is visual, not a measured sizing or lens-performance assessment.
+7856352896 | hoodie | 엘라모 3H 라모싸인 후드티, 2XL
+Coupang listing: https://www.coupang.com/vp/products/7856352896?itemId=21427199195&vendorItemId=88725729991
+Image/price source page: https://fallcent.com/product/i79DZCXN2afl5GgL09yYm6MAEZu47hVe/
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/3367/46316609b3e866217799bafa31a6c14a4e06f4ecd00159996919e673c6a5.jpg
+Local original: public/products/7856352896.jpg
+SHA-256: 463a1ea5e3923993cc62bf2a738bb120c9f2f67c3ef428cffd54e88402d5294d
+Reference price (KRW): 33800
+Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Source photo has four color swatches below garment; crop bottom 13% to exclude swatches while preserving complete garment. Price is Fallcent observed reference on 2026-10-25; live Coupang stock/price not independently readable because retailer body returned 403. Exact Coupang product, item, vendor IDs observed via ordinary click of Fallcent retailer link; size2XL named, black is pictured not independently selectable option verified. No ratings/reviews copied or invented.
 
 7612276799 | glasses | EYELAB 블루라이트 UV 차단 안경, 로즈골드
 Coupang listing: https://www.coupang.com/vp/products/7612276799?itemId=20163776919
@@ -175,4 +170,708 @@ SHA-256: 01d27d94e36aac636399e4d43928d2343ba4c251cff935706a7230e543fb51d4
 Reference price (KRW): 18130
 Real Coupang listing ID/title verified from publicly indexed official Coupang pages. Original Coupang CDN photo and reference price were recovered from the matching named public Fallcent listing. Direct retrieval may be blocked; no access-control bypass was attempted. Price is a historical/indexed reference, not a live offer. Current stock, seller options and price are unverified. Live glasses preview uses the visible frame variant in this photo and is an approximate visual fit only; lens performance, prescription and physical fit are not verified.
 
-Glasses alignment metadata: E374 front-frame crop removes the long side temple; approximate ellipse masks clear folded temple pixels within lenses. BB557 source roll is compensated by -10 degrees. Its folded temple pixels inside lenses are cleared and replaced with approximate translucent green tint sampled from the source photo, not calibrated lens colour or transmission. EYELAB masks clear folded temples inside the clear lenses. The unaltered originals remain in product cards.
+1814412512-pink-sand | lipstick | 롬앤 제로 매트 립스틱, 1개, 10 핑크 샌드
+Coupang listing: https://www.coupang.com/vp/products/1814412512?itemId=3063152898&vendorItemId=71051109185
+Image/price source page: https://fallcent.com/product/?item_id=3063152900&product_id=1814412512
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/179972684639393-7382e987-7be4-4f55-bd3a-82c633976988.jpg
+Local original: public/products/1814412512-pink-sand.jpg
+SHA-256: 56e9f1fa24c0a2ac3810f4449d457d5ccd51c6eb101fadf2c5093160afdd4a70
+Reference price (KRW): 7330
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+8248027642-pink-chuchu | lipstick | 미샤 글램 아트 루즈 립스틱, 1개, 핑크츄츄
+Coupang listing: https://www.coupang.com/vp/products/8248027642
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/a3b6/5d601c8fcf7fd2db8dc9c6e71807f4c3daf3ccafe8bc9981386c85a3789d.jpg
+Local original: public/products/8248027642-pink-chuchu.jpg
+SHA-256: ba142392c3961483afed51c0713ed58153682b4490dfe866b5c8d7afc970ed9f
+Reference price (KRW): 10890
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+8248027642-pink-rise | lipstick | 미샤 아트 루즈 글램 립스틱, 1개, 핑크라이즈
+Coupang listing: https://www.coupang.com/vp/products/8248027642
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/195302014893287-5d2cb11e-439a-4531-8596-2a89002f7034.jpg
+Local original: public/products/8248027642-pink-rise.jpg
+SHA-256: fa3233d1ae69c15df2c2e92e782c174666e78a4feb192fb3673c59a0156bf77f
+Reference price (KRW): 10340
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+1547725003-bitten-pink | lipstick | 미샤 데어 루즈 쉬어 슬릭 립스틱, 1개, 13호 비튼 핑크
+Coupang listing: https://www.coupang.com/vp/products/1547725003
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/190121944991043-ea7326da-36a8-4059-84dc-b7d805946d64.jpg
+Local original: public/products/1547725003-bitten-pink.jpg
+SHA-256: 8e53cfc144bba236a9388a0d63f1c5ce9253444997b10d5ddc37b0d6b1ebae34
+Reference price (KRW): 9450
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+8308780384-pink-wish | lipstick | 에뛰드 컬러 래스팅 글로우 스틱, 1개, 04핑크위시
+Coupang listing: https://www.coupang.com/vp/products/8308780384?itemId=23973498861&vendorItemId=91016346805
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%97%90%EB%9B%B0%EB%93%9C%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/213807253459011-d7cefdcc-de44-4eec-8b5e-a78fb59396c4.jpg
+Local original: public/products/8308780384-pink-wish.jpg
+SHA-256: e2057e3526413cdc735ae0d8a80d2b63d9f2886e943f5aea503c7d0675bdc028
+Reference price (KRW): 8000
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+1463552408-kinda-pink | lipstick | [비건뷰티] 에스쁘아 노웨어 립스틱 볼륨매트, 2개, 2호 카인다핑크
+Coupang listing: https://www.coupang.com/vp/products/1463552408
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%97%90%EC%8A%A4%EC%81%98%EC%95%84%20%ED%95%91%ED%81%AC%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/25558953356416-99e8f41a-f484-42e6-975c-59f75774e49f.jpg
+Local original: public/products/1463552408-kinda-pink.jpg
+SHA-256: 641be234b32d73dfe0c61e50212eb4febfdb6e35ab42373a94f72b5300ec7fcc
+Reference price (KRW): 32200
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+7480503353-pink-afternoon | lipstick | 레브론 수퍼 러스트러스 크림 립스틱, Pink in the Afternoon, 4.2g, 1개
+Coupang listing: https://www.coupang.com/vp/products/7480503353?itemId=20467173&vendorItemId=3278911472
+Image/price source page: https://fallcent.com/product/?item_id=23454574889&product_id=7480503353
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/product/image/vendoritem/2016/06/01/3001314881/38f9980f-59fe-439c-9528-ee6f14cd68dd.jpg
+Local original: public/products/7480503353-pink-afternoon.jpg
+SHA-256: c3c9835f8e5a6e9d1d6c1f06214cf4245b8780c552fa7c2c6d3faac79909a65e
+Reference price (KRW): 12780
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+7480503353-pink-velvet | lipstick | 레브론 수퍼 러스트러스 크림 립스틱, Pink Velvet, 4.2g, 1개
+Coupang listing: https://www.coupang.com/vp/products/7480503353
+Image/price source page: https://fallcent.com/product/?item_id=23454574889&product_id=7480503353
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/product/image/vendoritem/2018/10/10/3278622898/378e52af-9865-4dab-a4ac-b2c0dc839f32.jpg
+Local original: public/products/7480503353-pink-velvet.jpg
+SHA-256: f978cd908ee93f1f22da93836683d30e6f455023d29a443f93881aad58eb628b
+Reference price (KRW): 13360
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+7480503353-love-pink | lipstick | 레브론 수퍼 러스트러스 크림 립스틱, Love That Pink, 4.2g, 1개
+Coupang listing: https://www.coupang.com/vp/products/7480503353
+Image/price source page: https://fallcent.com/product/?item_id=23454574889&product_id=7480503353
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/product/image/vendoritem/2018/09/27/3278586118/c7dfa7d5-5ba8-435f-93e2-ec40cbac15bc.jpg
+Local original: public/products/7480503353-love-pink.jpg
+SHA-256: 8e18b7d330dcb2be11d0ec926a0a4210079d78944dafdabc580ba6b8f607f434
+Reference price (KRW): 17330
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+72621661-pink | lipstick | 무드매쳐 반전 립스틱, 1개, 핑크
+Coupang listing: https://www.coupang.com/vp/products/72621661?itemId=3142416293
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AC%B4%EB%93%9C%EB%A7%A4%EC%B3%90%20%ED%95%91%ED%81%AC
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/88bf/6e0aac5da4d397e01076503fb6186273644edb1679de3adb669479d3b19e.jpg
+Local original: public/products/72621661-pink.jpg
+SHA-256: d4b909d5c3681892ec3a1542e62d8c3dba1c368698d55db19fcff0d9c4418650
+Reference price (KRW): 11290
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match. A color-changing formula cannot be predicted from this photo; this is only a reference-swatch preview.
+
+1547904141-purple | lipstick | 미샤 데어루즈 벨벳 립스틱, 1개, 왓 더 퍼플
+Coupang listing: https://www.coupang.com/vp/products/1547904141
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%EC%99%93%20%EB%8D%94%20%ED%8D%BC%ED%94%8C
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/148714893290365-683b0f25-063b-4eb8-8ec6-74ca94708639.jpg
+Local original: public/products/1547904141-purple.jpg
+SHA-256: d1f6ad64ba545e9b3f87a3026c6129df8311868372e1286d3db3219cb8bcaf72
+Reference price (KRW): 11340
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. Preview color is an estimate sampled from visible pigment or swatch, excluding packaging; it is not a calibrated shade match.
+
+7612276799-black | glasses | EYELAB 블루라이트 UV 차단 안경, 블랙
+Coupang listing: https://www.coupang.com/vp/products/7612276799
+Image/price source page: https://fallcent.com/product/?item_id=20163776919&product_id=7612276799
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/33e2/72b1065cbedd27b35ec0a6f79fc26bf3996a4745237b2cc7eebaabb0f5d2.png
+Local original: public/products/7612276799-black.png
+SHA-256: 72d6f766fc2641fd857fc329b525a6d17809caf33afada893d933e8c95ea4f66
+Reference price (KRW): 19900
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+7612276799-silver | glasses | EYELAB 블루라이트 UV 차단 안경, 실버
+Coupang listing: https://www.coupang.com/vp/products/7612276799
+Image/price source page: https://fallcent.com/product/?item_id=20163776919&product_id=7612276799
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/4807/fbcbc8b97192598fe20c88d584c01f5a820c924cc5a9946344698afdb259.jpg
+Local original: public/products/7612276799-silver.jpg
+SHA-256: 50d1c0a76a661a2780dcedea411bf0594838ee39c3f8c9dc8e2ee8f53aa1d5b8
+Reference price (KRW): 19900
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+7235424403-round | glasses | EYELAB 티타늄 5g 블루라이트 차단 안경, 라운드
+Coupang listing: https://www.coupang.com/vp/products/7235424403
+Image/price source page: https://fallcent.com/product/search/?keyword=EYELAB%20%EC%95%88%EA%B2%BD
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/323d/537322469e6f3756084f2d38690bf8cf173cb789f220e40b6f277e3ddb35.jpg
+Local original: public/products/7235424403-round.jpg
+SHA-256: b6468fd40fda8b2e623c39aa8d7d334db8049ebca230ec6eabf5703a180bf329
+Reference price (KRW): 24200
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+7235424403-square | glasses | EYELAB 티타늄 5g 블루라이트 차단 안경, 스퀘어
+Coupang listing: https://www.coupang.com/vp/products/7235424403
+Image/price source page: https://fallcent.com/product/search/?keyword=EYELAB%20%EC%95%88%EA%B2%BD
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/d53f/84c1004c10372b491df11c8a3d2efc0b810e3558ee5600a93823009549c3.jpg
+Local original: public/products/7235424403-square.jpg
+SHA-256: d76c42f44f359ac9621f27111c64eab55defc4e82218863bd7ea6897f56d4b19
+Reference price (KRW): 24200
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+6511312982 | glasses | GL1988 안경사가 만든 TR 블루라이트차단 안경 10g, 51 (초경량)
+Coupang listing: https://www.coupang.com/vp/products/6511312982
+Image/price source page: https://fallcent.com/product/search/?keyword=GL1988%20%EC%95%88%EA%B2%BD
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/03b3/e14b42c16c88feae632e47e4f14c92b42215279b1f0aa03bef79ff87863c.jpg
+Local original: public/products/6511312982.jpg
+SHA-256: fe62587fe4ab7d4d0b412248c6ddc0aaa52d94d8d67eea8ca066c8788f430fe5
+Reference price (KRW): 29900
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+2082223437 | glasses | 멜라크메 남여공용 빅 오버 캣츠 블랙 선글라스 + 케이스, 전체 가로길이 149mm x 세로 57mm
+Coupang listing: https://www.coupang.com/vp/products/2082223437?itemId=3537088872&vendorItemId=86213775191
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/164377599432787-db7dd246-fbc4-48e5-bc61-b26c39e331e9.jpg
+Local original: public/products/2082223437.jpg
+SHA-256: dd36600bb21c09a099fa5ea4cde320b30115b60fc1cb78917c657aca643f91a7
+Reference price (KRW): 12500
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+9461808186 | glasses | [비비PICK] 리에티 LUNO RT 4056 선글라스, 프레임정면 147mm x 렌즈세로 33mm x 템플길이 144mm
+Coupang listing: https://www.coupang.com/vp/products/9461808186?itemId=28155243954&vendorItemId=95110459068
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/1489989814231129-e62b85bd-35a8-4d34-a6d4-7846eee227cf.jpg
+Local original: public/products/9461808186.jpg
+SHA-256: c27068a71c5a3b38815e48745c9560195afd0b00c856720eaaa6b6b9434a74ce
+Reference price (KRW): 53600
+Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.
+
+7505441634-derma-sos | lipbalm | 니베아 립밤 립케어, 더마 SOS 케어, 4.8g, 1개
+Coupang family: https://www.coupang.com/vp/products/7505441634
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%8B%88%EB%B2%A0%EC%95%84%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/d639/12f30d29ff47083c1220485c8a4abfe52883ae7b163fe771824be3c98be3.jpg
+Local unchanged image: /products/7505441634-derma-sos.jpg
+SHA-256: 05a97ef6d79eebd8f3244769e0421e88b4e17c4397437a63afd01d14a16b7e39
+Reference price: KRW 5800 (not a live offer)
+Brand: NIVEA; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+341621790-cherry-shine | lipbalm | 니베아 립케어 립밤, 체리 샤인, 4.8g, 2개
+Coupang family: https://www.coupang.com/vp/products/341621790
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%8B%88%EB%B2%A0%EC%95%84%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/16ae5ec6-501c-4ba5-90c0-59cabf785cd93929511380041055497.png
+Local unchanged image: /products/341621790-cherry-shine.png
+SHA-256: 1db74aaf4a4b13b4103b7c0407f05e14f39228e6235f4130ce049a292f2836c4
+Reference price: KRW 7500 (not a live offer)
+Brand: NIVEA; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+8063356643-strawberry | lipbalm | 니베아 립케어 립밤, 스트로베리 샤인, 4.8g, 2개
+Coupang family: https://www.coupang.com/vp/products/8063356643
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%8B%88%EB%B2%A0%EC%95%84%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/e91797b2-4246-4e30-978e-fda5976eb39411120696946913611103.png
+Local unchanged image: /products/8063356643-strawberry.png
+SHA-256: 7d8992591e57e938fa4d327ad0debb01cedd880b75aede974eef83f06a63bd82
+Reference price: KRW 7030 (not a live offer)
+Brand: NIVEA; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+6193917913-essential | lipbalm | 니베아 립케어 립밤, 에센셜 케어, 4.8g, 4개
+Coupang family: https://www.coupang.com/vp/products/6193917913
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%8B%88%EB%B2%A0%EC%95%84%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/c00d/c1f93444846f8d8129e676fc9ae964ebb2737fba8912d31cff58702e823d.jpg
+Local unchanged image: /products/6193917913-essential.jpg
+SHA-256: 245f0cb5ca1f2e3bf04181ef1830963a5c7e13b2b0bd7e89f5c443a865ab45e3
+Reference price: KRW 17140 (not a live offer)
+Brand: NIVEA; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7702523687-juicy-trio | lipbalm | 버츠비 쥬시 립밤 트리오 3종 세트, 스윗만다린 + 망고 + 스트로베리, 12.75g, 1개
+Coupang family: https://www.coupang.com/vp/products/7702523687
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%B2%84%EC%B8%A0%EB%B9%84%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/a03f/423ebb8294429d12690acd3ecae175d4b27a3ffd702f77cf69ae690964e0.png
+Local unchanged image: /products/7702523687-juicy-trio.png
+SHA-256: dca7515636c19314d09d3e9a8bcd909bdfd30613198164ecd08500c149e78618
+Reference price: KRW 13420 (not a live offer)
+Brand: Burt's Bees; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+120680-original | lipbalm | 히말라야 립 밤, 오리지널, 10g, 1개
+Coupang family: https://www.coupang.com/vp/products/120680
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%ED%9E%88%EB%A7%90%EB%9D%BC%EC%95%BC%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/3342/9a3bde0894aa9528e22f8564259c3486cf20929baab4f77c8ef056a6eb24.png
+Local unchanged image: /products/120680-original.png
+SHA-256: 87d42bcb3eb7f7cf7300760a3e2c2862dbb8004f6c57c8183b1e0606ac83d4d1
+Reference price: KRW 4280 (not a live offer)
+Brand: Himalaya; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7480865203-herbal | lipbalm | 히말라야 립밤 10g 튜브형, 허벌, 3개
+Coupang family: https://www.coupang.com/vp/products/7480865203
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%ED%9E%88%EB%A7%90%EB%9D%BC%EC%95%BC%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/32e2/86d96b69844111292f6ad97419d371f1675f3abd1065312efc85984bcee9.jpg
+Local unchanged image: /products/7480865203-herbal.jpg
+SHA-256: d06c129346fb7c50298658f551e234b27d2494e81fd59f4972ce20203f48cb52
+Reference price: KRW 13490 (not a live offer)
+Brand: Himalaya; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+166915136-grapefruit | lipbalm | 멘소래담 립밤 립아이스 그레이프프루트 자몽 티 맨소래담 립케어, 3.5g, 1개
+Coupang family: https://www.coupang.com/vp/products/166915136
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%A9%98%EC%86%8C%EB%9E%98%EB%8B%B4%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/ff65/3e49fbc6f1e924b95c5f546482d5ece808c51bd7baec1c570be4920bb479.jpg
+Local unchanged image: /products/166915136-grapefruit.jpg
+SHA-256: 8807aa18066f6577f5393ec087918c8c20cf804c0625fe16ba0e909653fec8a4
+Reference price: KRW 4800 (not a live offer)
+Brand: Mentholatum / 멘소래담; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+4322127769-lemon-grapefruit | lipbalm | 멘소래담 립밤 립아이스 레몬 SPF 15 + 그레이프프루트 자몽 티 맨소래담 립케어, 1개, 립아이스 레몬 + 그레이프프루트 자몽 티, 3.5g
+Coupang family: https://www.coupang.com/vp/products/4322127769
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%A9%98%EC%86%8C%EB%9E%98%EB%8B%B4%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/0a5d/3f1efc47ace228eea16c2c70da31c35167c26aaa000d91940b04fcda91b1.jpg
+Local unchanged image: /products/4322127769-lemon-grapefruit.jpg
+SHA-256: ce282c470956b6e8001d1d35fa97f94887cc8290dc1286a7dc4edf12a6e77d4d
+Reference price: KRW 8000 (not a live offer)
+Brand: Mentholatum / 멘소래담; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7656224848-grapefruit-care | lipbalm | 바세린 립밤 립테라피 컬러 앤 케어 4.2g 2개, 고져스 그레이프프룻 케어
+Coupang family: https://www.coupang.com/vp/products/7656224848
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%B0%94%EC%84%B8%EB%A6%B0%20%EB%A6%BD%EB%B0%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/d58c/87df2621276b3068cc8578f5ba210f4904e9936212d10c816093dde093f6.png
+Local unchanged image: /products/7656224848-grapefruit-care.png
+SHA-256: 54909d798ebc52b4fc2f274b8491028ae6e8465036304757cdb2bd19f0fca13c
+Reference price: KRW 26600 (not a live offer)
+Brand: Vaseline; seller identity unverified.
+Try-on: The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+8321792986-redbrity | lipstick | 미샤 아트 루즈 글램 립스틱, 1개, 레드브리티
+Coupang family: https://www.coupang.com/vp/products/8321792986
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%EB%A0%88%EB%93%9C%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/1025_amir_coupang_oct_80k/4ca6/3e464fb17b0a6ddf56b675fcc493cd207c698d211bce0e2cca5df10db02a.jpg
+Local unchanged image: /products/8321792986-redbrity.jpg
+SHA-256: 9f3ed069145de459a21a08821c348a974179258e496260019af3dd36681ca72f
+Reference price: KRW 10560 (not a live offer)
+Brand: MISSHA; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+1547725003-maple-red | lipstick | 미샤 데어 루즈 쉬어 슬릭 립스틱, 1개, 메이플 레드
+Coupang family: https://www.coupang.com/vp/products/1547725003
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%AF%B8%EC%83%A4%20%EB%A0%88%EB%93%9C%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/343993500754226-192fb044-fbf0-4968-81ca-ec3502519d1b.jpg
+Local unchanged image: /products/1547725003-maple-red.jpg
+SHA-256: 6c08ab19cbb34ce24136e8182640175adb15b1422b208aad26de64a60ecd0195
+Reference price: KRW 7900 (not a live offer)
+Brand: MISSHA; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+5376120420-relentlessly-red | lipstick | 맥 레트로 매트 립스틱, 1개, 릴렌트리슬리레드
+Coupang family: https://www.coupang.com/vp/products/5376120420
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%A7%A5%20%EB%A0%88%EB%93%9C%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/1025_amir_coupang_oct_80k/6890/764bf5367d4665fe83656c8207753421735c3aa2dd3d324530bc2da5950a.jpg
+Local unchanged image: /products/5376120420-relentlessly-red.jpg
+SHA-256: bd60131861829682d07f5493cc716ecaed9dfa3c7b35b8d2b81f2e92a8a88f9c
+Reference price: KRW 32300 (not a live offer)
+Brand: MAC; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7925244997-russian-red | lipstick | 맥 맥시멀 실키 매트 립스틱, 1개, 러시안 레드
+Coupang family: https://www.coupang.com/vp/products/7925244997
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%A7%A5%20%EB%A0%88%EB%93%9C%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2024/02/28/11/6/11ea252c-d5a0-4345-a366-f057b05918c3.jpg
+Local unchanged image: /products/7925244997-russian-red.jpg
+SHA-256: 6f52dbb7474d30a9d188e247b15a0a33a15fb46d45ccf5458251ff16941fd43a
+Reference price: KRW 32150 (not a live offer)
+Brand: MAC; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7925244997-red-rock | lipstick | 맥 맥시멀 실키 매트 립스틱, 1개, 레드 락
+Coupang family: https://www.coupang.com/vp/products/7925244997
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%A7%A5%20%EB%A0%88%EB%93%9C%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2024/02/28/11/1/28b83b7d-16ad-45aa-9b88-cf261b5e626f.jpg
+Local unchanged image: /products/7925244997-red-rock.jpg
+SHA-256: d9050ea08f60d5f01cf1500213b338bdb0fccbe95240747b6ab00c42a90c7520
+Reference price: KRW 32150 (not a live offer)
+Brand: MAC; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+8314847166-left-on-red | lipstick | 맥 맥시멀 슬릭 새틴 립스틱, 1개, 레프트 온 레드
+Coupang family: https://www.coupang.com/vp/products/8314847166
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%A7%A5%20%EB%A0%88%EB%93%9C%20%EB%A6%BD%EC%8A%A4%ED%8B%B1
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2024/08/29/16/8/5eaac797-dd52-4b12-a6e8-3154252e8398.png
+Local unchanged image: /products/8314847166-left-on-red.png
+SHA-256: 67a89fc665d7c7c6df8c41dcba76180f21e97aed7a47973494d09561d745dc5c
+Reference price: KRW 32150 (not a live offer)
+Brand: MAC; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7185725748-last-boss | lipstick | 케이트 립 몬스터, 1개, 07호라스트보스
+Coupang family: https://www.coupang.com/vp/products/7185725748
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%BC%80%EC%9D%B4%ED%8A%B8%20%EB%A6%BD%EB%AA%AC%EC%8A%A4%ED%84%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/218998327554637-0119333b-d4a4-4701-91ad-66c1d981abc4.jpg
+Local unchanged image: /products/7185725748-last-boss.jpg
+SHA-256: 86eef15336ec72120aaac40963921d20a04dd20d8c1d4a1bc5e29368076a6e27
+Reference price: KRW 19920 (not a live offer)
+Brand: KATE; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7185725748-ruby-bow | lipstick | 케이트 립 몬스터 립스틱, 1개, 12호루비보우
+Coupang family: https://www.coupang.com/vp/products/7185725748
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%BC%80%EC%9D%B4%ED%8A%B8%20%EB%A6%BD%EB%AA%AC%EC%8A%A4%ED%84%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/1340447294869180-6c3cccfa-b1fa-4494-ab71-7ef2d84f8d32.jpg
+Local unchanged image: /products/7185725748-ruby-bow.jpg
+SHA-256: 3433fb59a06b3d6ffb3dae0ac5ca35c2bf6254abfe0ca192a9bcd1225198a231
+Reference price: KRW 19920 (not a live offer)
+Brand: KATE; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+9514031816 | glasses | 비아워게스트 레트로 인싸템 힙한 미노이 선글라스, 143 x 30 x 138 mm
+Coupang family: https://www.coupang.com/vp/products/9514031816
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/6b75/ce057687a798558bee75e810bb15d4438c756a2ce2f75ef5ef0c67e73ba0.jpg
+Local unchanged image: /products/9514031816.jpg
+SHA-256: 2772134af74e122d24515d4d0241f039737fdc6d162e9f0f54628b6c441b404a
+Reference price: KRW 5390 (not a live offer)
+Brand: BE OUR GUEST / 비아워게스트; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+8197877328 | glasses | GL1988 GLS 안경사가 만든 편광 자외선차단 스포츠 선글라스, 150 x 45 mm
+Coupang family: https://www.coupang.com/vp/products/8197877328
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/rs_quotation_api/l8byqrbl/28942f43818d43718582f08fd2dad7f1.png
+Local unchanged image: /products/8197877328.png
+SHA-256: 0c391617c988c06a1026b56edc911a4c6526222806a9c06e5b2b86bc5ee826c8
+Reference price: KRW 19800 (not a live offer)
+Brand: GL1988; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+6774150396 | glasses | 휠라 선글라스 FLS7402, 150 x 54 x 142mm
+Coupang family: https://www.coupang.com/vp/products/6774150396
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/147767780806839-48cc41bb-ada2-456e-93d1-5b1abc9cef8f.jpg
+Local unchanged image: /products/6774150396.jpg
+SHA-256: 2e5b74d3c825e86004410ed1578dce402fedf14bcf6e337df5014a4e1b6c95bf
+Reference price: KRW 25200 (not a live offer)
+Brand: FILA; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+8539057200 | glasses | 리끌로우 남녀공용 옐린 블랙 선글라스, FREE(146 x 154 x 41 mm)
+Coupang listing: https://www.coupang.com/vp/products/8539057200?itemId=24798781673&vendorItemId=91806510370
+Image/price source page: https://fallcent.com/product/MAX3dJhmCQlSxHaGbvO7dwFnBDKLYEzf/
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/rs_quotation_api/4jbx1des/42acc57adf0c4f99946eda6e66e419eb.jpg
+Local original: public/products/8539057200.jpg
+SHA-256: 0616dc644b7728d7318fab8581bfd3fae25cbe8e27679b5a575e5808c1e2c253
+Reference price (KRW): 23210
+Actual Coupang listing and pictured option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. Frontal black frame with pictured green lenses. Lens translucency is approximate; the preview does not demonstrate UV protection.
+
+6994027284 | sweater | 라파클럽 남녀공용 니트 가디건 면 100% 긴팔 스웨터, L
+Coupang family: https://www.coupang.com/vp/products/6994027284
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%82%A8%EB%85%80%EA%B3%B5%EC%9A%A9%20%EB%8B%88%ED%8A%B8
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/4d72/66eec7572550305e18d6f47051e3d050dc006438d528941265f5d308235a.jpg
+Local unchanged image: /products/6994027284.jpg
+SHA-256: 5980af3f05b75962f798bb5c74da1f3da04c0bbf8916b68aebfe84ddbc11b586
+Reference price: KRW 39800 (not a live offer)
+Brand: Lafa Club / 라파클럽; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7616878459 | sweater | 라파클럽 여성 라운드 꽈배기 니트 가디건 스웨터 면100%, M
+Coupang family: https://www.coupang.com/vp/products/7616878459
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%8B%88%ED%8A%B8
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/image_audit/stage/manual/f34add0899c65bd804d649dcc4c6185bad079e04f07ea8bc7973a5b41dd4_1791769681973.png
+Local unchanged image: /products/7616878459.jpg
+SHA-256: 59017f6ac8733bf15531fb57a4d0b92ba50d3c66ffb275025673591a159d1061
+Reference price: KRW 46800 (not a live offer)
+Brand: Lafa Club / 라파클럽; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7944769320 | sweater | 라파클럽 여성 소프트 니트 V넥 반팔 여름 스웨터, L
+Coupang family: https://www.coupang.com/vp/products/7944769320
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%8B%88%ED%8A%B8
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/2802/aea01adf0017736e15bcbbb266e81c5593f827de2b5ebc854c618e4d4c1f.jpg
+Local unchanged image: /products/7944769320.jpg
+SHA-256: 08e05ec0c73b8396f528573ee11fbbc3f93414b8cda57780bec67deb89c5dc7f
+Reference price: KRW 36800 (not a live offer)
+Brand: Lafa Club / 라파클럽; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+345674940 | sweater | 제니트 겨울 여성 루즈핏 도톰 폴라니트 겨울니트 터틀넥 니트 스웨터 겨울니트, FREE
+Coupang family: https://www.coupang.com/vp/products/345674940
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%8A%A4%EC%9B%A8%ED%84%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/0516/d1b540efe373268a4ceef4bf231febfd66bd8afe1fc9497a18022cdc5b39.jpg
+Local unchanged image: /products/345674940.jpg
+SHA-256: 6688275480627c1fd47a4c0f90fac39f6418b49e8c9cbf1566889cc02afd2709
+Reference price: KRW 24900 (not a live offer)
+Brand: JENIT / 제니트; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+6058070834 | sweater | 로코비전 남자 라운드 니트 오버핏 부드러운 스판 빅사이즈 스웨터, XL (115-120)
+Coupang family: https://www.coupang.com/vp/products/6058070834
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%82%A8%EC%9E%90%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%8B%88%ED%8A%B8
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/49da/cc9e65d45d1326bd944b994d46a6e5e19db7277d67e060e6acbfbc85dfee.jpg
+Local unchanged image: /products/6058070834.jpg
+SHA-256: 8f5cdae5f6a4ae23fff76268c364a0d2f00a626fa89c7dbd3eab2064cb848190
+Reference price: KRW 28410 (not a live offer)
+Brand: Rocovision / 로코비전; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7909385138 | sweater | 제로스트릿 여성용 솔리드 언발란스 오프숄더 스웨터, S
+Coupang family: https://www.coupang.com/vp/products/7909385138
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%8A%A4%EC%9B%A8%ED%84%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/bf96/ca97b2ad5994eb517b500165d58e6c23f8e12729a7c457dd01b1279d9da3.jpg
+Local unchanged image: /products/7909385138.jpg
+SHA-256: 824b2a98b63ac9de6d980fee7101adde3210271ccac9b057d579468de87502bf
+Reference price: KRW 78950 (not a live offer)
+Brand: ZERO STREET / 제로스트릿; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+8391704299 | hoodie | 챔피온 남녀공용 US Powerblend 스크립트 로고 러버 프린트 후드티, XL
+Coupang listing: https://www.coupang.com/vp/products/8391704299
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%B1%94%ED%94%BC%EC%98%A8%20%ED%9B%84%EB%93%9C%ED%8B%B0
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2024/10/11/15/2/3b0a6955-f907-482b-991d-292430375b34.jpg
+Local original: public/products/8391704299.jpg
+SHA-256: feb57304d8377c22a7e1c93c4f4bed23c53502384e4da6ec5f590a3bad98edad
+Reference price (KRW): 66920
+Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Exact product family verified from matching title in public indexed Coupang search linked to8391704299; linked item24257770727/vendor91274519180 is a search default, not independently confirmed XL gray. Family-level URL deliberately omits unverified option IDs. Photo, named XL option and66920reference price jointly sourced on Fallcent search result. Detail link currently missing; live price/stock not independently readable. No ratings/reviews copied or invented.
+
+8391704457 | hoodie | 챔피온 남녀공용 US Powerblend 스크립트 로고 자수 후드티, L
+Coupang family: https://www.coupang.com/vp/products/8391704457
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%B1%94%ED%94%BC%EC%98%A8%20%ED%9B%84%EB%93%9C%ED%8B%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2024/10/11/15/4/65276967-b714-4e14-a456-1988d0c91369.jpg
+Local unchanged image: /products/8391704457.jpg
+SHA-256: d45b955116dd428918297580aa1c19bf81a5094ad22fbab47af52efd62374cac
+Reference price: KRW 62970 (not a live offer)
+Brand: Champion; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7116023545 | hoodie | 챔피온 남녀공용 미들웨이트 후드 티셔츠 ​​T4177-549921, M
+Coupang family: https://www.coupang.com/vp/products/7116023545
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%B1%94%ED%94%BC%EC%98%A8%20%ED%9B%84%EB%93%9C%ED%8B%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/3608954837540312-57800451-eebe-4975-bb85-9546f81413e7.jpg
+Local unchanged image: /products/7116023545.jpg
+SHA-256: 9f787216cccf3228f3971dabc30dd7c48c315831421d989882b28e83962b80ef
+Reference price: KRW 24090 (not a live offer)
+Brand: Champion; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+8310483629-brown | tshirt | 유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, M
+Coupang listing: https://www.coupang.com/vp/products/8310483629
+Image/price source page: https://fallcent.com/product/0JJQpywf7vgeKnV983JAQUTaysZcYLCM/
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/e73e/c54b1e4b51c3e03eed60bb882c37c5bd1e9ea7f27f67ef20138425f26308.png
+Local original: public/products/8310483629-brown.png
+SHA-256: 3bcdb9cb6acb498a87b54ecc91b1aa99472fa651eb367da6e50e592a3462d837
+Reference price (KRW): 10900
+Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. The source page explicitly groups the brown M, olive XL and muted-blue L photos as options of the same United Athle 17-count model. The exact Korean model title matches indexed Coupang family 8310483629. Exact color/item IDs are not verified; select the matching pictured color and named size on Coupang. These are options of one product family, not separate sellers.
+
+8310483629-olive | tshirt | 유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, XL
+Coupang listing: https://www.coupang.com/vp/products/8310483629
+Image/price source page: https://fallcent.com/product/0JJQpywf7vgeKnV983JAQUTaysZcYLCM/
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/cf80/0095624db28d6117f9f8254fdc061ef0fbc0adc6fd77131a0fa47f3f7457.png
+Local original: public/products/8310483629-olive.png
+SHA-256: 5206ba02cbe860ea1b36a6779c570bdf2c29909ab09328998590ae92d291c102
+Reference price (KRW): 10900
+Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. The source page explicitly groups the brown M, olive XL and muted-blue L photos as options of the same United Athle 17-count model. The exact Korean model title matches indexed Coupang family 8310483629. Exact color/item IDs are not verified; select the matching pictured color and named size on Coupang. These are options of one product family, not separate sellers.
+
+8310483629-blue | tshirt | 유나이티드 애슬 남녀공용 17수 반팔 티셔츠 12color, L
+Coupang listing: https://www.coupang.com/vp/products/8310483629
+Image/price source page: https://fallcent.com/product/0JJQpywf7vgeKnV983JAQUTaysZcYLCM/
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/c8e8/c2bda9607af4ceb508f4024311d51682d2898a3c18d04735ea5ff5366edd.png
+Local original: public/products/8310483629-blue.png
+SHA-256: 1d50977fe346e46d8afba2934a7c0f38138aca4c2d6663c6dc824a50ed9e4025
+Reference price (KRW): 10900
+Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. The source page explicitly groups the brown M, olive XL and muted-blue L photos as options of the same United Athle 17-count model. The exact Korean model title matches indexed Coupang family 8310483629. Exact color/item IDs are not verified; select the matching pictured color and named size on Coupang. These are options of one product family, not separate sellers.
+
+5976056 | tshirt | 어반티 남여공용 기능성 쿨론 라운드 반팔티 냉감 무지 반팔 쿨 티셔츠, M
+Coupang family: https://www.coupang.com/vp/products/5976056
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%96%B4%EB%B0%98%ED%8B%B0%20%EB%B0%98%ED%8C%94%ED%8B%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/1684/9fc2bcc926dd657592b2a3d88245b554f94625f6dac28fb94abb4f804309.jpg
+Local unchanged image: /products/5976056.jpg
+SHA-256: 5fbc9c1da77911e20401ffe805229ac50e20df6d9ba9e34308026be3f8b64be7
+Reference price: KRW 9200 (not a live offer)
+Brand: Urban Tee / 어반티; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7835573890 | tshirt | 나이키 반팔티 NSW 클럽 숏 슬리브 티 스포츠웨어 반팔 티셔츠 라운드 면 숏슬리브 반팔티셔츠 남자 여자 트레이닝 스포츠 운동 데일리 반소매 나이키티 나이키반팔 나이키반팔티, 95(M)
+Coupang family: https://www.coupang.com/vp/products/7835573890
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%82%98%EC%9D%B4%ED%82%A4%20%EB%B0%98%ED%8C%94%ED%8B%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/0973/99ac1d8529990a727df3f42b53a643bf8e60ca67b59d75b95343624b0c45.png
+Local unchanged image: /products/7835573890.png
+SHA-256: 50c7bd068918f35f2ab04ca339c77dd7370516744f8230e7ee97c3eef90109af
+Reference price: KRW 18280 (not a live offer)
+Brand: NIKE; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+6015571890 | tshirt | 나이키 반팔티 아이콘 NSW 퓨추라 스우시 반팔 티셔츠 스포츠웨어 라운드 면 티 남자 여자 트레이닝 스포츠 운동 데일리 반소매 나이키티 나이키반팔 나이키반팔티, L(100)
+Coupang family: https://www.coupang.com/vp/products/6015571890
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%82%98%EC%9D%B4%ED%82%A4%20%EB%B0%98%ED%8C%94%ED%8B%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/2f7b/ab0e8944f586fab6318b3a0b0b1022942b38643cb8d0a4bb8609cf143b1b.png
+Local unchanged image: /products/6015571890.png
+SHA-256: a5a667349e5d13e150c993b89dd6e942bd7023350654a3e5eec70ce239f36099
+Reference price: KRW 19900 (not a live offer)
+Brand: NIKE; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7187298300 | tshirt | (남여공용) 챔피온 반팔 로고 그래픽 티셔츠 GT23H, M
+Coupang listing: https://www.coupang.com/vp/products/7187298300?itemId=18139243548&vendorItemId=85289794531
+Image/price source page: https://fallcent.com/product/ToOrJD0DuhHLzRlQwUv16gnmtb3B9jpG/
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/3e17/d1905bf760bc5348439ee8b80da20fbd494b5d4ac192ef5f8542a1e60668.jpg
+Local original: public/products/7187298300.jpg
+SHA-256: d44c6efd78850088b51fbb2796bce33a3e8a17f32570a1f39a5c226a00cf9feb
+Reference price (KRW): 16400
+Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Front-on light-gray garment photo visually inspected; source names size M but does not specify an official color name. Exact product, item and vendor IDs verified through source ordinary purchase redirect. Coupang destination returns 403, so live stock/current price cannot be independently confirmed. Price 16,400 KRW observed on Fallcent source; may change. No review data provided.
+
+7411084109 | tshirt | 챔피온 US 스크립트 로고 Powerblend 반팔티셔츠, 00S
+Coupang listing: https://www.coupang.com/vp/products/7411084109?itemId=19202293986&vendorItemId=86319613091
+Image/price source page: https://fallcent.com/product/pAZgm0PoeBmjkru59bhHDz6Q1fp2FsIL/
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2023/06/19/17/6/6520e4b8-5138-4914-ba7d-930c6c12df74.jpg
+Local original: public/products/7411084109.jpg
+SHA-256: f20d43b373bd0e69747d9a1967aa229a558db311a6b258dedf786f250237e600
+Reference price (KRW): 24300
+Original Coupang CDN photograph is stored unchanged. Price is an observed historical reference, not a live offer. Current stock, seller, price and selected option must be checked on Coupang. Color describes the source photograph; the official color label is unverified. Front-on charcoal garment photo visually inspected; source names size 00S but does not specify an official color name. Exact product, item and vendor IDs verified through source ordinary purchase redirect. Coupang destination returns 403, so live stock/current price cannot be independently confirmed. Price 24,300 KRW observed on Fallcent source; may change. No review data provided.
+
+8715669911 | tshirt | 아디다스 반팔티 아디컬러 3 스트라이프 삼선 클래식 3S 반팔 티셔츠 26SS 남녀공용 데일리, M
+Coupang family: https://www.coupang.com/vp/products/8715669911
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EC%95%84%EB%94%94%EB%8B%A4%EC%8A%A4%20%EB%B0%98%ED%8C%94%ED%8B%B0
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/b96e/400b1d97b2b9d811ca790cca553ff14fbaeda34f81b769a7ea68a4a21f93.jpg
+Local unchanged image: /products/8715669911.jpg
+SHA-256: a61c0f19b2b501f707f72707244ed8667a46770c8e33eca116d324968088defa
+Reference price: KRW 44100 (not a live offer)
+Brand: adidas; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7330605115 | chair | 듀오백 독서실 스터디의자 DK073B, 그레이
+Coupang family: https://www.coupang.com/vp/products/7330605115
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%93%80%EC%98%A4%EB%B0%B1%20%EC%9D%98%EC%9E%90
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/d00d/1e93a636fd79a96c855539a7b89e9b0ae5ba255820f44b2e2c8f6334f5cc.jpg
+Local unchanged image: /products/7330605115.jpg
+SHA-256: 52180648f8f7e2764b8b0805208dd37530d7849d089919ee59715ee5a1870b3a
+Reference price: KRW 168000 (not a live offer)
+Brand: Duoback / 듀오백; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7395651009 | chair | 듀오백 사무용 의자 DK073W, 그린
+Coupang family: https://www.coupang.com/vp/products/7395651009
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%93%80%EC%98%A4%EB%B0%B1%20%EC%9D%98%EC%9E%90
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/1278590551040429-07e8f8d5-8e9f-40ba-acdc-b4585ba63dc0.jpg
+Local unchanged image: /products/7395651009.jpg
+SHA-256: 30ae67e631db50b282ba66aa3b6d879fa517b345ac8da0dce235260f148b5b0c
+Reference price: KRW 130070 (not a live offer)
+Brand: Duoback / 듀오백; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+6908241889 | chair | 코멧 5단 각도조절 패브릭 좌식의자, 그레이
+Coupang listing: https://www.coupang.com/vp/products/6908241889?itemId=16639822845
+Image/price source page: https://fallcent.com/product/search/?keyword=%EC%A2%8C%EC%8B%9D%EC%9D%98%EC%9E%90
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/537881800080394-3a08e091-49c1-4977-a6dd-e43857e05b7c.jpg
+Local original: public/products/6908241889.jpg
+SHA-256: 09d5a7d5fa2e2a2cc4999ff1ab5b855bd86e616143e4df5f09d3c1127d34d711
+Reference price (KRW): 22990
+Actual Coupang listing and pictured gray option verified from the cited public source. Original CDN photo is stored unchanged. Price is a historical reference; current seller, availability and price must be checked on Coupang. This is one floor-level chair.
+
+15089160 | lamp | 듀플렉스 LED 데스크 스탠드 DP-910LS, 혼합색상
+Coupang family: https://www.coupang.com/vp/products/15089160
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%93%80%ED%94%8C%EB%A0%89%EC%8A%A4%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/390579403244292-b0b66277-82ea-4245-b67e-2eda6c439481.jpg
+Local unchanged image: /products/15089160.jpg
+SHA-256: 8ac59c08a72b944be66c300504a2a1c60b83532d34e328efffa3eb2aab4d248f
+Reference price: KRW 34020 (not a live offer)
+Brand: Duplex / 듀플렉스; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+2371639363 | lamp | 듀플렉스 LED 안티 블루라이트 데스크 스탠드 DP-140LS, 단일 색상
+Coupang family: https://www.coupang.com/vp/products/2371639363
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%93%80%ED%94%8C%EB%A0%89%EC%8A%A4%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/9254/7ed4dd942defc28dd13395caeaf3aa6e13ce4ffa7e5e80e70368d090abea.jpg
+Local unchanged image: /products/2371639363.jpg
+SHA-256: 79cdd9691c578c26ed19cef7778f2e6fa4ab3a194f82515f978157f2f8fd761e
+Reference price: KRW 18900 (not a live offer)
+Brand: Duplex / 듀플렉스; seller identity unverified.
+Try-on: The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+7915055185 | lamp | 브리츠 무선 LED 스탠드 BE-LED3BR, 화이트
+Coupang family: https://www.coupang.com/vp/products/7915055185
+Named option / reference price source: https://fallcent.com/product/search/?keyword=%EB%B8%8C%EB%A6%AC%EC%B8%A0%20%EC%8A%A4%ED%83%A0%EB%93%9C
+Original image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2024/08/09/11/5/ea11420b-6b95-421a-b05c-c286441ff608.jpg
+Local unchanged image: /products/7915055185.jpg
+SHA-256: 7ccdec16ef5c855816084278d072179ccb319ade4ad4786ced2015ece0a0897e
+Reference price: KRW 12500 (not a live offer)
+Brand: Britz / 브리츠; seller identity unverified.
+Try-on: Available as an approximate live preview.
+Evidence limitation: Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.
+
+REVIEW COVERAGE UPDATE — checked 2026-10-25
+Added short English translated paraphrases, AI-curated sample summaries and explicit listing-family scope. Public Timing pages were read directly; each new source links to the exact Coupang family ID. Dates and individual star ratings are copied from the selected sample metadata. Aggregate score 0.0 in the mirror is treated as missing, never a zero-star rating. Historical mirror counts are not live totals. No review texts, star ratings, seller identities or verified-purchase badges were invented.
+
+1814412512 | romand
+Review mirror: https://timing.im/product/jdAaFB2E55hnWdAyFHPqbfKlsoHQBSmfRtWKwA6MrOQ
+Verified family link: https://www.coupang.com/vp/products/1814412512?itemId=19167758246&vendorItemId=86286064988
+Paraphrased samples: 2025.05.17 / Shell Nude / Pink Sand, 2025.05.10 / Shell Nude, 2025.05.15 / Pink Sand
+Scope: options across the named family; exact selected option is not guaranteed.
+
+7322824636 | mac
+Review mirror: https://timing.im/product/0MXPXYUTLwa6HDpGwNy1Nurlc8YwD99YW0DFZyOymgs
+Verified family link: https://www.coupang.com/vp/products/7322824636?itemId=10082844317&vendorItemId=94286012683
+Paraphrased samples: 2025.04.08 / Mull It Over, 2025.02.27 / Mull It Over
+Scope: options across the named family; exact selected option is not guaranteed.
+
+7185725748 | kate
+Review mirror: https://timing.im/product/kzKbwHSR7RgpL8lwoMpf-ZJAnu4ULGcQGol7q6t7eN8
+Verified family link: https://www.coupang.com/vp/products/7185725748?itemId=18131895617&vendorItemId=86741105008
+Paraphrased samples: 2025.05.18 / 03 Hit Haze, 2025.05.02 / 02 Pink Banana
+Scope: options across the named family; exact selected option is not guaranteed.
+
+7612276799 | eyelab
+Review mirror: https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw
+Verified family link: https://www.coupang.com/vp/products/7612276799?itemId=20163776919&vendorItemId=87256176126
+Paraphrased samples: 2025.03.16 / Color not specified, 2024.11.01 / Color not specified, 2025.05.07 / Color not specified
+Scope: options across the named family; exact selected option is not guaranteed.
+
+6285676894 | hoodie
+Review mirror: https://timing.im/product/oZZ3c1BQ5_W8ZWZI_emBJzSv8ycKljyXut7AyxvC1k8
+Verified family link: https://www.coupang.com/vp/products/6285676894?itemId=12927099196&vendorItemId=90838343335
+Paraphrased samples: 2025.05.09 / Grey, M / S, 2025.03.18 / S, color not specified
+Scope: options across the named family; exact selected option is not guaranteed.
+
+6431292464 | tshirt
+Review mirror: https://timing.im/product/Pf35lm9P54EfBPQwH-D2b80KmpqONC5rMJXh4ylh3mw
+Verified family link: https://www.coupang.com/vp/products/6431292464?itemId=13881623490&vendorItemId=81131423497
+Paraphrased samples: 2023.08.22 / White, size not specified, 2023.03.26 / Two colors including grey, size not specified
+Scope: options across the named family; exact selected option is not guaranteed.
+
+8248027642 | misshagl
+Review mirror: https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8
+Verified family link: https://www.coupang.com/vp/products/8248027642?itemId=20623028083&vendorItemId=87697199698
+Paraphrased samples: 2025.04.25 / Pink Chuchu, 2025.03.21 / Baby Coral
+Scope: options across the named family; exact selected option is not guaranteed.
+
+1547725003 | misshadare
+Review mirror: https://timing.im/product/81Lj6vx-bqvzwa9VecV4_f3_jDfXFHIBoJaqbbmAytM
+Verified family link: https://www.coupang.com/vp/products/1547725003?itemId=19167556934&vendorItemId=86285869141
+Paraphrased samples: 2025.03.15 / All That Rose, 2025.02.03 / All That Rose
+Scope: options across the named family; exact selected option is not guaranteed.
+
+Existing mixed-shade Revlon sample is also exposed on Pink Velvet and Love That Pink, with an explicit family-wide scope note.
+Replacement furniture review coverage is unverified. The public matched Duoback DK073B mirror contained no written reviews. Duplex DP-310LS had no written reviews; the DP-910LS mirror found linked to a different retailer product ID and was not reused. Absence from these mirrors does not establish that Coupang has no reviews.

@@ -32,6 +32,7 @@
       this.onStatus = onStatus;
       this.running = false;
       this.mode = 'none';
+      this.modeSequence = 0;
       this.product = null;
       this.productPreview = null;
       this.productLoader = null;
@@ -140,7 +141,9 @@
 
     async setMode(mode) {
       if (!['none','makeup','glasses','clothes','desk'].includes(mode)) throw new Error('Unknown camera mode.');
+      const sequence = ++this.modeSequence;
       if(mode==='none'||(this.product&&this.product.category!==mode))await this.setProduct(null);
+      if(sequence!==this.modeSequence)return false;
       this.mode = mode;
       if(mode==='makeup'&&this.productPreview?.shadeColor)this.setOptions({color:this.productPreview.shadeColor});
       this.lastLandmarks = null;

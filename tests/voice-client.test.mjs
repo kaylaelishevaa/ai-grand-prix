@@ -36,11 +36,12 @@ function response(body, status = 200, headers = {}) {
 }
 function fixture(t, options = {}) {
   const timerDelays = [];
+  const timers = [];
   const context = {
     window: {isSecureContext: true, fetch: () => {throw Error('Unexpected real network');}},
     navigator: {}, document: {readyState: 'loading', addEventListener() {}},
-    setTimeout: (fn,ms)=>{timerDelays.push(ms);return setTimeout(fn,ms);}, clearTimeout, setInterval, clearInterval, AbortController,
-    MediaStream: class {}, Audio: class {}, console,
+    setTimeout: (fn,ms)=>{timerDelays.push(ms);const id=setTimeout(fn,ms);timers.push({fn,ms,id});return id;}, clearTimeout, setInterval, clearInterval, AbortController,
+    MediaStream: class {}, Audio: class {}, TextEncoder, console,
   };
   vm.createContext(context);
   vm.runInContext(source, context, {filename: 'public/voice-call.js'});
@@ -72,7 +73,7 @@ function fixture(t, options = {}) {
   }
   const mic = microphone();
   const audio = {srcObject: null, play: async () => {}, pause() {this.paused = true;}};
-  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], visionStates = [], captures = [];
+  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], checkouts = [], preferences = [], visionStates = [], captures = [], transcriptionStates = [];
   let permissions = 0;
   const voice = new context.window.NookVoiceSession({
     audio, PeerConnection: Peer, greeting: options.greeting,
@@ -80,6 +81,7 @@ function fixture(t, options = {}) {
       permissions++;
       assert.equal(constraints.video, false);
       assert.equal(constraints.audio.echoCancellation, true);
+      assert.equal(constraints.audio.channelCount.ideal, 1);
       return options.getUserMedia ? options.getUserMedia(permissions) : mic;
     }},
     fetch: async (url, params = {}) => {
@@ -100,16 +102,20 @@ function fixture(t, options = {}) {
     onVisionState: value => visionStates.push(value),
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
-    onRecommendations: (products, message) => recommendations.push({products, message}),
+    onTranscriptionState: value => transcriptionStates.push(value),
+    onRecommendations: (products, message, metadata) => recommendations.push({products, message, metadata}),
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return {ok:true,action,product_id:product_id || "324548922",purchased:false};},
+    onPreferences: options.preferencesUnavailable?undefined:async value=>{preferences.push(value);return options.onPreferences?options.onPreferences(value):{ok:true,saved:false,...(value.action==='skip'?{skipped:true}:{draft_ready:true})};},
+    onCheckout: options.checkoutUnavailable?undefined:async value=>{checkouts.push(value);return options.onCheckout?options.onCheckout(value):{ok:true,item_ids:['324548922']};},
   });
   t.after(() => voice.end());
   return {
-    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, timerDelays, visionStates, captures,
+    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, checkouts, preferences, timerDelays, visionStates, captures, transcriptionStates,
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
+    expireTimer(ms) {const timer=timers.findLast(timer=>timer.ms===ms);assert.ok(timer);clearTimeout(timer.id);timer.fn();},
   };
 }
 const countReplies = channel => channel.sent.filter(event => event.type === 'response.create').length;
@@ -140,6 +146,78 @@ test('explicit audio-only start, one greeting, mute, and end release all call re
   assert.equal(f.audio.srcObject, null);
   const end = f.calls.find(([url]) => url.endsWith('/end'));
   assert.deepEqual(JSON.parse(end[1].body), {call_id: 'call_mock'});
+});
+
+test('audio playback rejected after ending cannot restore the old call speaker prompt', async t => {
+  const f = fixture(t), playing = deferred(), blocked = [];
+  f.voice.options.onPlaybackBlocked = value => blocked.push(value);
+  f.audio.play = () => playing.promise;
+  await connect(f);
+  f.peers[0].emit('track', {streams: [{}]});
+  f.voice.end();
+  assert.deepEqual(blocked, [false]);
+  playing.reject(Error('Playback interrupted by ending the call'));
+  await tick();
+  assert.deepEqual(blocked, [false]);
+  assert.equal(f.audio.srcObject, null);
+});
+
+test('a previous call playback completion cannot dismiss a new call speaker prompt', async t => {
+  const f = fixture(t), playing = deferred(), blocked = [];
+  f.voice.options.onPlaybackBlocked = value => blocked.push(value);
+  f.audio.play = () => playing.promise;
+  await connect(f);
+  f.peers[0].emit('track', {streams: [{}]});
+  f.voice.end();
+  await connect(f);
+  f.audio.play = () => Promise.reject(Error('Playback requires a user gesture'));
+  f.peers[1].emit('track', {streams: [{}]});
+  await tick();
+  assert.deepEqual(blocked, [false, true]);
+  playing.resolve();
+  await tick();
+  assert.deepEqual(blocked, [false, true]);
+});
+
+test('resuming speaker audio cannot update a replacement call after the original ends', async t => {
+  const f = fixture(t), playing = deferred(), blocked = [];
+  f.voice.options.onPlaybackBlocked = value => blocked.push(value);
+  await connect(f);
+  f.audio.play = () => playing.promise;
+  const resuming = f.voice.resumeAudio();
+  f.voice.end();
+  await connect(f);
+  playing.resolve();
+  await resuming;
+  assert.deepEqual(blocked, [false]);
+});
+
+test('ending during local WebRTC setup prevents a stale connection state and server session', async t => {
+  const f = fixture(t), localDescription = deferred();
+  f.voice.PeerConnection.prototype.setLocalDescription = () => localDescription.promise;
+  const starting = f.voice.start();
+  await tick();
+  assert.equal(f.peers.length, 1);
+  f.voice.end();
+  const endedStates = f.states.length;
+  localDescription.resolve();
+  assert.equal(await starting, false);
+  assert.equal(f.states.length, endedStates);
+  assert.equal(f.calls.filter(([url]) => url.endsWith('/session')).length, 0);
+  assert.equal(f.mic.track.stops, 1);
+});
+
+test('ending during remote WebRTC setup cannot complete an ended call successfully', async t => {
+  const f = fixture(t), remoteDescription = deferred();
+  f.voice.PeerConnection.prototype.setRemoteDescription = () => remoteDescription.promise;
+  const starting = f.voice.start();
+  await tick();
+  assert.equal(f.calls.filter(([url]) => url.endsWith('/session')).length, 1);
+  f.voice.end();
+  remoteDescription.resolve();
+  assert.equal(await starting, false);
+  assert.equal(f.voice.call, null);
+  assert.equal(f.mic.track.stops, 1);
 });
 
 test('missing server configuration never prompts for a microphone', async t => {
@@ -196,6 +274,9 @@ test('multiple tools deduplicate across GA events and wait for response.done plu
   assert.equal(f.tryons.length, 1);
   assert.equal(f.recommendations.length, 1);
   assert.deepEqual(f.recommendations[0].products, catalogResult.products);
+  assert.equal(f.recommendations[0].metadata.sourceOnly,true);
+  assert.equal(f.recommendations[0].metadata.query,'rose lipstick');
+  assert.equal(f.recommendations[0].metadata.maxPrice,20000);
   assert.equal(toolOutputs(channel).length, 2);
   assert.equal(countReplies(channel), baseline + 1);
   const output = toolOutputs(channel).find(event => event.item.call_id === 'search-1');
@@ -246,6 +327,22 @@ test('ending during a product lookup aborts it and suppresses late UI or model u
   assert.equal(toolOutputs(channel).length, 0);
 });
 
+test('long spoken product requests respect the catalog search API query limit', async t => {
+  const f = fixture(t, {search: params => {
+    const query = JSON.parse(params.body).query;
+    return query.length <= 300 ? response({products: [], message: 'No matching catalog products'}) : response({error: 'Query is too long'}, 400);
+  }});
+  await connect(f);
+  f.emit({type: 'response.created', response: {id: 'r-long-search'}});
+  const item = tool(f, 'long-search', 'search_products', {query: 'pink lipstick '.repeat(30), category: 'makeup', max_price: 10000}, 'r-long-search');
+  done(f, 'r-long-search', [item]);
+  await tick();
+  const request = f.calls.find(([url]) => url.endsWith('/search'));
+  assert.equal(JSON.parse(request[1].body).query.length, 300);
+  assert.equal(f.recommendations.length, 1);
+  assert.equal(JSON.parse(toolOutputs(f.channel).find(event => event.item.call_id === 'long-search').item.output).message, 'No matching catalog products');
+});
+
 test('GA transcript events pass literal text, and typed input works after muting interrupted speech', async t => {
   const f = fixture(t);
   await connect(f);
@@ -255,7 +352,7 @@ test('GA transcript events pass literal text, and typed input works after muting
   f.emit({type: 'response.output_audio_transcript.delta', item_id: 'assistant-1', delta: 'A rose '});
   f.emit({type: 'response.output_audio_transcript.done', item_id: 'assistant-1', transcript: 'A rose lipstick.'});
   assert.equal(f.transcripts[0].text, '<img src=x onerror=alert(1)>');
-  assert.equal(f.transcripts[1].delta, 'A rose ');
+  assert.equal(f.transcripts[1].text, 'A rose ');
   assert.equal(f.transcripts[2].text, 'A rose lipstick.');
   f.emit({type: 'input_audio_buffer.speech_started'});
   f.voice.mute();
@@ -633,4 +730,472 @@ test('rejected camera create events free capacity without interrupting voice and
   acknowledgeImage(f,imageEvents(f.channel).at(-1));
   assert.equal(f.visionStates.at(-1).state,'received');
   assert.equal(call.visionSnapshots.size,1);
+});
+
+
+function latestTranscript(f) {
+  return [...new Map(f.transcripts.map(row=>[row.key,row])).values()].sort((a,b)=>a.order-b.order);
+}
+
+test('speech reserves its place before assistant output and late finals update the original turn',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u-first'});
+  assert.equal(f.transcripts.at(-1).pending,true);
+  f.emit({type:'conversation.item.input_audio_transcription.delta',event_id:'u-delta',item_id:'u-first',delta:'Find pink'});
+  assert.equal(f.transcripts.at(-1).text,'Find pink');
+  f.emit({type:'input_audio_buffer.committed',item_id:'u-first',previous_item_id:null});
+  f.emit({type:'response.created',response:{id:'r-first'}});
+  f.emit({type:'response.output_audio_transcript.delta',event_id:'a-delta',response_id:'r-first',item_id:'a-first',delta:'Here are pink options.'});
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u-second'});
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u-second',transcript:'Under 20000 won.'});
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u-first',transcript:'Find pink lipstick.'});
+  const rows=latestTranscript(f);
+  assert.deepEqual(rows.map(row=>row.key),['u-first','a-first','u-second']);
+  assert.equal(rows[0].text,'Find pink lipstick.');
+  assert.equal(rows[0].pending,false);
+});
+
+test('server predecessor repairs delayed committed ordering and duplicate or late deltas cannot repeat final text',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'response.output_audio_transcript.delta',event_id:'same-delta',item_id:'a',delta:'Hello'});
+  f.emit({type:'response.output_audio_transcript.delta',event_id:'same-delta',item_id:'a',delta:'Hello'});
+  f.emit({type:'conversation.item.added',previous_item_id:'u',item:{id:'a',type:'message',role:'assistant',content:[]}});
+  f.emit({type:'input_audio_buffer.committed',item_id:'u',previous_item_id:null});
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u',transcript:'Hi'});
+  f.emit({type:'response.output_audio_transcript.done',item_id:'a',transcript:'Hello there'});
+  f.emit({type:'response.output_audio_transcript.delta',event_id:'late-delta',item_id:'a',delta:' there'});
+  const rows=latestTranscript(f);
+  assert.deepEqual(rows.map(row=>row.key),['u','a']);
+  assert.equal(rows[1].text,'Hello there');assert.equal(rows[1].final,true);
+});
+
+test('response slots preserve an interrupted assistant turn even if its first transcript arrives after new speech',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u1'});
+  f.emit({type:'response.created',response:{id:'r1'}});
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u2'});
+  f.emit({type:'response.output_audio_transcript.delta',item_id:'a1',response_id:'r1',delta:'An option'});
+  assert.deepEqual(latestTranscript(f).map(row=>row.key),['u1','a1','u2']);
+});
+
+const uploadImage={dataUrl:'data:image/jpeg;base64,/9j/AA==',name:'desk.jpg',text:'Find a lamp for this desk'};
+test('explicit image waits for acknowledgement and enters the call independently of camera sharing',async t=>{
+  const f=fixture(t,{getVisionEnabled:()=>false});await connect(f);done(f,'greeting');await tick();
+  const baseline=countReplies(f.channel),sent=f.voice.sendImage(uploadImage);
+  const event=f.channel.sent.at(-1);
+  assert.equal(event.item.content[1].type,'input_image');
+  assert.equal(event.item.content[0].text,uploadImage.text);
+  assert.equal(f.transcripts.at(-1).delivery,'sending');
+  assert.equal(countReplies(f.channel),baseline);
+  f.emit({type:'conversation.item.added',item:event.item});
+  assert.equal(await sent,true);await tick();
+  assert.equal(f.transcripts.at(-1).delivery,'sent');
+  assert.equal(f.transcripts.at(-1).image.name,'desk.jpg');
+  assert.equal(countReplies(f.channel),baseline+1);
+  f.voice.clearCameraSnapshots();
+  assert.equal(f.channel.sent.some(item=>item.type==='conversation.item.delete'&&item.item_id===event.item.id),false);
+});
+
+test('invalid, oversized, disconnected, and congested image sends fail without a success row',async t=>{
+  const f=fixture(t);
+  await assert.rejects(f.voice.sendImage(uploadImage),/connected call/);
+  await connect(f);
+  const baseline=f.transcripts.length;
+  await assert.rejects(f.voice.sendImage({...uploadImage,dataUrl:'data:image/svg+xml;base64,PHN2Zz4='}),/JPEG or PNG/);
+  await assert.rejects(f.voice.sendImage({...uploadImage,dataUrl:'data:image/jpeg;base64,'+'A'.repeat(55000)}),/JPEG or PNG/);
+  f.channel.bufferedAmount=200000;await assert.rejects(f.voice.sendImage(uploadImage),/connection is busy/);
+  f.channel.bufferedAmount=0;f.peers[0].sctp={maxMessageSize:20};await assert.rejects(f.voice.sendImage(uploadImage),/too large/);
+  assert.equal(f.transcripts.length,baseline);
+});
+
+test('image rejection and disconnect reject pending uploads without requesting an invented reply',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const baseline=countReplies(f.channel),rejected=f.voice.sendImage(uploadImage),event=f.channel.sent.at(-1);
+  f.emit({type:'error',error:{event_id:event.event_id,message:'Invalid image'}});
+  await assert.rejects(rejected,/not accepted/);await tick();
+  assert.equal(f.transcripts.at(-1).delivery,'failed');
+  assert.equal(countReplies(f.channel),baseline);
+  const interrupted=f.voice.sendImage(uploadImage);const expected=assert.rejects(interrupted,/call ended/);
+  f.voice.end();await expected;
+});
+
+test('image acknowledgement queues one reply until an active model response completes',async t=>{
+  const f=fixture(t);await connect(f);f.emit({type:'response.created',response:{id:'active'}});
+  const baseline=countReplies(f.channel),sent=f.voice.sendImage(uploadImage),event=f.channel.sent.at(-1);
+  f.emit({type:'conversation.item.done',item:event.item});assert.equal(await sent,true);await tick();
+  assert.equal(countReplies(f.channel),baseline);
+  done(f,'active');await tick();assert.equal(countReplies(f.channel),baseline+1);
+  f.emit({type:'conversation.item.done',item:event.item});await tick();assert.equal(countReplies(f.channel),baseline+1);
+});
+
+
+test('long delayed hidden snapshot and tool predecessor chains preserve every visible turn',async t=>{
+  const f=fixture(t);await connect(f);
+  const ordered=['u1',...Array.from({length:10},(_,i)=>'hidden-'+(i+1)),'a1','u2',...Array.from({length:10},(_,i)=>'hidden-'+(i+11)),'a2'];
+  for(const key of ['u1','a1','u2','a2']) {
+    if(key.startsWith('u'))f.emit({type:'input_audio_buffer.speech_started',item_id:key});
+    else f.emit({type:'response.output_audio_transcript.delta',item_id:key,delta:key});
+    f.emit({type:key.startsWith('u')?'input_audio_buffer.committed':'conversation.item.added',item_id:key,previous_item_id:key==='u1'?null:ordered[ordered.indexOf(key)-1],...(key.startsWith('a')?{item:{id:key,type:'message',role:'assistant',content:[]}}:{})});
+  }
+  for(const [index,key] of ordered.filter(key=>key.startsWith('hidden-')).reverse().entries()) {
+    const item=index%2?{id:key,type:'function_call_output',call_id:'tool-'+index,output:'{}'}:{id:key,type:'message',role:'user',content:[{type:'input_image',image_url:'data:image/jpeg;base64,/9j/AA=='}]};
+    f.emit({type:'conversation.item.added',previous_item_id:ordered[ordered.indexOf(key)-1],item});
+  }
+  for(const key of ['u2','u1'])f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:key,transcript:key+' final'});
+  assert.deepEqual(latestTranscript(f).map(row=>row.key),['u1','a1','u2','a2']);
+  assert.deepEqual(Array.from(f.voice.call.timeline).filter(key=>ordered.includes(key)),ordered);
+});
+
+test('hidden frames and function output during interruption never displace a pending human transcript behind its reply',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u1'});
+  f.emit({type:'conversation.item.added',previous_item_id:null,item:{id:'frame1',type:'message',role:'user',content:[{type:'input_image'}]}});
+  f.emit({type:'input_audio_buffer.committed',item_id:'u1',previous_item_id:'frame1'});
+  f.emit({type:'response.created',response:{id:'r1'}});
+  f.emit({type:'conversation.item.added',previous_item_id:'u1',item:{id:'lookup',type:'function_call',name:'search_products'}});
+  f.emit({type:'conversation.item.added',previous_item_id:'lookup',item:{id:'result',type:'function_call_output',output:'{}'}});
+  f.emit({type:'response.created',response:{id:'r2'}});
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'u2'});
+  f.emit({type:'response.output_audio_transcript.delta',response_id:'r2',item_id:'a1',delta:'Here are options'});
+  f.emit({type:'conversation.item.added',previous_item_id:'result',item:{id:'a1',type:'message',role:'assistant',content:[]}});
+  f.emit({type:'conversation.item.added',previous_item_id:'a1',item:{id:'frame2',type:'message',role:'user',content:[{type:'input_image'}]}});
+  f.emit({type:'input_audio_buffer.committed',item_id:'u2',previous_item_id:'frame2'});
+  f.emit({type:'response.created',response:{id:'r3'}});
+  f.emit({type:'response.output_audio_transcript.delta',response_id:'r3',item_id:'a2',delta:'A different style'});
+  assert.deepEqual(latestTranscript(f).map(row=>row.key),['u1','a1','u2','a2']);
+  assert.equal(latestTranscript(f).find(row=>row.key==='u2').pending,true);
+});
+
+test('checkout tools open one review for each explicit scope and never invoke a payment endpoint',async t=>{
+  const f=fixture(t);await connect(f);
+  for(const [index,scope] of ['selected','comparison','cart','products'].entries()) {
+    const args={scope,...(scope==='products'?{product_ids:['324548922','lamp-pink','324548922']}:{})};
+    const item=tool(f,'checkout-'+index,'start_checkout',args,'r-checkout-'+index);
+    done(f,'r-checkout-'+index,[item]);await tick();
+    // Repeated completion events must not open a second review.
+    done(f,'r-checkout-'+index,[item]);await tick();
+  }
+  assert.equal(f.checkouts.length,4);
+  assert.deepEqual(f.checkouts.map(value=>value.scope),['selected','comparison','cart','products']);
+  assert.deepEqual(JSON.parse(JSON.stringify(f.checkouts[3])),{scope:'products',productIds:['324548922','lamp-pink']});
+  assert.equal(f.checkouts[0].productIds,undefined);
+  assert.equal(toolOutputs(f.channel).length,4);
+  for(const event of toolOutputs(f.channel)) {
+    const result=JSON.parse(event.item.output);
+    assert.equal(result.ok,true);assert.equal(result.review_opened,true);
+    assert.equal(result.demo,true);assert.equal(result.payment_processed,false);
+    assert.match(result.instruction,/press the final payment button themselves/);
+    assert.match(result.instruction,/Do not announce completion until the application sends checkout_complete/);
+    assert.equal(result.order_placed,false);
+  }
+  assert.equal(f.calls.length,2);assert.equal(f.actions.length,0);
+});
+
+test('invalid checkout scopes, IDs, mixed selectors and payment commands never reach UI controls',async t=>{
+  const f=fixture(t);await connect(f);
+  const invalid=[{}, {scope:'pay'}, {scope:'all'}, {scope:'products'}, {scope:'products',product_ids:[]},
+    {scope:'products',product_ids:['https://attacker.test']}, {scope:'products',product_ids:[4]},
+    {scope:'products',product_ids:['x'.repeat(81)]}, {scope:'products',product_ids:['a\nb']}, {scope:'products',product_ids:['a\n']},
+    {scope:'products',product_ids:Array.from({length:11},(_,i)=>String(i))},
+    {scope:'selected',product_ids:['324548922']}, {scope:'cart',confirm:true}, {scope:'cart',payment:'charge'}];
+  const items=invalid.map((args,i)=>tool(f,'invalid-checkout-'+i,'start_checkout',args,'r-checkout-invalid'));
+  items.push(tool(f,'automatic-pay','confirm_payment',{},'r-checkout-invalid'));
+  done(f,'r-checkout-invalid',items);await tick();
+  assert.equal(f.checkouts.length,0);
+  assert.equal(toolOutputs(f.channel).length,items.length);
+  assert(toolOutputs(f.channel).every(event=>JSON.parse(event.item.output).ok===false));
+});
+
+test('checkout callback failures, missing controls and invalid success results remain failures',async t=>{
+  for(const settings of [{checkoutUnavailable:true},{onCheckout:async()=>{throw Error('Selection changed.');}},
+    {onCheckout:async()=>({ok:false,error:'Your bag is empty.'})},{onCheckout:async()=>undefined},
+    {onCheckout:async()=>({ok:true,review_opened:false})},{onCheckout:async()=>({ok:true,payment_processed:true})},{onCheckout:async()=>({ok:true,demo:false})}]) {
+    const f=fixture(t,settings);await connect(f);
+    const item=tool(f,'checkout-failed','start_checkout',{scope:'cart'},'r-checkout-failed');
+    done(f,'r-checkout-failed',[item]);await tick();
+    const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);
+    assert.equal(result.ok,false);assert.notEqual(result.review_opened,true);
+    assert.match(result.instruction,/Do not invent/);
+  }
+});
+
+test('ending a call suppresses late checkout results and stale tools cannot open a review',async t=>{
+  const pending=deferred();const f=fixture(t,{onCheckout:()=>pending.promise});await connect(f);
+  const oldCall=f.voice.call,channel=f.channel;
+  const item=tool(f,'pending-checkout','start_checkout',{scope:'selected'},'r-checkout-pending');
+  done(f,'r-checkout-pending',[item]);
+  assert.equal(f.checkouts.length,1);
+  f.voice.end();
+  pending.resolve({ok:true});await tick();
+  assert.equal(toolOutputs(channel).length,0);
+  await f.voice._tool(oldCall,{call_id:'stale-checkout',name:'start_checkout',arguments:'{"scope":"cart"}'});
+  assert.equal(f.checkouts.length,1);
+});
+
+test('long UI context retains checkout state and exact cart and comparison IDs',async t=>{
+  const context={mode:'glasses',screen:'active',visible_panel:'comparison',cameraRunning:true,
+    cart_ids:['324548922','lamp-pink'],comparison_ids:['chair-black','chair-white'],
+    visible_product:{id:'lamp-pink',title:'long '.repeat(1000)},
+    checkout:{step:'review',item_ids:['lamp-pink'],reference_total:29000,demo:true},unused:'x'.repeat(6000)};
+  const f=fixture(t,{getContext:()=>context});await connect(f);
+  const greeting=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context,'));
+  const encoded=greeting.item.content[0].text.split('App context, not a spoken shopper request: ')[1].split('. The shopper answered')[0];
+  assert(encoded.length<=1600);
+  const decoded=JSON.parse(encoded);
+  assert.deepEqual(decoded.checkout,context.checkout);
+  assert.deepEqual(decoded.cart_ids,context.cart_ids);
+  assert.deepEqual(decoded.comparison_ids,context.comparison_ids);
+  assert.equal(decoded.visible_product.id,'lamp-pink');assert.equal(decoded.screen,'active');
+  assert.equal(decoded.visible_panel,'comparison');
+});
+
+test('oversized checkout context stays bounded without changing any exact product ID',async t=>{
+  const ids=Array.from({length:10},(_,i)=>String(i)+'x'.repeat(79));
+  const context={mode:'desk',screen:'comparison',cart_ids:ids,comparison_ids:ids.slice(0,3),
+    checkout:{step:'review',item_ids:ids,reference_total:900000,demo:true},unused:'x'.repeat(6000)};
+  const f=fixture(t,{getContext:()=>context});await connect(f);
+  const greeting=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context,'));
+  const encoded=greeting.item.content[0].text.split('App context, not a spoken shopper request: ')[1].split('. The shopper answered')[0];
+  assert(encoded.length<=1600);
+  const decoded=JSON.parse(encoded);
+  assert.equal(decoded.screen,'comparison');assert.equal(decoded.checkout.step,'review');
+  assert.equal(decoded.checkout.demo,true);assert.equal(decoded.checkout.reference_total,900000);
+  assert(decoded.cart_ids_truncated || decoded.comparison_ids_truncated || decoded.checkout.item_ids_truncated);
+  assert([...decoded.cart_ids,...decoded.comparison_ids,...decoded.checkout.item_ids].every(id=>ids.includes(id)));
+});
+
+test('final ASR wording survives late item snapshots and transient failure events',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'conversation.item.created',item:{id:'u-caption',type:'message',role:'user',content:[{type:'input_audio',transcript:'Coupon lip steak'}]}});
+  f.emit({type:'conversation.item.input_audio_transcription.delta',item_id:'u-caption',delta:'Coupang '});
+  f.emit({type:'conversation.item.input_audio_transcription.delta',item_id:'u-caption',delta:'lipstick'});
+  assert.equal(f.transcripts.at(-1).text,'Coupang lipstick');
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u-caption',transcript:'Coupang lipstick under 10,000 won.'});
+  f.emit({type:'conversation.item.done',item:{id:'u-caption',type:'message',role:'user',content:[{type:'input_audio',transcript:'Coupon lip steak'}]}});
+  f.emit({type:'conversation.item.input_audio_transcription.failed',item_id:'u-caption'});
+  assert.equal(f.transcripts.at(-1).text,'Coupang lipstick under 10,000 won.');
+  assert.equal(f.transcripts.at(-1).error,false);
+  assert.equal(f.transcripts.at(-1).final,true);
+});
+
+test('a recovered ASR completion clears the failed-caption marker without inventing a correction',async t=>{
+  const f=fixture(t);await connect(f);
+  f.emit({type:'conversation.item.input_audio_transcription.failed',item_id:'u-caption'});
+  assert.equal(f.transcripts.at(-1).error,true);
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'u-caption',transcript:'이 립밤 보여 주세요.'});
+  assert.equal(f.transcripts.at(-1).text,'이 립밤 보여 주세요.');
+  assert.equal(f.transcripts.at(-1).error,false);
+});
+
+test('a compatible-caption fallback is observable without disconnecting the call',async t=>{
+  const f=fixture(t,{sessionResponse:response('v=0\no=answer',200,{'x-coupi-transcription-model':'gpt-4o-mini-transcribe'})});
+  await connect(f);
+  assert.equal(f.voice.call.ready,true);
+  assert.equal(f.transcriptionStates.length,1);
+  assert.equal(f.transcriptionStates[0].model,'gpt-4o-mini-transcribe');
+  assert.equal(f.transcriptionStates[0].compatibilityMode,true);
+});
+
+const completedReceipt = (id='DEMO-ORDER-1') => ({
+  id, item_ids:['lip-pink'], items:[{id:'lip-pink',product:{id:'lip-pink',name:'Pink lip tint',privateNote:'not forwarded'},quantity:2,included:true,unitPrice:5000,lineTotal:10000}],
+  referenceTotal:10000,currency:'KRW',demo:true,payment_processed:false,order_placed:false,paymentMethod:'demo-card',privateNote:'not forwarded',
+});
+const checkoutMessages = channel => channel.sent.filter(event=>event.item?.id?.startsWith('coupi_checkout_'));
+const ackCheckout = (f,event) => f.emit({type:'conversation.item.added',item:event.item});
+
+test('default greeting asks what to buy without presenting categories',async t=>{
+  const f=fixture(t);await connect(f);
+  const greeting=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.includes('The shopper answered'));
+  assert.match(greeting.item.content[0].text,/Begin with this brief greeting: "What do you want to buy\?"/);
+  assert.doesNotMatch(greeting.item.content[0].text,/lipstick|glasses|desk lamp/);
+});
+
+test('confirmed checkout sends bounded system data, waits for ACK, and never fabricates shopper captions',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const before=countReplies(f.channel),captions=f.transcripts.length;
+  const suggestions=[{id:'lip-pink',name:'Already bought'},
+    {id:'glasses-1',name:'Round glasses',productType:'glasses',price:15000,description:'Do not forward me',image:'private image'},
+    {id:'glasses-1',name:'Duplicate'}, {id:'lamp-1',name:'Desk lamp',price:22000},
+    {id:'https://invalid',name:'Invalid'}, {id:'shirt-1',name:'T-shirt'}, {id:'hoodie-1',name:'Fourth suggestion'}];
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt(),suggestions),true);
+  const [event]=checkoutMessages(f.channel);
+  assert.equal(event.type,'conversation.item.create');assert.equal(event.item.role,'system');
+  const data=JSON.parse(event.item.content[0].text.split('\n')[1]);
+  assert.equal(data.event,'checkout_complete');
+  assert.deepEqual(data.receipt,{id:'DEMO-ORDER-1',items:[{id:'lip-pink',name:'Pink lip tint',quantity:2,subtotal:10000}],subtotal:10000,currency:'KRW',demo:true,payment_processed:false,order_placed:false});
+  assert.deepEqual(data.suggestions,[{id:'glasses-1',name:'Round glasses',productType:'glasses',reference_price:15000},{id:'lamp-1',name:'Desk lamp',reference_price:22000},{id:'shirt-1',name:'T-shirt'}]);
+  assert.doesNotMatch(JSON.stringify(data),/private|description|paymentMethod/);
+  await tick();assert.equal(countReplies(f.channel),before);
+  ackCheckout(f,event);await tick();
+  assert.equal(countReplies(f.channel),before+1);
+  assert.equal(f.transcripts.length,captions);
+  assert.equal(f.calls.length,2); // No payment or extra model HTTP endpoint.
+});
+
+test('purchase acknowledgment waits behind an active answer and duplicate receipt or ACK cannot repeat it',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  f.emit({type:'response.created',response:{id:'answer'}});
+  const before=countReplies(f.channel);
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),true);
+  const [event]=checkoutMessages(f.channel);ackCheckout(f,event);await tick();
+  assert.equal(countReplies(f.channel),before);
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),false);
+  assert.equal(checkoutMessages(f.channel).length,1);
+  done(f,'answer');await tick();assert.equal(countReplies(f.channel),before+1);
+  f.emit({type:'response.created',response:{id:'thanks'}});done(f,'thanks');
+  ackCheckout(f,event);f.emit({type:'conversation.item.done',item:event.item});await tick();
+  assert.equal(countReplies(f.channel),before+1);
+});
+
+test('purchase notifications reject incomplete, inconsistent, or real-payment claims',async t=>{
+  const f=fixture(t);assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),false);
+  await connect(f);done(f,'greeting');await tick();
+  const before=f.channel.sent.length;
+  for(const receipt of [null,{}, {...completedReceipt(),id:'bad receipt'}, {...completedReceipt(),id:'DEMO-ORDER-1\n'}, {...completedReceipt(),demo:false},
+    {...completedReceipt(),payment_processed:true}, {...completedReceipt(),order_placed:true},
+    {...completedReceipt(),referenceTotal:1}, {...completedReceipt(),currency:'USD'},
+    {...completedReceipt(),item_ids:['different-id']}, {...completedReceipt(),items:[]},
+    {...completedReceipt(),items:[{...completedReceipt().items[0],quantity:0}]},
+    {...completedReceipt(),items:[{...completedReceipt().items[0],product:{id:'different-id',name:'Other'}}]},
+    {...completedReceipt(),items:[{...completedReceipt().items[0],included:false}]}]) {
+    assert.equal(f.voice.notifyCheckoutComplete(receipt),false);
+  }
+  assert.equal(f.channel.sent.length,before);
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),true);
+});
+
+test('failed sends can retry but rejected or timed-out ACKs never schedule stale purchase speech',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const before=countReplies(f.channel),send=f.channel.send;
+  f.channel.send=()=>{throw Error('Disconnected transport');};
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),false);
+  f.channel.send=send;
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),true);
+  const rejected=checkoutMessages(f.channel).at(-1);
+  f.emit({type:'error',error:{event_id:rejected.event_id,code:'invalid_event',message:'Rejected'}});
+  ackCheckout(f,rejected);await tick();assert.equal(countReplies(f.channel),before);
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt('DEMO-ORDER-2')),true);
+  const expired=checkoutMessages(f.channel).at(-1);
+  f.expireTimer(12000);ackCheckout(f,expired);await tick();
+  assert.equal(countReplies(f.channel),before);
+  assert.equal(f.voice.call.checkoutNotifications.size,0);
+});
+
+test('ending a call discards pending purchase speech and reconnecting never reannounces the same receipt',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const oldChannel=f.channel,oldCall=f.voice.call;
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),true);
+  const event=checkoutMessages(oldChannel)[0],before=countReplies(oldChannel);
+  f.voice.end();
+  assert.equal(oldCall.checkoutNotifications.size,0);
+  oldChannel.emit('message',{data:JSON.stringify({type:'conversation.item.added',item:event.item})});
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt('DEMO-LATE')),false);
+  await tick();assert.equal(countReplies(oldChannel),before);
+  await connect(f);done(f,'greeting-new');await tick();
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt()),false);
+  f.emit({type:'conversation.item.added',item:event.item});await tick();
+  assert.equal(checkoutMessages(f.channel).length,0);assert.equal(countReplies(f.channel),1);
+});
+
+const purchaseContext = () => ({receipt_id:'DEMO-ORDER-1',item_ids:['lip-pink'],pairing_ids:['glasses-1','lamp-1'],demo:true,payment_processed:false,order_placed:false});
+const initialContext = f => JSON.parse(f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context,')).item.content[0].text.split('App context, not a spoken shopper request: ')[1].split('. The shopper answered')[0]);
+
+test('purchase context preserves exact pairing IDs while stripping unrelated data and invalid flags',async t=>{
+  const original={...purchaseContext(),pairing_ids:['glasses-1','lip-pink','glasses-1','bad id','lamp-1'],private_note:'not for model'};
+  const f=fixture(t,{getContext:()=>({last_purchase:original})});await connect(f);
+  assert.deepEqual(initialContext(f).last_purchase,{...purchaseContext(),pairing_ids_truncated:true});
+  assert.equal(original.pairing_ids.length,5);
+  f.voice.updateContext({last_purchase:{...original,payment_processed:true}});f.expireTimer(350);
+  const update=f.channel.sent.at(-1).item.content[0].text;
+  assert.match(update,/"last_purchase":null/);assert.doesNotMatch(update,/private_note/);
+});
+
+test('oversized purchase context keeps exact recent receipt and pairing references without inventing partial IDs',async t=>{
+  const items=Array.from({length:20},(_,i)=>String(i).padStart(2,'0')+'x'.repeat(78));
+  const pairings=Array.from({length:3},(_,i)=>'p'+i+'y'.repeat(78));
+  const last_purchase={...purchaseContext(),item_ids:items,pairing_ids:pairings};
+  const context={screen:'active',visible_panel:'call',cart_ids:items,comparison_ids:items.slice(0,3),
+    checkout:{step:'complete',item_ids:items,reference_total:900000,demo:true},last_purchase,unused:'x'.repeat(6000)};
+  const f=fixture(t,{getContext:()=>context});await connect(f);
+  const decoded=initialContext(f);
+  assert(JSON.stringify(decoded).length<=1600);
+  assert.equal(decoded.last_purchase.receipt_id,last_purchase.receipt_id);
+  assert.equal(decoded.last_purchase.demo,true);assert.equal(decoded.last_purchase.payment_processed,false);assert.equal(decoded.last_purchase.order_placed,false);
+  assert.equal(decoded.last_purchase.item_ids_truncated,true);
+  assert(decoded.last_purchase.item_ids.every(id=>items.includes(id)));
+  assert.deepEqual(decoded.last_purchase.pairing_ids,pairings);
+});
+
+test('checkout context updates around confirmation preserve the system event and schedule exactly one ACKed response',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');await tick();
+  const before=countReplies(f.channel);
+  f.voice.updateContext({checkout:{step:'complete'},last_purchase:purchaseContext(),cart_ids:[]});
+  assert.equal(f.voice.notifyCheckoutComplete(completedReceipt(),[{id:'glasses-1',name:'Round glasses'}]),true);
+  const notification=checkoutMessages(f.channel)[0];
+  f.voice.updateContext({checkout:{step:'complete'},last_purchase:purchaseContext(),visible_panel:'checkout'});
+  f.expireTimer(350);await tick();
+  assert.equal(checkoutMessages(f.channel).length,1);assert.equal(countReplies(f.channel),before);
+  assert.equal(f.channel.sent.some(event=>event.type==='conversation.item.delete'),false);
+  ackCheckout(f,notification);await tick();assert.equal(countReplies(f.channel),before+1);
+  f.emit({type:'response.created',response:{id:'purchase-thanks'}});done(f,'purchase-thanks');
+  f.voice.updateContext({checkout:{step:'idle'},last_purchase:purchaseContext(),visible_panel:'call'});
+  f.expireTimer(350);await tick();
+  assert.equal(countReplies(f.channel),before+1);assert.equal(checkoutMessages(f.channel).length,1);
+  assert.match(f.channel.sent.at(-1).item.content[0].text,/"pairing_ids":\["glasses-1","lamp-1"\]/);
+});
+
+const preferenceDraft=()=>({interests:['cozy_home','focused_work'],vibe:'calm',budget:30000,story:'I like reading at home and keeping my desk tidy.'});
+const personalizing=()=>({personalization:{active:true,draft_pending:false,preferences:null}});
+test('optional voice preferences open a confirmed draft without saving or inventing user captions',async t=>{
+  const f=fixture(t,{getContext:personalizing,greeting:'What do you enjoy in your free time?'});await connect(f);
+  const before=f.transcripts.length;
+  tool(f,'preferences-1','draft_preferences',preferenceDraft());await tick();
+  assert.equal(f.preferences.length,1);assert.equal(f.preferences[0].action,'draft');assert.deepEqual(JSON.parse(JSON.stringify(f.preferences[0].preferences)),preferenceDraft());
+  const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);
+  assert.equal(result.ok,true);assert.equal(result.draft_ready,true);assert.equal(result.confirmation_required,true);assert.equal(result.saved,false);
+  assert.match(result.instruction,/tap Save preferences/);assert.match(result.instruction,/same call stays connected/);assert.equal(f.transcripts.length,before);
+  tool(f,'preferences-1','draft_preferences',preferenceDraft());await tick();assert.equal(f.preferences.length,1,'duplicate tool event must not reopen review');
+});
+
+test('draft preferences require an active opt-in and reject unknown or malformed fields',async t=>{
+  const off=fixture(t);await connect(off);tool(off,'prefs-off','draft_preferences',preferenceDraft());await tick();assert.equal(off.preferences.length,0);assert.match(JSON.parse(toolOutputs(off.channel).at(-1).item.output).error,/not active/);
+  const f=fixture(t,{getContext:personalizing});await connect(f);
+  const invalid=[{...preferenceDraft(),age:20},{...preferenceDraft(),interests:['unsupported']},{...preferenceDraft(),vibe:'wealthy'},{...preferenceDraft(),budget:-1},{...preferenceDraft(),budget:1.5},{...preferenceDraft(),budget:'30000'},{...preferenceDraft(),story:'x'.repeat(1201)},{...preferenceDraft(),story:null},{interests:[],vibe:'mixed',budget:null,story:''}];
+  for(let i=0;i<invalid.length;i++){tool(f,'bad-prefs-'+i,'draft_preferences',invalid[i]);await tick();assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);}
+  assert.equal(f.preferences.length,0);
+});
+
+test('skip exits only opted-in personalization and cannot attach a hidden draft',async t=>{
+  let active=true;
+  const f=fixture(t,{getContext:()=>({personalization:{active}}),onPreferences:request=>{assert.equal(request.action,'skip');active=false;return {ok:true,skipped:true,saved:false};}});await connect(f);
+  tool(f,'skip-bad','skip_personalization',{story:'Save this anyway'});await tick();assert.equal(f.preferences.length,0);
+  tool(f,'skip-ok','skip_personalization',{});await tick();assert.equal(f.preferences.length,1);assert.equal(active,false);assert.equal(f.voice.call.ready,true);
+  const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);assert.equal(result.skipped,true);assert.equal(result.saved,false);assert.match(result.instruction,/Stop onboarding questions/);
+  tool(f,'draft-too-late','draft_preferences',preferenceDraft());await tick();assert.equal(f.preferences.length,1);assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);
+});
+
+test('preference UI failure and unexpected persistence are not reported as a successful draft',async t=>{
+  const variants=[{preferencesUnavailable:true},{onPreferences:()=>{throw Error('Review closed');}},{onPreferences:()=>({ok:true,draft_ready:false})},{onPreferences:()=>({ok:true,draft_ready:true,saved:true})}];
+  for(let i=0;i<variants.length;i++){const f=fixture(t,{...variants[i],getContext:personalizing});await connect(f);tool(f,'prefs-failure-'+i,'draft_preferences',preferenceDraft());await tick();assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);}
+});
+
+test('a late draft callback after call end emits neither success nor another response',async t=>{
+  const pending=deferred();const f=fixture(t,{getContext:personalizing,onPreferences:()=>pending.promise});await connect(f);
+  const channel=f.channel;tool(f,'prefs-pending','draft_preferences',preferenceDraft());await tick();assert.equal(f.preferences.length,1);
+  f.voice.end();const replies=countReplies(channel);pending.resolve({ok:true,draft_ready:true,saved:false});await tick();assert.equal(toolOutputs(channel).length,0);assert.equal(countReplies(channel),replies);
+});
+
+test('personalization context drops extra fields, preserves opt-in and compacts story before catalog IDs',async t=>{
+  const ids=Array.from({length:10},(_,i)=>'p'+i+'a'.repeat(78));
+  const input={personalization:{active:true,draft_pending:true,preferences:{...preferenceDraft(),story:'Long voluntary story. '.repeat(100),secret:'omit'},transcript:'omit'},cart_ids:ids,checkout:{step:'review',item_ids:ids,reference_total:100000,demo:true},unused:'x'.repeat(6000)};
+  const f=fixture(t,{getContext:()=>input});await connect(f);const decoded=initialContext(f);
+  assert(JSON.stringify(decoded).length<=1600);assert.equal(decoded.personalization.active,true);assert.equal(decoded.personalization.draft_pending,true);assert.deepEqual(decoded.personalization.preferences.interests,preferenceDraft().interests);
+  assert(decoded.personalization.preferences.story.length<=160);assert(!('secret' in decoded.personalization.preferences));assert(!('transcript' in decoded.personalization));assert(decoded.checkout.item_ids.every(id=>ids.includes(id)));assert.equal(input.personalization.preferences.secret,'omit');
+});
+
+test('skipping while a preference draft is pending cannot announce a stale review',async t=>{
+  let active=true;const pending=deferred();
+  const f=fixture(t,{getContext:()=>({personalization:{active}}),onPreferences:()=>pending.promise});await connect(f);
+  tool(f,'prefs-late-skip','draft_preferences',preferenceDraft());await tick();active=false;pending.resolve({ok:true,draft_ready:true,saved:false});await tick();
+  const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);assert.equal(result.ok,false);assert.match(result.error,/Personalization ended/);assert.equal(result.draft_ready,undefined);
 });

@@ -33,8 +33,7 @@ test('a fired swipe requires cooldown and neutral hand before another product ca
   d.reset(); // UI changing to another product must not bypass the lock.
   assert.ok(swipe(d,[.7,.56,.42],{start:300}).every(x=>x===null));
   d.update(null,700);d.update(null,900);
-  assert.ok(swipe(d,[.3,.42,.55],{start:1000}).every(x=>x===null));
-  assert.equal(swipe(d,[.3,.42,.55],{start:1500}).at(-1),'right');
+  assert.equal(swipe(d,[.3,.42,.55],{start:1000}).at(-1),'right');
 });
 test('lost, closed or low-confidence hands cannot bridge a swipe trajectory', () => {
   for(const neutral of [null,{x:.4,y:.5,open:false},{x:.4,y:.5,confidence:.2}]) {
@@ -64,13 +63,35 @@ test('stopping a pending model start closes the late model and never starts its 
   const start=gestures.start();await creating.promise;gestures.stop();pending.resolve({close(){closed++;}});
   assert.equal(await start,false);assert.equal(closed,1);assert.equal(gestures.running,false);assert.equal(scheduled.size,0);
 });
-test('landmark detection reuses video, skips inactive products and runs at most ten frames per second', async () => {
+test('landmark detection reuses video, skips inactive products and runs at most seventeen frames per second', async () => {
   const {NookHandGestures,scheduled}=setup();let detects=0,active=true,closed=0;
   const video={readyState:4,videoWidth:400,paused:false,currentTime:1};
   const gestures=new NookHandGestures({video,isEnabled:()=>active,runtimeLoader:async()=>({files:{},mod:{HandLandmarker:{createFromOptions:async()=>({detectForVideo(value){assert.equal(value,video);detects++;return {landmarks:[]};},close(){closed++;}})}}})});
   assert.equal(await gestures.start(),true);
   function frame(now){const [id,fn]=scheduled.entries().next().value;scheduled.delete(id);video.currentTime+=.02;fn(now);}
   for(let now=0;now<=220;now+=20)frame(now);
-  assert.equal(detects,3);active=false;frame(400);assert.equal(detects,3);
+  assert.equal(detects,4);active=false;frame(400);assert.equal(detects,4);
   gestures.stop();assert.equal(closed,1);assert.equal(scheduled.size,0);
+});
+
+test('short 12-percent motions trigger at 120ms without allowing stationary repeats', () => {
+  const d=new NookSwipeDetector();
+  assert.equal(swipe(d,[.4,.465,.53],{step:60}).at(-1),'right');
+  for(let time=180;time<1500;time+=60)assert.equal(d.update({x:.53,y:.5},time),null);
+  assert.equal(swipe(new NookSwipeDetector(),[.53,.465,.4],{step:60,mirror:true}).at(-1),'right');
+});
+test('moderate detection confidence allows a short swipe but low confidence resets it', () => {
+  const d=new NookSwipeDetector();
+  assert.equal(d.update({x:.4,y:.5,confidence:.57},0),null);
+  assert.equal(d.update({x:.465,y:.5,confidence:.57},60),null);
+  assert.equal(d.update({x:.53,y:.5,confidence:.57},120),'right');
+  const low=new NookSwipeDetector();
+  for(const [i,x] of [.4,.465,.53].entries())assert.equal(low.update({x,y:.5,confidence:.5},i*60),null);
+});
+test('neutral release does not bypass the shorter cooldown', () => {
+  const d=new NookSwipeDetector();
+  assert.equal(swipe(d,[.4,.465,.53],{step:60}).at(-1),'right');
+  d.update(null,180);d.update(null,360);
+  assert.ok(swipe(d,[.4,.465,.53],{start:420,step:60}).every(result=>result===null));
+  assert.equal(swipe(d,[.4,.465,.53],{start:800,step:60}).at(-1),'right');
 });

@@ -12,7 +12,7 @@
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "check": "node --check public/product-preview.js && node --check public/camera-engine.js && node --check public/camera-snapshots.js && node --check public/mobile-call.js && node --check public/mobile-call-state.js && node --check public/hand-gestures.js && node --check public/voice-call.js && node --check public/home.js && node --check public/coupi.js && node --check public/home-demo-data.js && node --check public/settings.js && node --test tests/*.test.mjs"
+    "check": "node --check public/call-conversation.js && node --check public/chat-images.js && node --check public/product-discovery.js && node --check public/product-evidence.js && node --check public/product-preview.js && node --check public/camera-engine.js && node --check public/camera-snapshots.js && node --check public/demo-checkout.js && node --check public/purchase-pairings.js && node --check public/cold-start.js && node --check public/call-personalization.js && node --check public/explore-worlds.js && node --check public/mobile-call.js && node --check public/mobile-call-state.js && node --check public/hand-gestures.js && node --check public/voice-call.js && node --check public/home.js && node --check public/coupi.js && node --check public/home-demo-data.js && node --check public/settings.js && node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
