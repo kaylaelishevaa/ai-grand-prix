@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import catalog from '../data/catalog.json' with {type:'json'};
 const html=readFileSync(new URL('../site-pages/camera.html',import.meta.url),'utf8');
 const stateSource=readFileSync(new URL('../public/mobile-call-state.js',import.meta.url),'utf8');
-const moduleSources=['product-discovery.js','call-conversation.js','product-evidence.js','demo-checkout.js','purchase-pairings.js'].map(name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8'));
+const moduleSources=['product-discovery.js','call-conversation.js','product-evidence.js','demo-checkout.js','purchase-pairings.js','cold-start.js','call-personalization.js'].map(name=>readFileSync(new URL('../public/'+name,import.meta.url),'utf8'));
 const source=readFileSync(new URL('../public/mobile-call.js',import.meta.url),'utf8');
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
 function deferred(){let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};}
@@ -39,7 +39,7 @@ function fixture(t,options={}){
     async setProduct(product){const token=++this.productGen;if(product&&options.productLoad)await options.productLoad(product);if(token!==this.productGen)return {ok:false,stale:true};this.product=product;return product?{ok:true,productId:product.id,kind:product.category==='makeup'?'lip':product.category==='clothes'?'garment':product.category==='glasses'?'glasses':'object',shadeColor:product.category==='makeup'?'#bc3c57':undefined,shadeEstimated:product.category==='makeup'}:{ok:true};}
   }
   class Voice {
-    constructor(opts){this.opts=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;this.uploads=[];this.sentTexts=[];this.mutes=0;this.purchases=[];}
+    constructor(opts){this.opts=opts;this.options=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;this.uploads=[];this.sentTexts=[];this.mutes=0;this.purchases=[];}
     async start(){sequence.push('voice');voiceStarts++;this.call={ready:true};this.opts.onState({state:'connected',muted:false,connectedAt:Date.now()});return true;}
     end(){this.ends++;this.call=null;this.opts.onState({state:'idle',muted:false,connectedAt:null});}
     updateContext(value){this.contexts.push(value);} mute(){this.mutes++;if(this.call){this.call.muted=!this.call.muted;this.opts.onState({state:'connected',muted:this.call.muted,connectedAt:Date.now()});}} sendText(value){this.sentTexts.push(value);return options.textSend?options.textSend(value):!!this.call;} async sendImage(value){this.uploads.push(value);return options.imageSend?await options.imageSend(value):!!this.call;} async resumeAudio(){}
@@ -49,7 +49,7 @@ function fixture(t,options={}){
   }
   class Snapshots {constructor(opts){this.opts=opts;}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
   class Hands {constructor(opts){gestureInstance=this;this.opts=opts;this.running=false;}async start(){this.running=true;}stop(){this.running=false;}reset(){}}
-  const context={window:{COUPANG_PRODUCTS:options.catalog||catalog,localStorage:options.storage||{getItem(){return null;},setItem(){}},requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,requestAnimationFrame:fn=>{fn();return 1;}};
+  const context={window:{location:{search:options.search||'',href:''},COUPANG_PRODUCTS:options.catalog||catalog,localStorage:options.storage||{getItem(){return null;},setItem(){}},requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,URLSearchParams,requestAnimationFrame:fn=>{fn();return 1;}};
   vm.createContext(context);vm.runInContext(stateSource,context);for(const moduleSource of moduleSources)vm.runInContext(moduleSource,context);vm.runInContext(source,context);
   const mobile=context.window.NookMobile;
   t.after(()=>nodes.get('end-call').onclick());
@@ -571,4 +571,37 @@ test('a delayed close event from the completed receipt cannot cancel its replace
   f.voice.opts.onCheckout({scope:'products',productIds:[suggestion.id]});for(const event of pending.splice(0))event();
   assert.equal(dialog.open,true);assert.equal(f.checkout.current.step,'review');assert.deepEqual(checkoutIds(f),[suggestion.id]);
   f.nodes.get('close-checkout').onclick();for(const event of pending.splice(0))event();assert.equal(f.checkout.current.step,'idle');
+});
+
+
+function profileStorage(){const data=new Map();return {getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value),removeItem:key=>data.delete(key),data};}
+const draftPrefs={interests:['focused_work','beauty_play'],vibe:'calm',budget:20000,story:'I enjoy reading and making my desk comfortable.'};
+test('personalization is opt-in and never blocks a direct shopping call',async t=>{
+  const storage=profileStorage(),f=fixture(t,{storage});assert.equal(f.personalization.active,false);assert.equal(f.voice.opts.getContext().personalization.active,false);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voice.opts.greeting,'What do you want to buy?');
+  assert.throws(()=>f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs}),/not active/);assert.equal(storage.data.size,0);
+});
+test('new-customer conversation drafts preferences but only the explicit Build button saves and opens worlds',async t=>{
+  const storage=profileStorage(),f=fixture(t,{storage,search:'?intent=personalize'});assert.equal(f.personalization.active,true);assert.equal(f.cameraStarts,0);assert.equal(storage.data.size,0);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voice.opts.greeting,'What do you enjoy doing in your free time?');
+  const result=f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs});assert.equal(result.saved,false);assert.equal(result.draft_ready,true);
+  assert.equal(f.nodes.get('personalization-dialog').open,true);assert.equal(f.voice.opts.getContext().personalization.draft_pending,true);assert.equal(storage.data.size,0);assert.equal(f.hands.opts.isEnabled(),false);
+  f.nodes.get('preference-story').value='I like cozy reading evenings.';f.nodes.get('personalization-save').onclick();
+  const profile=JSON.parse(storage.getItem('coupi.preferences.v1'));assert.equal(profile.story,'I like cozy reading evenings.');assert.equal(profile.completed,true);assert.equal(profile.budget,20000);
+  assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.context.window.location.href,'/explore');
+});
+test('Skip discards the draft, keeps the call active and never saves partial answers',async t=>{
+  const storage=profileStorage(),f=fixture(t,{storage,search:'?intent=personalize'});await f.nodes.get('answer-call').onclick();f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs});
+  f.nodes.get('personalization-skip').onclick();assert.equal(f.personalization.active,false);assert.equal(f.nodes.get('personalization-dialog').open,false);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);assert.equal(storage.data.size,0);
+  assert.throws(()=>f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs}),/not active/);
+});
+test('blocked local storage leaves preference review open and keeps the call connected',async t=>{
+  const storage={getItem(){return null;},setItem(){throw Error('blocked');},removeItem(){}};
+  const f=fixture(t,{storage,search:'?intent=personalize'});await f.nodes.get('answer-call').onclick();f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs});f.nodes.get('personalization-save').onclick();
+  assert.equal(f.nodes.get('personalization-dialog').open,true);assert.equal(f.nodes.get('personalization-error').hidden,false);assert.equal(f.voice.call.ready,true);assert.equal(f.context.window.location.href,'');
+});
+test('a saved world seeds a budget-filtered catalog but does not start a call or onboarding automatically',t=>{
+  const storage=profileStorage();storage.setItem('coupi.preferences.v1',JSON.stringify({version:1,completed:true,...draftPrefs}));
+  const f=fixture(t,{storage,search:'?world=desk-reset'});assert.equal(f.personalization.active,false);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);assert.equal(f.personalization.world.id,'desk-reset');
+  f.nodes.get('decline-call').onclick();assert.equal(f.cameraStarts,0);assert(f.store.queue.length>0);assert(f.store.queue.every(p=>p.price<=20000));assert.equal(f.voice.opts.getContext().personalization.preferences.story,draftPrefs.story);
 });

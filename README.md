@@ -92,6 +92,14 @@ Caption transcription is separate from the audio-native conversation model. The 
 
 Live previews preserve the original product pixels. Exact-photo silhouette masks remove chair floor shadows/gaps and clothing hangers, clean glasses lenses, and adjust tracking anchors after cropping. Thin frames and pale fabric are preserved instead of globally erasing white pixels. This is still an approximate 2D placement/fit preview.
 
+## Optional personalized start
+
+Open **Explore worlds** or **New here? Make your own worlds** on the call screen. New shoppers can answer three swipeable this-or-that prompts, write a short story, or choose **Talk with Coupi** for an optional conversation. They can skip every step and go directly to shopping.
+
+Quick picks and voice conversations both end in an editable review. Only **Build my worlds** saves the chosen interests, style, optional per-item budget and story in this browser. No camera images or conversation transcripts are saved to the profile. Explore then shows real catalog products grouped into worlds; style prioritizes matching catalog color tags, and the budget filters prices. Written stories provide context for later calls; interest choices determine world selection. Preferences can be edited or reset in Explore.
+
+The voice route is `/call?intent=personalize`. Coupi asks short lifestyle questions and uses `draft_preferences` to open review, without saving. **Skip to shopping** or a spoken shopping request exits discovery. Confirming Build ends the call and opens Explore. World cards link to `/call?world=<id>` and seed the matching catalog collection; they never start the camera or microphone automatically. Saved preferences are soft defaults, and an explicit new request takes priority.
+
 ## Demo checkout
 
 During a connected call, say **“buy this”** for the product being viewed, **“buy these products”** for an explicitly chosen comparison, or **“pay for my cart”** for all bag items. If the selection is unclear, Coupi asks which items you mean. You can also use **Buy this**, **Buy these products** in comparison, or **Review & checkout** in the bag without an API key.

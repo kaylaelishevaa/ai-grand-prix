@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/checkout.css">
   <link rel="stylesheet" href="/inline-collections.css">
   <link rel="stylesheet" href="/reviews-detail.css">
+  <link rel="stylesheet" href="/call-personalization.css">
 </head>
 <body class="coupi-call-page">
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -46,10 +47,11 @@
         <div class="incoming-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       </div>
       <div class="incoming-bottom">
-        <p class="incoming-promise">Let’s find your<br>kind of thing.</p>
+        <p id="incoming-promise" class="incoming-promise">Let’s find your<br>kind of thing.</p>
         <p id="incoming-status" class="incoming-status" role="status" hidden></p>
         <button id="answer-call" class="answer-call"><span class="answer-icon"><svg><use href="#i-video"/></svg></span><span>Start video call</span><svg class="answer-arrow"><use href="#i-arrow"/></svg></button>
         <button id="decline-call" class="decline-call">Browse instead</button>
+        <a id="personalization-entry" class="personalization-entry" href="/explore">New here? Make your own worlds →</a>
         <label class="vision-consent"><input id="vision-consent" type="checkbox" checked> Let Coupi see my camera</label><p class="privacy-note">Mic + camera snapshots go to OpenAI during the call.</p>
       </div>
     </section>
@@ -81,6 +83,7 @@
       <div id="product-empty" class="product-empty" hidden>Ask Coupi for a few more ideas.</div>
 
       <div class="conversation-area">
+        <div id="personalization-strip" class="personalization-strip" hidden><span>Getting to know you · optional</span><button id="personalization-skip">Skip to shopping</button></div>
         <div id="tryon-chip" class="tryon-chip" hidden><svg><use href="#i-spark"/></svg><span id="tryon-label">Trying it on</span><button id="clear-tryon" aria-label="Remove try-on overlay"><svg><use href="#i-close"/></svg></button></div>
         <section id="conversation-box" class="conversation-box" aria-label="Conversation">
           <div class="conversation-heading"><button id="chat-history-open" aria-label="Open conversation history">Conversation <span id="chat-count">0</span><span aria-hidden="true">↗</span></button><button id="chat-minimize" aria-label="Minimize conversation" aria-expanded="true">⌄</button></div>
@@ -135,6 +138,16 @@
     </nav>
     <div id="toast" class="toast" role="status" hidden></div>
     <audio id="voice-audio" autoplay></audio>
+    <dialog id="personalization-dialog" class="sheet-dialog personalization-dialog" aria-labelledby="personalization-title">
+      <div class="sheet-grip" aria-hidden="true"></div><p class="sheet-kicker">YOUR WORLD, YOUR CHOICE</p><h2 id="personalization-title">Does this feel like you?</h2>
+      <p class="personalization-note">Edit anything before we build your worlds.</p>
+      <div class="preference-form"><fieldset><legend>What you enjoy</legend><div id="preference-interests"></div></fieldset>
+        <label>Your style<select id="preference-vibe"><option value="mixed">A bit of both</option><option value="calm">Calm & simple</option><option value="bold">Colorful & bold</option></select></label>
+        <label>Budget per item, if you have one<input id="preference-budget" type="number" min="1" max="10000000" step="1" placeholder="No budget set"></label>
+        <label>Your story<textarea id="preference-story" maxlength="1200" placeholder="The little things you enjoy…"></textarea></label>
+      </div><p class="personalization-note">Saved only in this browser. Build my worlds ends this call and opens Explore. You can edit or clear these preferences there.</p>
+      <p id="personalization-error" class="personalization-error" role="alert" hidden></p><div class="personalization-actions"><button id="personalization-save" class="sheet-primary">Build my worlds →</button><button id="personalization-edit-later" class="sheet-secondary">Keep talking</button></div>
+    </dialog>
     <dialog id="cart-dialog" class="sheet-dialog" aria-labelledby="cart-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">THE GOOD FINDS</p><h2 id="cart-title">Your bag</h2></div><button id="close-cart" class="sheet-close" aria-label="Close bag"><svg><use href="#i-close"/></svg></button></header><div id="cart-items" class="cart-items"></div><button id="cart-checkout" class="sheet-primary checkout-wide" disabled>Review &amp; checkout</button><p class="sheet-note">Say “pay for my cart” to review these picks.</p></dialog>
     <dialog id="details-dialog" class="sheet-dialog" aria-labelledby="detail-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><p class="sheet-kicker">A CLOSER LOOK</p><button id="close-details" class="sheet-close" aria-label="Close product details"><svg><use href="#i-close"/></svg></button></header><div class="detail-product-heading"><img id="detail-image" class="detail-image" alt=""><div><h2 id="detail-title"></h2><button id="detail-review-shortcut" class="detail-review-shortcut">Ratings &amp; reviews ↓</button></div></div><div id="detail-reviews" class="detail-reviews"></div><div id="detail-body" class="detail-body"></div><p id="detail-preview-note" class="sheet-note"></p><div class="detail-tools"><button id="detail-compare" class="sheet-secondary">Compare</button><button id="detail-try" class="sheet-primary">Try this product</button><button id="detail-add" class="sheet-secondary">Add to bag</button><button id="detail-buy" class="sheet-primary">Buy this</button></div><div class="detail-actions"><button id="detail-ask" class="sheet-primary"><svg><use href="#i-mic"/></svg> Ask Coupi about it</button><a id="detail-link" class="sheet-secondary" target="_blank" rel="noopener noreferrer">View on Coupang <span>↗</span></a></div><p class="sheet-note">Check current price and availability on Coupang.</p></dialog>
     <dialog id="catalog-dialog" class="sheet-dialog catalog-dialog" aria-labelledby="catalog-title"><div class="sheet-grip" aria-hidden="true"></div><header class="sheet-heading"><div><p class="sheet-kicker">CURATED COUPANG PICKS</p><h2 id="catalog-title">Your picks.</h2></div><button id="close-catalog" class="sheet-close" aria-label="Close product catalog"><svg><use href="#i-close"/></svg></button></header><div class="catalog-tabs" role="group" aria-label="Product categories"><button id="type-lipstick">Lipstick</button><button id="type-lipbalm">Lip balm</button><button id="type-sweater">Sweaters</button><button id="type-chair">Chairs</button><button id="type-lamp">Lamps</button><button id="type-tshirt">T-shirts</button><button id="type-hoodie">Hoodies</button><button id="type-glasses">Glasses</button></div><div class="group-toolbar"><p id="catalog-group-label"></p><button id="catalog-save-group">Save collection</button></div><div id="catalog-items" class="catalog-items"></div><button id="catalog-more" class="sheet-secondary load-more">View more</button><p id="catalog-availability" class="sheet-note"></p><div class="catalog-bottom"><button id="catalog-next-style" class="sheet-secondary">Next collection →</button><button id="compare-open" class="sheet-primary" disabled>Compare <span id="compare-count">0</span></button></div><p class="sheet-note">Original listing photos. Approximate previews, not a fit guarantee.</p><a class="catalog-download" href="/product-catalog.csv" download="coupi-coupang-products.csv">Download product names &amp; links</a></dialog>
@@ -180,6 +193,8 @@
   <script src="/chat-images.js" defer></script>
   <script src="/demo-checkout.js" defer></script>
   <script src="/purchase-pairings.js" defer></script>
+  <script src="/cold-start.js" defer></script>
+  <script src="/call-personalization.js" defer></script>
   <script src="/mobile-call.js" defer></script>
 </body>
 </html>

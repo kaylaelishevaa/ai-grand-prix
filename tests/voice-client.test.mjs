@@ -73,7 +73,7 @@ function fixture(t, options = {}) {
   }
   const mic = microphone();
   const audio = {srcObject: null, play: async () => {}, pause() {this.paused = true;}};
-  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], checkouts = [], visionStates = [], captures = [], transcriptionStates = [];
+  const calls = [], transcripts = [], states = [], recommendations = [], tryons = [], actions = [], checkouts = [], preferences = [], visionStates = [], captures = [], transcriptionStates = [];
   let permissions = 0;
   const voice = new context.window.NookVoiceSession({
     audio, PeerConnection: Peer, greeting: options.greeting,
@@ -106,11 +106,12 @@ function fixture(t, options = {}) {
     onRecommendations: (products, message, metadata) => recommendations.push({products, message, metadata}),
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return {ok:true,action,product_id:product_id || "324548922",purchased:false};},
+    onPreferences: options.preferencesUnavailable?undefined:async value=>{preferences.push(value);return options.onPreferences?options.onPreferences(value):{ok:true,saved:false,...(value.action==='skip'?{skipped:true}:{draft_ready:true})};},
     onCheckout: options.checkoutUnavailable?undefined:async value=>{checkouts.push(value);return options.onCheckout?options.onCheckout(value):{ok:true,item_ids:['324548922']};},
   });
   t.after(() => voice.end());
   return {
-    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, checkouts, timerDelays, visionStates, captures, transcriptionStates,
+    voice, mic, audio, calls, transcripts, states, recommendations, tryons, peers, actions, checkouts, preferences, timerDelays, visionStates, captures, transcriptionStates,
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
@@ -1053,4 +1054,60 @@ test('checkout context updates around confirmation preserve the system event and
   f.expireTimer(350);await tick();
   assert.equal(countReplies(f.channel),before+1);assert.equal(checkoutMessages(f.channel).length,1);
   assert.match(f.channel.sent.at(-1).item.content[0].text,/"pairing_ids":\["glasses-1","lamp-1"\]/);
+});
+
+const preferenceDraft=()=>({interests:['cozy_home','focused_work'],vibe:'calm',budget:30000,story:'I like reading at home and keeping my desk tidy.'});
+const personalizing=()=>({personalization:{active:true,draft_pending:false,preferences:null}});
+test('optional voice preferences open a confirmed draft without saving or inventing user captions',async t=>{
+  const f=fixture(t,{getContext:personalizing,greeting:'What do you enjoy in your free time?'});await connect(f);
+  const before=f.transcripts.length;
+  tool(f,'preferences-1','draft_preferences',preferenceDraft());await tick();
+  assert.equal(f.preferences.length,1);assert.equal(f.preferences[0].action,'draft');assert.deepEqual(JSON.parse(JSON.stringify(f.preferences[0].preferences)),preferenceDraft());
+  const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);
+  assert.equal(result.ok,true);assert.equal(result.draft_ready,true);assert.equal(result.confirmation_required,true);assert.equal(result.saved,false);
+  assert.match(result.instruction,/tap Build my worlds/);assert.equal(f.transcripts.length,before);
+  tool(f,'preferences-1','draft_preferences',preferenceDraft());await tick();assert.equal(f.preferences.length,1,'duplicate tool event must not reopen review');
+});
+
+test('draft preferences require an active opt-in and reject unknown or malformed fields',async t=>{
+  const off=fixture(t);await connect(off);tool(off,'prefs-off','draft_preferences',preferenceDraft());await tick();assert.equal(off.preferences.length,0);assert.match(JSON.parse(toolOutputs(off.channel).at(-1).item.output).error,/not active/);
+  const f=fixture(t,{getContext:personalizing});await connect(f);
+  const invalid=[{...preferenceDraft(),age:20},{...preferenceDraft(),interests:['unsupported']},{...preferenceDraft(),vibe:'wealthy'},{...preferenceDraft(),budget:-1},{...preferenceDraft(),budget:1.5},{...preferenceDraft(),budget:'30000'},{...preferenceDraft(),story:'x'.repeat(1201)},{...preferenceDraft(),story:null},{interests:[],vibe:'mixed',budget:null,story:''}];
+  for(let i=0;i<invalid.length;i++){tool(f,'bad-prefs-'+i,'draft_preferences',invalid[i]);await tick();assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);}
+  assert.equal(f.preferences.length,0);
+});
+
+test('skip exits only opted-in personalization and cannot attach a hidden draft',async t=>{
+  let active=true;
+  const f=fixture(t,{getContext:()=>({personalization:{active}}),onPreferences:request=>{assert.equal(request.action,'skip');active=false;return {ok:true,skipped:true,saved:false};}});await connect(f);
+  tool(f,'skip-bad','skip_personalization',{story:'Save this anyway'});await tick();assert.equal(f.preferences.length,0);
+  tool(f,'skip-ok','skip_personalization',{});await tick();assert.equal(f.preferences.length,1);assert.equal(active,false);assert.equal(f.voice.call.ready,true);
+  const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);assert.equal(result.skipped,true);assert.equal(result.saved,false);assert.match(result.instruction,/Stop onboarding questions/);
+  tool(f,'draft-too-late','draft_preferences',preferenceDraft());await tick();assert.equal(f.preferences.length,1);assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);
+});
+
+test('preference UI failure and unexpected persistence are not reported as a successful draft',async t=>{
+  const variants=[{preferencesUnavailable:true},{onPreferences:()=>{throw Error('Review closed');}},{onPreferences:()=>({ok:true,draft_ready:false})},{onPreferences:()=>({ok:true,draft_ready:true,saved:true})}];
+  for(let i=0;i<variants.length;i++){const f=fixture(t,{...variants[i],getContext:personalizing});await connect(f);tool(f,'prefs-failure-'+i,'draft_preferences',preferenceDraft());await tick();assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);}
+});
+
+test('a late draft callback after call end emits neither success nor another response',async t=>{
+  const pending=deferred();const f=fixture(t,{getContext:personalizing,onPreferences:()=>pending.promise});await connect(f);
+  const channel=f.channel;tool(f,'prefs-pending','draft_preferences',preferenceDraft());await tick();assert.equal(f.preferences.length,1);
+  f.voice.end();const replies=countReplies(channel);pending.resolve({ok:true,draft_ready:true,saved:false});await tick();assert.equal(toolOutputs(channel).length,0);assert.equal(countReplies(channel),replies);
+});
+
+test('personalization context drops extra fields, preserves opt-in and compacts story before catalog IDs',async t=>{
+  const ids=Array.from({length:10},(_,i)=>'p'+i+'a'.repeat(78));
+  const input={personalization:{active:true,draft_pending:true,preferences:{...preferenceDraft(),story:'Long voluntary story. '.repeat(100),secret:'omit'},transcript:'omit'},cart_ids:ids,checkout:{step:'review',item_ids:ids,reference_total:100000,demo:true},unused:'x'.repeat(6000)};
+  const f=fixture(t,{getContext:()=>input});await connect(f);const decoded=initialContext(f);
+  assert(JSON.stringify(decoded).length<=1600);assert.equal(decoded.personalization.active,true);assert.equal(decoded.personalization.draft_pending,true);assert.deepEqual(decoded.personalization.preferences.interests,preferenceDraft().interests);
+  assert(decoded.personalization.preferences.story.length<=160);assert(!('secret' in decoded.personalization.preferences));assert(!('transcript' in decoded.personalization));assert(decoded.checkout.item_ids.every(id=>ids.includes(id)));assert.equal(input.personalization.preferences.secret,'omit');
+});
+
+test('skipping while a preference draft is pending cannot announce a stale review',async t=>{
+  let active=true;const pending=deferred();
+  const f=fixture(t,{getContext:()=>({personalization:{active}}),onPreferences:()=>pending.promise});await connect(f);
+  tool(f,'prefs-late-skip','draft_preferences',preferenceDraft());await tick();active=false;pending.resolve({ok:true,draft_ready:true,saved:false});await tick();
+  const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);assert.equal(result.ok,false);assert.match(result.error,/Personalization ended/);assert.equal(result.draft_ready,undefined);
 });
