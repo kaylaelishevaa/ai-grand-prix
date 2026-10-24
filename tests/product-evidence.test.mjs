@@ -25,8 +25,8 @@ test('ratings without written review evidence never present unsupported AI summa
 });
 test('sourced review samples display scoped AI summary, source links and translated paraphrase labels',()=>{
   const {renderReviews}=setup(),container=new Element('div');
-  renderReviews(container,{...product,reviewEvidence:{rating:4.5,reviewCount:120,sourceUrl:product.url,summaryKind:'ai-curated',summary:'This sample liked the color.',pros:['Color'],cons:['Wear'],scopeNote:'Across listing variants.',reviews:[{rating:5,text:'Color suited me.',date:'2026-01-01',translated:true,sourceUrl:product.url}]}});
-  assert.match(container.textContent,/AI review summary/);assert.match(container.textContent,/1 sourced review sample, not every review/);assert.match(container.textContent,/Translated paraphrase/);assert.match(container.textContent,/Across listing variants/);
+  renderReviews(container,{...product,reviewEvidence:{rating:4.5,reviewCount:120,sourceUrl:product.url,summaryKind:'ai-curated',summary:'This sample liked the color.',pros:['Color'],cons:['Wear'],scopeNote:'Across listing variants.',reviews:[{rating:5,text:'Color suited me.',date:'2026-01-01',variant:'Rose Pink',translated:true,sourceUrl:product.url}]}});
+  assert.match(container.textContent,/AI review summary/);assert.match(container.textContent,/1 sourced review sample, not every review/);assert.match(container.textContent,/Translated paraphrase/);assert.match(container.textContent,/Across listing variants/);assert.match(container.textContent,/Option: Rose Pink/);
   for(const link of flatten(container).filter(n=>n.tagName==='a')){assert.match(link.href,/^https:/);assert.equal(link.rel,'noopener noreferrer');}
 });
 test('unsafe source URLs and hostile review text cannot inject HTML or source unsupported ratings',()=>{
@@ -57,4 +57,13 @@ test('comparison limits columns to three, renders missing facts honestly, and di
   assert.match(container.textContent,/Written review evidence unavailable/);assert.match(container.textContent,/₩8,000 · historical/);
   const buttons=flatten(container).filter(n=>n.tagName==='button');buttons.find(n=>n.textContent==='Try it').onclick();buttons.find(n=>n.textContent==='Remove').onclick();
   assert.deepEqual(clicked,[['try','p-0'],['remove','p-0']]);
+});
+
+
+test('comparison does not offer an unavailable try-on while product details remain usable',()=>{
+  const {renderComparison}=setup(),container=new Element('div'),clicked=[];
+  renderComparison(container,[{...product,preview:{available:false}}],{onTry:p=>clicked.push(['try',p.id]),onDetails:p=>clicked.push(['details',p.id])});
+  const buttons=flatten(container).filter(n=>n.tagName==='button');const noPreview=buttons.find(n=>n.textContent==='No preview');
+  assert(noPreview);assert.equal(noPreview.disabled,true);assert.equal(noPreview.onclick,undefined);assert.equal(noPreview.attributes['aria-label'],'Preview unavailable for Lipstick');
+  buttons.find(n=>n.textContent==='Details').onclick();assert.deepEqual(clicked,[['details','lip-1']]);
 });

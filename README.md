@@ -53,7 +53,7 @@ Restart the server whenever you change environment variables. If an older `.dev.
 npm run dev
 ```
 
-Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Use the bottom navigation to open **Video call** (`/call`) or **Explore worlds** (`/explore`). Main (`/`) and Explore Worlds are intentionally empty shells for the next phase. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
+Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers two starting points: **Video call** (`/call`) for shopping and **Explore worlds** (`/explore`) for optional personalization. The bottom navigation connects all three pages. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
 
 This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
@@ -142,7 +142,7 @@ npm run build
 
 Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clothing fit, colour, physical scale, and room perspective are approximate. Checkout is a local simulation; no order is sent to Coupang and no payment is processed. There is no generated-photo workflow, live price/stock feed, or persistent shopping profile.
 
-- `site-pages/main.html`, `site-pages/explore.html`, `public/coupi-shell.css`: empty page shells and shared navigation.
+- `site-pages/main.html`, `site-pages/explore.html`, `public/coupi-shell.css`: main entry, personalized worlds page and shared navigation.
 - `site-pages/camera.html`, `public/mobile-call.*`, `public/coupi-call.css`: mobile call interface and Coupi theme.
 - `public/camera-engine.js`, `public/product-preview.js`: local tracking and product rendering.
 - `public/voice-call.js`, `lib/nook-voice.mjs`, `worker/index.ts`: Realtime connection, catalog tools, and server routes.

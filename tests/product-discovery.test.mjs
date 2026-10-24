@@ -70,6 +70,20 @@ test('blocked browser storage keeps collection usable in this session and report
   d.recommend([catalog[0]],{query:'pink lipstick'});const result=d.saveCollection();
   assert.equal(result.persisted,false);assert.equal(d.collections.length,1);assert.equal(d.restoreCollection(result.id).current.id,catalog[0].id);
 });
+test('explicit mixed worlds preserve their exact sourced items, title and selected product across save and reload',()=>{
+  const saved=storage(),d=setup(saved),seeds=[catalog[0],catalog.find(p=>p.id==='lamp'),catalog.find(p=>p.id==='optic')];
+  d.recommend(seeds,{mixed:true,sourceOnly:true,groupLabel:'Your cozy corner',maxPrice:10000});
+  assert.deepEqual(ids(d.products),['lip-0-pink','lamp']);assert.equal(d.label,'Your cozy corner');assert.equal(d.select('lamp').id,'lamp');
+  const record=d.saveCollection(),restored=setup(saved);restored.restoreCollection(record.id);
+  assert.deepEqual(ids(restored.products),['lip-0-pink','lamp']);assert.equal(restored.current.id,'lamp');assert.equal(restored.label,'Your cozy corner');
+  d.recommend(seeds,{mixed:true});assert(d.products.every(p=>p.productType==='lipstick'),'Mixed types require an explicit source-only group');
+});
+test('skipping a mixed world finds a related group for its selected product and retains its budget',()=>{
+  const products=[...catalog,{id:'chair',name:'Chair',productType:'chair',category:'desk',price:9000,tags:['chair']}],d=setup(storage(),products);
+  d.recommend([products[0],products.find(p=>p.id==='lamp')],{mixed:true,sourceOnly:true,groupLabel:'Your world',maxPrice:10000});d.select('lamp');
+  assert.equal(d.nextCollection().changed,true);assert.equal(d.productType,'chair');assert.deepEqual(ids(d.products),['chair']);assert.equal(d.label,'Chairs');assert.equal(d.maxPrice,10000);
+  d.recommend([products[0]],{productType:'lipstick',maxPrice:d.maxPrice});assert.equal(d.mixed,false);assert.equal(d.label,'Lipsticks');
+});
 test('comparison is explicit, limited to three compatible products, and independent of current browsing group',()=>{
   const d=setup();assert.equal(d.toggleCompare('lip-0-pink').ok,true);assert.equal(d.toggleCompare('optic').ok,false);
   assert.equal(d.toggleCompare('lip-1-pink').ok,true);assert.equal(d.toggleCompare('red-1').ok,true);assert.equal(d.toggleCompare('purple-1').ok,false);

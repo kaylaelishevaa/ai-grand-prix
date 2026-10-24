@@ -35,7 +35,7 @@ function fixture(t,options={}){
     setOptions(opts){Object.assign(this.options,opts);}
     async start(settings={}){sequence.push('camera');cameraStarts++;this.starts.push({...settings});const token=++this.gen;this.running=false;this.opts.onStatus('Opening camera','loading');if(options.cameraPermission)await options.cameraPermission(cameraStarts);const allowed=options.cameraStart?await options.cameraStart(settings,cameraStarts):true;if(token!==this.gen)return false;if(allowed===false){this.lastCameraError={message:'Requested camera is unavailable.'};return false;}this.actualFacingMode=options.actualFacingMode||settings.facingMode||'user';this.running=true;this.opts.onStatus('Live','success');return true;}
     stop(){this.gen++;this.productGen++;this.running=false;this.stops++;}
-    async setMode(mode){this.mode=mode;if(options.modelLoad)await options.modelLoad();}
+    async setMode(mode){if(mode==='none'||(this.product&&this.product.category!==mode))await this.setProduct(null);this.mode=mode;if(options.modelLoad)await options.modelLoad();}
     async setProduct(product){const token=++this.productGen;if(product&&options.productLoad)await options.productLoad(product);if(token!==this.productGen)return {ok:false,stale:true};this.product=product;return product?{ok:true,productId:product.id,kind:product.category==='makeup'?'lip':product.category==='clothes'?'garment':product.category==='glasses'?'glasses':'object',shadeColor:product.category==='makeup'?'#bc3c57':undefined,shadeEstimated:product.category==='makeup'}:{ok:true};}
   }
   class Voice {
@@ -604,4 +604,43 @@ test('a saved world seeds a budget-filtered catalog but does not start a call or
   const storage=profileStorage();storage.setItem('coupi.preferences.v1',JSON.stringify({version:1,completed:true,...draftPrefs}));
   const f=fixture(t,{storage,search:'?world=desk-reset'});assert.equal(f.personalization.active,false);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);assert.equal(f.personalization.world.id,'desk-reset');
   f.nodes.get('decline-call').onclick();assert.equal(f.cameraStarts,0);assert(f.store.queue.length>0);assert(f.store.queue.every(p=>p.price<=20000));assert.equal(f.voice.opts.getContext().personalization.preferences.story,draftPrefs.story);
+  assert.deepEqual(Array.from(f.store.queue,p=>p.id),Array.from(f.personalization.world.products,p=>p.id));assert.equal(f.discovery.label,f.personalization.world.title);
+});
+test('answering a world call preserves every listed product and category tabs leave the world group',async t=>{
+  const storage=profileStorage();storage.setItem('coupi.preferences.v1',JSON.stringify({version:1,completed:true,...draftPrefs}));
+  const f=fixture(t,{storage,search:'?world=desk-reset'});await f.nodes.get('answer-call').onclick();
+  assert.deepEqual(Array.from(f.store.queue,p=>p.id),Array.from(f.personalization.world.products,p=>p.id));
+  f.nodes.get('type-lipstick').onclick();assert.equal(f.discovery.mixed,false);assert(f.discovery.products.every(p=>p.productType==='lipstick'));assert.equal(f.discovery.maxPrice,20000);
+});
+
+test('changing the selected card cancels an earlier photo load before it can preview the wrong item',async t=>{
+  const wait=deferred();const f=fixture(t,{productLoad:()=>wait.promise});await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='glasses'));
+  const first=f.store.current,second=f.discovery.visible[1];const pending=f.nodes.get('product-try').onclick();await tick();
+  f.nodes.get('inline-items').children[1].children[0].onclick();assert.equal(f.store.current.id,second.id);
+  wait.resolve();await pending;await tick();
+  assert.equal(f.voice.opts.getContext().tried_product,null,'A finished old request must not overlay the previously selected product');
+  assert.equal(f.nodes.get('tryon-chip').hidden,true);assert.notEqual(f.camera.product?.id,first.id);
+});
+
+test('clearing comparison resets the inline product chips as well as the count',t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();
+  for(let i=0;i<2;i++)f.nodes.get('inline-items').children[i].children[1].children.find(b=>b.textContent==='Compare').onclick();
+  f.nodes.get('inline-compare').onclick();f.nodes.get('compare-clear').onclick();
+  assert.equal(f.discovery.comparison.length,0);assert.equal(f.nodes.get('inline-compare').disabled,true);
+  assert(f.nodes.get('inline-items').children.every(row=>row.children[1].children.find(b=>b.textContent==='Compare').getAttribute('aria-pressed')==='false'));
+});
+
+test('changing categories retains the current price limit and opening an empty result group does not replace its filters',t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lipstick'),'',{productType:'lipstick',maxPrice:10000});
+  f.nodes.get('inline-type-lamp').onclick();assert.equal(f.discovery.maxPrice,10000);assert(f.discovery.products.every(p=>p.price<=10000));
+  f.voice.opts.onRecommendations([],'',{productType:'lipstick',query:'purple lipstick',maxPrice:1,sourceOnly:true});
+  f.nodes.get('catalog-button').onclick();assert.equal(f.discovery.maxPrice,1);assert.equal(f.discovery.query,'purple lipstick');assert.equal(f.discovery.total,0);
+});
+
+test('Coupi can explain a saved bag item after the shopper browses to another category',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lipstick'));
+  const saved=f.store.current;await f.voice.opts.onProductAction('save',saved.id);f.nodes.get('inline-type-chair').onclick();
+  await f.voice.opts.onProductAction('details',saved.id);assert.equal(f.store.detailProduct.id,saved.id);assert.equal(f.nodes.get('details-dialog').open,true);
 });

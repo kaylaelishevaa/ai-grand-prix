@@ -29,36 +29,38 @@
   function choose(ids){
     const q=questions[step];if(q.kind==='vibe')draft.vibe=ids.length===2?'mixed':ids[0];
     else draft.interests=[...new Set([...draft.interests.filter(id=>!q.choices.some(c=>c.id===id)),...ids])];
-    renderStep();
+    renderStep(true,'card-'+ids[0]);
   }
   function next(){step++;renderStep();}
-  function renderStep(){
-    mode(true);root.replaceChildren();progress();if(step===3){renderFinal();return;}
+  function renderStep(preservePosition=false,focusKey=''){
+    const previousTop=scroll.scrollTop;
+    const restore=()=>{if(preservePosition){scroll.scrollTop=previousTop;if(focusKey)root.querySelector('[data-focus-key="'+focusKey+'"]')?.focus({preventScroll:true});}};
+    mode(true);root.replaceChildren();progress();if(step===3){renderFinal();restore();return;}
     const q=questions[step],title=el('h2','cold-question',q.title);title.id='cold-title';root.append(title,el('p','cold-question-note',q.note));
     const grid=el('div','cold-choice-grid');grid.setAttribute('role','group');grid.setAttribute('aria-label',q.title);
     for(const option of q.choices){
       const selected=q.kind==='vibe'?draft.vibe===option.id:draft.interests.includes(option.id);
-      const card=button('','cold-choice',event=>{if(Date.now()<suppressClickUntil){event.preventDefault();return;}choose([option.id]);});card.dataset.choice=option.id;card.dataset.selected=String(selected);card.setAttribute('aria-pressed',String(selected));
+      const card=button('','cold-choice',event=>{if(Date.now()<suppressClickUntil){event.preventDefault();return;}choose([option.id]);});card.dataset.choice=option.id;card.dataset.focusKey='card-'+option.id;card.dataset.selected=String(selected);card.setAttribute('aria-pressed',String(selected));
       const mark=el('span','cold-choice-mark',option.mark);mark.setAttribute('aria-hidden','true');card.append(mark,el('strong','',option.title),el('small','',option.note));if(selected){const check=el('span','cold-choice-check','✓');check.setAttribute('aria-hidden','true');card.append(check);}grid.append(card);
     }
     grid.onpointerdown=event=>{if(event.pointerType==='mouse'&&event.button!==0)return;gesture={id:event.pointerId,x:event.clientX,y:event.clientY};};
     grid.onpointerup=event=>{const start=gesture;gesture=null;if(!start||start.id!==event.pointerId)return;const x=event.clientX-start.x,y=event.clientY-start.y;if(Math.abs(x)<55||Math.abs(x)<Math.abs(y)*1.4)return;suppressClickUntil=Date.now()+400;event.preventDefault();choose([q.choices[x>0?1:0].id]);};
     grid.onpointercancel=()=>{gesture=null;};
     root.append(grid,el('p','cold-gesture-hint','← Left card · right card →'));
-    const alternatives=el('div','cold-both');alternatives.append(button('A bit of both','',()=>{choose(q.choices.map(c=>c.id));next();}),button('Skip this','',next));root.append(alternatives,button('Next →','cold-primary cold-next',next),link('Skip setup & start shopping','cold-skip','/call'));
+    const alternatives=el('div','cold-both');alternatives.append(button('A bit of both','',()=>{choose(q.choices.map(c=>c.id));next();}),button('Skip this','',next));root.append(alternatives,button('Next →','cold-primary cold-next',next),link('Skip setup & start shopping','cold-skip','/call'));restore();
   }
   function chipGroup(values,current,onChange){
-    const group=el('div','cold-interest-grid');for(const [id,label] of values){const chip=button(label,'cold-chip',()=>onChange(id));chip.setAttribute('aria-pressed',String(current.includes(id)));group.append(chip);}return group;
+    const group=el('div','cold-interest-grid');for(const [id,label] of values){const chip=button(label,'cold-chip',()=>onChange(id));chip.dataset.focusKey='choice-'+id;chip.setAttribute('aria-pressed',String(current.includes(id)));group.append(chip);}return group;
   }
   function renderFinal(){
     const title=el('h2','cold-final-question','What makes a day feel like you?');title.id='cold-title';root.append(title,el('p','cold-question-note','Keep the picks you like. Add a story if you want — a sentence is enough.'));
-    root.append(el('p','cold-section-label','A few things you enjoy'),chipGroup(Object.entries(preferences.interests),draft.interests,id=>{draft.interests=draft.interests.includes(id)?draft.interests.filter(x=>x!==id):[...draft.interests,id];renderStep();}));
-    root.append(el('p','cold-section-label','Your style'),chipGroup([['calm','Quiet & simple'],['bold','Playful'],['mixed','A little of both']],[draft.vibe],id=>{draft.vibe=id;renderStep();}));
+    root.append(el('p','cold-section-label','A few things you enjoy'),chipGroup(Object.entries(preferences.interests),draft.interests,id=>{draft.interests=draft.interests.includes(id)?draft.interests.filter(x=>x!==id):[...draft.interests,id];renderStep(true,'choice-'+id);}));
+    root.append(el('p','cold-section-label','Your style'),chipGroup([['calm','Quiet & simple'],['bold','Playful'],['mixed','A little of both']],[draft.vibe],id=>{draft.vibe=id;renderStep(true,'choice-'+id);}));
     const label=el('label','cold-section-label','Your story · optional');label.htmlFor='cold-story';const story=el('textarea','cold-story');story.id='cold-story';story.maxLength=1200;story.placeholder='I love slow weekends, reading at home, and finding easy outfits for work…';story.value=draft.story;
     const count=el('p','cold-story-count',`${draft.story.length} / 1200`);story.oninput=()=>{draft.story=story.value;count.textContent=`${story.value.length} / 1200`;};
     const hints=el('div','cold-story-hints');for(const [text,placeholder] of [['My weekends','What does a good weekend look like for you?'],['My hobbies','What do you love doing in your spare time?'],['My everyday','What part of your everyday routine would you like to make nicer?']])hints.append(button(text,'',()=>{story.placeholder=placeholder;story.focus();}));
     root.append(label,story,count,hints,el('p','cold-section-label','A comfortable price per item'));
-    const budget=el('div','cold-budget');for(const [value,label] of [[null,'Open to ideas'],[10000,'Up to ₩10,000'],[30000,'Up to ₩30,000'],[60000,'Up to ₩60,000']]){const chip=button(label,'cold-chip',()=>{draft.budget=value;renderStep();});chip.setAttribute('aria-pressed',String(draft.budget===value));budget.append(chip);}root.append(budget);
+    const budget=el('div','cold-budget');for(const [value,label] of [[null,'Open to ideas'],[10000,'Up to ₩10,000'],[30000,'Up to ₩30,000'],[60000,'Up to ₩60,000']]){const chip=button(label,'cold-chip',()=>{draft.budget=value;renderStep(true,'budget-'+(value??'none'));});chip.dataset.focusKey='budget-'+(value??'none');chip.setAttribute('aria-pressed',String(draft.budget===value));budget.append(chip);}root.append(budget);
     const status=el('p','cold-status');status.setAttribute('role','status');
     root.append(button('Build my worlds →','cold-primary cold-build',()=>{try{profile=preferences.save({...draft,completed:true});renderWorlds();}catch(error){status.textContent=error.message;}}),status,el('p','cold-privacy-left','Your choices and story will be saved on this device. Your worlds start from the interests and budget you choose; tell Coupi your story in a call for a more personal conversation.'),link('Skip setup & start shopping','cold-skip','/call'));
   }

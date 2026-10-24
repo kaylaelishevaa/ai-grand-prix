@@ -148,6 +148,78 @@ test('explicit audio-only start, one greeting, mute, and end release all call re
   assert.deepEqual(JSON.parse(end[1].body), {call_id: 'call_mock'});
 });
 
+test('audio playback rejected after ending cannot restore the old call speaker prompt', async t => {
+  const f = fixture(t), playing = deferred(), blocked = [];
+  f.voice.options.onPlaybackBlocked = value => blocked.push(value);
+  f.audio.play = () => playing.promise;
+  await connect(f);
+  f.peers[0].emit('track', {streams: [{}]});
+  f.voice.end();
+  assert.deepEqual(blocked, [false]);
+  playing.reject(Error('Playback interrupted by ending the call'));
+  await tick();
+  assert.deepEqual(blocked, [false]);
+  assert.equal(f.audio.srcObject, null);
+});
+
+test('a previous call playback completion cannot dismiss a new call speaker prompt', async t => {
+  const f = fixture(t), playing = deferred(), blocked = [];
+  f.voice.options.onPlaybackBlocked = value => blocked.push(value);
+  f.audio.play = () => playing.promise;
+  await connect(f);
+  f.peers[0].emit('track', {streams: [{}]});
+  f.voice.end();
+  await connect(f);
+  f.audio.play = () => Promise.reject(Error('Playback requires a user gesture'));
+  f.peers[1].emit('track', {streams: [{}]});
+  await tick();
+  assert.deepEqual(blocked, [false, true]);
+  playing.resolve();
+  await tick();
+  assert.deepEqual(blocked, [false, true]);
+});
+
+test('resuming speaker audio cannot update a replacement call after the original ends', async t => {
+  const f = fixture(t), playing = deferred(), blocked = [];
+  f.voice.options.onPlaybackBlocked = value => blocked.push(value);
+  await connect(f);
+  f.audio.play = () => playing.promise;
+  const resuming = f.voice.resumeAudio();
+  f.voice.end();
+  await connect(f);
+  playing.resolve();
+  await resuming;
+  assert.deepEqual(blocked, [false]);
+});
+
+test('ending during local WebRTC setup prevents a stale connection state and server session', async t => {
+  const f = fixture(t), localDescription = deferred();
+  f.voice.PeerConnection.prototype.setLocalDescription = () => localDescription.promise;
+  const starting = f.voice.start();
+  await tick();
+  assert.equal(f.peers.length, 1);
+  f.voice.end();
+  const endedStates = f.states.length;
+  localDescription.resolve();
+  assert.equal(await starting, false);
+  assert.equal(f.states.length, endedStates);
+  assert.equal(f.calls.filter(([url]) => url.endsWith('/session')).length, 0);
+  assert.equal(f.mic.track.stops, 1);
+});
+
+test('ending during remote WebRTC setup cannot complete an ended call successfully', async t => {
+  const f = fixture(t), remoteDescription = deferred();
+  f.voice.PeerConnection.prototype.setRemoteDescription = () => remoteDescription.promise;
+  const starting = f.voice.start();
+  await tick();
+  assert.equal(f.calls.filter(([url]) => url.endsWith('/session')).length, 1);
+  f.voice.end();
+  remoteDescription.resolve();
+  assert.equal(await starting, false);
+  assert.equal(f.voice.call, null);
+  assert.equal(f.mic.track.stops, 1);
+});
+
 test('missing server configuration never prompts for a microphone', async t => {
   const f = fixture(t, {ready: false});
   assert.equal(await f.voice.start(), false);
@@ -253,6 +325,22 @@ test('ending during a product lookup aborts it and suppresses late UI or model u
   await tick();
   assert.equal(f.recommendations.length, 0);
   assert.equal(toolOutputs(channel).length, 0);
+});
+
+test('long spoken product requests respect the catalog search API query limit', async t => {
+  const f = fixture(t, {search: params => {
+    const query = JSON.parse(params.body).query;
+    return query.length <= 300 ? response({products: [], message: 'No matching catalog products'}) : response({error: 'Query is too long'}, 400);
+  }});
+  await connect(f);
+  f.emit({type: 'response.created', response: {id: 'r-long-search'}});
+  const item = tool(f, 'long-search', 'search_products', {query: 'pink lipstick '.repeat(30), category: 'makeup', max_price: 10000}, 'r-long-search');
+  done(f, 'r-long-search', [item]);
+  await tick();
+  const request = f.calls.find(([url]) => url.endsWith('/search'));
+  assert.equal(JSON.parse(request[1].body).query.length, 300);
+  assert.equal(f.recommendations.length, 1);
+  assert.equal(JSON.parse(toolOutputs(f.channel).find(event => event.item.call_id === 'long-search').item.output).message, 'No matching catalog products');
 });
 
 test('GA transcript events pass literal text, and typed input works after muting interrupted speech', async t => {

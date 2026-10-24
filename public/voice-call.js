@@ -336,7 +336,7 @@
         peer.addEventListener('track',event=>{
           if(!this._current(c)) return;
           this.audio.srcObject = event.streams?.[0] || new MediaStream([event.track]);
-          this.audio.play().then(()=>this.options.onPlaybackBlocked?.(false)).catch(()=>this.options.onPlaybackBlocked?.(true));
+          this.audio.play().then(()=>{if(this._current(c))this.options.onPlaybackBlocked?.(false);}).catch(()=>{if(this._current(c))this.options.onPlaybackBlocked?.(true);});
         });
         peer.addEventListener('connectionstatechange',()=>{
           if(!this._current(c)) return;
@@ -358,6 +358,7 @@
         const offer=await peer.createOffer();
         if(!this._current(c))return false;
         await peer.setLocalDescription(offer);
+        if(!this._current(c))return false;
         this._state('connecting','Connecting to Coupi…');
         const response=await this.fetch('/api/voice/session',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/sdp'},body:offer.sdp,signal:c.abort.signal});
         c.callId=response.headers?.get('x-nook-call-id') || null;
@@ -372,7 +373,7 @@
         if(!this._current(c))return false;
         if(!sdp.startsWith('v='))throw new Error('The voice server returned an invalid connection response.');
         await peer.setRemoteDescription({type:'answer',sdp});
-        return true;
+        return this._current(c);
       } catch(error) {
         if(!this._current(c))return false;
         this._cleanup(c);
@@ -493,7 +494,7 @@
           result=snapshot?{ok:true,captured_at:snapshot.metadata?.capturedAt || null,contains_tryon_preview:snapshot.images.some(image=>image.kind==='tryon_preview'),info:'Fresh camera images were sent immediately before this tool result. Use the raw camera for the real scene. A separate try-on preview uses the selected listing photo or an estimated lipstick shade; it is not a physical object or a fit/scale/colour guarantee.'}:{ok:false,captured_at:null,contains_tryon_preview:false,info:'No fresh camera image could be shared. Camera sharing may be paused, the camera may not be ready, or the connection is busy. Do not claim to see the current scene; ask the shopper to enable camera sharing or describe it.'};
         } else if(event.name==='search_products') {
           this._state('searching','Finding matching Coupang listings…');
-          const query=typeof args.query==='string'?args.query.slice(0,400):'';
+          const query=typeof args.query==='string'?args.query.slice(0,300):'';
           const category=['makeup','clothes','desk','glasses','all'].includes(args.category)?args.category:'all';
           const max_price=args.max_price===null || args.max_price===undefined?null:Number(args.max_price);
           if(max_price!==null && (!Number.isFinite(max_price)||max_price<0))throw new Error('Budget must be a non-negative amount in won.');
@@ -625,7 +626,7 @@
       c.microphone?.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
       this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Microphone on. You can speak to Coupi.');return c.muted;
     }
-    async resumeAudio() {await this.audio.play();this.options.onPlaybackBlocked?.(false);}
+    async resumeAudio() {const c=this.call;if(!c)return;await this.audio.play();if(this._current(c))this.options.onPlaybackBlocked?.(false);}
   }
   window.NookVoiceSession=NookVoiceSession;
 

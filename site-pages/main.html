@@ -5,17 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#edf8fa">
   <meta name="description" content="Coupi — your shopping companion.">
-  <title>Main — Coupi</title>
+  <title>Coupi — Find your kind of thing</title>
   <link rel="icon" type="image/png" href="/assets/coupi.png">
   <link rel="stylesheet" href="/coupi-shell.css">
+  <link rel="stylesheet" href="/main-page.css">
 </head>
-<body class="coupi-shell">
+<body class="coupi-shell main-shell">
   <div id="phone-app" class="phone-app shell-frame">
     <header class="shell-header">
       <a class="shell-brand" href="/" aria-label="Coupi home"><img src="/assets/coupi.png" alt="" width="36" height="36"><span>coupi</span></a>
-      <h1>Main</h1>
+      <h1>Your shopping companion</h1>
     </header>
-    <main class="shell-content" aria-label="Main"></main>
+    <main class="shell-content main-content" aria-label="Main">
+      <div class="main-welcome"><div class="main-portrait"><img src="/assets/coupi.png" alt="Coupi" width="132" height="132"></div><p class="main-eyebrow">A LITTLE HELP, A GOOD FIND</p><h2>Good finds.<br>Your way.</h2><p>Talk it through. Try it on.<br>Find the little things that feel like you.</p></div>
+      <div class="main-paths">
+        <a class="main-path main-path-call" href="/call"><span class="main-path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg></span><span><strong>Find it with Coupi</strong><small>Have something in mind? Let’s talk.</small></span><span aria-hidden="true">↗</span></a>
+        <a class="main-path main-path-worlds" href="/explore"><span class="main-path-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c5 4 5 12 0 16-5-4-5-12 0-16Z"/></svg></span><span><strong>Explore your worlds</strong><small>A few picks. A more personal start.</small></span><span aria-hidden="true">↗</span></a>
+      </div><p class="main-footnote">Start wherever you are. Make it yours as you go.</p>
+    </main>
     <nav class="app-nav" aria-label="Main navigation">
       <a href="/" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Z"/><path d="M9 20v-7h6v7"/></svg><span>Main</span></a>
       <a href="/call"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="12" height="14" rx="4"/><path d="m15 9 6-3v12l-6-3"/></svg><span>Video call</span></a>

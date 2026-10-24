@@ -66,7 +66,7 @@
         top.append(node('strong','review-item-label',`Review ${index+1}`));
         if(typeof review.rating==='number'&&Number.isFinite(review.rating)&&review.rating>=0&&review.rating<=5)top.append(node('span','review-item-rating',`★ ${review.rating.toFixed(1)} / 5`));
         article.append(top);
-        const parts=[];if(text(review.date))parts.push(text(review.date));
+        const parts=[];if(text(review.variant))parts.push('Option: '+text(review.variant));if(text(review.date))parts.push(text(review.date));
         const kind=text(review.kind||review.format);
         parts.push(review.translated||/translat/i.test(kind)?'Translated paraphrase':/excerpt|quote/i.test(kind)?'Review excerpt':'Review paraphrase');
         article.append(node('p','review-text',review.text),node('p','review-meta',parts.join(' · ')));
@@ -113,7 +113,7 @@
     row('Review sample positives',p=>{const e=evidence(p);return e.reviews.length?list(e.raw.pros,'comparison-facts','No positive theme established.'):'Written review evidence unavailable';});
     row('Review sample concerns',p=>{const e=evidence(p);return e.reviews.length?list(e.raw.cons,'comparison-facts','No recurring concern established.'):'Written review evidence unavailable';});
     row('Evidence',p=>{const e=evidence(p),cell=node('div');if(text(e.raw.scopeNote))cell.append(node('p','review-scope',e.raw.scopeNote));if(e.reviews.length)cell.append(node('p','review-scope',`${e.reviews.length} sourced review ${e.reviews.length===1?'sample':'samples'}; not all reviews.`));appendSource(cell,e.url,'Review source ↗');appendSource(cell,p.url,'Coupang listing ↗');return cell;});
-    row('Take a closer look',p=>{const actions=node('div','comparison-actions');for(const [label,callback] of [['Details',onDetails],['Try it',onTry]])if(typeof callback==='function'){const button=node('button','',label);button.type='button';button.onclick=()=>callback(p);actions.append(button);}return actions;});
+    row('Take a closer look',p=>{const actions=node('div','comparison-actions');for(const [label,callback] of [['Details',onDetails],['Try it',onTry]])if(typeof callback==='function'){const unavailable=label==='Try it'&&p.preview?.available===false;const button=node('button','',unavailable?'No preview':label);button.type='button';button.disabled=unavailable;if(unavailable)button.setAttribute('aria-label','Preview unavailable for '+text(p.name));else button.onclick=()=>callback(p);actions.append(button);}return actions;});
     table.append(body);container.replaceChildren(table);return table;
   }
   window.CoupiEvidence={renderReviews,renderComparison,reviewStats};

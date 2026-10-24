@@ -104,6 +104,17 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.deepEqual(config.tools.map(t=>t.name),['search_products','set_tryon','product_action','start_checkout','draft_preferences','skip_personalization','look_at_camera']);
 });
 
+test('an already-cancelled voice request never opens an upstream session', async () => {
+  let calls = 0;
+  const handler = createVoiceHandler({fetchImpl: async () => {calls++;return new Response(answer);}});
+  const controller = new AbortController();
+  controller.abort();
+  const request = new Request(makeRequest('/api/voice/session', offer, 'application/sdp'), {signal: controller.signal});
+  const response = await handler(request, {OPENAI_API_KEY: 'test-only-private-key'});
+  assert.equal(calls, 0);
+  assert.equal(response.status, 502);
+});
+
 test('caption configuration keeps automatic language detection unless explicitly configured',()=>{
   const english=sessionConfiguration({OPENAI_TRANSCRIPTION_LANGUAGE:'en'}).audio.input.transcription;
   assert.equal(english.language,'en');

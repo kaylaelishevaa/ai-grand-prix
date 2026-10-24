@@ -20,3 +20,5 @@
 .review-empty{padding:10px 0 3px}.detail-reviews .review-empty-title{font-size:13px;font-weight:550;margin:0 0 5px;color:#456d75}
 .detail-review-shortcut{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border-radius:10px;background:#e1f1f3;color:#357882;font-size:11px;border:1px solid #d0e7eb;text-align:left}
 @media(max-width:370px){.detail-product-heading{gap:11px}.detail-product-heading #detail-title{font-size:15px}.detail-product-heading .detail-review-shortcut{padding:7px 9px;font-size:10px}.detail-reviews .review-panel{padding:14px}.detail-reviews .review-panel-heading h3{font-size:16px}.detail-reviews .review-pros-cons{grid-template-columns:1fr}.review-rating-value{font-size:25px}}
+
+.comparison-actions button:disabled{cursor:not-allowed;opacity:.5}
