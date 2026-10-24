@@ -1,0 +1,43 @@
+COUPANG PRODUCT SOURCES
+Retrieved through public web-search/open extraction on 2026-10-24 (Asia/Singapore).
+
+These are real product names, IDs, URLs, and public product-image references.
+The extraction tool reports historical crawl snapshots, not a live retail feed.
+The checkedAt field records research date, NOT a guarantee of current prices.
+Prices must be displayed as indexed/reference prices; stock/variant/delivery must
+be rechecked by the shopper on Coupang. Do not claim a scraper is running live.
+No login, CAPTCHA, access controls, or bot block were bypassed.
+
+1. MAKEUP
+https://www.coupang.com/vp/products/324548922
+Name: 메이블린 뉴욕 슈퍼스테이 립크레용 1.2g
+Product/item: 324548922 / 1038974600.
+Snapshot about 2 months old: 8,620 KRW, temporary out-of-stock.
+Type: cream/balm/stick, matte/mousse. Exact shade not established.
+Product image follows the page's Product image link.
+
+2. CLOTHES
+https://www.coupang.com/vp/products/5186051654?itemId=7187414418&vendorItemId=74479008393
+Name: 라파클럽 20수 남여공용 라운드 반팔티
+Product/item: 5186051654 / 7187414418.
+Snapshot about 4 months old: 22,800 KRW; 100% cotton; white colour family;
+short sleeves; basic fit. No verified dimensions or exact size.
+Product image follows the page's Product image link.
+Discovered through https://pages.coupang.com/p/86846 .
+
+3. DESK
+https://www.coupang.com/vp/products/7608596658?itemId=20145312764&vendorItemId=87238564124
+Name: 코멧 와이드 스터디 LED 스탠드 집게형 조명
+Product/item: 7608596658 / 20145312764.
+Snapshot about 5 months old: 25,990 KRW; clamp style; integrated LED panel;
+model white; 24 Vdc, 0.5A. No verified physical dimensions.
+Product image follows the page's Product image link.
+The successful extraction used the indexed full result URL:
+https://www.coupang.com/vp/products/7608596658?itemId=20145312764&itemsCount=71&q=%EA%B3%B5%EB%B6%80+%EC%8A%A4%ED%83%A0%EB%93%9C&rank=64&searchId=08b27d923681452&searchRank=64&sourceType=search&vendorItemId=87238564124
+
+INTEGRATION LIMITS
+Camera overlays are generic simulations. They must not claim an exact product
+shade, garment fit, desk scale, or AR product identity based on these images.
+Use retailer images only as linked product thumbnails unless rendering has been
+specifically implemented and verified. Do not substitute unrelated art as a
+photograph of these products.

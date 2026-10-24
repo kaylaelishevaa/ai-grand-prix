@@ -1,0 +1,93 @@
+UPDATE: Live camera and real Coupang references added. See CAMERA-README.txt
+for the current implementation. The original prototype notes follow below.
+
+NOOK — AI GRAND PRIX INTERACTION PROTOTYPE
+
+RUN
+From this folder: npm start
+Open http://127.0.0.1:4173
+No package installation, API key, or build step is required.
+The application is static HTML, CSS, JavaScript, and local SVG illustrations.
+All state is session-only and resets on refresh.
+
+WHAT THIS PROTOTYPE ANSWERS
+Can one shopping companion adapt its first interaction to strong, weak,
+and no intent, then share the same evaluation and selection workflow?
+The home category is a demonstration surface, not the innovation claim.
+
+THREE DEMO ENTRY POINTS
+1. Strong: "A lamp under ₩50,000" → immediate constrained match.
+2. Weak: "Make my place feel cozy" → clarify desired feeling and budget.
+3. No intent: "Just seeing what's out there" → low-effort inspiration.
+
+SHARED JOURNEY
+Save or pass on products → refine the recommendations → picture the
+possibilities → review an illustrative scene → add only selected products
+→ review the bag → confirm the demo selection → optional editable memory.
+
+WORKING INTERACTIONS
+- Three entry routes and normal browsing without the companion.
+- Budget filtering and whole-bag budget validation.
+- Product shortlist, pass feedback, and simple preference-based ordering.
+- Sample scene preparation with continued chat and end-call handoff.
+- Before/after scene switching and individual cart additions/removals.
+- Product detail dialogs and explicit demo confirmation.
+- Optional local photo selection/camera capture; camera tracks stop on close.
+- Optional speech synthesis, where supported by the browser.
+- Editable and deletable in-memory preferences.
+- Restart button clears demo state.
+
+SIMULATED / NOT IMPLEMENTED
+- No LLM, Realtime API, catalog service, or retailer integration.
+- Conversation uses scripted replies and limited keyword matching.
+- Call UI is a metaphor; there is no phone call or microphone transcription.
+- Scene preparation uses static illustrations, not image generation or AR.
+- Uploaded/captured photos are local references, not analysed or rendered.
+- Product descriptions, dimensions, images, and prices are illustrative.
+- No live stock, shipping, checkout, payments, or real orders.
+- No durable/cross-session memory, avatar switching, or fatigue detection.
+
+PRESENTER CHECKLIST
+Show all three entry routes, using the restart button for separate shoppers.
+Spend most of the demo on one shared full journey. Show a rejection that
+changes recommendations, a blocked over-budget addition, and optional memory.
+Never describe the sample scene as measured fit or the catalog as Coupang data.
+
+NEXT SEVEN HOURS — IMPLEMENTATION ORDER
+0–1h: Curate 15–30 products with stable IDs, category, price, dimensions,
+image, tags, and availability. Define session state and outcome criteria.
+1–3h: Connect a real model for intent/constraint extraction and the next
+question. Retrieve exact catalog items. Validate product IDs and enforce
+budget in deterministic code, outside the model.
+3–4h: Connect one visual evaluation path with queued status, cancellation,
+timeout, and an honestly labeled fallback. Preserve product identity.
+4–5h: Complete feedback refinement, cart confirmation, and optional memory.
+5–6h: Exercise budget conflicts, empty matches, denied camera, unavailable
+products, changing preferences, and generation failure.
+6–7h: Measure task completion, actions, constraint adherence, and latency;
+rehearse all three branches, record a backup, and freeze scope.
+
+MINIMUM SERVICE BOUNDARIES FOR THE LIVE DEMO
+Client session → server model call → structured intent/constraints → catalog
+retrieval → deterministic ID/price/budget checks → explainable candidates.
+Image preview is a separate async job. It must not block recommendations.
+The cart is a user-controlled action. Never let model output auto-purchase.
+Store API credentials on the server, never in these static browser files.
+
+SEVEN-MINUTE PRESENTATION
+0:00–0:30: Problem and thesis: assistance adapts as intent becomes clearer.
+0:30–1:15: Strong intent, direct valid selection.
+1:15–2:30: Weak intent, one useful clarification.
+2:30–4:00: No intent, inspiration and feedback that changes the next choices.
+4:00–4:45: Shared visual evaluation and explicit cart confirmation.
+4:45–5:45: Architecture, real model calls, and measured evidence.
+5:45–6:30: One failure recovery and customer controls.
+6:30–7:00: Result, honest limitations, next validation step.
+
+RUBRIC FACTS
+Five dimensions are each scored 1–10. The supplied PDF does not assign
+different weights or provide detailed numerical anchors.
+AI-first transformation; customer value and experience; innovation and
+differentiation; execution and feasibility; responsible AI and safety.
+The organisers' verbal requirement to cover all three intents is included.
+No prototype or pitch can guarantee full marks.
