@@ -127,7 +127,7 @@ export default function CompanionCall(props: CompanionCallProps) {
     if (callbacks.current.offline || !voiceOnRef.current || !('speechSynthesis' in window) || document.hidden) return;
     const epoch = voiceEpoch.current;
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = navigator.language || 'en-US';
+    utterance.lang = 'en-US';
     utterance.rate = 0.96;
     utterance.pitch = 1.04;
     utterance.onstart = () => {if (mounted.current && epoch === voiceEpoch.current) setSpeaking(true);};
@@ -351,7 +351,7 @@ export default function CompanionCall(props: CompanionCallProps) {
     if (!Constructor) {setError('This browser cannot transcribe voice. You can type the same answer below.'); return;}
     stopSpeech(); stopRecognition(); setError('');
     const mic = new Constructor(), before = draftRef.current.trim();
-    mic.lang = navigator.language || 'en-US'; mic.interimResults = true; mic.continuous = false;
+    mic.lang = 'en-US'; mic.interimResults = true; mic.continuous = false;
     mic.onresult = event => {
       if (!mounted.current || recognition.current !== mic) return;
       const words = Array.from(event.results).map(result => result[0].transcript).join(' ');
@@ -429,7 +429,7 @@ export default function CompanionCall(props: CompanionCallProps) {
         {complete&&worldReady&&!props.profile.journey?.districts.length&&<button className="text-button" disabled={busy||comparisonBusy} onClick={()=>void changeInterview('finishInterview')}>Build my world <Glyph name="scene"/></button>}
         <form className="call-composer" onSubmit={submit}>
           {photoUrl && <div className="call-attached-photo"><img src={photoUrl} alt="The frame you are about to share with Coopy"/><div><b>A little context.</b><small>Sent only when you send your message.</small></div><button type="button" onClick={() => {setPhoto(null); if (fileInput.current) fileInput.current.value = '';}} aria-label="Remove attached photo" disabled={busy||comparisonBusy}><Glyph name="close"/></button></div>}
-          <label className="sr-only" htmlFor="coopy-call-answer">Tell or ask Coopy something</label><textarea id="coopy-call-answer" ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} disabled={!started || busy || comparisonBusy} rows={3} placeholder={listening ? 'listening…' : mode==='interview'?'your story, or something you need…':'tell me what’s on your mind…'} onKeyDown={event => {if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {event.preventDefault(); event.currentTarget.form?.requestSubmit();}}}/>
+          <label className="sr-only" htmlFor="coopy-call-answer">Tell or ask Coopy something</label><textarea id="coopy-call-answer" ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} disabled={!started || busy || comparisonBusy} rows={3} placeholder={listening ? 'listening in English…' : mode==='interview'?'your story, in English…':'tell me in English…'} onKeyDown={event => {if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {event.preventDefault(); event.currentTarget.form?.requestSubmit();}}}/>
           <div className="call-composer-tools"><div><button type="button" className={`call-icon-button ${listening ? 'mic-listening' : ''}`} disabled={props.offline || !voiceSupported || busy || comparisonBusy || !started} onClick={toggleMicrophone} aria-label={listening ? 'Stop voice input' : 'Speak your answer'} aria-pressed={listening} title={props.offline ? 'Offline rehearsal uses typing' : voiceSupported ? 'Speak your answer' : 'Voice input unavailable; type your answer'}><Glyph name={listening ? 'stop' : 'mic'}/></button><button type="button" className="call-icon-button" disabled={busy || comparisonBusy || !started} onClick={() => fileInput.current?.click()} aria-label="Attach a photo"><Glyph name="image"/></button><button type="button" className={`call-icon-button ${cameraOpen ? 'camera-is-open' : ''}`} disabled={busy || comparisonBusy || !started} onClick={() => void openCamera()} aria-label={cameraOpen ? 'Close camera' : cameraPending ? 'Cancel opening camera' : 'Open your camera'} aria-pressed={cameraOpen}><Glyph name="camera"/></button></div><button className="button call-send" type="submit" disabled={busy || comparisonBusy || !started || (!draft.trim() && !photo)}>Send <Glyph name="arrow-up"/></button></div>
           <input ref={fileInput} className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" tabIndex={-1} onChange={event => selectPhoto(event.target.files?.[0])}/>
           <p className="call-input-note">{props.offline ? 'Offline rehearsal · type your answer. Browser voice is off.' : listening ? 'Voice fills this box. Read it, then send.' : !voiceSupported ? 'Voice input isn’t available in this browser. Typing works.' : 'Speak, type, or share a frame. No need to choose a mode.'}</p>

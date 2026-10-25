@@ -422,7 +422,7 @@ function personalizationContext(f,values={}){f.events.emit('message',{origin:'ht
 test('the stable embedded frame waits for parent context and keeps the camera off in both first and later calls',async t=>{
   const f=fixture(t,{search:'?embedded=1'});await tick();assert.equal(f.nodes.get('answer-call').disabled,true);
   await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,0);assert.equal(f.cameraStarts,0);
-  personalizationContext(f);await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,0);assert.equal(f.nodes.get('incoming-title').textContent,'let’s get to know you.');
+  personalizationContext(f,{count:0});await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,0);assert.equal(f.nodes.get('incoming-title').textContent,'let’s get to know you.');assert.equal(f.voice.opts.greeting,'Hi Kayleen! What is your favorite quiet corner?');
   f.nodes.get('end-call').onclick();f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-live-call-open'}});
   personalizationContext(f,{active:false,question:'',count:5});assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('incoming-title').textContent,'let’s look together.');
   await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,2);assert.equal(f.cameraStarts,0);

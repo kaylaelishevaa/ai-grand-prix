@@ -99,7 +99,7 @@ Clothing, glasses and object previews preserve the original product pixels. Exac
 
 ## Optional personalized start
 
-The entry screen stays neutral. After a new shopper starts a video, voice, or chat session, Coupi says “Welcome new user! We want to learn more about you to personalize your experience,” then asks one easy question at a time about interests, everyday activities or style. There is no separate onboarding page, quick-pick exercise or story form. **Skip to shopping** appears only inside the active session; saying “skip” or asking for a specific product also exits the interview.
+The entry screen stays neutral. After a new shopper starts a video, voice, or chat session, Coupi says “Hi Kayleen! We want to learn more about you to personalize your experience,” then asks one easy question at a time about interests, everyday activities or style. There is no separate onboarding page, quick-pick exercise or story form. **Skip to shopping** appears only inside the active session; saying “skip” or asking for a specific product also exits the interview.
 
 After a few useful answers, `draft_preferences` opens a short read-only summary of what the shopper volunteered. Only **Save preferences** stores the confirmed interests, style, optional per-item budget and conversation summary in this browser. **Keep talking** dismisses the draft so corrections can be made conversationally. Saving keeps the camera and voice call connected and continues shopping. No camera images or full conversation transcripts are saved to the profile.
 

@@ -84,6 +84,7 @@ test('hatch → first call → five answers persists visible sourced memory; dup
     assert.equal(hatch.body.profile.journey?.hatched,true);
     assert.match(hatch.body.message,/can I call you/);
     const start=await browser.send({action:'start',requestId:'start'});
+    assert.equal(start.body.message,'Hi Kayleen!');
     assert.equal(start.body.question,FIRST_CALL_QUESTIONS[0]);
     assert.equal(calls.length,0);
     let latest:CallResponse=start.body;
@@ -100,7 +101,9 @@ test('hatch → first call → five answers persists visible sourced memory; dup
       assert(calls.at(-1)!.input.reviews.length>0);
       assert.equal(latest.conversationMode,i===4?'conversation':'interview');
       assert.equal(latest.worldReady,true);
-      assert.match(calls.at(-1)!.body.instructions,/language of the CURRENT user's message/);
+      assert.match(calls.at(-1)!.body.instructions,/Accept spoken and typed requests in English and respond in English/);
+      assert.match(calls.at(-1)!.body.instructions,/Please rephrase your request in English/);
+      assert.match(calls.at(-1)!.body.instructions,/English request containing Korean proper names or a won amount is valid/);
       const duplicate=await browser.send({action:'message',requestId:'answer-'+i,message:['I drink matcha in the morning.','I cook for one on weekends.','My desk is tiny.','I am saving for a holiday.','I want less clutter.'][i]});
       assert.equal(duplicate.body.interviewCount,i+1);
       assert.equal(calls.length,i+1);

@@ -15,7 +15,7 @@
       this.render();
     }
     get greeting(){
-      if(this.active)return (this.isNew?'Welcome new user! We want to learn more about you to personalize your experience. ':'Let’s update what you enjoy. ')+'What do you enjoy doing in your free time? You can say “skip” to go straight to shopping.';
+      if(this.active)return (this.isNew?'Hi Kayleen! We want to learn more about you to personalize your experience. ':'Let’s update what you enjoy. ')+'What do you enjoy doing in your free time? You can say “skip” to go straight to shopping.';
       return this.world?'What would you like to explore in '+this.world.title.toLowerCase()+'?':'What do you want to buy?';
     }
     get context(){return {active:this.active,draft_pending:!!this.pending,preferences:this.profile?.completed?{interests:this.profile.interests,vibe:this.profile.vibe,budget:this.profile.budget,story:this.profile.story}:null};}

@@ -82,7 +82,7 @@
     if($('caption-speaker').textContent!==speaker)text('caption-speaker',speaker);
     if(body.textContent!==current.text){body.textContent=current.text;body.scrollTop=body.scrollHeight;}
   }
-  function greeting(){return personalization.active?(personalization.question||'What would you like me to know about your everyday life?'):'Hi, I’m Coopy. How can I help you today?';}
+  function greeting(){const question=personalization.question||'What would you like me to know about your everyday life?';return personalization.active?(personalization.count===0?'Hi Kayleen! '+question:question):'Hi, I’m Coopy. How can I help you today?';}
   voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:greeting(),getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
     onPreferences:request=>{if(phase!=='active'||!personalization.active)throw Error('Start the optional introduction before shaping your worlds.');return bridge.preferences(request);},

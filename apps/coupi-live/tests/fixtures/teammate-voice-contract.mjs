@@ -94,6 +94,10 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   const config=JSON.parse(sent.options.body.get('session'));
   assert.equal(config.model,'gpt-realtime-2.1');
   assert.equal(config.audio.input.transcription.model,'gpt-4o-mini-transcribe');
+  assert.equal(config.audio.input.transcription.language,'en');
+  assert.match(config.audio.input.transcription.prompt,/speaking English/);
+  assert.match(config.instructions,/Accept spoken and typed shopping instructions in English/);
+  assert.match(config.instructions,/English request containing Korean proper names is valid/);
   assert.equal(config.audio.output.voice,'marin');
   assert.equal(config.audio.input.turn_detection.interrupt_response,true);
   assert.deepEqual(config.tools.map(t=>t.name),['draft_preferences','skip_personalization','resolve_shopping_request','search_products','set_tryon','product_action','look_at_camera','search_world_products','open_world_product']);

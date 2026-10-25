@@ -124,7 +124,7 @@ test('mobile entry has one call entry and no separate browse or onboarding link'
   assert.equal(f.nodes.has('decline-call'),false);assert.equal(f.nodes.has('personalization-entry'),false);
   assert.equal(f.voice.opts.getContext().screen,'incoming');assert.equal(f.store.queue.length,0);
   assert.equal(f.personalization.active,true);assert.equal(f.nodes.has('incoming-skip-personalization'),false);assert.equal(f.nodes.get('update-preferences').hidden,true);
-  assert.doesNotMatch(f.nodes.get('incoming-promise').textContent+' '+f.nodes.get('incoming-status').textContent,/Welcome new user|personalize your experience|Skip/);
+  assert.doesNotMatch(f.nodes.get('incoming-promise').textContent+' '+f.nodes.get('incoming-status').textContent,/Hi Kayleen|personalize your experience|Skip/);
 });
 
 test('Answer starts camera then real-call adapter; End closes both and returns to the start screen',async t=>{
@@ -1001,8 +1001,8 @@ test('new users see a neutral entry and can skip the interview only inside their
   const storage=profileStorage(),f=fixture(t,{storage});assert.equal(f.personalization.active,true);
   assert.equal(f.nodes.has('incoming-skip-personalization'),false);assert.equal(f.nodes.get('update-preferences').hidden,true);
   assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);assert.equal(f.context.window.location.href,'/call');
-  assert.doesNotMatch(f.nodes.get('incoming-promise').textContent+' '+f.nodes.get('incoming-status').textContent,/Welcome new user|personalize your experience|Skip/);
-  await f.nodes.get('answer-call').onclick();assert.match(f.voice.opts.greeting,/Welcome new user/);
+  assert.doesNotMatch(f.nodes.get('incoming-promise').textContent+' '+f.nodes.get('incoming-status').textContent,/Hi Kayleen|personalize your experience|Skip/);
+  await f.nodes.get('answer-call').onclick();assert.match(f.voice.opts.greeting,/Hi Kayleen/);
   const call=f.voice.call;f.nodes.get('personalization-skip').onclick();assert.equal(f.personalization.active,false);assert.equal(f.voice.opts.greeting,'What do you want to buy?');
   assert.equal(f.voice.skips,1);assert.equal(f.voice.call,call);assert.equal(f.voice.sentTexts.length,0);assert.equal(f.voice.opts.getContext().personalization.active,false);
   assert.equal(f.voice.call.ready,true);assert.equal(f.nodes.get('update-preferences').hidden,true);
@@ -1017,7 +1017,7 @@ test('skipping while camera permission is pending updates the actual call greeti
 });
 test('new-customer interview confirms preferences and keeps the same camera and call active',async t=>{
   const storage=profileStorage(),f=fixture(t,{storage});assert.equal(f.personalization.active,true);assert.equal(f.cameraStarts,0);assert.equal(storage.data.size,0);
-  await f.nodes.get('answer-call').onclick();assert.match(f.voice.opts.greeting,/Welcome new user! We want to learn more about you to personalize your experience/);
+  await f.nodes.get('answer-call').onclick();assert.match(f.voice.opts.greeting,/Hi Kayleen! We want to learn more about you to personalize your experience/);
   const result=f.voice.opts.onPreferences({action:'draft',preferences:draftPrefs});assert.equal(result.saved,false);assert.equal(result.draft_ready,true);
   assert.equal(f.nodes.get('personalization-dialog').open,true);assert.equal(f.voice.opts.getContext().personalization.draft_pending,true);assert.equal(storage.data.size,0);
   assert.match(f.nodes.get('preference-summary').textContent,/reading/);assert.equal(f.nodes.has('preference-story'),false);
@@ -1112,7 +1112,7 @@ test('live search results remain selectable by color and enter checkout using tr
 test('skipping personalization during camera setup updates the opening caption and greeting together',async t=>{
   const permission=deferred(),f=fixture(t,{cameraPermission:()=>permission.promise});
   const starting=f.nodes.get('answer-call').onclick();
-  assert.match(f.nodes.get('caption-text').textContent,/Welcome new user/);
+  assert.match(f.nodes.get('caption-text').textContent,/Hi Kayleen/);
   f.nodes.get('personalization-skip').onclick();
   assert.equal(f.nodes.get('caption-text').textContent,'What do you want to buy?');
   assert.equal(f.store.messages[0].text,'What do you want to buy?');
