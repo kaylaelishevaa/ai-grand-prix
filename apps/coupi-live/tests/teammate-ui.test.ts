@@ -843,6 +843,28 @@ function inlineCatalog(){
 const inlineRows=f=>f.nodes.get('inline-items').children.filter(row=>row.dataset.id);
 const inlineAction=(row,name)=>row.children[1].children.find(button=>button.textContent===name);
 
+test('generic glasses aliases keep all six catalog picks and ordinal order while explicit eyewear filters still apply',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const glasses=catalog.filter(product=>product.productType==='glasses'),ids=glasses.map(product=>String(product.id));
+  assert.equal(ids.length,6);
+  for(const sourceOnly of [true,false])for(const query of ['I want to buy glasses','eyeglass','eyeglasses','spectacle','spectacles','eyewear']){
+    const shown=f.voice.opts.onRecommendations(glasses,'',{query,sourceOnly});
+    assert.equal(shown.ok,true,query);assert.equal(f.discovery.productType,'glasses',query);assert.equal(f.discovery.theme,'',query);
+    assert.deepEqual(inlineRows(f).map(row=>row.dataset.id),ids,`${query}, sourceOnly=${sourceOnly}`);
+    assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),ids);
+  }
+  for(const index of [2,0]){
+    const action=f.context.window.CoupiCallActions.resolve(`try the ${index===2?'third':'first'} product`,f.voice.opts.getContext());
+    assert.equal(action.productId,ids[index]);assert.equal((await f.voice.opts.onProductAction(action.action,action.productId)).ok,true);
+    assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),ids);
+  }
+  for(const [query,style] of [['optical eyeglasses','optical'],['normal glasses','optical'],['regular glasses','optical'],['clear lens glasses','optical'],['clear lenses','optical'],['sunglasses','sunglasses'],['glasses, no eyeglasses','sunglasses'],['glasses without spectacles','sunglasses'],['glasses without sunglasses','optical']]){
+    const expected=glasses.filter(product=>product.tags.includes(style)).map(product=>String(product.id));
+    f.voice.opts.onRecommendations(glasses,'',{query,sourceOnly:true});
+    assert.equal(expected.length,3);assert.deepEqual(inlineRows(f).map(row=>row.dataset.id),expected,query);
+  }
+});
+
 test('recommendations open six picks inside the fixed product panel, expand to ten, and leave the call stationary',async t=>{
   const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
   f.voice.opts.onRecommendations([...f.store.catalog.values()].filter(p=>p.productType==='lipstick'),'',{query:'pink lipstick',category:'makeup',sourceOnly:true},'ready');

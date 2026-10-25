@@ -8,10 +8,11 @@
     black:['black','블랙','검정'],white:['white','화이트','흰색'],gray:['gray','grey','charcoal','그레이','회색'],
     blue:['blue','블루','파랑','파란'],green:['green','olive','그린','녹색','초록'],yellow:['yellow','옐로','노랑','노란'],beige:['beige','베이지'],silver:['silver','실버'],gold:['gold','골드'],
   };
-  const STYLE = {sunglasses:['sunglasses','선글라스'],optical:['optical','eyeglasses','spectacles','clear lenses','normal glasses','regular glasses','일반 안경','투명 렌즈']};
+  const BROAD_EYEWEAR = ['eyeglass','eyeglasses','spectacle','spectacles'];
+  const STYLE = {sunglasses:['sunglasses','선글라스'],optical:['optical',...BROAD_EYEWEAR,'clear lens','clear lenses','normal glasses','regular glasses','일반 안경','투명 렌즈']};
   const APPAREL={basic:['basic','plain','solid','unbranded','무지','베이직'],branded:['branded','logo','브랜드','로고']};
   const CHAIR={office:['office','desk','study','computer','사무용 의자','사무용의자','사무 의자','사무의자','책상 의자','책상의자','컴퓨터 의자','컴퓨터의자','공부 의자','공부의자','독서실 의자','독서실의자','사무용','사무','책상','컴퓨터','공부','독서실'],floor:['floor','좌식 의자','좌식의자','바닥 의자','바닥의자','좌식','바닥'],dining:['dining','식탁 의자','식탁의자','식탁']};
-  const TYPE_FACETS={lipbalm:['lip balm','lip balms','lipbalm','립밤'],lipstick:['lipstick','lipsticks','lip tint','립스틱','립틴트','틴트'],sweater:['sweater','sweaters','knit','pullover','니트','스웨터'],hoodie:['hoodie','hoodies','후드','후드티'],tshirt:['t-shirt','t-shirts','tshirt','tshirts','tee','티셔츠','반팔'],glasses:['glasses','eyeglasses','eyewear','안경'],chair:['chair','chairs','의자'],lamp:['lamp','lamps','스탠드','조명']};
+  const TYPE_FACETS={lipbalm:['lip balm','lip balms','lipbalm','립밤'],lipstick:['lipstick','lipsticks','lip tint','립스틱','립틴트','틴트'],sweater:['sweater','sweaters','knit','pullover','니트','스웨터'],hoodie:['hoodie','hoodies','후드','후드티'],tshirt:['t-shirt','t-shirts','tshirt','tshirts','tee','티셔츠','반팔'],glasses:['glasses',...BROAD_EYEWEAR,'eyewear','안경'],chair:['chair','chairs','의자'],lamp:['lamp','lamps','스탠드','조명']};
   const clean = value => typeof value === 'string' ? value.trim().slice(0,300) : '';
   const unique = values => [...new Set(values)];
   const has = (text,term) => /[a-z]/i.test(term) ? new RegExp(`(?:^|[^a-z])${term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?:$|[^a-z])`,'i').test(text) : text.includes(term);
@@ -26,6 +27,9 @@
         // "좌식의자 말고" excludes floor seating, not the entire chair category.
         const styledChair=map===TYPE_FACETS&&key==='chair'&&/(?:\b(?:office|desk|study|computer|floor|dining)|사무용?|책상|컴퓨터|공부|독서실|좌식|바닥|식탁)\s*$/u.test(before);
         const negative=!styledChair&&(/(?:not|no|except|excluding|without|don t want|do not want)\s+(?:a\s+)?$/u.test(before)||/^\s*(?:색)?\s*(?:말고|제외|빼고)/u.test(after));
+        // A model may paraphrase generic glasses as eyeglasses or spectacles.
+        // Keep these broad unless the shopper explicitly excludes optical frames.
+        if(BROAD_EYEWEAR.includes(term)&&((map===STYLE&&!negative)||(map===TYPE_FACETS&&negative)))continue;
         (negative?exclude:include).push(key);
       }
     }
@@ -62,7 +66,7 @@
       .replace(/\b(show|find|me|my|some|a|an|the|i|want|like|please|recommend|looking|for|can|could|would|you|need|trying|try|to|buy|not|no|except|excluding|without|don|do|products?|options?|different|normal|everyday|brands?|sellers?|and|or|of|with)\b/g,' ')
       .replace(/추천|찾아|보여|주세요|제품|상품|일반|말고|제외|빼고/g,' ');
     for(const words of [...Object.values(COLORS),...Object.values(STYLE),...Object.values(APPAREL),...(typeFrom(query)==='chair'?Object.values(CHAIR):[])])for(const word of words)value=/[a-z]/i.test(word)?value.replace(new RegExp(`\\b${word}\\b`,'g'),' '):value.replaceAll(word,' ');
-    value=value.replace(/lip balms?|lipbalms?|sweaters?|knit|pullovers?|립밤|스웨터|니트|lipsticks?|lip tints?|t-?shirts?|hoodies?|chairs?|desk lamps?|table lamps?|lamps?|glasses|립스틱|립틴트|틴트|티셔츠|반팔|후드티?|의자|스탠드|조명|안경|선글라스/g,' ');
+    value=value.replace(/lip balms?|lipbalms?|sweaters?|knit|pullovers?|립밤|스웨터|니트|lipsticks?|lip tints?|t-?shirts?|hoodies?|chairs?|desk lamps?|table lamps?|lamps?|eyeglasses?|spectacles?|eyewear|glasses|립스틱|립틴트|틴트|티셔츠|반팔|후드티?|의자|스탠드|조명|안경|선글라스/g,' ');
     return value.split(/[^\p{L}\p{N}-]+/u).filter(word=>word.length>1).slice(0,12);
   }
   function limitFrom(options,query) {

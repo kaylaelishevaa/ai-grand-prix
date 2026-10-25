@@ -263,3 +263,29 @@ test('voice sessions use semantic completion and keep interruption enabled for n
   assert.equal(compare.parameters.properties.product_ids.maxItems,3);
   assert.match(direct.instructions,/first and third/);
 });
+
+
+test('broad glasses wording shows all six demo options without weakening explicit eyewear filters',()=>{
+  for(const query of ['I want to buy glasses','glasses','eyeglasses','eyeglass','spectacles','spectacle','eyewear']){
+    const result=searchProducts({query,category:'glasses',max_price:null});
+    assert.equal(result.products.length,6,query);
+    assert.equal(new Set(result.products.map(product=>product.id)).size,6);
+    assert.deepEqual(result.constraints.eyewear,{include:[],exclude:[]});
+    assert(result.products.some(product=>product.tags.includes('optical')));
+    assert(result.products.some(product=>product.tags.includes('sunglasses')));
+  }
+  for(const query of ['optical glasses','normal glasses','regular glasses','glasses with clear lenses']){
+    const result=searchProducts({query,category:'glasses',max_price:null});
+    assert.equal(result.products.length,3,query);
+    assert(result.products.every(product=>product.tags.includes('optical')));
+  }
+  for(const query of ['sunglasses','glasses not eyeglasses','glasses no spectacles']){
+    const result=searchProducts({query,category:'glasses',max_price:null});
+    assert.equal(result.products.length,3,query);
+    assert(result.products.every(product=>product.tags.includes('sunglasses')));
+  }
+  const budget=searchProducts({query:'glasses',category:'glasses',max_price:20000});
+  assert.equal(budget.products.length,3);assert(budget.products.every(product=>product.price<=20000));
+  const black=searchProducts({query:'black glasses',category:'glasses'});
+  assert.equal(black.products.length,3);assert(black.products.every(product=>product.tags.some(tag=>tag.includes('black'))));
+});
