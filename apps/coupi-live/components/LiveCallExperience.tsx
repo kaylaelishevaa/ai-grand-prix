@@ -10,6 +10,7 @@ import {liveCallBody,parseLiveCallTurn,publicCallResult,type LiveCallTurn} from 
 import FirstCallController from './FirstCallController';
 import {usesFirstCall} from '@/lib/call-entry';
 import {LiveCallLifecycle} from '@/lib/live-call-session';
+import {saveCallReceipt} from '@/lib/call-receipts';
 import {Glyph} from './Glyph';
 import './live-call-experience.css';
 
@@ -42,7 +43,7 @@ export function LiveCallController({profile,frame,before,after,onReady,onProfile
   const [error,setError]=useState(''),[pending,setPending]=useState(0);
   function post(message:unknown){(frame.current?.contentWindow||childWindow.current)?.postMessage(message,location.origin);}
   function stop(){post({type:'coupi-live-call-stop'});}
-  function syncContext(){post({type:'coupi-personalization-context',active:false,question:'',count:0,draftPending:false,memories:[]});}
+  function syncContext(){post({type:'coupi-personalization-context',profileId:latest.current.profile.id,active:false,question:'',count:0,draftPending:false,memories:[]});}
   function acceptProfile(updated:Profile){
     if(updated.id!==latest.current.profile.id||updated.revision<latest.current.profile.revision)throw new Error('Your profile changed. Please start a new call.');
     latest.current.profile=updated;latest.current.onProfile(updated);syncContext();
@@ -91,6 +92,11 @@ export function LiveCallController({profile,frame,before,after,onReady,onProfile
       if(event.origin!==location.origin||event.source!==frame.current?.contentWindow||!event.data||typeof event.data!=='object')return;
       const message=event.data;
       if(message.type==='coupi-live-call-ready'){childWindow.current=frame.current?.contentWindow||null;syncContext();return;}
+      if(message.type==='coupi-call-checkout-complete'){
+        if(!acceptingTurns.current||message.profileId!==latest.current.profile.id)return;
+        try{const saved=saveCallReceipt(latest.current.profile.id,message.receipt,window.sessionStorage);if(!saved.ok)setError(saved.error||'Your receipt could not be saved.');}catch{setError('Your browser could not save this receipt. Keep the confirmation open.');}
+        return;
+      }
       if(message.type==='coupi-personalization-review'||message.type==='coupi-personalization-skip'){
         if(typeof message.id!=='string'||!/^personalization-[A-Za-z0-9_-]{1,80}$/.test(message.id))return;
         post({type:'coupi-personalization-result',id:message.id,error:'Calls now start with shopping. Tell Coupi what you want to buy.'});return;

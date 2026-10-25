@@ -9,6 +9,8 @@ import * as catalog from '../lib/catalog';
 import * as profileLibrary from '../lib/profile';
 import * as bridge from '../lib/call-bridge';
 import * as sessionLibrary from '../lib/live-call-session';
+import * as callReceipts from '../lib/call-receipts';
+import callCatalog from '../data/teammate-catalog.json';
 import {LiveCallLifecycle,liveDiscoveryContext} from '../lib/live-call-session';
 import {handlePersonalization} from '../lib/server/personalization';
 import {remember} from '../lib/memory';
@@ -56,6 +58,7 @@ function textOf(root:any):string{if(typeof root==='string')return root;if(Array.
 /** Runs the actual parent component with hook effects and fake transport; no DOM/media/network. */
 function componentHarness(initial:Profile|null,transport:typeof fetch,wrapper=false){
   const hooks:any[]=[],effects:any[]=[],listeners=new Map<string,Set<(event:any)=>void>>(),posts:any[]=[],profiles:Profile[]=[],completed:Profile[]=[],navigations:string[]=[];
+  const sessionValues=new Map<string,string>(),sessionStorage={getItem:(key:string)=>sessionValues.get(key)||null,setItem:(key:string,value:string)=>{sessionValues.set(key,value);}};
   const child={postMessage(message:unknown){posts.push(message);}};let cursor=0,tree:any,mounted=true,scheduled=false,forceEffects=false,frameReady=false;
   const frameNode={contentWindow:child,isConnected:true,addEventListener(){},removeEventListener(){},set src(value:string){navigations.push(value);}};
   const props:any={profile:initial,visible:true,frame:{current:frameNode},before:{},after:{},onReady(value:boolean){frameReady=value;},onProfile(value:Profile){props.profile=value;profiles.push(value);schedule();},onClose(){},onType(){},onOpenProduct(){},onComplete(value:Profile){completed.push(value);}};
@@ -66,8 +69,8 @@ function componentHarness(initial:Profile|null,transport:typeof fetch,wrapper=fa
     useEffect(callback:()=>void,deps:any[]){const at=cursor++,old=hooks[at];if(forceEffects||!old||deps.some((value,i)=>value!==old.deps[i])){effects.push(()=>{old?.cleanup?.();const cleanup=callback();hooks[at]={deps,cleanup};});}},
   };
   const Review=()=>null,jsx=(type:unknown,properties:Record<string,unknown>)=>({type,props:properties});
-  const imports:Record<string,unknown>={'react':react,'react-dom':{createPortal:(children:unknown)=>({type:'portal',props:{children}})},'react/jsx-runtime':{jsx,jsxs:jsx},'@/lib/catalog':catalog,'@/lib/profile':profileLibrary,'@/lib/call-bridge':bridge,'@/lib/live-call-session':sessionLibrary,'@/lib/call-entry':callEntry,'./FirstCallController':{__esModule:true,default:()=>null},'./FirstCallReview':{__esModule:true,default:Review},'./Glyph':{Glyph:()=>null},'./live-call-experience.css':{}};
-  const module={exports:{} as any},context=createContext({module,exports:module.exports,require:(name:string)=>{if(!(name in imports))throw Error('Unexpected import '+name);return imports[name];},fetch:transport,AbortController,setTimeout,clearTimeout,crypto:{randomUUID},location:{origin},window:{addEventListener(type:string,fn:(event:any)=>void){if(!listeners.has(type))listeners.set(type,new Set());listeners.get(type)!.add(fn);},removeEventListener(type:string,fn:(event:any)=>void){listeners.get(type)?.delete(fn);}},console});
+  const imports:Record<string,unknown>={'react':react,'react-dom':{createPortal:(children:unknown)=>({type:'portal',props:{children}})},'react/jsx-runtime':{jsx,jsxs:jsx},'@/lib/catalog':catalog,'@/lib/profile':profileLibrary,'@/lib/call-bridge':bridge,'@/lib/live-call-session':sessionLibrary,'@/lib/call-receipts':callReceipts,'@/lib/call-entry':callEntry,'./FirstCallController':{__esModule:true,default:()=>null},'./FirstCallReview':{__esModule:true,default:Review},'./Glyph':{Glyph:()=>null},'./live-call-experience.css':{}};
+  const module={exports:{} as any},context=createContext({module,exports:module.exports,require:(name:string)=>{if(!(name in imports))throw Error('Unexpected import '+name);return imports[name];},fetch:transport,AbortController,setTimeout,clearTimeout,crypto:{randomUUID},location:{origin},window:{sessionStorage,addEventListener(type:string,fn:(event:any)=>void){if(!listeners.has(type))listeners.set(type,new Set());listeners.get(type)!.add(fn);},removeEventListener(type:string,fn:(event:any)=>void){listeners.get(type)?.delete(fn);}},console});
   const source=readFileSync(new URL('../components/LiveCallExperience.tsx',import.meta.url),'utf8');
   runInContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,context);
   function render(){
@@ -76,7 +79,7 @@ function componentHarness(initial:Profile|null,transport:typeof fetch,wrapper=fa
     for(const effect of effects.splice(0))effect();return tree;
   }
   function cleanup(){for(const hook of hooks)hook?.cleanup?.();}
-  render();return{profiles,completed,posts,props,navigations,ready:()=>frameReady,tree:()=>tree,review:()=>flatten(tree).find(node=>node.type===Review),button:(label:string)=>flatten(tree).find(node=>node.type==='button'&&textOf(node).includes(label)),emit(data:unknown){for(const listener of listeners.get('message')||[])listener({origin,source:child,data});},strictReplay(){cleanup();forceEffects=true;render();},unmount(){mounted=false;cleanup();},render};
+  render();return{profiles,completed,posts,props,navigations,sessionStorage,ready:()=>frameReady,tree:()=>tree,review:()=>flatten(tree).find(node=>node.type===Review),button:(label:string)=>flatten(tree).find(node=>node.type==='button'&&textOf(node).includes(label)),emit(data:unknown){for(const listener of listeners.get('message')||[])listener({origin,source:child,data});},strictReplay(){cleanup();forceEffects=true;render();},unmount(){mounted=false;cleanup();},render};
 }
 
 test('the wrapper always includes one static-src iframe before a profile exists, while visibility only gates its controls',()=>{
@@ -140,4 +143,14 @@ test('direct mode retains profile context readiness, world details and explicit 
   h.emit({type:'coupi-live-call-ready'});assert.equal(h.ready(),true);assert.equal(h.posts.at(-1).type,'coupi-personalization-context');assert.equal(h.posts.at(-1).active,false);
   h.emit({type:'coupi-live-call-product',namespace:'world-simulation',skuId:'7612276799'});await tick();assert.deepEqual(opened,['7612276799']);
   h.emit({type:'coupi-live-call-exit'});assert.equal(closes,1);assert(h.posts.some(message=>message.type==='coupi-live-call-stop'));h.unmount();
+});
+
+test('incoming call receipts save for the matching member while stale member confirmations are rejected',()=>{
+  const first=fresh(),h=componentHarness(first,(async()=>{throw Error('Session receipts do not make network requests');}) as typeof fetch),product=callCatalog[0];
+  const receipt={id:'DEMO-INCOMING-1',demo:true,payment_processed:false,order_placed:false,currency:'KRW',paymentMethod:'demo-card',item_ids:[product.id],referenceTotal:product.price,items:[{id:product.id,product,quantity:1,unitPrice:product.price,lineTotal:product.price,included:true}]};
+  assert.equal(h.posts.find(message=>message.type==='coupi-personalization-context').profileId,first.id);
+  h.emit({type:'coupi-call-checkout-complete',profileId:first.id,receipt});assert.equal(callReceipts.readCallReceipts(first.id,h.sessionStorage).length,1);
+  const second=fresh();h.props.profile=second;h.render();h.emit({type:'coupi-live-call-ready'});assert.equal(h.posts.at(-1).profileId,second.id);
+  h.emit({type:'coupi-call-checkout-complete',profileId:first.id,receipt:{...receipt,id:'DEMO-STALE-2'}});assert.equal(callReceipts.readCallReceipts(first.id,h.sessionStorage).length,1);assert.deepEqual(callReceipts.readCallReceipts(second.id,h.sessionStorage),[]);
+  h.emit({type:'coupi-call-checkout-complete',profileId:second.id,receipt:{...receipt,id:'DEMO-CURRENT-3'}});assert.equal(callReceipts.readCallReceipts(second.id,h.sessionStorage)[0].id,'DEMO-CURRENT-3');h.unmount();
 });

@@ -249,3 +249,12 @@
   .phone-app .call-stage .call-controls { gap: 4px; }
   .phone-app .call-stage .call-controls .end-control { flex-basis: 44px; width: 44px !important; }
 }
+
+/* Shopping stays reachable while the camera preview is minimized. */
+.phone-app .focus-shopping { position:absolute; z-index:7; top:calc(var(--flex-call-top) + 57px); left:var(--flex-call-gutter); right:var(--flex-call-gutter); display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.phone-app .focus-shopping[hidden] { display:none; }
+.phone-app .focus-shopping .focus-product { max-width:none!important; min-width:0; flex:1; height:40px; }
+.phone-app .focus-shopping .focus-product span:first-of-type { min-width:0; }
+.phone-app .focus-add { flex:none; min-height:40px; padding:0 14px; border:1px solid #d4e8e9; border-radius:20px; background:#f5ffffed; color:#285b60; font:inherit; font-size:12px; font-weight:600; }
+.phone-app .focus-add:focus-visible { outline:2px solid #246e73; outline-offset:3px; }
+.phone-app #cart-button { display:grid!important; flex-shrink:0; }

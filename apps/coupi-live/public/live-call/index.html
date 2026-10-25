@@ -59,6 +59,7 @@
           <button id="entry-chat" class="call-control" type="button" aria-label="Start a text chat" title="Chat"><svg><use href="#i-chat"/></svg></button>
         </div>
         <p id="entry-language" class="language-note">English only for voice and chat.</p>
+        <button id="entry-bag" class="decline-call" aria-label="Open your bag" hidden>View bag</button>
         <button id="update-preferences" class="decline-call" data-world-return hidden>Update preferences</button>
         <label id="entry-vision-consent" class="vision-consent"><input id="vision-consent" type="checkbox" checked> Let Coupi see my camera</label><p id="entry-privacy" class="privacy-note">Mic + camera snapshots go to OpenAI during the call.</p>
       </div>
@@ -72,10 +73,11 @@
       <div class="video-shade" aria-hidden="true"></div>
       <header class="call-header">
         <div class="call-person"><span class="mini-nori" aria-hidden="true"><img class="coupi-avatar" src="/live-call/assets/coupi.png" alt=""></span><div><strong>Coupi <span class="ai-tag">AI</span></strong><span id="call-status">Connecting…</span></div></div>
-        <button id="focus-product" class="focus-product" aria-label="Show call controls" hidden><img id="focus-product-image" alt=""><span id="focus-product-label">Products</span><span aria-hidden="true">⌄</span></button><span id="call-timer" class="call-timer">00:00</span><button id="catalog-button" class="catalog-button" aria-label="Explore product previews">Picks</button>
+        <span id="call-timer" class="call-timer">00:00</span><button id="catalog-button" class="catalog-button" aria-label="Explore product previews">Picks</button>
         <button id="collections-button" class="cart-button" aria-label="Saved collections"><svg><use href="#i-bookmark"/></svg></button>
         <button id="cart-button" class="cart-button" aria-label="View your bag"><svg><use href="#i-bag"/></svg><span id="cart-count">0</span></button>
       </header>
+      <div id="focus-shopping" class="focus-shopping" hidden><button id="focus-product" class="focus-product" aria-label="Show call controls" hidden><img id="focus-product-image" alt=""><span id="focus-product-label">Products</span><span aria-hidden="true">⌄</span></button><button id="focus-add" class="focus-add" aria-label="Add the product you are trying to your bag">Add to bag</button></div>
       <div class="call-feedback"><p id="call-notice" role="status" hidden></p><button id="retry-call" class="inline-retry" hidden>Reconnect</button><button id="play-audio" class="inline-retry" hidden><svg><use href="#i-speaker"/></svg> Enable sound</button></div>
 
       <section id="product-zone" class="product-zone" aria-label="Product recommendations" data-collection="false" hidden>

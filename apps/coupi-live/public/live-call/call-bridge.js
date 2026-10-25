@@ -7,7 +7,7 @@
   let latestId = '',lastPhase='incoming';
   const newCallNonce=()=>globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
   let callNonce=newCallNonce();
-  let personalization={active:false,question:'',count:0,draftPending:false,memories:[],received:false},preferenceSerial=0;
+  let personalization={profileId:null,active:false,question:'',count:0,draftPending:false,memories:[],received:false},preferenceSerial=0;
   const preferenceRequests=new Map();
   let stop = () => {}, lastState = '', availability;
   function post(message) {
@@ -65,6 +65,7 @@
   window.CoupiCallBridge = {
     getAvailability,
     personalizationContext:()=>({...personalization,memories:personalization.memories.map(item=>({...item}))}),
+    checkoutComplete(receipt){if(!personalization.profileId||window.parent===window)return false;post({type:'coupi-call-checkout-complete',profileId:personalization.profileId,receipt});return true;},
     preferences:preferenceRequest,cancelPreferences,
     async openWorldProduct(skuId,details={}) {
       if (typeof skuId !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9-]{0,99}$/.test(skuId) || window.parent === window) return {ok:false,error:'Open a world product from the main Coopy app.'};
@@ -111,7 +112,7 @@
     if (event.data.type === 'coupi-live-call-stop') {cancelPreferences();stop();}
     if(event.data.type==='coupi-personalization-context'){
       const value=event.data;
-      personalization={active:value.active===true,question:string(value.question,400),count:Number.isInteger(value.count)?Math.max(0,Math.min(5,value.count)):0,draftPending:value.draftPending===true,received:true,memories:(Array.isArray(value.memories)?value.memories:[]).slice(-8).filter(item=>item&&typeof item.text==='string').map(item=>({text:string(item.text,240),source:string(item.source,100),confidence:typeof item.confidence==='number'&&Number.isFinite(item.confidence)?Math.max(0,Math.min(1,item.confidence)):null}))};
+      personalization={profileId:typeof value.profileId==='string'&&/^[A-Za-z0-9_-]{1,100}$/.test(value.profileId)?value.profileId:null,active:value.active===true,question:string(value.question,400),count:Number.isInteger(value.count)?Math.max(0,Math.min(5,value.count)):0,draftPending:value.draftPending===true,received:true,memories:(Array.isArray(value.memories)?value.memories:[]).slice(-8).filter(item=>item&&typeof item.text==='string').map(item=>({text:string(item.text,240),source:string(item.source,100),confidence:typeof item.confidence==='number'&&Number.isFinite(item.confidence)?Math.max(0,Math.min(1,item.confidence)):null}))};
       if(!personalization.active)for(const [id,pending] of preferenceRequests)if(pending.action==='draft')preferenceResult(id,null,'Personalization ended before the review was ready. Nothing was saved.');
       notify({state:'personalization-context',context:window.CoupiCallBridge.personalizationContext()});
     }

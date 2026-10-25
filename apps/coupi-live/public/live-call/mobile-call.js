@@ -3,6 +3,8 @@
   'use strict';
   const $=id=>document.getElementById(id);
   const store=new window.NookCallState(window.COUPANG_PRODUCTS||[]);
+  let bagStorageKey='coupi_call_bag_v1:standalone';
+  try { const saved=JSON.parse(window.sessionStorage.getItem(bagStorageKey)||'[]');if(Array.isArray(saved))for(const id of saved.slice(0,100)){const product=store.catalog.get(String(id));if(product)store.cart.set(String(id),product);} } catch {}
   const discovery=new window.CoupiDiscovery(window.COUPANG_PRODUCTS||[]);
   const checkout=new window.CoupiCheckout(window.COUPANG_PRODUCTS||[]);
   let personalization=null;
@@ -97,7 +99,8 @@
   function updateFocusUI(){
     const active=!!trying&&camera.running&&['active'].includes(phase),focused=active&&!controlsExpanded;
     $('phone-app').dataset.focused=String(focused);
-    show('focus-product',focused);show('focus-toggle',active);
+    show('focus-product',focused);show('focus-toggle',active);show('focus-shopping',focused&&!viewingCollection);
+    if(trying){$('focus-add').setAttribute('aria-label','Add '+trying.name+' to your bag');text('focus-add',store.cart.has(String(trying.id))?'In bag':'Add to bag');}
     $('focus-toggle').setAttribute('aria-expanded',String(controlsExpanded));
     $('focus-toggle').setAttribute('aria-label',controlsExpanded?'Hide call controls':'Show call controls');
     $('focus-toggle').title=controlsExpanded?'Hide call controls':'Show call controls';
@@ -323,7 +326,8 @@
   }
   function recommendationResult(requested,products=discovery.products){const ids=products.map(product=>String(product.id));return {ok:!requested.length||!!ids.length,product_ids:ids,visible_product_ids:displayedProducts().map(product=>String(product.id)),...(!ids.length&&requested.length?{error:'These listings could not be shown. Please search again; do not claim their product cards are visible.'}:{})};}
   function recommend(list,message,options={}){if(!['connecting','active'].includes(phase))return {ok:false,error:'The shopping call is no longer active.'};discovery.recommend(list,options);catalogType=discovery.productType||catalogType;adoptDiscovery({resetScroll:true});scrollToCollection();if($('catalog-dialog').open)renderCatalog();if(!store.current)toast('No matching listing in this catalog. Try another colour or budget.');if(bridgePanelVisible)showBridgePanel();return recommendationResult(list);}
-  function updateBag(){text('cart-count',String(store.cart.size));$('cart-button').setAttribute('aria-label',`Open bag, ${store.cart.size} items`);sync();}
+  function useProfileBag(profileId){if(typeof profileId!=='string'||!profileId||profileId.length>120)return;const key='coupi_call_bag_v1:'+profileId;if(key===bagStorageKey)return;bagStorageKey=key;store.cart.clear();try{const saved=JSON.parse(window.sessionStorage.getItem(key)||'[]');if(Array.isArray(saved))for(const id of saved.slice(0,100)){const p=store.catalog.get(String(id));if(p)store.cart.set(String(id),p);}}catch{}updateBag();}
+  function updateBag(){text('cart-count',String(store.cart.size));$('cart-button').setAttribute('aria-label',`Open bag, ${store.cart.size} items`);text('entry-bag',`View bag (${store.cart.size})`);show('entry-bag',store.cart.size>0);try{window.sessionStorage.setItem(bagStorageKey,JSON.stringify([...store.cart.keys()]));}catch{}updateFocusUI();sync();}
   function addToBag(p){p=trusted(p);if(!p)return;store.cart.set(String(p.id),p);updateBag();toast('Selected product added to your bag');}
   function nextStyle(){const previous=store.current;const next=discovery.nextCollection();if(!next.changed){toast('No related collection within these preferences. Ask Coupi for a new direction.');return false;}if(previous)store.skipped.push(String(previous.id));adoptDiscovery({resetScroll:true});if($('catalog-dialog').open)renderCatalog();toast(discovery.label);sync();return true;}
   function productDetails(p=store.current){p=trusted(p);if(!p)return;store.detailProduct=p;text('detail-title',p.name);const img=$('detail-image');img.hidden=!p.image;if(p.image){img.src=p.image;img.alt=p.name;}const attributes=(p.verifiedAttributes||[]).filter(x=>!/^Preview depicts/.test(x)).slice(0,4).join(' · ');const introduction=p.description?.trim()||attributes;const price=Number.isFinite(p.price)?(isLiveListing(p)?'Listed price: ':'Reference price: ')+priceText(p)+'.':'Price unavailable.';text('detail-body',(introduction?introduction+(/[.!?。！？]$/u.test(introduction)?' ':'. '):'')+price);text('detail-preview-note',!p.image?'No preview photo is available for this product.':p.preview?.available===false?previewUnavailable(p):p.preview?.previewNote||(p.category==='makeup'?'Approximate shade preview; lighting and finish vary.':'Placement and fit are approximate.'));$('detail-link').href=p.url;$('detail-try').disabled=(!p.image||p.preview?.available===false);text('detail-try',(!p.image||p.preview?.available===false)?'Preview unavailable':'Try this product');window.CoupiEvidence.renderReviews($('detail-reviews'),p);appendCheckedDetails(p);text('detail-review-shortcut',window.CoupiEvidence.reviewStats(p).label+' ↓');text('detail-compare',discovery.comparison.some(x=>x.id===p.id)?'Remove compare':'Compare');if(!$('details-dialog').open)$('details-dialog').showModal();$('details-dialog').scrollTop=0;sync();}
@@ -333,7 +337,7 @@
     viewingCollection=visible;$('product-zone').dataset.collection=String(visible);$('phone-app').dataset.hasProducts=String(!!store.current||visible);
     show('inline-products',visible);show('product-zone',!!store.current||visible);show('product-empty',!store.current&&!visible&&!!discovery.productType);
     $('group-open').setAttribute('aria-expanded',String(visible));$('catalog-button').setAttribute('aria-expanded',String(visible));
-    $('call-screen').scrollTop=0;if(resetScroll)$('product-panel-scroll').scrollTop=0;
+    $('call-screen').scrollTop=0;if(resetScroll)$('product-panel-scroll').scrollTop=0;updateFocusUI();
   }
   function scrollToCollection(){setCollectionView(true);sync();}
   function backToCamera(){hideBridgePanel();setCollectionView(false);sync();}
@@ -418,7 +422,7 @@
   let completedReceipt=null,lastPurchase=null,purchasePairings=[];
   function checkoutAction(action){show('checkout-error',false);try{action();renderCheckout();}catch(error){text('checkout-error',error.message);show('checkout-error',true);}}
   function openCheckout({scope='selected',productIds=[]}={}){
-    if(!['active'].includes(phase))throw Error('Start a call before checkout.');
+    if(!['active','incoming','ended'].includes(phase))throw Error('Wait for the call to connect before checkout.');
     if($('checkout-dialog').open&&checkout.snapshot().step!=='complete')throw Error('A checkout is already open. Review it or close it before choosing new items.');
     let products;
     if(scope==='selected')products=[$('details-dialog').open?store.detailProduct:store.current].filter(Boolean);
@@ -481,7 +485,7 @@
   $('product-buy').onclick=()=>checkoutButton({scope:'selected'});$('detail-buy').onclick=()=>checkoutButton({scope:'selected'});$('compare-buy').onclick=()=>checkoutButton({scope:'comparison'});$('cart-checkout').onclick=()=>checkoutButton({scope:'cart'});
   $('checkout-next').onclick=()=>checkoutAction(()=>{checkout.next();$('checkout-dialog').scrollTop=0;});$('checkout-back').onclick=()=>checkoutAction(()=>checkout.back());
   $('checkout-card').onclick=()=>checkoutAction(()=>checkout.selectPayment('demo-card'));$('checkout-wallet').onclick=()=>checkoutAction(()=>checkout.selectPayment('demo-wallet'));
-  $('checkout-confirm').onclick=()=>checkoutAction(()=>{const receipt=checkout.confirm();if(receipt.id!==completedReceipt){completedReceipt=receipt.id;lastPurchase=receipt;purchasePairings=window.CoupiPairings.select([...store.catalog.values()],receipt.item_ids,{maxPrice:discovery.maxPrice,excludedTypes:discovery.constraints.types.exclude});for(const id of receipt.item_ids)store.cart.delete(id);updateBag();try{voice.notifyCheckoutComplete(receipt,purchasePairings);}catch{toast('Purchase complete. Explore your matching picks below.');}}$('checkout-dialog').scrollTop=0;});
+  $('checkout-confirm').onclick=()=>checkoutAction(()=>{const receipt=checkout.confirm();if(receipt.id!==completedReceipt){completedReceipt=receipt.id;lastPurchase=receipt;bridge.checkoutComplete?.(receipt);purchasePairings=window.CoupiPairings.select([...store.catalog.values()],receipt.item_ids,{maxPrice:discovery.maxPrice,excludedTypes:discovery.constraints.types.exclude});for(const id of receipt.item_ids)store.cart.delete(id);updateBag();try{voice.notifyCheckoutComplete(receipt,purchasePairings);}catch{toast('Purchase complete. Explore your matching picks below.');}}$('checkout-dialog').scrollTop=0;});
   $('close-checkout').onclick=()=>$('checkout-dialog').close();$('checkout-done').onclick=()=>$('checkout-dialog').close();
   $('checkout-dialog').addEventListener('close',()=>{if(!$('checkout-dialog').open)checkout.cancel();sync();});
   async function productAction(action,productId){const p=productId?[...displayedProducts(),...store.queue,...discovery.comparison,...purchasePairings,...store.cart.values(),...(store.detailProduct?[store.detailProduct]:[])].find(p=>String(p.id)===String(productId)):store.current;if(!p)throw Error('That product is not in the current picks, comparison, details or bag. Search first.');if(action==='try_on'&&p.preview?.available===false)return previewFailure(p);if(productId&&store.current?.id!==p.id&&discovery.products.some(x=>x.id===p.id))selectProduct(p);if($('checkout-dialog').open&&checkout.snapshot().step==='complete')$('checkout-dialog').close();if(action==='save')addToBag(p);else if(action==='skip'){if(!nextStyle())return {ok:false,action,error:'No different collection matches these preferences. Ask for a new colour or product type.'};closeDialogs();hideBridgePanel();scrollToCollection();return {ok:true,action,product:store.current,products:discovery.visible,visible_product_ids:discovery.visible.map(product=>String(product.id)),cart_count:store.cart.size,purchased:false};}else if(action==='try_on'){if(!discovery.products.some(item=>item.id===p.id))recommend([p],'',{productType:p.productType,category:p.category});selectProduct(p);closeDialogs();backToCamera();if(!(await tryOn(p))?.ok)throw Error('The product preview was cancelled.');}else if(action==='details'||action==='browse')productDetails(p);else throw Error('Unsupported product action.');return {ok:true,action,product:p,cart_count:store.cart.size,purchased:false,preview_is_approximate:true,...(action==='try_on'?{preview_kind:previewMeta?.kind,shade_estimated:previewMeta?.shadeEstimated}:{} )};}
@@ -507,6 +511,7 @@
   $('retry-call').onclick=async()=>{text('retry-call','Retry');if(voice.call?.ready){if(entryCameraWanted)await startCamera();else notice('');return;}voice.end();screen('incoming');answer();};
   $('toggle-camera').onclick=async()=>{if(cameraBusy||formatBusy)return;if(camera.running){entryCameraWanted=false;camera.stop(false);await setMode('none');cameraUI();}else{entryCameraWanted=true;await startCamera();}selectEntry();};
   $('flip-camera').onclick=async()=>{if(cameraBusy||!camera.running)return;const token=generation,previous=facingMode;facingMode=previous==='user'?'environment':'user';const ok=await startCamera({strictFacing:true});if(token!==generation)return;if(!ok){facingMode=previous;const restored=await startCamera();if(token!==generation)return;notice(restored?'This device has no available camera on the other side. Your original camera is still on.':'The other camera is unavailable. Tap Camera to reconnect.',!restored);}else{notice('');toast(facingMode==='environment'?'Back camera':'Front camera');}};
+  $('focus-add').onclick=()=>addToBag(trying||store.current);$('entry-bag').onclick=openBag;
   $('focus-toggle').onclick=()=>{controlsExpanded=!controlsExpanded;updateFocusUI();};
   $('focus-product').onclick=()=>openCatalog();
   $('vision-consent').onchange=()=>{visionWanted=$('vision-consent').checked;selectEntry();updateVisionUI();updateFocusUI();};
@@ -600,7 +605,7 @@
     return true;
   }
   bridge.subscribe(event=>{
-    if(event.state==='personalization-context')return;
+    if(event.state==='personalization-context'){useProfileBag(event.context?.profileId);return;}
     if(!['active','connecting'].includes(phase))return;
     const root=$('validated-call-content');
     if(event.state==='pending'){
@@ -654,5 +659,5 @@
   const visionTimer=setInterval(()=>{updateVisionUI();shareSnapshot('interval');},3000);
   window.addEventListener('pagehide',()=>{clearInterval(timer);clearInterval(visionTimer);endCall('Call ended',false);});document.addEventListener('visibilitychange',()=>{if(!document.hidden||choosingImage)return;if(['active','connecting'].includes(phase))endCall('Call paused while you were away. Tap to call again.');else if(phase==='browse'&&camera.running){camera.stop(false);cameraUI();}});
   for(const d of [$('cart-dialog'),$('details-dialog'),$('catalog-dialog'),$('collections-dialog'),$('compare-dialog'),$('chat-history-dialog')])d.addEventListener('close',()=>{sync();});
-  $('mute-call').disabled=true;$('text-input').disabled=false;$('text-toggle').disabled=false;$('chat-send').disabled=true;$('flip-camera').disabled=true;selectEntry('video');formatUI();updateBag();updateVisionUI();updateFocusUI();renderInline();setCollectionView(false);
+  $('mute-call').disabled=true;$('text-input').disabled=false;$('text-toggle').disabled=false;$('chat-send').disabled=true;$('flip-camera').disabled=true;selectEntry('video');formatUI();useProfileBag(bridge.personalizationContext?.().profileId);updateBag();updateVisionUI();updateFocusUI();renderInline();setCollectionView(false);
 })();

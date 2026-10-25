@@ -32,6 +32,8 @@ function fixture(t,options={}){
   for(const match of html.matchAll(/<dialog\b[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/dialog>/g))for(const child of match[2].matchAll(/\bid="([^"]+)"/g)){if(nodes.has(child[1]))nodes.get(child[1]).parentElement=nodes.get(match[1]);}
   const events=new Element(),docEvents=new Element(),sequence=[],intervals=[],messages=[],storage=options.storage||new Map();
   const localStorage=options.blockStorage?{getItem(){throw Error('Storage blocked');},setItem(){throw Error('Storage blocked');},removeItem(){throw Error('Storage blocked');}}:typeof storage.getItem==='function'?storage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value)),removeItem:key=>storage.delete(key)};
+  const sessionMemory=options.sessionStorage||new Map();
+  const sessionStorage=options.blockStorage?localStorage:typeof sessionMemory.getItem==='function'?sessionMemory:{getItem:key=>sessionMemory.get(key)??null,setItem:(key,value)=>sessionMemory.set(key,String(value)),removeItem:key=>sessionMemory.delete(key)};
   nodes.get('vision-consent').checked=true;
   let cameraStarts=0,voiceStarts=0;
   class Camera {
@@ -55,7 +57,7 @@ function fixture(t,options={}){
     clearCameraSnapshots(){this.imageClears++;this.opts.onVisionState({state:'paused'});return true;}
   }
   class Snapshots {constructor(opts){this.opts=opts;}_encode(){return {dataUrl:'data:image/jpeg;base64,AQID',width:200,height:200};}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
-  const context={window:{location:{origin:'https://coupi.test',search:options.search||'',href:'/call',assign(){}},parent:{postMessage:(data,target)=>messages.push({data,target})},COUPANG_PRODUCTS:options.catalog||catalog,localStorage,requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{head:new Element('head'),querySelectorAll:()=>[],getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,URLSearchParams,requestAnimationFrame:fn=>{fn();return 1;}};
+  const context={window:{location:{origin:'https://coupi.test',search:options.search||'',href:'/call',assign(){}},parent:{postMessage:(data,target)=>messages.push({data,target})},COUPANG_PRODUCTS:options.catalog||catalog,localStorage,sessionStorage,requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{head:new Element('head'),querySelectorAll:()=>[],getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,URLSearchParams,requestAnimationFrame:fn=>{fn();return 1;}};
   context.AbortController=AbortController;context.location=context.window.location;context.fetch=async(url,init)=>url==='/api/voice/status'?{ok:true,json:async()=>options.status||{ready:true,offline:false}}:options.fetch?options.fetch(url,init):Promise.reject(Error('Unexpected network request'));context.window.fetch=(...args)=>context.fetch(...args);
   vm.createContext(context);vm.runInContext(stateSource,context);vm.runInContext(bridgeSource,context);for(const moduleSource of moduleSources)vm.runInContext(moduleSource,context);vm.runInContext(source,context);
   const mobile=context.window.NookMobile;
@@ -402,6 +404,19 @@ test('browse card action opens grounded details; saving only adds to local bag',
   actions[0].onclick();assert.equal(f.nodes.get('detail-title').textContent,p.name);
 });
 
+
+test('try-on keeps add-to-bag available and a restored bag can open checkout before a new call',async t=>{
+  const f=fixture(t);await startShopping(f);const p=f.store.current;
+  await f.voice.opts.onProductAction('try_on',p.id);
+  assert.equal(f.nodes.get('focus-shopping').hidden,false);
+  f.nodes.get('focus-add').onclick();assert.equal(f.store.cart.size,1);
+  assert.equal(f.nodes.get('focus-add').textContent,'In bag');
+  const returning=fixture(t,{sessionStorage:f.context.window.sessionStorage});
+  assert.equal(returning.store.cart.size,1);assert.equal(returning.nodes.get('entry-bag').hidden,false);
+  returning.nodes.get('entry-bag').onclick();assert.equal(returning.nodes.get('cart-dialog').open,true);
+  returning.nodes.get('cart-checkout').onclick();assert.equal(returning.nodes.get('checkout-dialog').open,true);
+  assert.equal(returning.voiceStarts,0);assert.equal(returning.nodes.get('checkout-next').disabled,false);
+});
 
 test('old camera-permission completion cannot start voice inside a newer pending call',async t=>{
   const first=deferred(),second=deferred();const f=fixture(t,{cameraPermission:n=>n===1?first.promise:second.promise});
