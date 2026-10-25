@@ -47,3 +47,7 @@ html,body { height:100%; min-height:0; overflow:hidden; }
   .coupi-call-page .incoming-person h1{font-size:25px!important}
   .coupi-call-page .incoming-promise{display:none}
 }
+
+.checked-explanation{margin:8px 0;font-size:12px;line-height:1.5}
+.checked-explanation>summary{min-height:40px;padding:10px 0;color:#346f76;cursor:pointer}
+#validated-call-status:empty{display:none}

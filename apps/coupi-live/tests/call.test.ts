@@ -14,6 +14,7 @@ import approvedProducts from '../data/teammate-catalog.json';
 import type {CallResponse} from '../lib/journey-types';
 import type {Profile} from '../lib/types';
 import {remember} from '../lib/memory';
+import {publicCallResult} from '../lib/call-bridge';
 
 type Json=Record<string,any>;
 const origin='http://localhost:3007';
@@ -203,6 +204,36 @@ test('a fresh shopping need is fulfilled in one call without consuming the first
     assert.equal(duplicate.body.profile.xp,result.body.profile.xp);assert.equal(calls.length,1);
     const conflict=await browser.send({...request,message:'A different item now.'});
     assert.equal(conflict.status,409);assert.equal(conflict.body.code,'CALL_REQUEST_CONFLICT');assert.equal(calls.length,1);
+  });
+});
+
+test('text-only discovery returns two sourced listings with prices and no forced review caveat',{concurrency:false},async()=>{
+  await fixture(async({calls,setOutput})=>{
+    const first=getSku('7612276799')!,second=getSku('6274724147')!;
+    const reply=`Try ${first.name}, listed at ₩${first.price.toLocaleString('en-US')}, or ${second.name}, listed at ₩${second.price.toLocaleString('en-US')}. Which would you like to try?`;
+    setOutput(()=>({intent:'buy',message:reply,memories:[],inventory:null,verdict:{pickSkuId:first.id,reason:'Two glasses listings to explore.',dissent:'',citations:[],runnerUpSkuId:second.id,whyRunnerUpLost:'',clarifyingQuestion:null}}));
+    const result=(await new Browser().send({action:'message',requestId:'browse-glasses',message:'Show me glasses.'})).body;
+    assert.equal(result.status,'ok');assert.equal(result.question,null);assert.equal(result.message,reply);assert.equal(calls.length,1);
+    assert.equal(result.verdict?.dissent,'');assert.equal(result.verdict?.whyRunnerUpLost,'');
+    const cards=publicCallResult(result).products;
+    assert.deepEqual(cards.map(card=>({id:card.id,price:card.price})),[{id:first.id,price:first.price},{id:second.id,price:second.price}]);
+    assert.equal(result.profile.decisions.length,1,'The alternate listing is shown without adding another pending decision');
+    assert(cards.every(card=>card.delivery==='Delivery unknown · check the sourced listing'),'Suppressing generic narration must not conceal the underlying listing facts');
+    assert.match(calls[0].body.instructions,/do not append generic warnings/);
+    assert(!calls[0].body.input[0].content.some((part:Json)=>part.type==='input_image'));
+    assert.match(calls[0].body.instructions,/a product type, occasion, or useful context is enough/);
+    assert.match(calls[0].body.instructions,/Do not ask for images to recommend ordinary catalog products/);
+    assert.equal(calls[0].body.text.format.schema.properties.message.maxLength,400);
+  });
+});
+
+test('an explicitly requested fit or delivery guarantee retains its material uncertainty',{concurrency:false},async()=>{
+  await fixture(async({setOutput,calls})=>{
+    const reply='These listings do not confirm over-glasses fit or next-day delivery. Would you like to see the available frames?';
+    setOutput(()=>({intent:'clarify',message:reply,memories:[],verdict:null,inventory:null}));
+    const result=(await new Browser().send({action:'message',requestId:'specific-fit-delivery',message:'I need glasses guaranteed to fit over my prescription glasses and arrive tomorrow.'})).body;
+    assert.equal(result.message,reply);assert.equal(result.question,reply);assert.deepEqual(result.proposedSkuIds,[]);assert.equal(calls.length,1);
+    assert.deepEqual(publicCallResult(result).products,[],'Unavailable guarantees must not turn into claimed matches');
   });
 });
 

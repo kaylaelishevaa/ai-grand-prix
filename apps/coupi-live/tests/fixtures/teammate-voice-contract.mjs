@@ -162,7 +162,7 @@ test('mobile call tools support local card actions, overlay clearing and bounded
   const action=config.tools.find(t=>t.name==='product_action');
   assert.deepEqual(action.parameters.properties.action.enum,['skip','save','try_on','details','browse']);
   assert.doesNotMatch(config.instructions,/AUDIO and textual UI context only|CANNOT see the live camera/);
-  assert.match(config.instructions,/ONE short sentence/);
+  assert.match(config.instructions,/at most two short sentences, normally under 35 words/);
   assert.match(config.instructions,/reversible demo-cart|reversible|demo.cart action|local demo cart|local demo-cart/);
 });
 

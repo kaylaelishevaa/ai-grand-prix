@@ -1033,12 +1033,12 @@ test('checked call cards use returned exact products, citations and safe fields 
   const f=fixture(t);await f.nodes.get('answer-call').onclick();
   f.voice.opts.onTranscript({role:'user',key:'shop',text:'red socks tomorrow',final:true});
   const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
-  assert.equal(f.nodes.get('validated-call').dataset.state,'pending');assert.equal(f.nodes.get('validated-call').hidden,false);
+  assert.equal(f.nodes.get('validated-call').dataset.state,'pending');assert.equal(f.nodes.get('validated-call').hidden,true);assert.equal(f.nodes.get('call-status').textContent,'Thinking…');
   let resolved=false;const waiting=f.voice.opts.onResolveCall().then(result=>{resolved=true;return result;});
   const result=checkedResult();result.profile={secret:'PRIVATE_PROFILE'};result.diary='PRIVATE_DIARY';result.products.push({id:'rogue',name:'UNVALIDATED_PRODUCT',price:1});
   f.events.emit('message',{origin:'https://attacker.test',source:f.context.window.parent,data:{type:'coupi-call-result',id,result}});await tick();assert.equal(resolved,false);
   parentResult(f,id,result);const safe=await waiting;const serialized=JSON.stringify(safe);assert(!serialized.includes('PRIVATE_'));assert(!serialized.includes('UNVALIDATED_PRODUCT'));
-  const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='Red training socks'));assert(nodes.some(n=>n.textContent==='PENDING YOUR APPROVAL · nothing ordered'));assert(nodes.some(n=>n.textContent==='Two seeded reviews describe pilling.'));
+  const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='Red training socks'));assert(!nodes.some(n=>n.textContent==='PENDING YOUR APPROVAL · nothing ordered'));assert(nodes.some(n=>n.tagName==='DETAILS'&&!n.open));assert(nodes.some(n=>n.textContent==='Two seeded reviews describe pilling.'));
   f.context.fetch=async(_url,init)=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:JSON.parse(init.body).skuId})});
   await nodes.find(n=>n.textContent==='review 1 ↗').onclick();
   const opened=f.messages.find(row=>row.data.type==='coupi-live-call-product').data;assert.equal(opened.skuId,'socks');assert.equal(opened.callId,id);assert.equal(opened.reviewId,'socks-r-15');
@@ -1051,7 +1051,7 @@ test('checked inventories keep uncertainty, proposed cards and exact numeric ide
   parentResult(f,id,{...checkedResult(),verdict:undefined,inventory:{items:[{name:'milk',quantity:'one carton',status:'low'}],lowOrMissing:[{name:'greens',reason:'not visible',confidence:'low'}],uncertainties:['The back shelf is obscured.']},proposedSkuIds:['9999999998'],products:[{id:'9999999998',name:'Sourced reference',price:10000,priceBasis:'historical-reference',image:'/live-call/products/example.jpg',delivery:'Current delivery unknown'}]});
   const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='milk · one carton — low'));assert(nodes.some(n=>n.textContent==='The back shelf is obscured.'));assert(nodes.some(n=>n.textContent==='REFERENCE PRICE · confirm current price on Coupang'));
   f.context.fetch=async()=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'9999999998'})});
-  await nodes.find(n=>n.textContent==='Details & approval').onclick();assert.equal(f.messages.find(row=>row.data.type==='coupi-live-call-product').data.skuId,'9999999998');
+  await nodes.find(n=>n.textContent==='Details').onclick();assert.equal(f.messages.find(row=>row.data.type==='coupi-live-call-product').data.skuId,'9999999998');
 });
 
 test('retry reopens the same checked turn while unknown or stale results cannot replace the latest card',async t=>{
@@ -1138,7 +1138,7 @@ test('checked approved products open the fixed six-to-ten collection with real i
   f.voice.opts.onTranscript({role:'user',key:'local-checked',text:'Find me lipstick',final:true});const id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
   parentResult(f,id,checkedCatalogResult(pick));assert.equal(f.nodes.get('bridge-panel').hidden,true);assert.equal(f.nodes.get('product-zone').hidden,false);
   assert.equal(f.store.current.id,pick.id);assert.equal(f.nodes.get('product-image').src,pick.image);assert.equal(f.nodes.get('product-title').textContent,pick.name);assert.equal(inlineRows(f).length,6);
-  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.match(f.nodes.get('product-selected-note').textContent,/checked pick/);
+  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.match(f.nodes.get('product-selected-note').textContent,/Recommended/);
   f.nodes.get('inline-more').onclick();assert.equal(inlineRows(f).length,10);
   const selected=inlineRows(f).find(row=>row.dataset.id===String(pick.id));inlineAction(selected,'Details').onclick();assert.equal(f.nodes.get('details-dialog').open,true);
   assert.match(f.nodes.get('detail-body').textContent,/A sourced option for your request/);assert.match(f.nodes.get('detail-body').textContent,/Check the exact shade/);
@@ -1160,7 +1160,7 @@ test('a checked selection with an unparsed request stays exact, and blocked reco
   f.voice.opts.onTranscript({role:'user',key:'exact',text:'A mysterious style that works for me',final:true});let id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
   parentResult(f,id,checkedCatalogResult(pick));assert.deepEqual(Array.from(f.discovery.products,p=>p.id),[pick.id]);
   f.voice.opts.onTranscript({role:'user',key:'blocked',text:'Another choice',final:true});id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
-  parentResult(f,id,{...checkedCatalogResult(pick),status:'blocked'});assert.equal(f.nodes.get('bridge-panel').hidden,false);assert.equal(f.nodes.get('product-zone').hidden,true);
+  parentResult(f,id,{...checkedCatalogResult(pick),status:'blocked'});assert.equal(f.nodes.get('bridge-panel').hidden,true);assert.equal(f.store.current.id,pick.id);assert.equal(f.nodes.get('call-notice').hidden,false);
 });
 
 
@@ -1173,4 +1173,16 @@ test('identical transcript keys and words deduplicate within a call but receive 
   const repeated=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');assert.equal(repeated.length,2);assert.notEqual(repeated[0].data.id,repeated[1].data.id);
   const reloaded=fixture(t);await reloaded.nodes.get('entry-chat').onclick();reloaded.voice.opts.onTranscript(entry);
   const fresh=reloaded.messages.find(row=>row.data.type==='coupi-live-call-transcript');assert.notEqual(fresh.data.id,repeated[0].data.id);assert.notEqual(fresh.data.id,repeated[1].data.id);
+});
+
+
+test('pending and clarification replies keep the visible product window and never show a duplicate validation panel',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lipstick'));
+  const selected=f.store.current,image=f.nodes.get('product-image').src,rows=inlineRows(f).map(row=>row.dataset.id),scroller=f.nodes.get('product-panel-scroll');scroller.scrollTop=120;
+  f.voice.opts.onTranscript({role:'user',key:'question-only',text:'Which color would you recommend?',final:true});const id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
+  assert.equal(f.nodes.get('bridge-panel').hidden,true);assert.equal(f.nodes.get('product-zone').hidden,false);assert.equal(f.nodes.get('call-status').textContent,'Thinking…');assert.equal(f.nodes.get('product-image').src,image);assert.equal(scroller.scrollTop,120);
+  parentResult(f,id,{...checkedResult(),verdict:undefined,proposedSkuIds:[],products:[],message:'Do you prefer pink or red?',question:'Do you prefer pink or red?'});
+  assert.equal(f.nodes.get('bridge-panel').hidden,true);assert.equal(f.nodes.get('validated-call-content').children.length,0);assert.equal(f.store.current,selected);assert.deepEqual(inlineRows(f).map(row=>row.dataset.id),rows);
+  f.voice.opts.onTranscript({role:'assistant',key:'short-reply',text:'Do you prefer pink or red?',final:true});assert.equal(f.store.messages.filter(message=>message.text==='Do you prefer pink or red?').length,1);
+  assert.doesNotMatch(source,/CHECKED FOR YOU|CHECKING YOUR WORDS|Coupi’s checked pick/);
 });

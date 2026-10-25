@@ -666,7 +666,7 @@ test('embedded voice waits for the same checked turn and strips private fields b
   assert.equal(f.voice.sendText('red socks tomorrow'),true);await tick();assert.equal(countReplies(f.channel),1);assert.equal(resolutions,1);
   wait.resolve({status:'ok',message:'One red pair.',conversationMode:'request',profile:{secret:'PRIVATE_PROFILE'},diary:'PRIVATE_DIARY',verdict:{pickSkuId:'socks',reason:'Under your budget',dissent:'Some pilling reported.',citations:['socks-r-15'],runnerUpSkuId:null,whyRunnerUpLost:'',clarifyingQuestion:null},products:[{skuId:'socks',name:'Red socks',price:6900,delivery:'Demo tomorrow'}],proposedSkuIds:['socks']});
   await tick();await tick();assert.equal(countReplies(f.channel),2);
-  const context=f.channel.sent.find(event=>JSON.stringify(event).includes('Validated app result'));assert(context);assert(JSON.stringify(context).includes('socks-r-15'));assert(!JSON.stringify(context).includes('PRIVATE_'));assert.equal(f.calls.filter(([url])=>url==='/api/call').length,0);
+  const context=f.channel.sent.find(event=>JSON.stringify(event).includes('Validated app result'));assert(context);assert(JSON.stringify(context).includes('socks-r-15'));assert(!JSON.stringify(context).includes('PRIVATE_'));assert.match(JSON.stringify(context),/name up to two recommended listings and their exact returned prices/);assert.match(JSON.stringify(context),/Use result.message as the complete reply/);assert.doesNotMatch(JSON.stringify(context),/Preserve its uncertainty, dissent/);assert.equal(f.calls.filter(([url])=>url==='/api/call').length,0);
 });
 
 test('actual audio transcriptions deduplicate checked resolution and an ended call never speaks late results',async t=>{
