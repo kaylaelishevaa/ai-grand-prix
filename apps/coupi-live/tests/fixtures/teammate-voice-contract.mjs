@@ -12,7 +12,9 @@ test('English and Korean retrieval stay in real sourced catalog, honor reference
     const result = searchProducts({query,category:'makeup',max_price:50000});
     assert.ok(result.products.length > 0);
     assert.equal(result.current_prices_verified,false);
-    assert.match(result.message,/historical/);
+    assert.match(result.catalog_scope,/not a live search or stock feed/);
+    assert.ok(result.products.every(product=>product.checkedAt&&product.sourceNote),'Freshness remains in the sourced product details');
+    assert.match(result.message,/listed price/);
     assert.ok(result.products.every(p=>catalog.some(c=>c.id===p.id) && p.category==='makeup' && p.price<=50000));
   }
   const desk = searchProducts({query:'집게 조명',category:'desk',max_price:null});
@@ -100,7 +102,10 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.match(config.instructions,/English request containing Korean proper names is valid/);
   assert.equal(config.audio.output.voice,'marin');
   assert.equal(config.audio.input.turn_detection.interrupt_response,true);
-  assert.deepEqual(config.tools.map(t=>t.name).sort(),['draft_preferences','skip_personalization','resolve_shopping_request','search_products','set_tryon','product_action','look_at_camera','search_world_products','open_world_product','start_checkout'].sort());
+  assert.equal(config.audio.input.turn_detection.create_response,true);
+  assert.doesNotMatch(config.instructions,/CHECKED CALL BRIDGE OVERRIDE/);
+  assert.match(config.instructions,/Hi Kayleen! What can I help you find today/);
+  assert.deepEqual(config.tools.map(t=>t.name).sort(),['draft_preferences','skip_personalization','search_products','set_tryon','product_action','look_at_camera','search_world_products','open_world_product','start_checkout'].sort());
 });
 
 test('upstream errors, invalid answers, and network exceptions never expose raw details', async () => {

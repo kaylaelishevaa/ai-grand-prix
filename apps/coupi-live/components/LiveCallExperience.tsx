@@ -30,8 +30,9 @@ export default function LiveCallExperience({profile,visible=true,...callbacks}:C
   </section>;
 }
 
-/** Voice, camera and text start directly with the same checked shopping flow. */
+/** Ordinary voice, camera and text use direct Realtime tools; first-call discovery has its own controller. */
 export function LiveCallController({profile,frame,before,after,onReady,onProfile,onClose,onOpenProduct,onComplete}:CallCallbacks&{profile:Profile;frame:RefObject<HTMLIFrameElement|null>;before:HTMLElement;after:HTMLElement;onReady:(ready:boolean)=>void}) {
+  const directRealtime=true;
   const childWindow=useRef<Window|null>(null),lifecycle=useRef(new LiveCallLifecycle());
   const latest=useRef({profile,onProfile,onClose,onOpenProduct,onComplete});latest.current={profile:profile.id!==latest.current.profile.id||profile.revision>=latest.current.profile.revision?profile:latest.current.profile,onProfile,onClose,onOpenProduct,onComplete};
   const writes=useRef(Promise.resolve()),seen=useRef(new Set<string>()),results=useRef(new Map<string,CallResponse>()),mounted=useRef(true);
@@ -107,7 +108,9 @@ export function LiveCallController({profile,frame,before,after,onReady,onProfile
           latest.current.onOpenProduct(message.skuId,verdict,citation);
         });return;
       }
-      if(message.type!=='coupi-live-call-transcript')return;
+      // Older iframe code may still forward transcripts. Ordinary calls must never
+      // trigger a second model request or mutate the profile through the verdict service.
+      if(message.type!=='coupi-live-call-transcript'||directRealtime)return;
       try{const turn=parseLiveCallTurn(message);if(turn)enqueue(turn);}catch(cause){const error=cause instanceof Error?cause.message:'Try sharing that frame again.';setError(error);if(typeof message.id==='string'&&message.id.length<=90)post({type:'coupi-call-error',id:message.id,error});}
     }
     window.addEventListener('message',receive);

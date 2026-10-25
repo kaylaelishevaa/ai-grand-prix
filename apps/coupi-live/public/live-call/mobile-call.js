@@ -8,6 +8,7 @@
   let personalization=null;
   const bridge=window.CoupiCallBridge;
   const params=new URLSearchParams(window.location.search||'');
+  const checkedShopping=params.get('checked')==='1'||params.get('interview')==='1';
   const requiresContext=params.get('embedded')==='1'||params.get('interview')==='1'||params.get('intent')==='personalize';
   let availabilityReady=false,availabilityChecking=false,checkedTurnId='',interviewContext=null,bridgePanelVisible=false;
   const appPrompts=new Set(),uploadedPhotos=new Map();
@@ -113,7 +114,7 @@
   function shareSnapshot(reason='interval'){if(!visionEnabled())return false;const frame=snapshots.capture(reason);return frame?voice.sendCameraSnapshot(frame):false;}
 
   function forwardTurn(entry,photo){
-    if(entry.delivery==='failed'||entry.error||entry.localAction===true)return;
+    if(!checkedShopping||entry.delivery==='failed'||entry.error||entry.localAction===true)return;
     const upload=entry.image||uploadedPhotos.get(entry.key);
     if(entry.image)uploadedPhotos.set(entry.key,entry.image);
     if(entry.role!=='user'||!entry.final||!upload){bridge.transcript(entry,photo);return;}
@@ -160,20 +161,20 @@
   }});
   voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:personalization.greeting,getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
-    onUserTurnStart:()=>{bridgeTurnEpoch++;pendingPhoto=Promise.resolve();checkedTurnId='';bridge.beginTurn();},onResolveCall:async()=>{await pendingPhoto;return bridge.resolveLatest();},
+    directShopping:!checkedShopping,...(checkedShopping?{onUserTurnStart:()=>{bridgeTurnEpoch++;pendingPhoto=Promise.resolve();checkedTurnId='';bridge.beginTurn();},onResolveCall:async()=>{await pendingPhoto;return bridge.resolveLatest();}}:{}),
     onWorldRecommendations:(list,message)=>worldRecommendations(list,message),onWorldProduct:skuId=>bridge.openWorldProduct(skuId),
     onTranscript:transcript,onRecommendations:(list,message,options,status)=>{searchController?.abort();searchController=null;$('catalog-search-submit').disabled=false;$('catalog-refresh').disabled=false;if(list.some(isLiveListing))receiveRecommendations(list,message,options,[],status);else recommend(list,message,options);},
     onTryon:async(next,options)=>{
       const token=generation;let target=trying;
       if(next==='none'){await setMode('none');return {product_id:null,preview_kind:null};}
-      if(!camera.running)throw Error('Camera is off. Ask the shopper to tap Camera before previewing.');
+      if(!camera.running)throw Error('Tap Camera and I can show you the try-on.');
       if(next!=='makeup'&&options.color!==undefined)throw Error('The preview uses the real product photo. Choose another product for a different colour.');
       if(!trying||trying.category!==next){const p=store.current;if(!p||p.category!==next)throw Error('Choose a matching product card and try it first.');target=p;if(p.preview?.available===false)return previewFailure(p);if(!(await tryOn(p))?.ok)throw Error('The product preview was cancelled.');}
       if(token!==generation||!trying||mode!==next||trying.id!==target?.id||camera.product?.id!==target?.id)throw Error('The product preview changed or the call ended.');
       if(previewMeta?.finish==='clear-balm'&&options.color!==undefined)throw Error('This balm is clear and preserves natural lip colour. Choose a tinted balm or lipstick for a colour preview.');
       camera.setOptions(options);cameraUI();return {product_id:trying.id,product_type:trying.productType,preview_kind:previewMeta?.kind,shade_estimated:previewMeta?.shadeEstimated,preview_is_approximate:true};
     },
-    onProductAction:async(action,productId)=>{if(action==='try_on'&&!camera.running)throw Error('Camera is off. Ask the shopper to tap Camera before previewing.');return productAction(action,productId);},
+    onProductAction:async(action,productId)=>{if(action==='try_on'&&!camera.running)throw Error('Tap Camera and I can show you the try-on.');return productAction(action,productId);},
     onCheckout:request=>openCheckout(request),
     onPreferences:request=>{if(phase!=='active'||!personalization.active)throw Error('Start the optional introduction before shaping your worlds.');return personalization.handle(request);},
     onTranscriptionState:state=>{if(state.compatibilityMode)notice('Using compatible captions. Speak clearly or type if a word looks wrong.');},
@@ -405,7 +406,7 @@
       products=discovery.comparison;
     }else if(scope==='products'){
       if(!Array.isArray(productIds)||!productIds.length||productIds.length>10)throw Error('Choose between one and ten exact product IDs.');
-      const visible=new Map([...store.queue,...discovery.visible,...discovery.comparison,...purchasePairings,...store.cart.values(),...($('details-dialog').open&&store.detailProduct?[store.detailProduct]:[])].map(p=>[String(p.id),p]));
+      const visible=new Map([...displayedProducts(),...store.queue,...discovery.visible,...discovery.comparison,...purchasePairings,...store.cart.values(),...($('details-dialog').open&&store.detailProduct?[store.detailProduct]:[])].map(p=>[String(p.id),p]));
       products=productIds.map(id=>{if(typeof id!=='string'||!visible.has(id))throw Error('That product is not in the current picks or bag. Ask which products to buy.');return visible.get(id);});
     }else throw Error('Choose the selected product, comparison, exact products, or cart.');
     if(!products.length)throw Error(scope==='cart'?'Your bag is empty. Add a product first.':'Choose a product first.');

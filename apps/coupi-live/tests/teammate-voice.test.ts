@@ -51,6 +51,8 @@ test('realtime context contains only surviving allowed memories and quarantine a
   profile=remember(profile,{id:'safe',text:'I prefer quiet evenings and warm neutrals.',source:'from our first call',confidence:0.95,kind:'call'});
   profile=remember(profile,{id:'private',text:'skin cream is sensitive',source:'from your call',confidence:0.95,kind:'call'});
   const before=teammateProfileContext(profile);
+  assert.equal(before.callMode,'direct');assert.equal(before.budget,profile.budget);
+  const direct=sessionConfiguration({},before);assert.match(direct.instructions,/I prefer quiet evenings and warm neutrals/);assert.doesNotMatch(direct.instructions,/CHECKED CALL BRIDGE OVERRIDE/);assert(!direct.tools.some(tool=>tool.name==='resolve_shopping_request'));
   assert(before.memoryLines.some(line=>line.text.includes('quiet evenings')));
   assert(!JSON.stringify(before).includes('skin cream'));
   assert(!('owned' in before)&&!('quarantine' in before)&&!('decisions' in before));
@@ -63,25 +65,36 @@ test('realtime context contains only surviving allowed memories and quarantine a
   assert(!eligibleTeammateProducts(profile).some(product=>product.id===chosen.id));
 });
 
-test('Realtime config starts shopping despite unfinished interview history and waits for checked turns',async()=>{
+test('direct Realtime keeps profile context and automatic replies without waiting for backend verdicts',async()=>{
   const profile=createProfile('first-voice-context');
   for(const count of [0,2,4]){
     profile.journey={hatched:true,interviewCount:count,interviewComplete:false,nextQuestion:FIRST_CALL_QUESTIONS[count],districts:[],processedCallIds:[]};
     const context=teammateProfileContext(profile),config=sessionConfiguration({OPENAI_REALTIME_MODEL:'test-realtime'},context);
-    assert(config.tools.some(tool=>tool.name==='resolve_shopping_request'));assert(config.tools.some(tool=>tool.name==='look_at_camera'));assert.equal((config.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,false);assert.equal(context.interview.answeredCount,count);assert.equal(context.interview.question,'');
-    assert.doesNotMatch(config.instructions,/FIRST CALL OVERRIDE|warm reverse-onboarding interview/);assert.match(config.instructions,/Every public call starts directly with shopping/);
+    assert(!config.tools.some(tool=>tool.name==='resolve_shopping_request'));assert(config.tools.some(tool=>tool.name==='look_at_camera'));assert.equal((config.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,true);assert.equal(context.interview.answeredCount,count);assert.equal(context.interview.question,'');
+    assert.doesNotMatch(config.instructions,/FIRST CALL OVERRIDE|warm reverse-onboarding interview|CHECKED CALL BRIDGE OVERRIDE/);assert.match(config.instructions,/DIRECT SHOPPING/);assert.match(config.instructions,/Hi Kayleen! What can I help you find today/);assert.equal(context.callMode,'direct');assert.match(config.instructions,/Every public call starts directly with shopping/);
     assert(config.instructions.includes(JSON.stringify({active:false,answeredCount:count,question:'',questions:[]})));
     assert.equal(context.personalization.active,false);assert.equal(context.personalization.draft_pending,false);
   }
   let requests=0;
   const context=teammateProfileContext(profile),handler=createVoiceHandler({profileContext:context,fetchImpl:(async(_url,init)=>{
     requests++;const transmitted=JSON.parse(String((init!.body as FormData).get('session')));
-    assert(transmitted.tools.some((tool:{name:string})=>tool.name==='resolve_shopping_request'));assert.equal(transmitted.audio.input.turn_detection.create_response,false);assert(!transmitted.instructions.includes(FIRST_CALL_QUESTIONS[4]));assert.doesNotMatch(transmitted.instructions,/FIRST CALL OVERRIDE/);assert.match(transmitted.instructions,/Every public call starts directly with shopping/);
+    assert(!transmitted.tools.some((tool:{name:string})=>tool.name==='resolve_shopping_request'));assert.equal(transmitted.audio.input.turn_detection.create_response,true);assert.doesNotMatch(transmitted.instructions,/CHECKED CALL BRIDGE OVERRIDE/);assert.match(transmitted.instructions,/DIRECT SHOPPING/);assert(!transmitted.instructions.includes(FIRST_CALL_QUESTIONS[4]));assert.doesNotMatch(transmitted.instructions,/FIRST CALL OVERRIDE/);assert.match(transmitted.instructions,/Every public call starts directly with shopping/);
     return new Response(answer,{headers:{'content-type':'application/sdp'}});
   }) as typeof fetch});
   assert.equal((await handler(post('/api/voice/session',offer),{OPENAI_API_KEY:'TEST_ONLY_FIRST_INTERVIEW',OPENAI_REALTIME_MODEL:'test-realtime'}))!.status,200);assert.equal(requests,1);
   profile.journey!.interviewComplete=true;profile.journey!.interviewCount=5;
   const ongoing=sessionConfiguration({},teammateProfileContext(profile));assert(ongoing.tools.some(tool=>tool.name==='search_world_products'));assert(ongoing.tools.some(tool=>tool.name==='look_at_camera'));assert.doesNotMatch(ongoing.instructions,/FIRST CALL OVERRIDE/);
+});
+
+test('explicit legacy checked sessions retain their gate without changing direct-session tools',()=>{
+  const context=teammateProfileContext(createProfile('two-call-modes'));
+  const checked=sessionConfiguration({},{...context,callMode:'checked'}),direct=sessionConfiguration({},context);
+  assert.equal((checked.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,false);
+  assert(checked.tools.some(tool=>tool.name==='resolve_shopping_request'));assert.match(checked.instructions,/CHECKED CALL BRIDGE OVERRIDE/);assert.doesNotMatch(checked.instructions,/DIRECT SHOPPING:/);
+  assert.equal((direct.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,true);
+  assert(!direct.tools.some(tool=>tool.name==='resolve_shopping_request'));
+  for(const name of ['search_products','product_action','set_tryon','start_checkout','look_at_camera','open_world_product'])assert(direct.tools.some(tool=>tool.name===name),name+' remains immediately available');
+  assert.match(direct.instructions,/actions on already shown cards use product_action or start_checkout without searching again/);
 });
 
 test('offline voice refuses a valid SDP before fetch or key use while local search stays available',async()=>{
@@ -135,7 +148,7 @@ test('Next voice routes use server-only credentials, persist cookies, refresh de
   const previous=Object.fromEntries(names.map(name=>[name,process.env[name]]));
   const oldFetch=globalThis.fetch,oldInfo=console.info;
   process.env.COUPI_DATA_DIR=root;process.env.OPENAI_API_KEY='fake-voice-server-only';process.env.OPENAI_REALTIME_MODEL='realtime-test-model';process.env.DEMO_OFFLINE='0';
-  const captured:{instructions:string;model:string}[]=[];
+  const captured:{instructions:string;model:string;tools:{name:string}[];audio:{input:{turn_detection:{create_response:boolean}}}}[]=[];
   globalThis.fetch=(async(url,init)=>{
     assert.equal(url,'https://api.openai.com/v1/realtime/calls');
     assert.equal(new Headers(init?.headers).get('authorization'),'Bearer fake-voice-server-only');
@@ -161,6 +174,7 @@ test('Next voice routes use server-only credentials, persist cookies, refresh de
     assert.equal(session.status,200);assert.equal(session.headers.get('content-type'),'application/sdp');assert.equal(await session.text(),answer);
     assert.equal(captured.length,1);assert.equal(captured[0].model,'realtime-test-model');
     assert.match(captured[0].instructions,/I prefer warm neutrals/);
+    assert.equal(captured[0].audio.input.turn_detection.create_response,true);assert(!captured[0].tools.some(tool=>tool.name==='resolve_shopping_request'));assert.doesNotMatch(captured[0].instructions,/CHECKED CALL BRIDGE OVERRIDE/);
     assert.doesNotMatch(captured[0].instructions,/fake-voice-server-only|acquiredAt|personal-care/);
     assert.match(captured[0].instructions,/separate from synthetic evidence/);
     const memory=learned.profile.memoryLines.find(line=>line.id==='call:voice-memory')!;

@@ -386,8 +386,8 @@ test('camera-off during product loading clears a stale product claim',async t=>{
 
 test('voice cannot reactivate a camera the shopper turned off',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));await f.nodes.get('toggle-camera').onclick();const starts=f.cameraStarts;
-  await assert.rejects(f.voice.opts.onTryon('desk',{scale:1.1}),/Camera is off/);
-  await assert.rejects(f.voice.opts.onProductAction('try_on',f.store.current.id),/Camera is off/);
+  await assert.rejects(f.voice.opts.onTryon('desk',{scale:1.1}),/Tap Camera/);
+  await assert.rejects(f.voice.opts.onProductAction('try_on',f.store.current.id),/Tap Camera/);
   assert.equal(f.cameraStarts,starts);assert.equal(f.camera.running,false);
 });
 
@@ -577,7 +577,7 @@ test('live results keep the backend unavailable-preview flag and never activate 
   assert.equal(stored.preview.available,false);assert.equal(stored.preview.unavailableReason,unavailableReason);
   assert.equal(button.disabled,true);assert.equal(button.textContent,'No preview');
   await button.onclick();assert.equal(f.cameraStarts,0);assert.equal(f.camera.running,false);assert.equal(f.camera.product,undefined);
-  await assert.rejects(f.voice.opts.onProductAction('try_on',product.id),/Camera is off/);
+  await assert.rejects(f.voice.opts.onProductAction('try_on',product.id),/Tap Camera/);
   assert.equal(f.cameraStarts,0);
   await f.nodes.get('toggle-camera').onclick();
   const result=await f.voice.opts.onProductAction('try_on',product.id);
@@ -1005,7 +1005,7 @@ test('world result rows retain their simulation namespace and Details opens the 
 });
 
 test('memory bridge sends final user words only, deduplicates, and rejects foreign stop messages',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();
   f.voice.opts.onTranscript({role:'assistant',key:'a',text:'You like expensive things',final:true});
   f.voice.opts.onTranscript({role:'user',key:'u',text:'I want a quiet lamp',final:false});
   f.voice.opts.onTranscript({role:'user',key:'u',text:'I want a quiet lamp',final:true});
@@ -1018,7 +1018,7 @@ test('memory bridge sends final user words only, deduplicates, and rejects forei
 });
 
 test('final actual turns attach one consented raw frame; periodic, partial and assistant snapshots never trigger requests',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();
   f.visionTick();f.voice.opts.onTranscript({role:'assistant',key:'a1',text:'which one?',final:true});f.voice.opts.onTranscript({role:'user',key:'u1',text:'this',final:false});
   assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,0);
   for(const [i,text] of ['which one?','what do I need?','what’s missing?','this or that?'].entries())f.voice.opts.onTranscript({role:'user',key:'camera-'+i,text,final:true});
@@ -1030,7 +1030,7 @@ test('final actual turns attach one consented raw frame; periodic, partial and a
 });
 
 test('checked call cards use returned exact products, citations and safe fields without another request',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();
   f.voice.opts.onTranscript({role:'user',key:'shop',text:'red socks tomorrow',final:true});
   const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
   assert.equal(f.nodes.get('validated-call').dataset.state,'pending');assert.equal(f.nodes.get('validated-call').hidden,true);assert.equal(f.nodes.get('call-status').textContent,'Thinking…');
@@ -1046,7 +1046,7 @@ test('checked call cards use returned exact products, citations and safe fields 
 });
 
 test('checked inventories keep uncertainty, proposed cards and exact numeric identities outside the approved try-on catalog',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'scan',text:'what is missing?',final:true});
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'scan',text:'what is missing?',final:true});
   const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
   parentResult(f,id,{...checkedResult(),verdict:undefined,inventory:{items:[{name:'milk',quantity:'one carton',status:'low'}],lowOrMissing:[{name:'greens',reason:'not visible',confidence:'low'}],uncertainties:['The back shelf is obscured.']},proposedSkuIds:['9999999998'],products:[{id:'9999999998',name:'Sourced reference',price:10000,priceBasis:'historical-reference',image:'/live-call/products/example.jpg',delivery:'Current delivery unknown'}]});
   const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='milk · one carton — low'));assert(nodes.some(n=>n.textContent==='The back shelf is obscured.'));assert(nodes.some(n=>n.textContent==='REFERENCE PRICE · confirm current price on Coupang'));
@@ -1055,7 +1055,7 @@ test('checked inventories keep uncertainty, proposed cards and exact numeric ide
 });
 
 test('retry reopens the same checked turn while unknown or stale results cannot replace the latest card',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'retry',text:'socks',final:true});const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'retry',text:'socks',final:true});const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
   const emit=data=>f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data});
   emit({type:'coupi-call-error',id,error:'Connection paused.'});assert.equal(f.nodes.get('validated-call').dataset.state,'error');
   let retries=0;f.voice.resolveAppTurn=()=>{retries++;};emit({type:'coupi-call-pending',id});emit({type:'coupi-call-pending',id});assert.equal(retries,1);
@@ -1065,14 +1065,14 @@ test('retry reopens the same checked turn while unknown or stale results cannot 
 });
 
 test('bridge drops oversized frames and only eligible result products can carry local images',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();const bridge=f.context.window.CoupiCallBridge;
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();const bridge=f.context.window.CoupiCallBridge;
   const id=bridge.transcript({role:'user',key:'image-bound',text:'this one',final:true},{dataUrl:'data:image/jpeg;base64,'+'A'.repeat(22001),mime:'image/jpeg',capturedAt:new Date().toISOString()});
   assert(!('photo' in f.messages.find(row=>row.data.id===id).data));
   const result=checkedResult();result.products[0].image='https://untrusted.example/pixel';parentResult(f,id,result);const safe=await bridge.resolveLatest();assert.equal(safe.products[0].image,null);
 });
 
 test('late prior transcripts persist their actual words without replacing the current checked turn',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onUserTurnStart();
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();f.voice.opts.onUserTurnStart();
   f.voice.opts.onTranscript({role:'user',key:'current',text:'red socks',final:true});const current=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data;
   f.voice.opts.onTranscript({role:'user',key:'older',text:'a kettle',final:true,superseded:true});const older=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data;assert(!('photo' in older));assert.equal(older.text,'a kettle');
   let resolved=false;const waiting=f.voice.opts.onResolveCall().then(value=>{resolved=true;return value;});parentResult(f,older.id,{...checkedResult(),message:'OLD ANSWER'});await tick();assert.equal(resolved,false);assert.equal(f.nodes.get('validated-call').dataset.state,'pending');
@@ -1083,9 +1083,9 @@ test('late prior transcripts persist their actual words without replacing the cu
 test('embedded entry waits for its parent then starts shopping even if legacy context still contains interview questions',async t=>{
   const f=fixture(t,{search:'?embedded=1'});await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,0);
   personalizationContext(f,{count:0,question:'What makes a good weekend for you?',draftPending:true});await f.nodes.get('answer-call').onclick();
-  assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,1);assert.equal(f.voice.opts.greeting,'What do you want to buy?');assert.equal(f.voice.opts.getContext().personalization.active,false);assert.equal(f.voice.opts.getContext().personalization.draft_pending,false);
+  assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,1);assert.equal(f.voice.opts.greeting,'Hi Kayleen! What can I help you find today?');assert.equal(f.voice.opts.getContext().personalization.active,false);assert.equal(f.voice.opts.getContext().personalization.draft_pending,false);
   assert.equal(f.nodes.get('personalization-strip').hidden,true);assert.equal(f.nodes.get('update-preferences').hidden,true);assert.equal(f.nodes.get('personalization-summary-dialog')?.open||false,false);
-  f.nodes.get('end-call').onclick();await f.nodes.get('entry-chat').onclick();assert.equal(f.voice.opts.greeting,'What do you want to buy?');assert.equal(f.voice.inputMode,'text');
+  f.nodes.get('end-call').onclick();await f.nodes.get('entry-chat').onclick();assert.equal(f.voice.opts.greeting,'Hi Kayleen! What can I help you find today?');assert.equal(f.voice.inputMode,'text');
 });
 
 test('removed preference tools cannot open review while the shopping call remains available',async t=>{
@@ -1101,7 +1101,7 @@ test('offline calls request no camera or microphone even when an entry handler i
 });
 
 test('an explicitly uploaded image reaches the checked parent answer only after confirmed delivery, with camera off',async t=>{
-  const f=fixture(t);await f.nodes.get('entry-chat').onclick();const image={dataUrl:'data:image/jpeg;base64,AQID',name:'desk.jpg'};
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('entry-chat').onclick();const image={dataUrl:'data:image/jpeg;base64,AQID',name:'desk.jpg'};
   f.voice.opts.onTranscript({role:'user',key:'upload',text:'Which lamp fits?',image,final:false,delivery:'pending'});
   assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,0);
   f.voice.opts.onTranscript({role:'user',key:'failed',text:'Unsent photo',image,final:true,delivery:'failed'});
@@ -1120,7 +1120,7 @@ test('the embedded catalog and every local frontend asset resolve within its own
 
 
 test('checked answers wait for large uploaded photos to resize before resolving the exact user turn',async t=>{
-  const f=fixture(t);await f.nodes.get('entry-chat').onclick();let decode;
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('entry-chat').onclick();let decode;
   f.context.Image=class{constructor(){decode=this;this.naturalWidth=1600;this.naturalHeight=1000;}};
   f.voice.opts.onUserTurnStart();f.voice.opts.onTranscript({role:'user',key:'large-photo',text:'What fits this room?',final:true,image:{dataUrl:'data:image/png;base64,AQID'}});
   let settled=false;const answer=f.voice.opts.onResolveCall().then(value=>{settled=true;return value;});await tick();
@@ -1134,7 +1134,7 @@ test('checked answers wait for large uploaded photos to resize before resolving 
 function checkedCatalogResult(product){return {...checkedResult(),verdict:{...checkedResult().verdict,pickSkuId:String(product.id),reason:'A sourced option for your request.',dissent:'Check the exact shade and current price.',citations:[]},proposedSkuIds:[String(product.id)],products:[{id:String(product.id),name:'Server result name',price:product.price}]};}
 
 test('checked approved products open the fixed six-to-ten collection with real images, details, try-on and bag',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='lipstick'),call=f.voice.call;
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='lipstick'),call=f.voice.call;
   f.voice.opts.onTranscript({role:'user',key:'local-checked',text:'Find me lipstick',final:true});const id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
   parentResult(f,id,checkedCatalogResult(pick));assert.equal(f.nodes.get('bridge-panel').hidden,true);assert.equal(f.nodes.get('product-zone').hidden,false);
   assert.equal(f.store.current.id,pick.id);assert.equal(f.nodes.get('product-image').src,pick.image);assert.equal(f.nodes.get('product-title').textContent,pick.name);assert.equal(inlineRows(f).length,6);
@@ -1147,7 +1147,7 @@ test('checked approved products open the fixed six-to-ten collection with real i
 });
 
 test('checked local alternatives retain the spoken budget and exclusions and never absorb injected live listings',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='lipstick'&&p.price<10000&&!p.tags.includes('red'));
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='lipstick'&&p.price<10000&&!p.tags.includes('red'));
   const rogue={...pick,id:'dynamic-rogue',name:'Injected lipstick',source:'coupang_web'};f.store.catalog.set(rogue.id,rogue);f.discovery.catalog.set(rogue.id,rogue);
   f.voice.opts.onTranscript({role:'user',key:'bounded',text:'Find lipstick under 10000, not red',final:true});const id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
   parentResult(f,id,checkedCatalogResult(pick));assert(f.discovery.products.length>1);
@@ -1156,7 +1156,7 @@ test('checked local alternatives retain the spoken budget and exclusions and nev
 });
 
 test('a checked selection with an unparsed request stays exact, and blocked recommendations never unlock local cards',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='glasses');
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='glasses');
   f.voice.opts.onTranscript({role:'user',key:'exact',text:'A mysterious style that works for me',final:true});let id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
   parentResult(f,id,checkedCatalogResult(pick));assert.deepEqual(Array.from(f.discovery.products,p=>p.id),[pick.id]);
   f.voice.opts.onTranscript({role:'user',key:'blocked',text:'Another choice',final:true});id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
@@ -1166,18 +1166,18 @@ test('a checked selection with an unparsed request stays exact, and blocked reco
 
 test('identical transcript keys and words deduplicate within a call but receive fresh receipt IDs in later calls and reloads',async t=>{
   const entry={role:'user',key:'user-1',text:'Find me pink lipstick under 15000 won',final:true};
-  const f=fixture(t);await f.nodes.get('entry-chat').onclick();f.voice.opts.onTranscript(entry);f.voice.opts.onTranscript(entry);
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('entry-chat').onclick();f.voice.opts.onTranscript(entry);f.voice.opts.onTranscript(entry);
   const first=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');assert.equal(first.length,1);assert.match(first[0].data.id,/^[A-Za-z0-9:_-]{1,90}$/);
   await f.nodes.get('toggle-camera').onclick();f.voice.opts.onTranscript(entry);assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,1);
   f.nodes.get('end-call').onclick();await f.nodes.get('entry-chat').onclick();f.voice.opts.onTranscript(entry);
   const repeated=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');assert.equal(repeated.length,2);assert.notEqual(repeated[0].data.id,repeated[1].data.id);
-  const reloaded=fixture(t);await reloaded.nodes.get('entry-chat').onclick();reloaded.voice.opts.onTranscript(entry);
+  const reloaded=fixture(t,{search:'?checked=1'});await reloaded.nodes.get('entry-chat').onclick();reloaded.voice.opts.onTranscript(entry);
   const fresh=reloaded.messages.find(row=>row.data.type==='coupi-live-call-transcript');assert.notEqual(fresh.data.id,repeated[0].data.id);assert.notEqual(fresh.data.id,repeated[1].data.id);
 });
 
 
 test('pending and clarification replies keep the visible product window and never show a duplicate validation panel',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lipstick'));
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lipstick'));
   const selected=f.store.current,image=f.nodes.get('product-image').src,rows=inlineRows(f).map(row=>row.dataset.id),scroller=f.nodes.get('product-panel-scroll');scroller.scrollTop=120;
   f.voice.opts.onTranscript({role:'user',key:'question-only',text:'Which color would you recommend?',final:true});const id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
   assert.equal(f.nodes.get('bridge-panel').hidden,true);assert.equal(f.nodes.get('product-zone').hidden,false);assert.equal(f.nodes.get('call-status').textContent,'Thinking…');assert.equal(f.nodes.get('product-image').src,image);assert.equal(scroller.scrollTop,120);
@@ -1188,7 +1188,7 @@ test('pending and clarification replies keep the visible product window and neve
 });
 
 test('local try-on transcript stays in chat without becoming a new parent shopping request',async t=>{
-  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(product=>product.productType==='lipstick'));
+  const f=fixture(t,{search:'?checked=1'});await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(product=>product.productType==='lipstick'));
   const before=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,selected=f.store.current;
   f.voice.opts.onUserTurnStart();f.voice.opts.onTranscript({role:'user',key:'local-preview',text:'Try the first one',final:false});
   f.voice.opts.onTranscript({role:'user',key:'local-preview',text:'Try the first one',final:true,localAction:true});
@@ -1222,4 +1222,18 @@ test('search-modal ordinal context and try-on follow its displayed mixed-categor
   assert.equal(result.ok,true);assert.equal(String(result.product.id),order[1]);assert.equal(String(f.camera.product.id),order[1]);assert.equal(f.nodes.get('catalog-dialog').open,false);
   assert.equal(f.discovery.productType,shown[1].productType);assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,1);
   assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),Array.from(f.discovery.visible,product=>String(product.id)));
+});
+
+
+test('ordinary embedded calls use direct shopping with friendly greeting, local product actions and no checked parent requests',async t=>{
+  const f=fixture(t,{search:'?embedded=1'});personalizationContext(f,{active:false});await f.nodes.get('answer-call').onclick();
+  assert.equal(f.voice.opts.directShopping,true);assert.equal(f.voice.opts.onResolveCall,undefined);assert.equal(f.voice.opts.onUserTurnStart,undefined);
+  assert.equal(f.voice.opts.greeting,'Hi Kayleen! What can I help you find today?');
+  f.voice.opts.onTranscript({role:'user',key:'direct-search',text:'Find pink lipstick',final:true});
+  f.voice.opts.onTranscript({role:'user',key:'direct-upload',text:'Match my outfit',image:{dataUrl:'data:image/jpeg;base64,AQID',name:'outfit.jpg'},final:true,delivery:'sent'});
+  f.voice.opts.onRecommendations(catalog.filter(product=>product.productType==='lipstick'));
+  const selected=f.discovery.visible[1];assert(selected);const action=await f.voice.opts.onProductAction('try_on',String(selected.id));assert.equal(action.ok,true);assert.equal(f.camera.product.id,selected.id);
+  f.voice.opts.onTranscript({role:'user',key:'direct-preview',text:'Try the second one',final:true,localAction:true});await f.voice.opts.onProductAction('save',String(selected.id));assert(f.store.cart.has(String(selected.id)));
+  assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,0);assert.equal(f.nodes.get('bridge-panel').hidden,true);
+  assert(f.store.messages.some(message=>message.text==='Find pink lipstick'));assert(f.store.messages.some(message=>message.text==='Match my outfit'));assert(f.store.messages.some(message=>message.text==='Try the second one'));
 });

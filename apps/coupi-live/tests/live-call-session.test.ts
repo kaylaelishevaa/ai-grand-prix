@@ -96,8 +96,6 @@ test('an initially ready controller never navigates its existing iframe across p
 });
 
 
-function shoppingResult(profile:Profile){return{profile,status:'ok',message:'What do you want to buy?',question:null,conversationMode:'request',interviewCount:0,interviewComplete:false,worldReady:false,proposedSkuIds:[]};}
-
 test('new and unfinished profiles become call-ready immediately without starting or resuming an interview',{concurrency:false},async()=>{
   for(const profile of [fresh(),draftProfile()]){
     const requests:string[]=[],h=componentHarness(profile,(async url=>{requests.push(String(url));throw Error('No bootstrap request expected');}) as typeof fetch);
@@ -106,10 +104,18 @@ test('new and unfinished profiles become call-ready immediately without starting
   }
 });
 
-test('shopping turns omit an unfinished draft ID and cannot reopen automatic preference review',{concurrency:false},async()=>{
-  const profile=draftProfile(),requests:{url:string;body:any}[]=[],h=componentHarness(profile,(async(url,init)=>{requests.push({url:String(url),body:JSON.parse(String(init?.body))});return Response.json({...shoppingResult(profile),personalization:{reviewReady:true},conversationMode:'interview'});}) as typeof fetch);
-  h.emit({type:'coupi-live-call-transcript',role:'user',id:'shopping-now',text:'Find me pink lipstick'});await tick();await tick();
-  assert.equal(requests.length,1);assert.equal(requests[0].url,'/api/call');assert.equal(requests[0].body.personalizationDraftId,undefined);assert.equal(requests[0].body.message,'Find me pink lipstick');assert(!h.review());assert.equal(h.completed.length,0);h.unmount();
+test('ordinary Realtime transcripts never enqueue a second model request or reopen preference review',{concurrency:false},async()=>{
+  for(const profile of [fresh(),draftProfile()]){
+    const requests:string[]=[],h=componentHarness(profile,(async url=>{requests.push(String(url));throw Error('Direct calls must not invoke the verdict service');}) as typeof fetch);
+    for(const text of ['Find me pink lipstick','Let me try the second product','Save this one','Pay my cart']){
+      h.emit({type:'coupi-live-call-transcript',role:'user',id:'direct-'+text,text});
+      h.emit({type:'coupi-live-call-transcript',role:'user',id:'direct-'+text,text});
+    }
+    await tick();await tick();
+    assert.deepEqual(requests,[]);assert.equal(h.profiles.length,0);assert(!h.review());assert.equal(h.completed.length,0);
+    assert(!h.posts.some(message=>['coupi-call-pending','coupi-call-result','coupi-call-error'].includes(message.type)));
+    assert.equal(h.ready(),true);assert.equal(h.props.profile,profile);h.unmount();
+  }
 });
 
 test('legacy preference controls are rejected without saving, discarding or exposing a review',{concurrency:false},async()=>{
@@ -118,13 +124,20 @@ test('legacy preference controls are rejected without saving, discarding or expo
   await tick();assert.equal(requests,0);assert(!h.review());assert.equal(h.completed.length,0);assert(h.props.profile.journey.personalizationDraft);assert(h.posts.some(value=>value.type==='coupi-personalization-result'&&value.error.includes('shopping')));h.unmount();
 });
 
-test('a shopping response cannot update a different selected profile',{concurrency:false},async()=>{
-  const initial=fresh();let resolve!:(value:Response)=>void;const h=componentHarness(initial,(()=>new Promise(done=>resolve=done)) as typeof fetch);
-  h.emit({type:'coupi-live-call-transcript',role:'user',id:'old-profile-turn',text:'A lamp please'});await tick();h.props.profile=fresh();h.render();resolve(Response.json(shoppingResult(initial)));await tick();await tick();
-  assert.equal(h.profiles.length,0);assert.equal(h.completed.length,0);h.unmount();
+test('late legacy transcripts cannot mutate a different profile or trigger requests after unmount',{concurrency:false},async()=>{
+  const requests:string[]=[],initial=fresh(),h=componentHarness(initial,(async url=>{requests.push(String(url));throw Error('No background verdict request expected');}) as typeof fetch);
+  h.emit({type:'coupi-live-call-transcript',role:'user',id:'old-profile-turn',text:'A lamp please'});
+  h.props.profile=fresh();h.render();h.strictReplay();
+  h.emit({type:'coupi-live-call-transcript',role:'user',id:'old-profile-turn',text:'A lamp please'});
+  h.unmount();h.emit({type:'coupi-live-call-transcript',role:'user',id:'late-turn',text:'Try the first one'});await tick();
+  assert.deepEqual(requests,[]);assert.equal(h.profiles.length,0);assert.equal(h.completed.length,0);
+  assert(h.posts.some(message=>message.type==='coupi-live-call-stop'));
 });
 
-test('leaving a shopping call aborts its pending request and ignores a late successful response',{concurrency:false},async()=>{
-  const profile=fresh();let resolve!:(value:Response)=>void,signal:AbortSignal|undefined;const h=componentHarness(profile,((_url,init)=>{signal=init?.signal as AbortSignal;return new Promise(done=>resolve=done);}) as typeof fetch);
-  h.emit({type:'coupi-live-call-transcript',role:'user',id:'ending-turn',text:'A lamp please'});await tick();h.unmount();assert.equal(signal?.aborted,true);resolve(Response.json(shoppingResult(profile)));await tick();assert.equal(h.profiles.length,0);assert.equal(h.completed.length,0);
+test('direct mode retains profile context readiness, world details and explicit call exit',{concurrency:false},async()=>{
+  const profile=fresh(),opened:string[]=[],h=componentHarness(profile,(async()=>{throw Error('Direct control messages do not need a model');}) as typeof fetch);
+  let closes=0;h.props.onOpenProduct=(id:string)=>opened.push(id);h.props.onClose=()=>closes++;h.render();
+  h.emit({type:'coupi-live-call-ready'});assert.equal(h.ready(),true);assert.equal(h.posts.at(-1).type,'coupi-personalization-context');assert.equal(h.posts.at(-1).active,false);
+  h.emit({type:'coupi-live-call-product',namespace:'world-simulation',skuId:'7612276799'});await tick();assert.deepEqual(opened,['7612276799']);
+  h.emit({type:'coupi-live-call-exit'});assert.equal(closes,1);assert(h.posts.some(message=>message.type==='coupi-live-call-stop'));h.unmount();
 });

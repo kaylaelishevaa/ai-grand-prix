@@ -34,7 +34,7 @@ test('Realtime review tools remain draft-only, bounded and optional',()=>{
   const properties=draft.parameters.properties as Record<string,any>;
   assert.equal(properties.story.maxLength,1200);assert.equal(properties.budget.maximum,10000000);assert.equal(properties.interests.maxItems,5);
   assert.deepEqual(skip.parameters.properties,{});assert.equal(skip.parameters.additionalProperties,false);
-  assert.equal((configuration.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,false);
+  assert.equal((configuration.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,true);
   assert(!JSON.stringify(configuration).includes('OPENAI_API_KEY'));
 });
 

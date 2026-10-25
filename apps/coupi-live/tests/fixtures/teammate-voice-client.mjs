@@ -5,6 +5,7 @@ import vm from 'node:vm';
 
 // No browser, microphone, network, or OpenAI credential is used by these tests.
 const source = readFileSync(new URL('../../public/live-call/voice-call.js', import.meta.url), 'utf8');
+const actionSource = readFileSync(new URL('../../public/live-call/call-actions.js', import.meta.url), 'utf8');
 const tick = (ms = 0) => new Promise(resolve => setTimeout(resolve, ms));
 function deferred() {
   let resolve, reject;
@@ -43,6 +44,7 @@ function fixture(t, options = {}) {
     MediaStream: class {}, Audio: class {}, TextEncoder, console,
   };
   vm.createContext(context);
+  vm.runInContext(actionSource, context, {filename:'public/call-actions.js'});
   vm.runInContext(source, context, {filename: 'public/voice-call.js'});
   const peers = [];
   class Peer extends Emitter {
@@ -73,10 +75,10 @@ function fixture(t, options = {}) {
   }
   const mic = microphone();
   const audio = {srcObject: null, play: async () => {}, pause() {this.paused = true;}};
-  const calls = [], transcripts = [], states = [], recommendations = [], worldRecommendations = [], worldActions = [], tryons = [], actions = [], visionStates = [], captures = [];
+  const calls = [], transcripts = [], states = [], recommendations = [], worldRecommendations = [], worldActions = [], tryons = [], actions = [], checkouts = [], visionStates = [], captures = [];
   let permissions = 0;
   const voice = new context.window.NookVoiceSession({
-    audio, PeerConnection: Peer, greeting: options.greeting,
+    audio, PeerConnection: Peer, greeting: options.greeting, directShopping:options.directShopping,
     mediaDevices: {getUserMedia: async constraints => {
       permissions++;
       assert.equal(constraints.video, false);
@@ -107,11 +109,12 @@ function fixture(t, options = {}) {
     onWorldRecommendations: (products, message) => worldRecommendations.push({products, message}),
     onWorldProduct: async skuId => {worldActions.push(skuId);return options.onWorldProduct?.(skuId) || {ok:true,skuId,purchased:false};},
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
+    onCheckout: async request => {checkouts.push(JSON.parse(JSON.stringify(request)));return options.onCheckout?options.onCheckout(request):{ok:true,review_opened:true,demo:true,payment_processed:false,order_placed:false};},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return options.onProductAction?options.onProductAction(action,product_id):{ok:true,action,product_id:product_id || "324548922",purchased:false};},
   });
   t.after(() => voice.end());
   return {
-    voice, mic, audio, calls, transcripts, states, recommendations, worldRecommendations, worldActions, tryons, peers, actions, timerDelays, visionStates, captures,
+    voice, mic, audio, calls, transcripts, states, recommendations, worldRecommendations, worldActions, tryons, peers, actions, checkouts, timerDelays, visionStates, captures,
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
@@ -841,4 +844,60 @@ test('late voice permission cannot turn on a cancelled or re-selected text sessi
   await f.voice.start({inputMode:'text'});const switching=f.voice.setInputMode('voice');await tick();
   await f.voice.setInputMode('text');permission.resolve(late);assert.equal(await switching,false);assert.equal(late.track.stops,1);assert.equal(f.voice.call.inputMode,'text');assert.equal(f.voice.call.microphone,undefined);
   const endPermission=deferred(),endMic=microphone(),g=fixture(t,{getUserMedia:()=>endPermission.promise});await g.voice.start({inputMode:'text'});const ended=g.voice.setInputMode('voice');await tick();g.voice.end();endPermission.resolve(endMic);assert.equal(await ended,false);assert.equal(endMic.track.stops,1);assert.equal(g.voice.call,null);
+});
+
+
+test('direct typed controls perform exact try-on, skip, bag and checkout actions without shopping inference',async t=>{
+  const cases=[
+    ['Let me try the second product',{action:'try_on',product_id:'6274724147'}],
+    ['Skip this collection',{action:'skip',product_id:undefined}],
+    ['Add the first product to my cart',{action:'save',product_id:'7612276799'}],
+    ['Tell me more about the second product',{action:'details',product_id:'6274724147'}],
+    ['Buy the first product',null,{scope:'products',productIds:['7612276799']}],
+    ['Pay my cart',null,{scope:'cart'}],
+  ];
+  for(const [words,action,checkout] of cases)await t.test(words,async t=>{
+    const f=fixture(t,{directShopping:true,getContext:ordinalContext});await connect(f);done(f,'greeting');
+    assert.equal(f.voice.sendText(words),true);await tick();await tick();
+    assert.deepEqual(f.actions,action?[action]:[]);assert.deepEqual(f.checkouts,checkout?[checkout]:[]);
+    assert.equal(f.calls.filter(([url])=>url.endsWith('/search')||url==='/api/call').length,0);
+    assert(!f.channel.sent.some(event=>JSON.stringify(event).includes('Validated app result')));
+    assert(f.channel.sent.some(event=>JSON.stringify(event).includes('Application action result')));
+    assert.equal(countReplies(f.channel),2,'Only one concise action acknowledgement follows the greeting');
+    const turn=f.transcripts.find(row=>row.role==='user'&&row.final&&row.text===words);assert.equal(turn.localAction,true);
+    f.voice._completeUserTurn(f.voice.call,turn.key,{text:words});await tick();assert.equal(f.actions.length+f.checkouts.length,1,'Repeated finalized input does not repeat a control');
+  });
+});
+
+test('direct ordinary text requests one realtime response without a checked backend round trip',async t=>{
+  const f=fixture(t,{directShopping:true,getContext:ordinalContext});await connect(f);done(f,'greeting');
+  assert(f.voice.sendText('Find me pink lipstick under 15000 won'));await tick();
+  assert.equal(countReplies(f.channel),2);assert.deepEqual(f.actions,[]);assert.deepEqual(f.checkouts,[]);
+  assert(!f.channel.sent.some(event=>JSON.stringify(event).includes('Validated app result')));
+  assert.equal(f.calls.filter(([url])=>url==='/api/call').length,0);
+});
+
+test('direct spoken try-on uses the realtime tool once and late captions never start another action or response',async t=>{
+  const f=fixture(t,{directShopping:true,getContext:ordinalContext});await connect(f);done(f,'greeting');
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'direct-spoken'});f.emit({type:'input_audio_buffer.speech_stopped'});
+  f.emit({type:'response.created',response:{id:'automatic-vad-response'}});
+  const call=tool(f,'direct-tool','product_action',{action:'try_on',product_id:'6274724147'},'automatic-vad-response');
+  done(f,'automatic-vad-response',[call]);await tick();await tick();
+  assert.deepEqual(f.actions,[{action:'try_on',product_id:'6274724147'}]);const replies=countReplies(f.channel);
+  const caption={type:'conversation.item.input_audio_transcription.completed',item_id:'direct-spoken',transcript:'Let me try the second product'};
+  f.emit(caption);f.emit(caption);await tick();
+  assert.equal(countReplies(f.channel),replies);assert.equal(f.actions.length,1);assert.equal(f.checkouts.length,0);
+  assert.equal(f.transcripts.find(row=>row.key==='direct-spoken'&&row.final)?.text,'Let me try the second product');
+  assert(!f.channel.sent.some(event=>JSON.stringify(event).includes('Validated app result')));
+});
+
+test('direct spoken cart checkout only opens order review and captions do not repeat it',async t=>{
+  const f=fixture(t,{directShopping:true,getContext:ordinalContext});await connect(f);done(f,'greeting');
+  f.emit({type:'response.created',response:{id:'automatic-cart-response'}});
+  const call=tool(f,'direct-cart','start_checkout',{scope:'cart'},'automatic-cart-response');done(f,'automatic-cart-response',[call]);await tick();await tick();
+  assert.deepEqual(f.checkouts,[{scope:'cart'}]);const replies=countReplies(f.channel);
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'cart-speech',transcript:'Pay my cart'});await tick();
+  assert.equal(f.checkouts.length,1);assert.equal(countReplies(f.channel),replies);
+  const output=JSON.parse(toolOutputs(f.channel).find(event=>event.item.call_id==='direct-cart').item.output);
+  assert.equal(output.review_opened,true);assert.equal(output.payment_processed,false);assert.equal(output.order_placed,false);
 });

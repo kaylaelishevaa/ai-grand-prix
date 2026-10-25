@@ -17,7 +17,7 @@ test('shopping-only calls preserve the latest direct-shopping flow, including ol
    assert.equal(result.profile.journey?.interviewPaused,true);assert.deepEqual(result.profile.journey?.districts,before.journey?.districts);
    assert.deepEqual(result.profile.memoryLines,before.memoryLines);assert.deepEqual(result.profile.journey?.personalizationDraft,before.journey?.personalizationDraft);
    const context=teammateProfileContext(result.profile);assert.equal(context.interview.active,false);assert.equal(context.interview.question,'');assert.equal(context.personalization.active,false);assert.deepEqual(context.personalization.draftMemories,[]);
-   const configuration=sessionConfiguration({},context);assert(!configuration.instructions.includes('FIRST CALL OVERRIDE'));assert.match(configuration.instructions,/What do you want to buy/);
+   const configuration=sessionConfiguration({},context);assert(!configuration.instructions.includes('FIRST CALL OVERRIDE'));assert.match(configuration.instructions,/Hi Kayleen! What can I help you find today/);
   }
  }
 

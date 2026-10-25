@@ -9,7 +9,7 @@
     }
     get active(){return false;}
     get received(){return this.state.received===true;}
-    get greeting(){return 'What do you want to buy?';}
+    get greeting(){return 'Hi Kayleen! What can I help you find today?';}
     get context(){return {active:false,draft_pending:false,preferences:null};}
     render(){$('personalization-strip').hidden=true;$('update-preferences').hidden=true;$('incoming-promise').textContent='Let’s find your kind of thing.';}
     handle(){throw Error('Calls start with shopping. Tell Coupi what you want to buy.');}
