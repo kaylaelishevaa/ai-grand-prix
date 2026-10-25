@@ -1,4 +1,4 @@
-/* Actual Coupang listings and named options; indexed reference prices, not live offers. See VOICE-CATALOG-SOURCES.txt. */
+/* Preview-ready Coupang demo catalog. Generated from reviewed source records; reference prices are not live. */
 window.COUPANG_PRODUCTS = [
   {
     "id": "1814412512",
@@ -69,7 +69,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "romand-20250517-1",
           "date": "2025-05-17",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Shell Nude and Pink Sand offered soft matte color, lasting wear and good value for this reviewer.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -79,7 +79,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "romand-20250510-10",
           "date": "2025-05-10",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Shell Nude worked well under other colors, but felt dry without lip balm.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -89,7 +89,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "romand-20250515-2",
           "date": "2025-05-15",
-          "rating": 4.0,
+          "rating": 4,
           "text": "Pink Sand layered nicely under gloss; the matte finish emphasized dryness and vertical lip lines.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -167,7 +167,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "mac-20250408-0",
           "date": "2025-04-08",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Mull It Over applied softly and layered well, but looked deeper than expected and wiped away without much staining.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -177,7 +177,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "mac-20250227-2",
           "date": "2025-02-27",
-          "rating": 5.0,
+          "rating": 5,
           "text": "The powdery color worked alone or as a base; eating or wiping removed it easily.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -256,7 +256,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "kate-20250518-2",
           "date": "2025-05-18",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Hit Haze had a flattering, restrained sheen for this reviewer, though the case felt like a plastic toy.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -266,7 +266,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "kate-20250502-4",
           "date": "2025-05-02",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Pink Banana felt comfortable with a natural glossy finish; most color faded after eating.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -709,7 +709,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "tshirt-20230822-0",
           "date": "2023-08-22",
-          "rating": 5.0,
+          "rating": 5,
           "text": "The V-neck and substantial fabric were comfortable; the shirt held its shape after the first wash.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -719,7 +719,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "tshirt-20230326-11",
           "date": "2023-03-26",
-          "rating": 3.0,
+          "rating": 3,
           "text": "The cotton felt soft and opaque, but two colors fit differently and the sleeves felt tight during movement.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -898,7 +898,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "hoodie-20250509-0",
           "date": "2025-05-09",
-          "rating": 5.0,
+          "rating": 5,
           "text": "The soft fabric and simple design worked for everyday wear, but the drawstrings were too long.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -908,7 +908,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "hoodie-20250318-27",
           "date": "2025-03-18",
-          "rating": 3.0,
+          "rating": 3,
           "text": "The fabric felt thin and the waist hem could be firmer; size S was large for the reviewer’s child.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1051,7 +1051,7 @@ window.COUPANG_PRODUCTS = [
     "imageSha256": "6df90fbb2d08cef997208771bb4c2574e9532e375c1f5302c905f57b91b1f87c",
     "reviewEvidence": {
       "status": "partial",
-      "rating": 5.0,
+      "rating": 5,
       "reviewCount": 225,
       "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
       "sourceName": "Timing public Coupang listing mirror",
@@ -1073,7 +1073,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "eyelab-20250316-0",
           "date": "2025-03-16",
-          "rating": 5.0,
+          "rating": 5,
           "text": "The design and fit were good, but reflections made the view somewhat hazy in bright surroundings.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1083,7 +1083,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "eyelab-20241101-2",
           "date": "2024-11-01",
-          "rating": 5.0,
+          "rating": 5,
           "text": "The reviewer liked the lightweight frame, case and cleaning cloth.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1093,7 +1093,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "eyelab-20250507-4",
           "date": "2025-05-07",
-          "rating": 4.0,
+          "rating": 4,
           "text": "The lenses were much smaller than expected; the reviewer cautioned people with larger faces.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1338,7 +1338,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "romand-20250517-1",
           "date": "2025-05-17",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Shell Nude and Pink Sand offered soft matte color, lasting wear and good value for this reviewer.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1348,7 +1348,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "romand-20250510-10",
           "date": "2025-05-10",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Shell Nude worked well under other colors, but felt dry without lip balm.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1358,7 +1358,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "romand-20250515-2",
           "date": "2025-05-15",
-          "rating": 4.0,
+          "rating": 4,
           "text": "Pink Sand layered nicely under gloss; the matte finish emphasized dryness and vertical lip lines.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1417,7 +1417,7 @@ window.COUPANG_PRODUCTS = [
     },
     "reviewEvidence": {
       "status": "partial",
-      "rating": 5.0,
+      "rating": 5,
       "reviewCount": 2852,
       "sourceUrl": "https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8",
       "sourceName": "Timing public Coupang listing mirror",
@@ -1439,7 +1439,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "misshagl-20250425-13",
           "date": "2025-04-25",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Pink Chuchu felt comfortable and moisturizing, but looked stronger than expected.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1449,7 +1449,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "misshagl-20250321-1",
           "date": "2025-03-21",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Baby Coral offered good value, but felt slightly stiff and became dry over time.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1508,7 +1508,7 @@ window.COUPANG_PRODUCTS = [
     },
     "reviewEvidence": {
       "status": "partial",
-      "rating": 5.0,
+      "rating": 5,
       "reviewCount": 2852,
       "sourceUrl": "https://timing.im/product/G_TC46dzJ-9y1LNbS6GN7FXU0CAeWk533hBFZ-FeBE8",
       "sourceName": "Timing public Coupang listing mirror",
@@ -1530,7 +1530,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "misshagl-20250425-13",
           "date": "2025-04-25",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Pink Chuchu felt comfortable and moisturizing, but looked stronger than expected.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1540,7 +1540,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "misshagl-20250321-1",
           "date": "2025-03-21",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Baby Coral offered good value, but felt slightly stiff and became dry over time.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1621,7 +1621,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "misshadare-20250315-0",
           "date": "2025-03-15",
-          "rating": 5.0,
+          "rating": 5,
           "text": "All That Rose felt smooth and comfortable with a natural sheen, but needed reapplication.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -1631,7 +1631,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "misshadare-20250203-16",
           "date": "2025-02-03",
-          "rating": 4.0,
+          "rating": 4,
           "text": "The reviewer liked the soft application and understated rose-coral color for everyday wear.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -2190,473 +2190,6 @@ window.COUPANG_PRODUCTS = [
     }
   },
   {
-    "id": "7612276799-black",
-    "sourceProductId": "7612276799",
-    "name": "EYELAB 블루라이트 UV 차단 안경, 블랙",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/7612276799",
-    "price": 19900,
-    "priceStatus": "reference",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/33e2/72b1065cbedd27b35ec0a6f79fc26bf3996a4745237b2cc7eebaabb0f5d2.png",
-    "imageSourcePage": "https://fallcent.com/product/?item_id=20163776919&product_id=7612276799",
-    "sourceNote": "Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.",
-    "checkedAt": "2026-10-25",
-    "brand": "EYELAB",
-    "aliases": [
-      "EYELAB black optical glasses"
-    ],
-    "tags": [
-      "glasses",
-      "optical",
-      "eyeglasses",
-      "black"
-    ],
-    "verifiedAttributes": [
-      "EYELAB 블루라이트 UV 차단 안경, 블랙",
-      "Reference price and selected option require confirmation on Coupang."
-    ],
-    "image": "/products/7612276799-black.png",
-    "imageSha256": "72d6f766fc2641fd857fc329b525a6d17809caf33afada893d933e8c95ea4f66",
-    "seller": null,
-    "sellerStatus": "unverified",
-    "preview": {
-      "kind": "glasses",
-      "available": false,
-      "image": "/products/7612276799-black.png",
-      "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
-    },
-    "reviewEvidence": {
-      "status": "partial",
-      "rating": 5.0,
-      "reviewCount": 225,
-      "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
-      "sourceName": "Timing public Coupang listing mirror",
-      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7612276799?itemId=20163776919&vendorItemId=87256176126",
-      "sourceProductId": "7612276799",
-      "checkedAt": "2026-10-25",
-      "summaryKind": "ai-curated",
-      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
-      "summary": "Sampled users liked the frame design, light weight and accessories. Other comments note glare or a hazy view in bright surroundings and smaller-than-expected lenses. This is not evidence of lens protection.",
-      "pros": [
-        "Lightweight frame",
-        "Case and cleaning cloth included"
-      ],
-      "cons": [
-        "Hazy view in bright light reported",
-        "Lenses may feel small"
-      ],
-      "reviews": [
-        {
-          "id": "eyelab-20250316-0",
-          "date": "2025-03-16",
-          "rating": 5.0,
-          "text": "The design and fit were good, but reflections made the view somewhat hazy in bright surroundings.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
-          "variant": "Color not specified"
-        },
-        {
-          "id": "eyelab-20241101-2",
-          "date": "2024-11-01",
-          "rating": 5.0,
-          "text": "The reviewer liked the lightweight frame, case and cleaning cloth.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
-          "variant": "Color not specified"
-        },
-        {
-          "id": "eyelab-20250507-4",
-          "date": "2025-05-07",
-          "rating": 4.0,
-          "text": "The lenses were much smaller than expected; the reviewer cautioned people with larger faces.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
-          "variant": "Color not specified"
-        }
-      ]
-    }
-  },
-  {
-    "id": "7612276799-silver",
-    "sourceProductId": "7612276799",
-    "name": "EYELAB 블루라이트 UV 차단 안경, 실버",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/7612276799",
-    "price": 19900,
-    "priceStatus": "reference",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/4807/fbcbc8b97192598fe20c88d584c01f5a820c924cc5a9946344698afdb259.jpg",
-    "imageSourcePage": "https://fallcent.com/product/?item_id=20163776919&product_id=7612276799",
-    "sourceNote": "Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.",
-    "checkedAt": "2026-10-25",
-    "brand": "EYELAB",
-    "aliases": [
-      "EYELAB silver optical glasses"
-    ],
-    "tags": [
-      "glasses",
-      "optical",
-      "eyeglasses",
-      "silver"
-    ],
-    "verifiedAttributes": [
-      "EYELAB 블루라이트 UV 차단 안경, 실버",
-      "Reference price and selected option require confirmation on Coupang."
-    ],
-    "image": "/products/7612276799-silver.jpg",
-    "imageSha256": "50d1c0a76a661a2780dcedea411bf0594838ee39c3f8c9dc8e2ee8f53aa1d5b8",
-    "seller": null,
-    "sellerStatus": "unverified",
-    "preview": {
-      "kind": "glasses",
-      "available": false,
-      "image": "/products/7612276799-silver.jpg",
-      "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
-    },
-    "reviewEvidence": {
-      "status": "partial",
-      "rating": 5.0,
-      "reviewCount": 225,
-      "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
-      "sourceName": "Timing public Coupang listing mirror",
-      "sourceCoupangUrl": "https://www.coupang.com/vp/products/7612276799?itemId=20163776919&vendorItemId=87256176126",
-      "sourceProductId": "7612276799",
-      "checkedAt": "2026-10-25",
-      "summaryKind": "ai-curated",
-      "scopeNote": "Translated, paraphrased sample from a public Timing mirror linked to this Coupang product family. Feedback and aggregate count span listing options, not necessarily this exact shade, color, size or seller. This small sample is not the full review set.",
-      "summary": "Sampled users liked the frame design, light weight and accessories. Other comments note glare or a hazy view in bright surroundings and smaller-than-expected lenses. This is not evidence of lens protection.",
-      "pros": [
-        "Lightweight frame",
-        "Case and cleaning cloth included"
-      ],
-      "cons": [
-        "Hazy view in bright light reported",
-        "Lenses may feel small"
-      ],
-      "reviews": [
-        {
-          "id": "eyelab-20250316-0",
-          "date": "2025-03-16",
-          "rating": 5.0,
-          "text": "The design and fit were good, but reflections made the view somewhat hazy in bright surroundings.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
-          "variant": "Color not specified"
-        },
-        {
-          "id": "eyelab-20241101-2",
-          "date": "2024-11-01",
-          "rating": 5.0,
-          "text": "The reviewer liked the lightweight frame, case and cleaning cloth.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
-          "variant": "Color not specified"
-        },
-        {
-          "id": "eyelab-20250507-4",
-          "date": "2025-05-07",
-          "rating": 4.0,
-          "text": "The lenses were much smaller than expected; the reviewer cautioned people with larger faces.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/tI8y3CU70wuJm6gLcsf9ov-AwVWmmDe1WFfKLhEBMRw",
-          "variant": "Color not specified"
-        }
-      ]
-    }
-  },
-  {
-    "id": "7235424403-round",
-    "sourceProductId": "7235424403",
-    "name": "EYELAB 티타늄 5g 블루라이트 차단 안경, 라운드",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/7235424403",
-    "price": 24200,
-    "priceStatus": "reference",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/323d/537322469e6f3756084f2d38690bf8cf173cb789f220e40b6f277e3ddb35.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=EYELAB%20%EC%95%88%EA%B2%BD",
-    "sourceNote": "Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.",
-    "checkedAt": "2026-10-25",
-    "brand": "EYELAB",
-    "aliases": [
-      "EYELAB titanium round glasses"
-    ],
-    "tags": [
-      "glasses",
-      "optical",
-      "eyeglasses",
-      "round"
-    ],
-    "verifiedAttributes": [
-      "EYELAB 티타늄 5g 블루라이트 차단 안경, 라운드",
-      "Reference price and selected option require confirmation on Coupang."
-    ],
-    "image": "/products/7235424403-round.jpg",
-    "imageSha256": "b6468fd40fda8b2e623c39aa8d7d334db8049ebca230ec6eabf5703a180bf329",
-    "seller": null,
-    "sellerStatus": "unverified",
-    "preview": {
-      "kind": "glasses",
-      "available": false,
-      "image": "/products/7235424403-round.jpg",
-      "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
-    },
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7235424403",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "7235424403-square",
-    "sourceProductId": "7235424403",
-    "name": "EYELAB 티타늄 5g 블루라이트 차단 안경, 스퀘어",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/7235424403",
-    "price": 24200,
-    "priceStatus": "reference",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/d53f/84c1004c10372b491df11c8a3d2efc0b810e3558ee5600a93823009549c3.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=EYELAB%20%EC%95%88%EA%B2%BD",
-    "sourceNote": "Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.",
-    "checkedAt": "2026-10-25",
-    "brand": "EYELAB",
-    "aliases": [
-      "EYELAB titanium square glasses"
-    ],
-    "tags": [
-      "glasses",
-      "optical",
-      "eyeglasses",
-      "square"
-    ],
-    "verifiedAttributes": [
-      "EYELAB 티타늄 5g 블루라이트 차단 안경, 스퀘어",
-      "Reference price and selected option require confirmation on Coupang."
-    ],
-    "image": "/products/7235424403-square.jpg",
-    "imageSha256": "d76c42f44f359ac9621f27111c64eab55defc4e82218863bd7ea6897f56d4b19",
-    "seller": null,
-    "sellerStatus": "unverified",
-    "preview": {
-      "kind": "glasses",
-      "available": false,
-      "image": "/products/7235424403-square.jpg",
-      "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
-    },
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7235424403",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "6511312982",
-    "sourceProductId": "6511312982",
-    "name": "GL1988 안경사가 만든 TR 블루라이트차단 안경 10g, 51 (초경량)",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/6511312982",
-    "price": 29900,
-    "priceStatus": "reference",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/03b3/e14b42c16c88feae632e47e4f14c92b42215279b1f0aa03bef79ff87863c.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=GL1988%20%EC%95%88%EA%B2%BD",
-    "sourceNote": "Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.",
-    "checkedAt": "2026-10-25",
-    "brand": "GL1988",
-    "aliases": [
-      "GL1988 lightweight optical glasses"
-    ],
-    "tags": [
-      "glasses",
-      "optical",
-      "eyeglasses"
-    ],
-    "verifiedAttributes": [
-      "GL1988 안경사가 만든 TR 블루라이트차단 안경 10g, 51 (초경량)",
-      "Reference price and selected option require confirmation on Coupang."
-    ],
-    "image": "/products/6511312982.jpg",
-    "imageSha256": "fe62587fe4ab7d4d0b412248c6ddc0aaa52d94d8d67eea8ca066c8788f430fe5",
-    "seller": null,
-    "sellerStatus": "unverified",
-    "preview": {
-      "kind": "glasses",
-      "available": false,
-      "image": "/products/6511312982.jpg",
-      "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
-    },
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/6511312982",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "2082223437",
-    "sourceProductId": "2082223437",
-    "name": "멜라크메 남여공용 빅 오버 캣츠 블랙 선글라스 + 케이스, 전체 가로길이 149mm x 세로 57mm",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/2082223437?itemId=3537088872&vendorItemId=86213775191",
-    "price": 12500,
-    "priceStatus": "reference",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/164377599432787-db7dd246-fbc4-48e5-bc61-b26c39e331e9.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4",
-    "sourceNote": "Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.",
-    "checkedAt": "2026-10-25",
-    "brand": "MELACME",
-    "aliases": [
-      "Melacme cat eye black sunglasses"
-    ],
-    "tags": [
-      "glasses",
-      "sunglasses",
-      "black",
-      "cat-eye"
-    ],
-    "verifiedAttributes": [
-      "멜라크메 남여공용 빅 오버 캣츠 블랙 선글라스 + 케이스, 전체 가로길이 149mm x 세로 57mm",
-      "Reference price and selected option require confirmation on Coupang."
-    ],
-    "image": "/products/2082223437.jpg",
-    "imageSha256": "dd36600bb21c09a099fa5ea4cde320b30115b60fc1cb78917c657aca643f91a7",
-    "seller": null,
-    "sellerStatus": "unverified",
-    "preview": {
-      "kind": "glasses",
-      "available": false,
-      "image": "/products/2082223437.jpg",
-      "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
-    },
-    "reviewEvidence": {
-      "status": "partial",
-      "rating": 4.5,
-      "reviewCount": 4669,
-      "sourceUrl": "https://timing.im/product/5d10h6ILmZZpwD9TzTs63560xEh3I2169eBUqInEFBc",
-      "sourceName": "Timing public Coupang listing mirror",
-      "checkedAt": "2026-10-25",
-      "summaryKind": "ai-curated",
-      "scopeNote": "Translated, paraphrased excerpts from a public Timing mirror of this Coupang listing. This small sample is not the full review set; historical aggregate and sample ratings differ.",
-      "summary": "Sampled reviewers liked the oversized style and value. Fit and accessory quality were less consistent: some mentioned slipping, stiff hinges or a cheap-feeling case. These opinions do not verify lens protection.",
-      "pros": [
-        "Oversized cat-eye styling",
-        "Lightweight feel in one sample",
-        "Affordable everyday option"
-      ],
-      "cons": [
-        "May slip on smaller faces or low bridges",
-        "Stiff hinges and case quality complaints",
-        "Plastic feel noted by one reviewer"
-      ],
-      "reviews": [
-        {
-          "id": "melacme-20230728",
-          "date": "2023-07-28",
-          "rating": 5,
-          "text": "Stylish and good value, but hinges felt stiff; the plastic case disappointed and low bridges may experience slipping.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/5d10h6ILmZZpwD9TzTs63560xEh3I2169eBUqInEFBc"
-        },
-        {
-          "id": "melacme-20231027",
-          "date": "2023-10-27",
-          "rating": 5,
-          "text": "Lightweight and attractive, but slipped on a smaller face; the lenses looked less dark than expected.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/5d10h6ILmZZpwD9TzTs63560xEh3I2169eBUqInEFBc"
-        },
-        {
-          "id": "melacme-20250424",
-          "date": "2025-04-24",
-          "rating": 4,
-          "text": "The plastic felt inexpensive, though acceptable for the price.",
-          "translated": true,
-          "kind": "translated-paraphrase",
-          "sourceUrl": "https://timing.im/product/5d10h6ILmZZpwD9TzTs63560xEh3I2169eBUqInEFBc"
-        }
-      ]
-    }
-  },
-  {
-    "id": "9461808186",
-    "sourceProductId": "9461808186",
-    "name": "[비비PICK] 리에티 LUNO RT 4056 선글라스, 프레임정면 147mm x 렌즈세로 33mm x 템플길이 144mm",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/9461808186?itemId=28155243954&vendorItemId=95110459068",
-    "price": 53600,
-    "priceStatus": "reference",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/1489989814231129-e62b85bd-35a8-4d34-a6d4-7846eee227cf.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4",
-    "sourceNote": "Named Coupang listing/option matched to a public index. Original listing photo is unchanged. Price is an indexed reference; live price, seller, availability and the selected option must be checked on Coupang. This listing photo has no isolated frame asset, so live try-on is unavailable for this option.",
-    "checkedAt": "2026-10-25",
-    "brand": "RIETI",
-    "aliases": [
-      "Rieti Luno RT4056 sunglasses"
-    ],
-    "tags": [
-      "glasses",
-      "sunglasses"
-    ],
-    "verifiedAttributes": [
-      "[비비PICK] 리에티 LUNO RT 4056 선글라스, 프레임정면 147mm x 렌즈세로 33mm x 템플길이 144mm",
-      "Reference price and selected option require confirmation on Coupang."
-    ],
-    "image": "/products/9461808186.jpg",
-    "imageSha256": "c27068a71c5a3b38815e48745c9560195afd0b00c856720eaaa6b6b9434a74ce",
-    "seller": null,
-    "sellerStatus": "unverified",
-    "preview": {
-      "kind": "glasses",
-      "available": false,
-      "image": "/products/9461808186.jpg",
-      "unavailableReason": "The sourced listing image includes a person or scene; a clean frame image is needed for a reliable camera preview."
-    },
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/9461808186?itemId=28155243954&vendorItemId=95110459068",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
     "id": "7505441634-derma-sos",
     "sourceProductId": "7505441634",
     "name": "니베아 립밤 립케어, 더마 SOS 케어, 4.8g, 1개",
@@ -2668,7 +2201,7 @@ window.COUPANG_PRODUCTS = [
     "image": "/products/7505441634-derma-sos.jpg",
     "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/d639/12f30d29ff47083c1220485c8a4abfe52883ae7b163fe771824be3c98be3.jpg",
     "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%8B%88%EB%B2%A0%EC%95%84%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified. Demo lip preview uses a documented clear or tinted balm finish; its sheen and any RGB tint are illustrative, not packaging-pixel sampling or calibrated on-lip measurements.",
     "checkedAt": "2026-10-25",
     "brand": "NIVEA",
     "aliases": [
@@ -2686,8 +2219,18 @@ window.COUPANG_PRODUCTS = [
       "kind": "lip",
       "image": "/products/7505441634-derma-sos.jpg",
       "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
+      "available": true,
+      "finish": "clear-balm",
+      "opacity": 0,
+      "glossStrength": 0.055,
+      "shadeLabel": "Clear balm finish",
+      "shadeVerified": false,
+      "finishEstimated": true,
+      "sourceUrls": [
+        "https://www.nivea.co.kr/products/니베아-립케어-더마-sos-케어-40058088506310076.html"
+      ],
+      "finishSource": "Official Korean Derma SOS Care identifies the care balm. The preview preserves natural lip colour rather than inferring a pigment from its white tube; subtle sheen is illustrative, not manufacturer-measured.",
+      "previewNote": "Natural lip colour with an illustrative balm finish. This is not a calibrated prediction of texture, hydration or shine."
     },
     "imageSha256": "05a97ef6d79eebd8f3244769e0421e88b4e17c4397437a63afd01d14a16b7e39",
     "reviewEvidence": {
@@ -2715,7 +2258,7 @@ window.COUPANG_PRODUCTS = [
     "image": "/products/341621790-cherry-shine.png",
     "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/16ae5ec6-501c-4ba5-90c0-59cabf785cd93929511380041055497.png",
     "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%8B%88%EB%B2%A0%EC%95%84%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified. Demo lip preview uses a documented clear or tinted balm finish; its sheen and any RGB tint are illustrative, not packaging-pixel sampling or calibrated on-lip measurements.",
     "checkedAt": "2026-10-25",
     "brand": "NIVEA",
     "aliases": [
@@ -2734,8 +2277,21 @@ window.COUPANG_PRODUCTS = [
       "kind": "lip",
       "image": "/products/341621790-cherry-shine.png",
       "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
+      "available": true,
+      "finish": "tinted-balm",
+      "opacity": 0.2,
+      "glossStrength": 0.1,
+      "shadeLabel": "Cherry · sheer red",
+      "shadeVerified": false,
+      "finishEstimated": true,
+      "sourceUrls": [
+        "https://www.nivea.co.kr/products/니베아-립케어-체리-샤인-40058085175890076.html",
+        "https://www.nivea.co.uk/products/nivea-cherry-shine-lip-balm-40059009839160045.html"
+      ],
+      "finishSource": "Official Korean page confirms Cherry Shine colour, and the UK page describes a soft ruby-red shine. Regional formulas may vary. The exact RGB and opacity are illustrative, not colour-matched.",
+      "previewNote": "Illustrative sheer tint and sheen based on the named balm’s documented finish. Exact pigment, opacity and lighting are not calibrated.",
+      "color": "#b84251",
+      "colorSource": "Illustrative RGB chosen for the manufacturer-described colour family. Not sampled from the closed cap or packaging and not a measured on-lip swatch."
     },
     "imageSha256": "1db74aaf4a4b13b4103b7c0407f05e14f39228e6235f4130ce049a292f2836c4",
     "reviewEvidence": {
@@ -2763,7 +2319,7 @@ window.COUPANG_PRODUCTS = [
     "image": "/products/8063356643-strawberry.png",
     "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/e91797b2-4246-4e30-978e-fda5976eb39411120696946913611103.png",
     "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%8B%88%EB%B2%A0%EC%95%84%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified. Demo lip preview uses a documented clear or tinted balm finish; its sheen and any RGB tint are illustrative, not packaging-pixel sampling or calibrated on-lip measurements.",
     "checkedAt": "2026-10-25",
     "brand": "NIVEA",
     "aliases": [
@@ -2782,8 +2338,21 @@ window.COUPANG_PRODUCTS = [
       "kind": "lip",
       "image": "/products/8063356643-strawberry.png",
       "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
+      "available": true,
+      "finish": "tinted-balm",
+      "opacity": 0.16,
+      "glossStrength": 0.11,
+      "shadeLabel": "Strawberry · soft red",
+      "shadeVerified": false,
+      "finishEstimated": true,
+      "sourceUrls": [
+        "https://www.nivea.co.kr/products/니베아-립케어-스트로베리-샤인-40058083728810076.html",
+        "https://www.nivea.com.my/en-my/products/strawberry-shine-caring-lip-balm-40058083729040058.html"
+      ],
+      "finishSource": "Official Korean page confirms Strawberry Shine colour; the Malaysian page describes soft red/reddish shine. Regional formulas may vary. The warmer RGB and opacity are illustrative, not colour-matched.",
+      "previewNote": "Illustrative sheer tint and sheen based on the named balm’s documented finish. Exact pigment, opacity and lighting are not calibrated.",
+      "color": "#d75163",
+      "colorSource": "Illustrative RGB chosen for the manufacturer-described colour family. Not sampled from the closed cap or packaging and not a measured on-lip swatch."
     },
     "imageSha256": "7d8992591e57e938fa4d327ad0debb01cedd880b75aede974eef83f06a63bd82",
     "reviewEvidence": {
@@ -2811,7 +2380,7 @@ window.COUPANG_PRODUCTS = [
     "image": "/products/6193917913-essential.jpg",
     "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/c00d/c1f93444846f8d8129e676fc9ae964ebb2737fba8912d31cff58702e823d.jpg",
     "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%8B%88%EB%B2%A0%EC%95%84%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified. Demo lip preview uses a documented clear or tinted balm finish; its sheen and any RGB tint are illustrative, not packaging-pixel sampling or calibrated on-lip measurements.",
     "checkedAt": "2026-10-25",
     "brand": "NIVEA",
     "aliases": [
@@ -2829,8 +2398,18 @@ window.COUPANG_PRODUCTS = [
       "kind": "lip",
       "image": "/products/6193917913-essential.jpg",
       "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
+      "available": true,
+      "finish": "clear-balm",
+      "opacity": 0,
+      "glossStrength": 0.05,
+      "shadeLabel": "Clear balm finish",
+      "shadeVerified": false,
+      "finishEstimated": true,
+      "sourceUrls": [
+        "https://www.nivea.co.kr/products/니베아-립케어-에센셜-케어-40058083694850076.html"
+      ],
+      "finishSource": "Official Korean Essential Care page describes a nourishing care balm and lists its formula without a lip colour claim. Natural lip colour is preserved; subtle sheen is an illustrative care-balm effect rather than a sampled cap colour or measured finish.",
+      "previewNote": "Natural lip colour with an illustrative balm finish. This is not a calibrated prediction of texture, hydration or shine."
     },
     "imageSha256": "245f0cb5ca1f2e3bf04181ef1830963a5c7e13b2b0bd7e89f5c443a865ab45e3",
     "reviewEvidence": {
@@ -2838,53 +2417,6 @@ window.COUPANG_PRODUCTS = [
       "rating": null,
       "reviewCount": null,
       "sourceUrl": "https://www.coupang.com/vp/products/6193917913",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "7702523687-juicy-trio",
-    "sourceProductId": "7702523687",
-    "name": "버츠비 쥬시 립밤 트리오 3종 세트, 스윗만다린 + 망고 + 스트로베리, 12.75g, 1개",
-    "category": "makeup",
-    "productType": "lipbalm",
-    "url": "https://www.coupang.com/vp/products/7702523687",
-    "price": 13420,
-    "priceStatus": "reference",
-    "image": "/products/7702523687-juicy-trio.png",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/a03f/423ebb8294429d12690acd3ecae175d4b27a3ffd702f77cf69ae690964e0.png",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%B2%84%EC%B8%A0%EB%B9%84%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Burt's Bees",
-    "aliases": [
-      "Burts Bees Juicy Lip Balm Trio mandarin mango strawberry"
-    ],
-    "tags": [
-      "lipbalm",
-      "clear"
-    ],
-    "verifiedAttributes": [
-      "Burts Bees Juicy Lip Balm Trio mandarin mango strawberry",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "lip",
-      "image": "/products/7702523687-juicy-trio.png",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
-    },
-    "imageSha256": "dca7515636c19314d09d3e9a8bcd909bdfd30613198164ecd08500c149e78618",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7702523687",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -2905,7 +2437,7 @@ window.COUPANG_PRODUCTS = [
     "image": "/products/120680-original.png",
     "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/3342/9a3bde0894aa9528e22f8564259c3486cf20929baab4f77c8ef056a6eb24.png",
     "imageSourcePage": "https://fallcent.com/product/search/?keyword=%ED%9E%88%EB%A7%90%EB%9D%BC%EC%95%BC%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified. Demo lip preview uses a documented clear or tinted balm finish; its sheen and any RGB tint are illustrative, not packaging-pixel sampling or calibrated on-lip measurements.",
     "checkedAt": "2026-10-25",
     "brand": "Himalaya",
     "aliases": [
@@ -2923,8 +2455,19 @@ window.COUPANG_PRODUCTS = [
       "kind": "lip",
       "image": "/products/120680-original.png",
       "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
+      "available": true,
+      "finish": "clear-balm",
+      "opacity": 0,
+      "glossStrength": 0.055,
+      "shadeLabel": "Clear balm finish",
+      "shadeVerified": false,
+      "finishEstimated": true,
+      "sourceUrls": [
+        "https://himalayawellness.in/collections/meta-fbn20/products/lip-balm",
+        "https://www.hwahae.com/en/products/Himalaya-Lip-balm/1892530/reviews?skin_type=dry"
+      ],
+      "finishSource": "Manufacturer page identifies the 10g oil-and-wax lip balm; Korean product feedback describes a clear texture. The photographed 10g tube matches this family. Natural lip colour is retained; subtle sheen is illustrative, not a measured reflectance or exact treatment outcome.",
+      "previewNote": "Natural lip colour with an illustrative balm finish. This is not a calibrated prediction of texture, hydration or shine."
     },
     "imageSha256": "87d42bcb3eb7f7cf7300760a3e2c2862dbb8004f6c57c8183b1e0606ac83d4d1",
     "reviewEvidence": {
@@ -2952,7 +2495,7 @@ window.COUPANG_PRODUCTS = [
     "image": "/products/7480865203-herbal.jpg",
     "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/32e2/86d96b69844111292f6ad97419d371f1675f3abd1065312efc85984bcee9.jpg",
     "imageSourcePage": "https://fallcent.com/product/search/?keyword=%ED%9E%88%EB%A7%90%EB%9D%BC%EC%95%BC%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified. Demo lip preview uses a documented clear or tinted balm finish; its sheen and any RGB tint are illustrative, not packaging-pixel sampling or calibrated on-lip measurements.",
     "checkedAt": "2026-10-25",
     "brand": "Himalaya",
     "aliases": [
@@ -2970,8 +2513,19 @@ window.COUPANG_PRODUCTS = [
       "kind": "lip",
       "image": "/products/7480865203-herbal.jpg",
       "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
+      "available": true,
+      "finish": "clear-balm",
+      "opacity": 0,
+      "glossStrength": 0.055,
+      "shadeLabel": "Clear balm finish",
+      "shadeVerified": false,
+      "finishEstimated": true,
+      "sourceUrls": [
+        "https://himalayawellness.in/collections/meta-fbn20/products/lip-balm",
+        "https://www.hwahae.com/en/products/Himalaya-Lip-balm/1892530/reviews?skin_type=dry"
+      ],
+      "finishSource": "Manufacturer page identifies the 10g oil-and-wax lip balm; Korean product feedback describes a clear texture. The photographed 10g tube matches this family. Natural lip colour is retained; subtle sheen is illustrative, not a measured reflectance or exact treatment outcome.",
+      "previewNote": "Natural lip colour with an illustrative balm finish. This is not a calibrated prediction of texture, hydration or shine."
     },
     "imageSha256": "d06c129346fb7c50298658f551e234b27d2494e81fd59f4972ce20203f48cb52",
     "reviewEvidence": {
@@ -2979,147 +2533,6 @@ window.COUPANG_PRODUCTS = [
       "rating": null,
       "reviewCount": null,
       "sourceUrl": "https://www.coupang.com/vp/products/7480865203",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "166915136-grapefruit",
-    "sourceProductId": "166915136",
-    "name": "멘소래담 립밤 립아이스 그레이프프루트 자몽 티 맨소래담 립케어, 3.5g, 1개",
-    "category": "makeup",
-    "productType": "lipbalm",
-    "url": "https://www.coupang.com/vp/products/166915136",
-    "price": 4800,
-    "priceStatus": "reference",
-    "image": "/products/166915136-grapefruit.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/ff65/3e49fbc6f1e924b95c5f546482d5ece808c51bd7baec1c570be4920bb479.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A9%98%EC%86%8C%EB%9E%98%EB%8B%B4%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Mentholatum / 멘소래담",
-    "aliases": [
-      "Mentholatum Lip Ice grapefruit tea lip balm 3.5g single"
-    ],
-    "tags": [
-      "lipbalm",
-      "clear"
-    ],
-    "verifiedAttributes": [
-      "Mentholatum Lip Ice grapefruit tea lip balm 3.5g single",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "lip",
-      "image": "/products/166915136-grapefruit.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
-    },
-    "imageSha256": "8807aa18066f6577f5393ec087918c8c20cf804c0625fe16ba0e909653fec8a4",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/166915136",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "4322127769-lemon-grapefruit",
-    "sourceProductId": "4322127769",
-    "name": "멘소래담 립밤 립아이스 레몬 SPF 15 + 그레이프프루트 자몽 티 맨소래담 립케어, 1개, 립아이스 레몬 + 그레이프프루트 자몽 티, 3.5g",
-    "category": "makeup",
-    "productType": "lipbalm",
-    "url": "https://www.coupang.com/vp/products/4322127769",
-    "price": 8000,
-    "priceStatus": "reference",
-    "image": "/products/4322127769-lemon-grapefruit.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/0a5d/3f1efc47ace228eea16c2c70da31c35167c26aaa000d91940b04fcda91b1.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A9%98%EC%86%8C%EB%9E%98%EB%8B%B4%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Mentholatum / 멘소래담",
-    "aliases": [
-      "Mentholatum Lip Ice lemon and grapefruit tea two-piece set"
-    ],
-    "tags": [
-      "lipbalm",
-      "clear"
-    ],
-    "verifiedAttributes": [
-      "Mentholatum Lip Ice lemon and grapefruit tea two-piece set",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "lip",
-      "image": "/products/4322127769-lemon-grapefruit.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
-    },
-    "imageSha256": "ce282c470956b6e8001d1d35fa97f94887cc8290dc1286a7dc4edf12a6e77d4d",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/4322127769",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "7656224848-grapefruit-care",
-    "sourceProductId": "7656224848",
-    "name": "바세린 립밤 립테라피 컬러 앤 케어 4.2g 2개, 고져스 그레이프프룻 케어",
-    "category": "makeup",
-    "productType": "lipbalm",
-    "url": "https://www.coupang.com/vp/products/7656224848",
-    "price": 26600,
-    "priceStatus": "reference",
-    "image": "/products/7656224848-grapefruit-care.png",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/d58c/87df2621276b3068cc8578f5ba210f4904e9936212d10c816093dde093f6.png",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%B0%94%EC%84%B8%EB%A6%B0%20%EB%A6%BD%EB%B0%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Vaseline",
-    "aliases": [
-      "Vaseline Color and Care Gorgeous Grapefruit lip balm two-pack"
-    ],
-    "tags": [
-      "lipbalm",
-      "coral"
-    ],
-    "verifiedAttributes": [
-      "Vaseline Color and Care Gorgeous Grapefruit lip balm two-pack",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "lip",
-      "image": "/products/7656224848-grapefruit-care.png",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The sealed listing photo does not provide a reliable on-lip colour or finish. Explore its details instead."
-    },
-    "imageSha256": "54909d798ebc52b4fc2f274b8491028ae6e8465036304757cdb2bd19f0fca13c",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7656224848",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -3251,7 +2664,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "misshadare-20250315-0",
           "date": "2025-03-15",
-          "rating": 5.0,
+          "rating": 5,
           "text": "All That Rose felt smooth and comfortable with a natural sheen, but needed reapplication.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -3261,7 +2674,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "misshadare-20250203-16",
           "date": "2025-02-03",
-          "rating": 4.0,
+          "rating": 4,
           "text": "The reviewer liked the soft application and understated rose-coral color for everyday wear.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -3566,7 +2979,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "kate-20250518-2",
           "date": "2025-05-18",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Hit Haze had a flattering, restrained sheen for this reviewer, though the case felt like a plastic toy.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -3576,7 +2989,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "kate-20250502-4",
           "date": "2025-05-02",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Pink Banana felt comfortable with a natural glossy finish; most color faded after eating.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -3653,7 +3066,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "kate-20250518-2",
           "date": "2025-05-18",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Hit Haze had a flattering, restrained sheen for this reviewer, though the case felt like a plastic toy.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -3663,7 +3076,7 @@ window.COUPANG_PRODUCTS = [
         {
           "id": "kate-20250502-4",
           "date": "2025-05-02",
-          "rating": 5.0,
+          "rating": 5,
           "text": "Pink Banana felt comfortable with a natural glossy finish; most color faded after eating.",
           "translated": true,
           "kind": "translated-paraphrase",
@@ -3671,150 +3084,6 @@ window.COUPANG_PRODUCTS = [
           "variant": "02 Pink Banana"
         }
       ]
-    }
-  },
-  {
-    "id": "9514031816",
-    "sourceProductId": "9514031816",
-    "name": "비아워게스트 레트로 인싸템 힙한 미노이 선글라스, 143 x 30 x 138 mm",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/9514031816",
-    "price": 5390,
-    "priceStatus": "reference",
-    "image": "/products/9514031816.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/6b75/ce057687a798558bee75e810bb15d4438c756a2ce2f75ef5ef0c67e73ba0.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "BE OUR GUEST / 비아워게스트",
-    "aliases": [
-      "Be Our Guest retro black mini sunglasses"
-    ],
-    "tags": [
-      "glasses",
-      "sunglasses",
-      "black"
-    ],
-    "verifiedAttributes": [
-      "Be Our Guest retro black mini sunglasses",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "glasses",
-      "image": "/products/9514031816.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "2772134af74e122d24515d4d0241f039737fdc6d162e9f0f54628b6c441b404a",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/9514031816",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "8197877328",
-    "sourceProductId": "8197877328",
-    "name": "GL1988 GLS 안경사가 만든 편광 자외선차단 스포츠 선글라스, 150 x 45 mm",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/8197877328",
-    "price": 19800,
-    "priceStatus": "reference",
-    "image": "/products/8197877328.png",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/rs_quotation_api/l8byqrbl/28942f43818d43718582f08fd2dad7f1.png",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "GL1988",
-    "aliases": [
-      "GL1988 GLS sports sunglasses"
-    ],
-    "tags": [
-      "glasses",
-      "sunglasses",
-      "black"
-    ],
-    "verifiedAttributes": [
-      "GL1988 GLS sports sunglasses",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "glasses",
-      "image": "/products/8197877328.png",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "0c391617c988c06a1026b56edc911a4c6526222806a9c06e5b2b86bc5ee826c8",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/8197877328",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "6774150396",
-    "sourceProductId": "6774150396",
-    "name": "휠라 선글라스 FLS7402, 150 x 54 x 142mm",
-    "category": "glasses",
-    "productType": "glasses",
-    "url": "https://www.coupang.com/vp/products/6774150396",
-    "price": 25200,
-    "priceStatus": "reference",
-    "image": "/products/6774150396.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/147767780806839-48cc41bb-ada2-456e-93d1-5b1abc9cef8f.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%84%A0%EA%B8%80%EB%9D%BC%EC%8A%A4",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "FILA",
-    "aliases": [
-      "FILA FLS7402 round sunglasses"
-    ],
-    "tags": [
-      "glasses",
-      "sunglasses",
-      "black"
-    ],
-    "verifiedAttributes": [
-      "FILA FLS7402 round sunglasses",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "glasses",
-      "image": "/products/6774150396.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "2e5b74d3c825e86004410ed1578dce402fedf14bcf6e337df5014a4e1b6c95bf",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/6774150396",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
     }
   },
   {
@@ -4078,103 +3347,6 @@ window.COUPANG_PRODUCTS = [
       "rating": null,
       "reviewCount": null,
       "sourceUrl": "https://www.coupang.com/vp/products/345674940",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "6058070834",
-    "sourceProductId": "6058070834",
-    "name": "로코비전 남자 라운드 니트 오버핏 부드러운 스판 빅사이즈 스웨터, XL (115-120)",
-    "category": "clothes",
-    "productType": "sweater",
-    "url": "https://www.coupang.com/vp/products/6058070834",
-    "price": 28410,
-    "priceStatus": "reference",
-    "image": "/products/6058070834.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/49da/cc9e65d45d1326bd944b994d46a6e5e19db7277d67e060e6acbfbc85dfee.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%82%A8%EC%9E%90%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%8B%88%ED%8A%B8",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Rocovision / 로코비전",
-    "aliases": [
-      "Rocovision relaxed round-neck knit sweater"
-    ],
-    "tags": [
-      "sweater",
-      "black",
-      "knit"
-    ],
-    "verifiedAttributes": [
-      "Rocovision relaxed round-neck knit sweater",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/6058070834.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "8f5cdae5f6a4ae23fff76268c364a0d2f00a626fa89c7dbd3eab2064cb848190",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/6058070834",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "7909385138",
-    "sourceProductId": "7909385138",
-    "name": "제로스트릿 여성용 솔리드 언발란스 오프숄더 스웨터, S",
-    "category": "clothes",
-    "productType": "sweater",
-    "url": "https://www.coupang.com/vp/products/7909385138",
-    "price": 78950,
-    "priceStatus": "reference",
-    "image": "/products/7909385138.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/bf96/ca97b2ad5994eb517b500165d58e6c23f8e12729a7c457dd01b1279d9da3.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%8A%A4%EC%9B%A8%ED%84%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "ZERO STREET / 제로스트릿",
-    "aliases": [
-      "Zero Street solid asymmetric off-shoulder sweater"
-    ],
-    "tags": [
-      "sweater",
-      "black",
-      "knit",
-      "off-shoulder"
-    ],
-    "verifiedAttributes": [
-      "Zero Street solid asymmetric off-shoulder sweater",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/7909385138.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "824b2a98b63ac9de6d980fee7101adde3210271ccac9b057d579468de87502bf",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7909385138",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -4501,55 +3673,6 @@ window.COUPANG_PRODUCTS = [
     "imageSha256": "1d50977fe346e46d8afba2934a7c0f38138aca4c2d6663c6dc824a50ed9e4025"
   },
   {
-    "id": "5976056",
-    "sourceProductId": "5976056",
-    "name": "어반티 남여공용 기능성 쿨론 라운드 반팔티 냉감 무지 반팔 쿨 티셔츠, M",
-    "category": "clothes",
-    "productType": "tshirt",
-    "url": "https://www.coupang.com/vp/products/5976056",
-    "price": 9200,
-    "priceStatus": "reference",
-    "image": "/products/5976056.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/1684/9fc2bcc926dd657592b2a3d88245b554f94625f6dac28fb94abb4f804309.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%96%B4%EB%B0%98%ED%8B%B0%20%EB%B0%98%ED%8C%94%ED%8B%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Urban Tee / 어반티",
-    "aliases": [
-      "Urban Tee cool short-sleeve round-neck T-shirt"
-    ],
-    "tags": [
-      "tshirt",
-      "white",
-      "basic"
-    ],
-    "verifiedAttributes": [
-      "Urban Tee cool short-sleeve round-neck T-shirt",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/5976056.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "5fbc9c1da77911e20401ffe805229ac50e20df6d9ba9e34308026be3f8b64be7",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/5976056",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    },
-    "collectionStyle": "basic"
-  },
-  {
     "id": "7835573890",
     "sourceProductId": "7835573890",
     "name": "나이키 반팔티 NSW 클럽 숏 슬리브 티 스포츠웨어 반팔 티셔츠 라운드 면 숏슬리브 반팔티셔츠 남자 여자 트레이닝 스포츠 운동 데일리 반소매 나이키티 나이키반팔 나이키반팔티, 95(M)",
@@ -4758,55 +3881,6 @@ window.COUPANG_PRODUCTS = [
     "imageSha256": "f20d43b373bd0e69747d9a1967aa229a558db311a6b258dedf786f250237e600"
   },
   {
-    "id": "8715669911",
-    "sourceProductId": "8715669911",
-    "name": "아디다스 반팔티 아디컬러 3 스트라이프 삼선 클래식 3S 반팔 티셔츠 26SS 남녀공용 데일리, M",
-    "category": "clothes",
-    "productType": "tshirt",
-    "url": "https://www.coupang.com/vp/products/8715669911",
-    "price": 44100,
-    "priceStatus": "reference",
-    "image": "/products/8715669911.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/b96e/400b1d97b2b9d811ca790cca553ff14fbaeda34f81b769a7ea68a4a21f93.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%95%84%EB%94%94%EB%8B%A4%EC%8A%A4%20%EB%B0%98%ED%8C%94%ED%8B%B0",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "adidas",
-    "aliases": [
-      "Adidas Adicolor 3-Stripes short-sleeve T-shirt"
-    ],
-    "tags": [
-      "tshirt",
-      "black",
-      "branded"
-    ],
-    "verifiedAttributes": [
-      "Adidas Adicolor 3-Stripes short-sleeve T-shirt",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "garment",
-      "image": "/products/8715669911.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "a61c0f19b2b501f707f72707244ed8667a46770c8e33eca116d324968088defa",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/8715669911",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    },
-    "collectionStyle": "branded"
-  },
-  {
     "id": "7330605115",
     "sourceProductId": "7330605115",
     "name": "듀오백 독서실 스터디의자 DK073B, 그레이",
@@ -4844,54 +3918,6 @@ window.COUPANG_PRODUCTS = [
       "rating": null,
       "reviewCount": null,
       "sourceUrl": "https://www.coupang.com/vp/products/7330605115",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    },
-    "chairStyle": "office"
-  },
-  {
-    "id": "7395651009",
-    "sourceProductId": "7395651009",
-    "name": "듀오백 사무용 의자 DK073W, 그린",
-    "category": "desk",
-    "productType": "chair",
-    "url": "https://www.coupang.com/vp/products/7395651009",
-    "price": 130070,
-    "priceStatus": "reference",
-    "image": "/products/7395651009.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/1278590551040429-07e8f8d5-8e9f-40ba-acdc-b4585ba63dc0.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%EC%98%A4%EB%B0%B1%20%EC%9D%98%EC%9E%90",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Duoback / 듀오백",
-    "aliases": [
-      "Duoback DK073W office chair green"
-    ],
-    "tags": [
-      "chair",
-      "green"
-    ],
-    "verifiedAttributes": [
-      "Duoback DK073W office chair green",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "object",
-      "image": "/products/7395651009.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "30ae67e631db50b282ba66aa3b6d879fa517b345ac8da0dce235260f148b5b0c",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/7395651009",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],
@@ -4952,100 +3978,6 @@ window.COUPANG_PRODUCTS = [
     "chairStyle": "floor"
   },
   {
-    "id": "15089160",
-    "sourceProductId": "15089160",
-    "name": "듀플렉스 LED 데스크 스탠드 DP-910LS, 혼합색상",
-    "category": "desk",
-    "productType": "lamp",
-    "url": "https://www.coupang.com/vp/products/15089160",
-    "price": 34020,
-    "priceStatus": "reference",
-    "image": "/products/15089160.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/390579403244292-b0b66277-82ea-4245-b67e-2eda6c439481.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%ED%94%8C%EB%A0%89%EC%8A%A4%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Duplex / 듀플렉스",
-    "aliases": [
-      "Duplex DP-910LS LED desk lamp"
-    ],
-    "tags": [
-      "lamp",
-      "white"
-    ],
-    "verifiedAttributes": [
-      "Duplex DP-910LS LED desk lamp",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "object",
-      "image": "/products/15089160.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "8ac59c08a72b944be66c300504a2a1c60b83532d34e328efffa3eb2aab4d248f",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/15089160",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
-    "id": "2371639363",
-    "sourceProductId": "2371639363",
-    "name": "듀플렉스 LED 안티 블루라이트 데스크 스탠드 DP-140LS, 단일 색상",
-    "category": "desk",
-    "productType": "lamp",
-    "url": "https://www.coupang.com/vp/products/2371639363",
-    "price": 18900,
-    "priceStatus": "reference",
-    "image": "/products/2371639363.jpg",
-    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/9254/7ed4dd942defc28dd13395caeaf3aa6e13ce4ffa7e5e80e70368d090abea.jpg",
-    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%ED%94%8C%EB%A0%89%EC%8A%A4%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C",
-    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
-    "checkedAt": "2026-10-25",
-    "brand": "Duplex / 듀플렉스",
-    "aliases": [
-      "Duplex DP-140LS LED desk lamp"
-    ],
-    "tags": [
-      "lamp",
-      "white"
-    ],
-    "verifiedAttributes": [
-      "Duplex DP-140LS LED desk lamp",
-      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
-    ],
-    "preview": {
-      "kind": "object",
-      "image": "/products/2371639363.jpg",
-      "background": "white",
-      "available": false,
-      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
-    },
-    "imageSha256": "79cdd9691c578c26ed19cef7778f2e6fa4ab3a194f82515f978157f2f8fd761e",
-    "reviewEvidence": {
-      "status": "unavailable",
-      "rating": null,
-      "reviewCount": null,
-      "sourceUrl": "https://www.coupang.com/vp/products/2371639363",
-      "checkedAt": "2026-10-25",
-      "summary": null,
-      "pros": [],
-      "cons": [],
-      "reviews": [],
-      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
-    }
-  },
-  {
     "id": "7915055185",
     "sourceProductId": "7915055185",
     "name": "브리츠 무선 LED 스탠드 BE-LED3BR, 화이트",
@@ -5083,6 +4015,426 @@ window.COUPANG_PRODUCTS = [
       "rating": null,
       "reviewCount": null,
       "sourceUrl": "https://www.coupang.com/vp/products/7915055185",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    }
+  },
+  {
+    "id": "6974242810-gray",
+    "sourceProductId": "6974242810",
+    "name": "리끌로우 안경 FBB82, 그레이, FREE",
+    "category": "glasses",
+    "productType": "glasses",
+    "url": "https://www.coupang.com/vp/products/6974242810?itemId=17018766666",
+    "price": 23390,
+    "priceStatus": "reference",
+    "image": "/products/6974242810-gray.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/12/06/18/5/011d1367-814b-4a18-afd0-f549b92fade9.jpg",
+    "imageSourcePage": "https://fallcent.com/product/?item_id=17018766666&product_id=6974242810",
+    "sourceNote": "Real Coupang product family and title verified from public official Coupang pages. The original Coupang CDN image was recovered from the exact item-linked public Fallcent page and is stored unchanged. Price is an indexed reference; current stock, seller options, and price are unverified. The preview shows the frame pictured in that source image as approximate 2D placement, not physical size or lens performance. Gray color and item 17018766666 are also explicitly identified by the official indexed listing.",
+    "checkedAt": "2026-10-25",
+    "brand": "RECLOW / 리끌로우",
+    "aliases": [
+      "RECLOW FBB82 gray browline eyeglasses"
+    ],
+    "tags": [
+      "glasses",
+      "eyeglasses",
+      "optical",
+      "gray",
+      "gold",
+      "round",
+      "안경",
+      "그레이"
+    ],
+    "verifiedAttributes": [
+      "RECLOW FBB82 gray browline eyeglasses",
+      "Preview uses the pictured frame variant; confirm the color option and sizing on Coupang."
+    ],
+    "preview": {
+      "kind": "glasses",
+      "image": "/products/6974242810-gray.jpg",
+      "background": "white",
+      "available": true,
+      "crop": {
+        "x": 0,
+        "y": 0.35,
+        "width": 1,
+        "height": 0.36
+      },
+      "bridgeX": 0.5,
+      "bridgeY": 0.267,
+      "frameWidth": 0.98,
+      "lensClear": true,
+      "lensTransparent": true,
+      "lensMasks": [
+        {
+          "x": 0.255,
+          "y": 0.5,
+          "rx": 0.174,
+          "ry": 0.37
+        },
+        {
+          "x": 0.742,
+          "y": 0.5,
+          "rx": 0.174,
+          "ry": 0.37
+        }
+      ]
+    },
+    "imageSha256": "553d6502d2433a0c78e2dba566532b4c5a58c6a2ea70224fda68d32760afe16b",
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/6974242810?itemId=17018766666",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    }
+  },
+  {
+    "id": "6331079250-cream",
+    "sourceProductId": "6331079250",
+    "name": "리끌로우 선글라스 E03, FREE",
+    "category": "glasses",
+    "productType": "glasses",
+    "url": "https://www.coupang.com/vp/products/6331079250",
+    "price": 14220,
+    "priceStatus": "reference",
+    "image": "/products/6331079250.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/02/09/15/7/f275b47d-8127-4690-ba8e-1aa8046e3314.jpg",
+    "imageSourcePage": "https://fallcent.com/product/?item_id=13239160062&product_id=6331079250",
+    "sourceNote": "Real Coupang product family and title verified from public official Coupang pages. The original Coupang CDN image was recovered from the exact item-linked public Fallcent page and is stored unchanged. Price is an indexed reference; current stock, seller options, and price are unverified. The preview shows the frame pictured in that source image as approximate 2D placement, not physical size or lens performance. The mirror photo depicts a cream frame; official indexed default color metadata conflicts with this picture, so confirm the pictured color option on Coupang. The lens tint is sampled approximately from the picture; it is not calibrated optical transmission.",
+    "checkedAt": "2026-10-25",
+    "brand": "RECLOW / 리끌로우",
+    "aliases": [
+      "RECLOW E03 cream frame sunglasses"
+    ],
+    "tags": [
+      "glasses",
+      "sunglasses",
+      "cream",
+      "beige",
+      "round",
+      "선글라스"
+    ],
+    "verifiedAttributes": [
+      "RECLOW E03 cream frame sunglasses",
+      "Preview uses the pictured frame variant; confirm the color option and sizing on Coupang.",
+      "Preview shows the pictured cream option; select that option on Coupang. Exact default color metadata is unverified."
+    ],
+    "preview": {
+      "kind": "glasses",
+      "image": "/products/6331079250.jpg",
+      "background": "white",
+      "available": true,
+      "crop": {
+        "x": 0.045,
+        "y": 0.28,
+        "width": 0.84,
+        "height": 0.36
+      },
+      "bridgeX": 0.5,
+      "bridgeY": 0.35,
+      "frameWidth": 0.98,
+      "lensClear": true,
+      "lensTransparent": true,
+      "lensMasks": [
+        {
+          "x": 0.245,
+          "y": 0.5,
+          "rx": 0.17,
+          "ry": 0.37
+        },
+        {
+          "x": 0.755,
+          "y": 0.5,
+          "rx": 0.17,
+          "ry": 0.37
+        }
+      ],
+      "lensTint": "#8c8174"
+    },
+    "imageSha256": "8a1f2c719f7a001e053e2ef9eb65978755ca8069707b7a0817e21dd773d281b6",
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/6331079250?itemId=13239160062",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    }
+  },
+  {
+    "id": "22985509",
+    "sourceProductId": "22985509",
+    "name": "듀플렉스 클립형 LED 데스크 스탠드 DP-330LS, 혼합색상",
+    "category": "desk",
+    "productType": "lamp",
+    "url": "https://www.coupang.com/vp/products/22985509",
+    "price": 25230,
+    "priceStatus": "reference",
+    "image": "/products/demo-22985509.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/6340/447c69b5544c4b2f8f06066e0da6591989a91b3acd68599b34cd9de0ca23.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%ED%94%8C%EB%A0%89%EC%8A%A4%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C",
+    "sourceNote": "Real Coupang product-family ID verified against public indexed listing sources; the original unchanged Coupang CDN photo, pictured option and historical reference price come from the matching product name on the cited Fallcent page. Current seller, availability, exact option IDs and live price are unverified. Select the matching pictured option on Coupang.",
+    "checkedAt": "2026-10-25",
+    "brand": "Duplex / 듀플렉스",
+    "aliases": [
+      "Duplex DP-330LS clip LED desk lamp"
+    ],
+    "tags": [
+      "lamp",
+      "white",
+      "desk lamp",
+      "table lamp",
+      "스탠드"
+    ],
+    "verifiedAttributes": [
+      "Duplex DP-330LS clip LED desk lamp",
+      "Preview depicts the pictured sourced option. Select and verify the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/products/demo-22985509.jpg",
+      "background": "white",
+      "available": true,
+      "backgroundTolerance": 0
+    },
+    "imageSha256": "97042e69e39075326afb46a6b3d987b532806a42646042ed6a574d1a817430c7",
+    "listingEvidenceUrls": [
+      "https://www.coupang.com/vp/products/22985509"
+    ],
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/22985509",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    }
+  },
+  {
+    "id": "6566125679",
+    "sourceProductId": "6566125679",
+    "name": "듀오백 메쉬 의자 Q7-05HLDA-M 방문설치, 블랙",
+    "category": "desk",
+    "productType": "chair",
+    "url": "https://www.coupang.com/vp/products/6566125679?itemId=14720763466",
+    "price": 278000,
+    "priceStatus": "reference",
+    "image": "/products/demo-6566125679.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2025/09/24/17/9/34c9fc9d-237e-4524-b6ec-2c4598b60694.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%EC%98%A4%EB%B0%B1%20%EC%9D%98%EC%9E%90",
+    "sourceNote": "Real Coupang product-family ID verified against public indexed listing sources; the original unchanged Coupang CDN photo, pictured option and historical reference price come from the matching product name on the cited Fallcent page. Current seller, availability, exact option IDs and live price are unverified. Select the matching pictured option on Coupang. Both Coupang and Fallcent mark this option temporarily sold out; this is a historical demo preview, not a current-stock promise.",
+    "checkedAt": "2026-10-25",
+    "brand": "Duoback / 듀오백",
+    "aliases": [
+      "Duoback Q7-05HLDA-M mesh office chair black"
+    ],
+    "tags": [
+      "chair",
+      "black",
+      "office chair",
+      "mesh",
+      "사무용의자"
+    ],
+    "verifiedAttributes": [
+      "Duoback Q7-05HLDA-M mesh office chair black",
+      "Preview depicts the pictured sourced option. Select and verify the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/products/demo-6566125679.jpg",
+      "background": "white",
+      "available": true
+    },
+    "imageSha256": "3a6bf67dee11f13947a3c0c3c57c2ee47662af231fb90af80de79e51dc5337b9",
+    "listingEvidenceUrls": [
+      "https://www.coupang.com/vp/products/6566125679",
+      "https://fallcent.com/product/?item_id=14720763466&product_id=6566125679"
+    ],
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/6566125679?itemId=14720763466",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    },
+    "chairStyle": "office"
+  },
+  {
+    "id": "7616878459-brown",
+    "sourceProductId": "7616878459",
+    "name": "라파클럽 여성 라운드 꽈배기 니트 가디건 스웨터 면100%, M (사진 색상: 브라운)",
+    "category": "clothes",
+    "productType": "sweater",
+    "url": "https://www.coupang.com/vp/products/7616878459",
+    "price": 46800,
+    "priceStatus": "reference",
+    "image": "/products/demo-7616878459-brown.png",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/a065/31e43a35f64441a4b8b4323ca96308a5380ed0d79ef505ec8d2eae52542e.png",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%8B%88%ED%8A%B8",
+    "sourceNote": "Real Coupang product-family ID verified against public indexed listing sources; the original unchanged Coupang CDN photo, pictured option and historical reference price come from the matching product name on the cited Fallcent page. Current seller, availability, exact option IDs and live price are unverified. Select the matching pictured option on Coupang.",
+    "checkedAt": "2026-10-25",
+    "brand": "Rafa Club / 라파클럽",
+    "aliases": [
+      "Rafa Club cable knit cardigan, pictured brown, M"
+    ],
+    "tags": [
+      "sweater",
+      "brown",
+      "knit",
+      "cardigan"
+    ],
+    "verifiedAttributes": [
+      "Rafa Club cable knit cardigan, pictured brown, M",
+      "Preview depicts the pictured sourced option. Select and verify the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "garment",
+      "image": "/products/demo-7616878459-brown.png",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.69,
+      "shoulderY": 0.08
+    },
+    "imageSha256": "1a54a3867c017df9557c12126151a7aabc4f773b73e197f101c3fe9be4d9569e",
+    "listingEvidenceUrls": [
+      "https://www.coupang.com/vp/products/7616878459"
+    ],
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/7616878459",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    }
+  },
+  {
+    "id": "7616878459-red",
+    "sourceProductId": "7616878459",
+    "name": "라파클럽 여성 라운드 꽈배기 니트 가디건 스웨터 면100%, L (사진 색상: 레드)",
+    "category": "clothes",
+    "productType": "sweater",
+    "url": "https://www.coupang.com/vp/products/7616878459",
+    "price": 46800,
+    "priceStatus": "reference",
+    "image": "/products/demo-7616878459-red.png",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/3b0b/2a58074098943b2f3b53840b7a58ef0fd32a1d784736326ea9c8ae7dcdff.png",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%8B%88%ED%8A%B8",
+    "sourceNote": "Real Coupang product-family ID verified against public indexed listing sources; the original unchanged Coupang CDN photo, pictured option and historical reference price come from the matching product name on the cited Fallcent page. Current seller, availability, exact option IDs and live price are unverified. Select the matching pictured option on Coupang.",
+    "checkedAt": "2026-10-25",
+    "brand": "Rafa Club / 라파클럽",
+    "aliases": [
+      "Rafa Club cable knit cardigan, pictured red, L"
+    ],
+    "tags": [
+      "sweater",
+      "red",
+      "knit",
+      "cardigan"
+    ],
+    "verifiedAttributes": [
+      "Rafa Club cable knit cardigan, pictured red, L",
+      "Preview depicts the pictured sourced option. Select and verify the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "garment",
+      "image": "/products/demo-7616878459-red.png",
+      "background": "white",
+      "available": true,
+      "shoulderWidth": 0.69,
+      "shoulderY": 0.08
+    },
+    "imageSha256": "d5b4a207952eff8f048e275012150c046f28f51e4f89c5d3587a1382965ea8f4",
+    "listingEvidenceUrls": [
+      "https://www.coupang.com/vp/products/7616878459"
+    ],
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/7616878459",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    }
+  },
+  {
+    "id": "2124178650-black",
+    "sourceProductId": "2124178650",
+    "name": "마켓비 CAMPANA 단스탠드 E14 KS1823T, 블랙",
+    "category": "desk",
+    "productType": "lamp",
+    "url": "https://www.coupang.com/vp/products/2124178650",
+    "price": 15580,
+    "priceStatus": "reference",
+    "image": "/products/demo-2124178650-black.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/33ae/1d93132860af7721c7a8ffea90dedf064e8310b2195746a38664b7187add.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A7%88%EC%BC%93%EB%B9%84%20%EB%8B%A8%EC%8A%A4%ED%83%A0%EB%93%9C",
+    "sourceNote": "Coupang product family 2124178650 is identified by the public indexed Alltimeprice record for CAMPANA E14 KS1823T, which lists black among its options. The exact black option ID is unverified; family links can open a different color. Black product name, reference price and unchanged original Coupang CDN photograph are from the cited Fallcent search page; select black on Coupang. Current stock, seller and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "MarketB / 마켓비",
+    "aliases": [
+      "MarketB CAMPANA E14 KS1823T table lamp black"
+    ],
+    "tags": [
+      "lamp",
+      "black",
+      "desk lamp",
+      "table lamp",
+      "스탠드"
+    ],
+    "verifiedAttributes": [
+      "MarketB CAMPANA E14 KS1823T table lamp black",
+      "Preview depicts the pictured sourced option. Select and verify the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/products/demo-2124178650-black.jpg",
+      "background": "white",
+      "available": true
+    },
+    "imageSha256": "76f4405286c2624f2f4956f49c22280180d3b8faffd29a11362ef63469e8c0b6",
+    "listingEvidenceUrls": [
+      "https://alltimeprice.com/product/?pid=2124178650-71590130089",
+      "https://www.coupang.com/np/search?q=e14%EC%8A%A4%ED%83%A0%EB%93%9C"
+    ],
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/2124178650",
       "checkedAt": "2026-10-25",
       "summary": null,
       "pros": [],

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createVoiceHandler, searchProducts, sessionConfiguration } from '../lib/nook-voice.mjs';
 import catalog from '../data/catalog.json' with {type:'json'};
+import { demoCatalog } from '../lib/demo-catalog.mjs';
 const origin = 'https://nook.test';
 const offer = 'v=0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\na=sendrecv\r\n';
 const answer = 'v=0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\na=recvonly\r\n';
@@ -38,15 +39,22 @@ test('retrieval does not return unsafe catalog links or treat null reference pri
   assert.equal(searchProducts({query:'lipstick',category:'makeup',max_price:10000},fixtures).products.length,0);
 });
 
-test('search supplies explicit try-on availability and retains the listing-specific refusal reason', () => {
-  const supported=catalog.find(p=>p.category==='glasses'&&p.preview&&p.preview.available===undefined);
-  const unsupported=catalog.find(p=>p.category==='glasses'&&p.preview?.available===false);
-  const results=searchProducts({query:'glasses',category:'glasses'},[supported,unsupported]).products;
-  assert.equal(results.find(p=>p.id===supported.id).preview.available,true);
-  const rejected=results.find(p=>p.id===unsupported.id);
-  assert.equal(rejected.preview.available,false);
-  assert.equal(rejected.preview.unavailableReason,unsupported.preview.unavailableReason);
-  assert.equal(supported.preview.available,undefined,'normalizing tool output must not alter catalog data');
+test('search excludes unavailable previews and explicitly enables supported legacy recipes', () => {
+  const supported=catalog.find(p=>p.category==='glasses'&&p.preview&&p.preview.available!==false);
+  const legacy={...supported,preview:{...supported.preview}};delete legacy.preview.available;
+  const unsupported={...supported,id:'unavailable-preview',preview:{...supported.preview,available:false,unavailableReason:'A person obscures the frames.'}};
+  const results=searchProducts({query:'glasses',category:'glasses'},[legacy,unsupported]).products;
+  assert.equal(results.length,1);assert.equal(results[0].id,supported.id);assert.equal(results[0].preview.available,true);
+  assert.equal(legacy.preview.available,undefined,'normalizing tool output must not alter catalog data');
+});
+
+test('voice status and product-search endpoint use the same preview-ready demo catalog', async () => {
+  const supported=demoCatalog(catalog)[0];
+  const unsupported={...supported,id:'unavailable-preview',preview:{...supported.preview,available:false}};
+  const products=[supported,unsupported],handler=createVoiceHandler({products});
+  const status=await handler(new Request(origin+'/api/voice/status'));assert.equal((await status.json()).catalogCount,1);
+  const response=await handler(makeRequest('/api/products/search',{query:supported.productType,category:supported.category}));
+  const result=await response.json();assert.deepEqual(result.products.map(p=>p.id),[supported.id]);assert.equal(result.products[0].preview.available,true);
 });
 
 test('voice readiness is honest and contains no secret or credential fragments', async () => {
@@ -158,7 +166,7 @@ test('caption compatibility does not retry unrelated errors or repeatedly retry 
 });
 
 test('related collections keep balm, knitwear and explicit shirt style separate',()=>{
-  const product=(id,productType,name,category,collectionStyle)=>({...catalog[0],id,name,productType,category,collectionStyle,tags:[],aliases:[],verifiedAttributes:[]});
+  const product=(id,productType,name,category,collectionStyle)=>({...catalog[0],id,name,productType,category,collectionStyle,preview:{...catalog[0].preview,kind:category==='clothes'?'garment':'lip'},tags:[],aliases:[],verifiedAttributes:[]});
   const products=[product('1','lipstick','Lipstick','makeup'),product('2','lipbalm','립밤 lip balm','makeup'),product('3','hoodie','Hoodie 후드티','clothes'),product('4','sweater','Knitted sweater 니트 스웨터','clothes'),product('5','tshirt','Basic T-shirt','clothes','basic'),product('6','tshirt','Brand logo T-shirt','clothes','branded')];
   for(const query of ['lip balm','립밤'])assert.deepEqual(searchProducts({query},products).products.map(p=>p.id),['2']);
   for(const query of ['sweater','knit pullover','니트'])assert.deepEqual(searchProducts({query},products).products.map(p=>p.id),['4']);
@@ -309,7 +317,7 @@ test('specific English and Korean requests cannot cross product types within sha
 
 
 test('English and Korean glasses retrieval never crosses categories or invents an unavailable budget match',()=>{
-  const glasses=[0,1,2,3,4,5].map((i)=>({id:String(900000+i),name:'안경 Glasses '+i,category:'glasses',productType:'glasses',tags:[i<3?'optical':'sunglasses'],price:10000+i*1000,url:'https://www.coupang.com/vp/products/'+(900000+i),image:'/products/glasses-'+i+'.jpg'}));
+  const glasses=[0,1,2,3,4,5].map((i)=>({id:String(900000+i),name:'안경 Glasses '+i,category:'glasses',productType:'glasses',tags:[i<3?'optical':'sunglasses'],price:10000+i*1000,url:'https://www.coupang.com/vp/products/'+(900000+i),image:'/products/glasses-'+i+'.jpg',preview:{kind:'glasses',image:'/products/glasses-'+i+'.jpg',available:true}}));
   for(const query of ['glasses','eyeglasses','spectacles','sunglasses','안경','선글라스']){
     const result=searchProducts({query,category:'all',max_price:null},[...catalog,...glasses]);
     assert.ok(result.products.length>=3&&result.products.length<=10,query);
@@ -322,7 +330,7 @@ test('English and Korean glasses retrieval never crosses categories or invents a
 
 
 test('larger themed results preserve explicit colors, negative colors, and reference budgets using trusted catalog tags',()=>{
-  const fixtures=Array.from({length:14},(_,i)=>({id:`lip-${i}`,name:'Sourced lipstick '+i,category:'makeup',productType:'lipstick',tags:[i<11?'pink':'purple','lipstick'],price:5000+i*1000,url:'https://www.coupang.com/vp/products/'+(500000+i),image:'/products/lip-'+i+'.jpg'}));
+  const fixtures=Array.from({length:14},(_,i)=>({id:`lip-${i}`,name:'Sourced lipstick '+i,category:'makeup',productType:'lipstick',tags:[i<11?'pink':'purple','lipstick'],price:5000+i*1000,url:'https://www.coupang.com/vp/products/'+(500000+i),image:'/products/lip-'+i+'.jpg',preview:{kind:'lip',image:'/products/lip-'+i+'.jpg',color:'#cc6688'}}));
   for(const query of ['pink lipstick','분홍 립스틱']) {
     const result=searchProducts({query,category:'makeup'},fixtures);
     assert.equal(result.products.length,10);assert(result.products.every(p=>p.tags.includes('pink')));
@@ -340,14 +348,15 @@ test('larger themed results preserve explicit colors, negative colors, and refer
 });
 
 test('explicit optical and sunglasses requests cannot silently substitute the other eyewear subtype',()=>{
-  const fixtures=[{id:'optical',tags:['optical','black']},{id:'sun',tags:['sunglasses','black']},{id:'unknown',tags:['glasses']}].map((p,i)=>({...p,name:'Glasses '+i,productType:'glasses',category:'glasses',price:10000,url:'https://www.coupang.com/vp/products/'+(800000+i)}));
+  const fixtures=[{id:'optical',tags:['optical','black']},{id:'sun',tags:['sunglasses','black']},{id:'unknown',tags:['glasses']}].map((p,i)=>({...p,name:'Glasses '+i,productType:'glasses',category:'glasses',price:10000,url:'https://www.coupang.com/vp/products/'+(800000+i),preview:{kind:'glasses',image:'/products/glasses-'+i+'.jpg'}}));
   for(const query of ['normal glasses','eyeglasses','optical glasses','일반 안경'])assert.deepEqual(searchProducts({query,category:'glasses'},fixtures).products.map(p=>p.id),['optical']);
   for(const query of ['sunglasses','선글라스'])assert.deepEqual(searchProducts({query,category:'glasses'},fixtures).products.map(p=>p.id),['sun']);
   assert.equal(searchProducts({query:'glasses',category:'glasses'},fixtures).products.length,3);
 });
 
 test('sourced chair searches preserve office, floor and dining compatibility instead of matching caution text',()=>{
-  const expected={office:['7330605115','7395651009'],floor:['6908241889','8491783776'],dining:['6775922884','6775922884-gray']};
+  const eligible=demoCatalog(catalog);
+  const expected=Object.fromEntries(['office','floor','dining'].map(style=>[style,eligible.filter(p=>p.productType==='chair'&&p.chairStyle===style).map(p=>p.id).sort()]));
   for(const [style,queries] of Object.entries({office:['office chair','desk chair','책상 의자','사무용 의자'],floor:['floor chair','좌식의자'],dining:['dining chair','식탁 의자']})){
     for(const query of queries){
       const result=searchProducts({query,category:'desk'});
@@ -356,9 +365,9 @@ test('sourced chair searches preserve office, floor and dining compatibility ins
       assert.deepEqual(result.constraints.chair.include,[style]);
     }
   }
-  const broad=searchProducts({query:'chair',category:'desk'});assert.equal(broad.products.length,6);
+  const broad=searchProducts({query:'chair',category:'desk'});assert.equal(broad.products.length,eligible.filter(p=>p.productType==='chair').length);
   for(const query of ['chairs without floor chairs','좌식의자 말고 의자']){
-    const result=searchProducts({query,category:'desk'});assert.equal(result.products.length,4);assert(result.products.every(p=>p.chairStyle!=='floor'));
+    const result=searchProducts({query,category:'desk'});assert.equal(result.products.length,eligible.filter(p=>p.productType==='chair'&&p.chairStyle!=='floor').length);assert(result.products.every(p=>p.chairStyle!=='floor'));
   }
   assert.equal(searchProducts({query:'office chair',category:'desk',max_price:30000}).products.length,0,'cheap floor chairs must not fill an unavailable office-chair budget');
   const unknown={...catalog.find(p=>p.chairStyle==='floor'),id:'unknown-chair',chairStyle:undefined,name:'Office desk chair'};

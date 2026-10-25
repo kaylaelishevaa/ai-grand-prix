@@ -1,12 +1,18 @@
 Coupi catalog provenance — checked 2026-10-25 (Asia/Singapore)
 
-Scope: 82 sourced Coupang listings or named options: 22 lipsticks, 10 lip balms, 14 glasses, 12 T-shirts, and six each of sweaters, hoodies, chairs and desk lamps. Every related collection retains at least six named options. Variant-suffixed IDs are local keys; sourceProductId identifies the numeric retailer family. Seller identities are not independently verified.
+Scope: data/catalog.json retains the full history of sourced Coupang listings and named options, including unsupported records held out of the demo. The active demo contains only reviewed records accepted by lib/demo-catalog.mjs. Run npm run catalog:build for the current active/held-out counts and to regenerate public/coupang-products.js plus public/product-catalog.csv; npm run check rejects stale generated files. The server applies the same rule. Variant-suffixed IDs are local keys; sourceProductId identifies the numeric retailer family. Seller identities are not independently verified.
 
 Fourteen unsuitable preview listings were replaced with simpler sourced products; see data/catalog-replacements.json for the old-to-new mapping. Four mesh chairs were replaced by two Edgar dining-chair sets and two solid floor chairs. RECLOW YLeen black sunglasses replace the pale E03 frame. PAPA PA-800B black replaces the clear-glass Tarnaby collage. Source photos were downloaded unchanged from the matching Coupang CDN URLs; local hashes below verify the bytes. Six tee options and two hoodies now use isolated front-facing photographs instead of tags, collages or asymmetric sleeve poses. The three United Athle color options share one verified product family. Rejected candidate photos were not added to the catalog.
+
+Demo eligibility: recommendations, product details, Home, Explore worlds, purchase pairings and the downloadable product list use the filtered demo catalog. Saved collections store IDs and restore only IDs still present in that catalog; retired items are not silently substituted. A historical entry below is evidence, not proof it is active. data/catalog.json holds its current preview metadata, and the generated catalog is the authoritative demo list.
 
 Direct Coupang retrieval may return HTTP 403. Product IDs/options were verified from indexed public retailer listings or ordinary public Fallcent product links. Matching named Fallcent entries provide image/price evidence. No access-control bypass was attempted. All numeric prices are historical references, not live offers. Stock, seller, delivery and selected options must be confirmed on Coupang; some source snapshots report sold-out stock. For family-only links, select the exact named option.
 
 Preview treatment: card photos remain original. The existing renderer removes edge-connected neutral background and uses verified masks where needed. The replacement Comet chair has a simple solid outline to exclude its photographed floor shadow. The new L.LAMO hoodie preview excludes detached color swatches below the hem; all eight new garment previews use the existing neutral-background extraction with shoulder anchors calibrated to their source photos. Edgar listings sell two chairs; the preview crops to one chair from that set. Chess and Comet are floor-level seats, not desk-height office chairs. The front-facing YLeen frame uses the existing approximate lens-translucency treatment. All object/garment previews are 2D guides, not physical size or fit guarantees. No reviews or ratings were transferred from retired products to their replacements. Existing sourced reviews retain their product-family scope and source URLs in data/catalog.json.
+
+Lip preview treatment: lipstick and tinted balm colours are estimates from listing imagery or identified pictured shades, not calibrated matches. Clear-balm previews preserve the shopper’s natural lip colour and add subtle sheen. Tinted-balm previews add low-opacity colour plus sheen. These are approximate visual finishes, not verified texture, hydration, SPF or skincare performance. Unsupported balm imagery remains source-only until a defensible preview recipe is reviewed.
+
+Historical provenance entries follow. Source notes and earlier preview descriptions are retained for audit history; current inclusion is determined by the generated demo catalog.
 
 1814412512 | lipstick | 롬앤 제로 매트 립스틱, 1개, 09 쉘 누드
 Coupang listing: https://www.coupang.com/vp/products/1814412512?itemId=3063152900&vendorItemId=71051109229
@@ -875,3 +881,82 @@ Scope: options across the named family; exact selected option is not guaranteed.
 
 Existing mixed-shade Revlon sample is also exposed on Pink Velvet and Love That Pink, with an explicit family-wide scope note.
 Replacement furniture review coverage is unverified. The public matched Duoback DK073B mirror contained no written reviews. Duplex DP-310LS had no written reviews; the DP-910LS mirror found linked to a different retailer product ID and was not reused. Absence from these mirrors does not establish that Coupang has no reviews.
+
+Additional sourced demo records — checked 2026-10-25
+
+6974242810-gray | glasses | 리끌로우 안경 FBB82, 그레이, FREE
+Coupang listing: https://www.coupang.com/vp/products/6974242810?itemId=17018766666
+Image/price source page: https://fallcent.com/product/?item_id=17018766666&product_id=6974242810
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/12/06/18/5/011d1367-814b-4a18-afd0-f549b92fade9.jpg
+Local original: public/products/6974242810-gray.jpg
+SHA-256: 553d6502d2433a0c78e2dba566532b4c5a58c6a2ea70224fda68d32760afe16b
+Reference price (KRW): 23390
+Real Coupang product family and title verified from public official Coupang pages. The original Coupang CDN image was recovered from the exact item-linked public Fallcent page and is stored unchanged. Price is an indexed reference; current stock, seller options, and price are unverified. The preview shows the frame pictured in that source image as approximate 2D placement, not physical size or lens performance. Gray color and item 17018766666 are also explicitly identified by the official indexed listing.
+Review evidence: unavailable
+
+6331079250 | glasses | 리끌로우 선글라스 E03, FREE
+Coupang listing: https://www.coupang.com/vp/products/6331079250
+Image/price source page: https://fallcent.com/product/?item_id=13239160062&product_id=6331079250
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/02/09/15/7/f275b47d-8127-4690-ba8e-1aa8046e3314.jpg
+Local original: public/products/6331079250.jpg
+SHA-256: 8a1f2c719f7a001e053e2ef9eb65978755ca8069707b7a0817e21dd773d281b6
+Reference price (KRW): 14220
+Real Coupang product family and title verified from public official Coupang pages. The original Coupang CDN image was recovered from the exact item-linked public Fallcent page and is stored unchanged. Price is an indexed reference; current stock, seller options, and price are unverified. The preview shows the frame pictured in that source image as approximate 2D placement, not physical size or lens performance. The mirror photo depicts a cream frame; official indexed default color metadata conflicts with this picture, so confirm the pictured color option on Coupang. The lens tint is sampled approximately from the picture; it is not calibrated optical transmission.
+Review evidence: unavailable
+
+22985509 | lamp | 듀플렉스 클립형 LED 데스크 스탠드 DP-330LS, 혼합색상
+Coupang listing: https://www.coupang.com/vp/products/22985509
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%93%80%ED%94%8C%EB%A0%89%EC%8A%A4%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/6340/447c69b5544c4b2f8f06066e0da6591989a91b3acd68599b34cd9de0ca23.jpg
+Local original: public/products/demo-22985509.jpg
+SHA-256: 97042e69e39075326afb46a6b3d987b532806a42646042ed6a574d1a817430c7
+Reference price (KRW): 25230
+Real Coupang product-family ID verified against public indexed listing sources; the original unchanged Coupang CDN photo, pictured option and historical reference price come from the matching product name on the cited Fallcent page. Current seller, availability, exact option IDs and live price are unverified. Select the matching pictured option on Coupang.
+Listing verification source: https://www.coupang.com/vp/products/22985509
+Review evidence: unavailable
+
+6566125679 | chair | 듀오백 메쉬 의자 Q7-05HLDA-M 방문설치, 블랙
+Coupang listing: https://www.coupang.com/vp/products/6566125679?itemId=14720763466
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%93%80%EC%98%A4%EB%B0%B1%20%EC%9D%98%EC%9E%90
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2025/09/24/17/9/34c9fc9d-237e-4524-b6ec-2c4598b60694.jpg
+Local original: public/products/demo-6566125679.jpg
+SHA-256: 3a6bf67dee11f13947a3c0c3c57c2ee47662af231fb90af80de79e51dc5337b9
+Reference price (KRW): 278000
+Real Coupang product-family ID verified against public indexed listing sources; the original unchanged Coupang CDN photo, pictured option and historical reference price come from the matching product name on the cited Fallcent page. Current seller, availability, exact option IDs and live price are unverified. Select the matching pictured option on Coupang. Both Coupang and Fallcent mark this option temporarily sold out; this is a historical demo preview, not a current-stock promise.
+Listing verification source: https://www.coupang.com/vp/products/6566125679
+Listing verification source: https://fallcent.com/product/?item_id=14720763466&product_id=6566125679
+Review evidence: unavailable
+
+7616878459-brown | sweater | 라파클럽 여성 라운드 꽈배기 니트 가디건 스웨터 면100%, M (사진 색상: 브라운)
+Coupang listing: https://www.coupang.com/vp/products/7616878459
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%8B%88%ED%8A%B8
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/a065/31e43a35f64441a4b8b4323ca96308a5380ed0d79ef505ec8d2eae52542e.png
+Local original: public/products/demo-7616878459-brown.png
+SHA-256: 1a54a3867c017df9557c12126151a7aabc4f773b73e197f101c3fe9be4d9569e
+Reference price (KRW): 46800
+Real Coupang product-family ID verified against public indexed listing sources; the original unchanged Coupang CDN photo, pictured option and historical reference price come from the matching product name on the cited Fallcent page. Current seller, availability, exact option IDs and live price are unverified. Select the matching pictured option on Coupang.
+Listing verification source: https://www.coupang.com/vp/products/7616878459
+Review evidence: unavailable
+
+7616878459-red | sweater | 라파클럽 여성 라운드 꽈배기 니트 가디건 스웨터 면100%, L (사진 색상: 레드)
+Coupang listing: https://www.coupang.com/vp/products/7616878459
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%8B%88%ED%8A%B8
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/3b0b/2a58074098943b2f3b53840b7a58ef0fd32a1d784736326ea9c8ae7dcdff.png
+Local original: public/products/demo-7616878459-red.png
+SHA-256: d5b4a207952eff8f048e275012150c046f28f51e4f89c5d3587a1382965ea8f4
+Reference price (KRW): 46800
+Real Coupang product-family ID verified against public indexed listing sources; the original unchanged Coupang CDN photo, pictured option and historical reference price come from the matching product name on the cited Fallcent page. Current seller, availability, exact option IDs and live price are unverified. Select the matching pictured option on Coupang.
+Listing verification source: https://www.coupang.com/vp/products/7616878459
+Review evidence: unavailable
+
+2124178650-black | lamp | 마켓비 CAMPANA 단스탠드 E14 KS1823T, 블랙
+Coupang listing: https://www.coupang.com/vp/products/2124178650
+Image/price source page: https://fallcent.com/product/search/?keyword=%EB%A7%88%EC%BC%93%EB%B9%84%20%EB%8B%A8%EC%8A%A4%ED%83%A0%EB%93%9C
+Original CDN image: https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/33ae/1d93132860af7721c7a8ffea90dedf064e8310b2195746a38664b7187add.jpg
+Local original: public/products/demo-2124178650-black.jpg
+SHA-256: 76f4405286c2624f2f4956f49c22280180d3b8faffd29a11362ef63469e8c0b6
+Reference price (KRW): 15580
+Coupang product family 2124178650 is identified by the public indexed Alltimeprice record for CAMPANA E14 KS1823T, which lists black among its options. The exact black option ID is unverified; family links can open a different color. Black product name, reference price and unchanged original Coupang CDN photograph are from the cited Fallcent search page; select black on Coupang. Current stock, seller and price are unverified.
+Listing verification source: https://alltimeprice.com/product/?pid=2124178650-71590130089
+Listing verification source: https://www.coupang.com/np/search?q=e14%EC%8A%A4%ED%83%A0%EB%93%9C
+Review evidence: unavailable

@@ -1,6 +1,6 @@
 # Coupi — AI shopping companion
 
-Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 82 sourced Coupang listings/options.
+Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and a curated catalog of sourced Coupang listings/options with supported live previews.
 
 Each developer runs their own local server and supplies **their own OpenAI API key**. No usable API key is included in this repository.
 
@@ -57,7 +57,7 @@ Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers **Cal
 
 This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
 
-To check that the server loaded your configuration, open [the local voice status endpoint](http://127.0.0.1:5173/api/voice/status). With a nonempty key, it should report `ready: true` and `catalogCount: 82`. This check makes no OpenAI request: it confirms that a key is present, not that the key, credits, or model access are valid. Starting an actual call exercises those checks and incurs API usage.
+To check that the server loaded your configuration, open [the local voice status endpoint](http://127.0.0.1:5173/api/voice/status). With a nonempty key, it should report `ready: true`; `catalogCount` reports the current number of preview-ready demo products. This check makes no OpenAI request: it confirms that a key is present, not that the key, credits, or model access are valid. Starting an actual call exercises those checks and incurs API usage.
 
 ## 4. Try the demo
 
@@ -78,19 +78,19 @@ The current work is on `feat/coupi-call-discovery`, including the Home and Setti
 
 - **Conversation:** a fixed-height, scrollable panel keeps the camera visible. Tap Conversation for the full call history, or the chevron to minimize it. Speech turns are ordered before asynchronous transcription finishes, with streamed updates applied to the same turn.
 - **Photo chat:** tap the message icon, then the image icon next to Send. JPG, PNG and WebP files up to 10 MB are resized locally; the photo is sent to OpenAI only when you press Send during a connected call. A failed send keeps the draft ready to retry. Photos and transcripts are not stored in collections.
-- **Scrollable collections:** recommendations open inside a fixed window at the top of the video call. Scroll inside that window; the camera, conversation and call controls stay in place, with no section below the call. Each themed collection starts with six matching products; View more adds up to ten inside the same window. Next collection moves to related options: lipstick → lip balm, everyday glasses → sunglasses, basic → branded T-shirts, hoodies → sweaters. Budget and explicit exclusions remain in effect. Restrictive preferences can return fewer than six actual matches. Tap Try on to preview that exact item and minimize the window. Use each row’s actions for that exact product, and Next collection to change the themed group.
-- **Collections:** Save collection keeps up to ten products in that group and the selected item in this browser. The bookmark button restores saved groups, even after exploring a different style.
+- **Scrollable collections:** recommendations open inside a fixed window at the top of the video call. Scroll inside that window; the camera, conversation and call controls stay in place, with no section below the call. Each themed collection starts with up to six matching products; View more adds up to ten inside the same window. Next collection moves to related options: lipstick → lip balm, everyday glasses → sunglasses, basic → branded T-shirts, hoodies → sweaters. Budget and explicit exclusions remain in effect. Restrictive preferences can return fewer than six actual matches. Tap Try on to preview that exact item and minimize the window. Use each row’s actions for that exact product, and Next collection to change the themed group.
+- **Collections:** Save collection keeps up to ten products in that group and the selected item in this browser. The bookmark button restores saved groups, even after exploring a different style. Older saved groups resolve against the current demo catalog: retired IDs are dropped and empty groups are omitted.
 - **Compare:** choose two or three products of the same type, then Compare. The table shows sourced prices, variants, attributes and available review evidence. Ask Coupi to discuss the selection during a call.
-- **Reviews:** ratings, a precomputed AI summary, pros/cons and translated review samples are available for 19 product options across 10 families, including the first Romand, MAC and Kate lipsticks and EYELAB glasses. Other products explicitly show missing evidence. These are historical samples from linked public mirrors, not a live Coupang review feed or a summary of every review.
+- **Reviews:** ratings, a precomputed AI summary, pros/cons and translated review samples are available for selected product options, including the first Romand, MAC and Kate lipsticks and EYELAB glasses. Other products explicitly show missing evidence. These are historical samples from linked public mirrors, not a live Coupang review feed or a summary of every review.
 - **Camera-off mode:** a clean conversation background keeps voice, typed messages, image uploads, and product actions available when the camera is off. Product selection uses explicit buttons; gesture controls have been removed.
 
-For a quick review demo, open **Details** on the first Romand lipstick. For more, ask for **pink lipsticks**, scroll within the top product window and tap **View more**. Review evidence can span multiple shades or options; this is labeled in the UI. The catalog includes pink/red lipsticks, lip balms, optical glasses, sunglasses, basic/branded T-shirts, hoodies, sweaters, chairs and desk lamps. Sourced brands are shown; seller identities are not inferred. Product-family links may require selecting the pictured option on Coupang. Photos with people, multiple products, or unsuitable scenes are marked **No preview** unless a faithful cutout is available. Prices are historical reference values, and seller/stock details are not invented.
+For a quick review demo, open **Details** on the first Romand lipstick. For more, ask for **pink lipsticks**, scroll within the top product window and tap **View more**. Review evidence can span multiple shades or options; this is labeled in the UI. The catalog includes pink/red lipsticks, lip balms, optical glasses, sunglasses, basic/branded T-shirts, hoodies, sweaters, chairs and desk lamps. Sourced brands are shown; seller identities are not inferred. Product-family links may require selecting the pictured option on Coupang. Every product exposed in the demo has a supported preview recipe. Historical records with unsuitable photos or unsupported preview data are retained only in the source catalog; they are excluded from recommendations, worlds, saved-group restoration, checkout suggestions, and the downloadable demo list. Prices are historical reference values, and seller/stock details are not invented.
 
 Design references: [NN/g comparison tables](https://www.nngroup.com/articles/comparison-tables/) and [Baymard comparison selection](https://baymard.com/research-articles/provide-comparison-features). The compact selection tray and explicit per-item actions adapt these patterns to the call interface.
 
 Caption transcription is separate from the audio-native conversation model. The full transcription model now receives a concise English/Korean shopping vocabulary hint, with longer speech-boundary padding; finalized text cannot be overwritten by stale partial events. This improves the configuration but does not guarantee perfect recognition. The displayed words remain the actual transcription, not an AI rewrite of what the shopper might have meant. See the [Realtime API reference](https://developers.openai.com/api/reference/resources/realtime/client-events). A specifically rejected caption model gets one compatibility fallback to the previous mini model; authentication, credits and rate-limit failures are not retried as model errors.
 
-Live previews preserve the original product pixels. Exact-photo silhouette masks remove chair floor shadows/gaps and clothing hangers, clean glasses lenses, and adjust tracking anchors after cropping. Thin frames and pale fabric are preserved instead of globally erasing white pixels. This is still an approximate 2D placement/fit preview.
+Clothing, glasses and object previews preserve the original product pixels. Exact-photo silhouette masks remove chair floor shadows/gaps and clothing hangers, clean glasses lenses, and adjust tracking anchors after cropping. Thin frames and pale fabric are preserved instead of globally erasing white pixels. This is still an approximate 2D placement/fit preview. Lipstick shades are estimated from source imagery. Clear lip balm preserves natural lip colour and adds a subtle sheen; tinted balm adds an estimated tint and sheen. These finish previews are illustrative, not calibrated shade matches or evidence of a product’s skincare effects.
 
 ## Optional personalized start
 
@@ -123,7 +123,9 @@ npm run check
 npm run build
 ```
 
-`npm run check` runs syntax checks and automated tests without a real API key or paid OpenAI calls. `npm run build` produces the Worker and browser assets under `dist/`.
+After changing reviewed product data or preview assets, run `npm run catalog:build` to regenerate `public/coupang-products.js` and `public/product-catalog.csv` from `data/catalog.json`. The command prints the active and held-out record counts. `lib/demo-catalog.mjs` defines the shared eligibility rule used by this generator and the server; keep unsupported historical records in the source file for provenance. Review new source images and verify their live previews before making them eligible.
+
+`npm run check` checks that both generated catalog files are current, then runs syntax checks and automated tests without a real API key or paid OpenAI calls. `npm run build` produces the Worker and browser assets under `dist/`.
 
 ## Troubleshooting
 
@@ -140,13 +142,15 @@ npm run build
 
 ## Current scope and source files
 
-Glasses, lipstick, clothes, chairs, and lamps use live image-based previews. Clothing fit, colour, physical scale, and room perspective are approximate. Checkout is a local simulation; no order is sent to Coupang and no payment is processed. There is no generated-photo workflow, live price/stock feed, or cloud-synced shopping profile. Confirmed preferences and saved collections stay in the current browser.
+Glasses, clothes, chairs, and lamps use live image-based previews; lipstick and lip balm use approximate colour or finish previews. Clothing fit, colour, physical scale, and room perspective are approximate. Checkout is a local simulation; no order is sent to Coupang and no payment is processed. There is no generated-photo workflow, live price/stock feed, or cloud-synced shopping profile. Confirmed preferences and saved collections stay in the current browser.
 
 - `site-pages/main.html`, `site-pages/explore.html`, `public/coupi-shell.css`: main entry, personalized worlds page and shared navigation.
 - `site-pages/camera.html`, `public/mobile-call.*`, `public/coupi-call.css`: mobile call interface and Coupi theme.
 - `public/camera-engine.js`, `public/product-preview.js`: local tracking and product rendering.
 - `public/voice-call.js`, `lib/nook-voice.mjs`, `worker/index.ts`: Realtime connection, catalog tools, and server routes.
-- `data/catalog.json`, `public/products/`, `public/product-catalog.csv`: 82 listings/options and their images/links.
+- `data/catalog.json`, `public/products/`: full sourced product history, original images and preview metadata, including records held out of the demo.
+- `lib/demo-catalog.mjs`, `scripts/build-demo-catalog.mjs`: shared preview eligibility and catalog generation.
+- `public/coupang-products.js`, `public/product-catalog.csv`: generated preview-ready demo products and downloadable names/links.
 - `data/catalog-replacements.json`: retired-to-replacement mappings for cleaner live previews; original CDN photos and hashes are documented in `VOICE-CATALOG-SOURCES.txt`.
 - `VOICE-CATALOG-SOURCES.txt`: listing provenance and historical reference prices.
 - `public/product-discovery.js`, `public/inline-collections.css`, `public/product-evidence.js`: inline related collections, saved groups, comparison and sourced review rendering.

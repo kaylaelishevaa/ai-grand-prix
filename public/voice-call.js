@@ -71,7 +71,7 @@
       const serialized=JSON.stringify(safe);
       if(serialized.length<=1600)return serialized;
       const short=value=>typeof value==='string'?value.slice(0,120):['number','boolean'].includes(typeof value)?value:undefined;
-      const product=value=>value&&typeof value==='object'?Object.fromEntries(['id','title','category','productType','price','preview_kind','preview_available','preview_unavailable_reason','shade_color','shade_estimated'].filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
+      const product=value=>value&&typeof value==='object'?Object.fromEntries(['id','title','category','productType','price','preview_kind','finish','preview_available','preview_unavailable_reason','shade_color','shade_estimated'].filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
       const fields=(value,keys)=>value&&typeof value==='object'?Object.fromEntries(keys.filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
       const ids=value=>Array.isArray(value)?[...new Set(value.filter(id=>typeof id==='string'&&PRODUCT_ID.test(id)))].slice(0,10):[];
       const compact={mode:short(safe.mode),interaction_format:short(safe.interaction_format),input_mode:short(safe.input_mode),screen:short(safe.screen),visible_panel:short(safe.visible_panel),cameraRunning:safe.cameraRunning===true,

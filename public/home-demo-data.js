@@ -6,7 +6,7 @@ window.HOME_DEMO = {
   orders: [
     { id: '1042', items: ['1814412512'], status: 'delivered', deliveredAt: '2026-10-25T07:02' },
     { id: '1043', items: ['55518713'], status: 'out_for_delivery', eta: '2026-10-26T12:00' },
-    { id: '1044', items: ['7395651009'], status: 'delayed', eta: '2026-10-30', originalEta: '2026-10-28',
+    { id: '1044', items: ['6566125679'], status: 'delayed', eta: '2026-10-30', originalEta: '2026-10-28',
       swap: { item: '7330605115', eta: '2026-10-27', priceDelta: 37930 } }
   ],
   decisions: [{ item: '7612276799', status: 'waiting', addedAt: '2026-10-25T21:10' }],
