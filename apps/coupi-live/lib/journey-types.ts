@@ -25,6 +25,7 @@ export interface District {
 }
 export interface JourneyState {
   hatched: boolean;
+  firstCallRequested?: boolean;
   interviewCount: number;
   interviewComplete: boolean;
   interviewPaused?: boolean;

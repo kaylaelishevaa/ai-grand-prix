@@ -7,6 +7,8 @@ import type {CallResponse} from '@/lib/journey-types';
 import {getReview,getSku} from '@/lib/catalog';
 import {eligibleCatalog} from '@/lib/profile';
 import {liveCallBody,parseLiveCallTurn,publicCallResult,type LiveCallTurn} from '@/lib/call-bridge';
+import FirstCallController from './FirstCallController';
+import {usesFirstCall} from '@/lib/call-entry';
 import {LiveCallLifecycle} from '@/lib/live-call-session';
 import {Glyph} from './Glyph';
 import './live-call-experience.css';
@@ -19,11 +21,12 @@ export default function LiveCallExperience({profile,visible=true,...callbacks}:C
   const [ports,setPorts]=useState<{before:HTMLDivElement;after:HTMLDivElement}|null>(null),[frameReady,setFrameReady]=useState(false);
   useEffect(()=>{if(before.current&&after.current)setPorts({before:before.current,after:after.current});},[]);
   useEffect(()=>{if(!visible)setFrameReady(false);},[visible]);
+  const Controller=profile&&usesFirstCall(profile)?FirstCallController:LiveCallController;
   return <section className="live-call-experience" data-ready={frameReady} hidden={!visible} style={{display:visible?'flex':'none'}}>
     <div ref={before} className="live-call-before"/>
     <iframe ref={frame} src="/live-call/index.html?embedded=1" title="Your conversation with Coupi" allow="camera; microphone; autoplay" className="live-call-frame" inert={!visible||!frameReady} style={{display:visible&&frameReady?'block':'none'}}/>
     <div ref={after} className="live-call-after"/>
-    {visible&&profile&&ports&&<LiveCallController key={profile.id} {...callbacks} profile={profile} frame={frame} before={ports.before} after={ports.after} onReady={setFrameReady}/>}
+    {visible&&profile&&ports&&<Controller key={profile.id} {...callbacks} profile={profile} frame={frame} before={ports.before} after={ports.after} onReady={setFrameReady}/>}
   </section>;
 }
 

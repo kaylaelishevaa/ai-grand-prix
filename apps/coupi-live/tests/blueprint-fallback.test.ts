@@ -5,6 +5,15 @@ import {BLUEPRINT_SHAPES,blueprintNodeCorners,resolveBlueprintAnchors,validateSc
 import {blueprintPaintOrder,blueprintUnitFaces,createBlueprintProjection,faceShade,fitProjection,projectIntoFrame,projectWorldPoint,transformBlueprintPoint,validatedBlueprintForScene} from '../lib/blueprint-projection';
 import {fixtureBlueprint} from './fixtures/blueprint';
 import type {SceneResult} from '../lib/types';
+import {createRequire} from 'node:module';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+import {getSku} from '../lib/catalog';
+
+const require=createRequire(import.meta.url),styleLoader=require.extensions['.css'];
+require.extensions['.css']=()=>{};
+const fallback=require('../components/SceneFallback.tsx') as typeof import('../components/SceneFallback');
+if(styleLoader)require.extensions['.css']=styleLoader;else delete require.extensions['.css'];
 
 const near=(a:number,b:number)=>assert(Math.abs(a-b)<1e-7,`${a} should match ${b}`);
 const scene=(variant=0):SceneResult=>({name:'A newly composed place',explanation:'Test geometry',items:[{skuId:'kettle',oneLiner:'A listed kettle.'},{skuId:'mugs',oneLiner:'Listed mugs.'}],blueprint:fixtureBlueprint(['kettle','mugs'],variant)});
@@ -119,4 +128,42 @@ test('projection stays finite for tiny responsive stages and fits actual authore
     }
   }
   assert(Number.isFinite(fitProjection([],390,430).scale));
+});
+
+test('generated reference products retain exact anchors and paint order as original listing photo frames',()=>{
+  const ids=['7434051500','1539744911'],blueprint=fixtureBlueprint(ids),projection=createBlueprintProjection(blueprint,390,430);
+  const html=renderToStaticMarkup(createElement(fallback.GeneratedBlueprintSVG,{blueprint,width:390,height:430,projection}));
+  const actualOrder=[...html.matchAll(/data-blueprint-(node|product)="([^"]+)"/g)].map(match=>`${match[1]}:${match[2]}`);
+  assert.deepEqual(actualOrder,blueprintPaintOrder(projection).map(entry=>entry.kind==='face'?`node:${entry.face.nodeId}`:`product:${entry.product.skuId}`));
+  for(const product of projection.products){
+    const sku=getSku(product.skuId)!;
+    assert(html.includes(`src="${sku.image}"`),'use the exact locally bundled listing photograph');
+    const frame=html.match(new RegExp(`<svg[^>]*data-blueprint-product="${sku.id}"[^>]*>`))?.[0];assert(frame);
+    assert(frame.includes(`x="${product.x-product.width/2}"`)&&frame.includes(`y="${product.y-product.height*.85}"`));
+    assert(frame.includes(`width="${product.width}"`)&&frame.includes(`height="${product.height}"`));
+  }
+  assert.match(html,/<foreignObject/);assert.doesNotMatch(html,/blueprint-product-art/);
+});
+
+test('authored fallback mixes exact reference photos with readable legacy synthetic illustrations',()=>{
+  const prepared:SceneResult={name:'A morning',explanation:'Sourced mugs and a simulated kettle.',items:[{skuId:'7434051500',oneLiner:'Mugs'},{skuId:'kettle',oneLiner:'Kettle'}]};
+  const html=renderToStaticMarkup(createElement(fallback.default,{scene:prepared,onSelect:()=>{}}));
+  assert(html.includes(`src="${getSku('7434051500')!.image}"`));
+  assert.equal((html.match(/data-product-source="listing-photo"/g)||[]).length,1);
+  assert.match(html,/fallback-kettle/);assert.match(html,/class="fallback-product-art"><svg/);
+  assert(html.includes('aria-label="Explore '+getSku('kettle')!.name+'"'));
+});
+
+test('missing or untrusted reference photos use local catalog photo fallbacks',()=>{
+  const sku=getSku('7434051500')!,second=getSku('1539744911')!,saved=sku.image,secondSaved=second.image,blueprint=fixtureBlueprint([sku.id,second.id]);
+  const prepared:SceneResult={name:'A morning',explanation:'Sourced mugs.',items:[{skuId:sku.id,oneLiner:'Mugs'}]};
+  try{
+    for(const image of [undefined,'https://untrusted.example/other.jpg','/scene-reference/products/illustration.svg','/scene-reference/products/../other.png']){
+      sku.image=image;second.image=image;
+      for(const html of [renderToStaticMarkup(createElement(fallback.GeneratedBlueprintSVG,{blueprint})),renderToStaticMarkup(createElement(fallback.default,{scene:prepared,onSelect:()=>{}}))]){
+        assert.match(html,/<img[^>]+src="\/generated-products\/[a-zA-Z0-9_-]+\.webp"/);assert.doesNotMatch(html,/Photo unavailable|blueprint-product-art|class="fallback-product-art"><svg/);
+        assert.doesNotMatch(html,/https:\/\/untrusted/);
+      }
+    }
+  }finally{sku.image=saved;second.image=secondSaved;}
 });

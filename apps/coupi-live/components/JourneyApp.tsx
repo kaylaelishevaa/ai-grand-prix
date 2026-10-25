@@ -126,6 +126,17 @@ export default function JourneyApp({initialView='auto'}:{initialView?:InitialMai
   },[storeProfile,task,initialView]);
   useEffect(()=>()=>{if(noticeTimer.current)clearTimeout(noticeTimer.current);},[]);
   useEffect(()=>{
+    if(view!=='hatch'||!hatched||busy||error)return;
+    // Let the egg finish opening, then use the same teammate call as the Call tab.
+    const timer=setTimeout(()=>{
+      setTypedCall(false);
+      history.replaceState(null,'',mainHref('call'));
+      setView('call');
+      mainScroll.current?.scrollTo({top:0,behavior:'instant'});
+    },1800);
+    return()=>clearTimeout(timer);
+  },[view,hatched,busy,error]);
+  useEffect(()=>{
     const back=()=>{const route=mainLocation(location.pathname,location.search,'auto');setView(initialMainView(route,latestProfile.current?.journey));setDistrictId(route.districtId||'');setTemplateId(route.templateId||'');setArchiveId(route.archiveId||'');setMomentId(route.momentId||'');setArchivedMomentId(route.momentId||'');setProductId(null);productRequest.current++;setError('');mainScroll.current?.scrollTo({top:0,behavior:'instant'});};
     window.addEventListener('popstate',back);return()=>window.removeEventListener('popstate',back);
   },[]);
@@ -163,7 +174,10 @@ export default function JourneyApp({initialView='auto'}:{initialView?:InitialMai
     if(busy||hatched)return;
     setHatched(true);
     if(profile?.journey?.hatched)return;
-    await task('A little hello',async()=>{const result=await api<CallResponse>('/api/call',{action:'hatch',requestId:uid()});storeProfile(result.profile);});
+    await task('A little hello',async()=>{
+      try{const result=await api<CallResponse>('/api/call',{action:'hatch',beginInterview:true,requestId:uid()});storeProfile(result.profile);}
+      catch(cause){setHatched(false);throw cause;}
+    });
   }
   async function makeWorld(text?:string,rebuildId?:string,enterNew=false,selection?:{selectedSkuIds:string[];avoidSkuIds?:string[]}) {
     if(busy)return;
@@ -267,7 +281,7 @@ export default function JourneyApp({initialView='auto'}:{initialView?:InitialMai
       {profile&&view==='preview'&&template&&<section className="world-preview screen-surface">
         <button className="text-button" onClick={()=>changeView('world')}><Glyph name="arrow-left"/> Your world</button>
         <div className="world-preview-heading"><div><p className="eyebrow orange">{scenicMood?.time} / A WORLD TO EXPLORE</p><h1>{template.name}</h1></div><p>{template.description}</p></div>
-        <div className="full-district"><SceneDiorama scene={template.scene} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={template.scene} onSelect={id=>void openProduct(id)}/>}/><div className="world-preview-note"><span>Tap a light to meet the object. Or browse them below.</span><span>CURATED WORLD / MAKE YOUR OWN VERSION</span></div></div>
+        <div className="full-district"><SceneDiorama scene={template.scene} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={template.scene} onSelect={id=>void openProduct(id)}/>}/><div className="world-preview-note"><span>Tap a photo or a light to meet the product.</span><span>CURATED WORLD / MAKE YOUR OWN VERSION</span></div></div>
         <WorldObjects scene={template.scene} onSelect={id=>void openProduct(id)}/>
         <WorldCommunity key={'template:'+template.id} profile={profile} worldId={'template:'+template.id} onProfile={storeProfile} disabled={!!busy} onBuild={(selectedSkuIds,avoidSkuIds)=>void makeWorld(`Create a new version of ${template.name}, built around my selected products with a different bundle. ${personalWords.trim()||template.prompt}`,undefined,true,{selectedSkuIds,avoidSkuIds})}/>
         <form className="world-personalize" onSubmit={e=>{e.preventDefault();void makeWorld(template.prompt+(personalWords.trim()?` My own words: ${personalWords.trim()}`:''),undefined,true);}}><div><h2>Same beginning.<br/>Your own story.</h2><p>{template.journalPrompt} Make a version that fits you, then keep your moments inside it.</p></div><div><label htmlFor="personal-world-words">WHAT WOULD MAKE THIS FEEL LIKE YOU? · OPTIONAL</label><textarea id="personal-world-words" value={personalWords} onChange={e=>setPersonalWords(e.target.value)} maxLength={600} placeholder="Your occasion, your mood, your little details…"/><Button type="submit" disabled={!!busy||!profile.journey?.interviewComplete}>Make it mine <Glyph name="arrow-right"/></Button><p>{profile.journey?.interviewComplete?'Coopy will rebuild it from your words, current memory and budget.':'Share a little about yourself in Call, or save a product above to start from something you like.'}</p>{!profile.journey?.interviewComplete&&<button type="button" className="text-button" onClick={()=>openUtility('call')}>Tell Coopy about me <Glyph name="arrow-right"/></button>}</div></form>
@@ -278,7 +292,7 @@ export default function JourneyApp({initialView='auto'}:{initialView?:InitialMai
         <button className="text-button" onClick={()=>changeView('world')}><Glyph name="arrow-left"/> Your world</button>
         <div className="district-heading"><div><p className="eyebrow orange">{districtScene?.blueprint?.atmosphere.timeLabel||scenicMood?.time} / {districtScene?.blueprint?'IMAGINED FROM YOUR STORY':scenicMood?.label}</p><h1>{moment?.districtName||district.name}</h1><p>{moment?`a moment kept on ${new Date(moment.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`:district.provenance}</p></div></div>
         {moment&&<div className="moment-return"><span>THEN / YOUR SAVED ROOM<br/>Product details still show the current demo catalog.</span><button onClick={()=>{setMomentId('');changeView('district',{districtId:district.id,momentId:''});}}>Back to now <Glyph name="arrow-right"/></button></div>}
-        <div className="full-district"><SceneDiorama scene={districtScene!} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={districtScene!} onSelect={id=>void openProduct(id)}/>}/><div className="district-scene-note"><span>Tap a light to meet the object. Or browse them below.</span><span>{districtScene!.blueprint?'BUILT FROM YOUR WORDS':'YOUR OWN WORLD'} / {districtScene!.items.length} objects</span></div></div>
+        <div className="full-district"><SceneDiorama scene={districtScene!} phase={phase} onSelect={id=>void openProduct(id)} fallback={<RoomFallback scene={districtScene!} onSelect={id=>void openProduct(id)}/>}/><div className="district-scene-note"><span>Tap a photo or a light to meet the product.</span><span>{districtScene!.blueprint?'BUILT FROM YOUR WORDS':'YOUR OWN WORLD'} / {districtScene!.items.length} objects</span></div></div>
         <WorldObjects scene={districtScene!} onSelect={id=>void openProduct(id)}/>
         {moment&&<p className="moment-note">{moment.text}</p>}
         {!moment&&<WorldCommunity key={'district:'+district.id} profile={profile} worldId={'district:'+district.id} onProfile={storeProfile} disabled={!!busy} onBuild={(selectedSkuIds,avoidSkuIds)=>void makeWorld(`A new interpretation of ${district.name}, keeping my selected products and trying a different bundle. ${rebuild.trim()}`,undefined,true,{selectedSkuIds,avoidSkuIds})}/>}
@@ -289,7 +303,7 @@ export default function JourneyApp({initialView='auto'}:{initialView?:InitialMai
       </section>:<div className="empty-state"><h2>This little world has moved.</h2><Button secondary onClick={()=>changeView('world')}>Back to your world</Button></div>)}
 
 
-      {view!=='call'&&<div className="main-shell-footer"><ProductFooter/><Link href="/guided">Guided day <Glyph name="arrow-up"/></Link></div>}
+      {view!=='call'&&<div className="main-shell-footer"><ProductFooter/><Link href="/guided">Start from the egg <Glyph name="arrow-up"/></Link></div>}
     </main>
     <nav className="main-shell-nav" aria-label="Main navigation">
       <a href="/home" aria-current={view==='home'?'page':undefined}><Glyph name="home"/><span>Home</span></a>

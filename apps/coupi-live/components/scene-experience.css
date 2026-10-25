@@ -23,3 +23,29 @@
 .scene-journey-links{display:flex;align-items:center;justify-content:space-between;gap:25px;border-top:1px solid var(--line);padding:27px 0 4px;margin-top:44px}.scene-journey-links>span{font:8px/1.7 var(--mono);letter-spacing:.08em;color:var(--muted)}.scene-journey-links>button{display:flex;align-items:center;gap:20px;font:27px/1.2 var(--display);letter-spacing:-.03em;text-align:right}.scene-journey-links .glyph{width:22px;height:22px;color:var(--orange);flex-shrink:0}.scene-journey-links>button:hover .glyph{transform:translateX(4px);transition:transform 300ms var(--spring)}@media(max-width:640px){.scene-journey-links{gap:22px}.scene-journey-links>span{font-size:6px;max-width:100px}.scene-journey-links>button{font-size:23px;gap:12px}}
 
 .scene-touchpoint-leaders circle{fill:#fff8f0;stroke:var(--scene-ink);stroke-width:1;opacity:0;pointer-events:none}
+
+/* One real listing photograph at a time; the world remains the primary surface. */
+.scene-product-preview{position:absolute;left:0;top:0;z-index:5;width:188px;height:190px;display:grid;grid-template-rows:104px 1fr;overflow:hidden;border:1px solid #16424a12;border-radius:19px;background:#fffdf8;color:#16424a;box-shadow:0 18px 50px -18px #173c4c66;pointer-events:none!important;will-change:transform;animation:scene-photo-arrive 220ms var(--spring);text-align:left}
+.scene-product-preview *{pointer-events:none!important}
+.scene-product-preview .scene-preview-photo{width:100%;height:104px;min-height:0;aspect-ratio:auto;border:0;border-radius:0;background:#fff;margin:0;padding:7px 11px}
+.scene-product-preview .scene-preview-photo img{display:block;mix-blend-mode:multiply}
+.scene-preview-copy{display:flex;flex-direction:column;justify-content:center;gap:4px;padding:8px 11px;min-width:0}
+.scene-preview-copy>strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font:500 11px/1.35 var(--ui);letter-spacing:-.01em}
+.scene-preview-copy>span{display:flex;justify-content:space-between;align-items:center;gap:8px;font:600 16px/1 var(--display);letter-spacing:-.03em}
+.scene-preview-copy>span>.glyph{width:12px;height:12px;color:#738b86}
+.scene-preview-copy>small{color:#74847e;font:8px/1.2 var(--ui);white-space:nowrap;letter-spacing:-.01em}
+.scene-touchpoint{scale:1!important;touch-action:manipulation}
+@keyframes scene-photo-arrive{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.scene-product-preview{animation:none}}
+
+/* Small original photographs remain visible on touch devices, not only on hover. */
+.scene-touchpoint[data-photo=true]{width:56px;height:56px;padding:3px;border:1px solid #fffdf8;border-radius:13px;background:#fffdf8;box-shadow:0 8px 24px -7px #173c4c57;color:#16424a}
+.scene-touchpoint .scene-anchored-photo.product-art{width:48px;height:48px;min-height:0;aspect-ratio:auto;margin:0;padding:0;border:0;border-radius:9px;overflow:hidden;background:#fffdf8}
+.scene-anchored-photo img{display:block;mix-blend-mode:multiply}
+.scene-touchpoint[data-photo=true] .scene-dot{position:absolute;right:-4px;bottom:-4px;width:16px;height:16px;background:#fcf5de;border:1px solid #fffdf8;box-shadow:0 2px 9px #16424a25;transform:none}
+.scene-touchpoint[data-photo=true] .scene-dot::after{inset:-3px}
+.scene-touchpoint[data-photo=true] .scene-dot .glyph{opacity:1;width:9px;height:9px}
+.scene-touchpoint[data-photo=true]:is(:hover,:focus-visible){border-color:#87b5a8;outline:2px solid #fffdf8;outline-offset:2px;border-radius:13px;box-shadow:0 12px 28px -8px #173c4c70}
+.scene-anchored-photo>[role=img]{min-height:0!important;padding:4px!important;gap:2px!important}
+.scene-anchored-photo>[role=img]>.glyph{width:14px;height:14px}
+.scene-anchored-photo>[role=img]>span{font:7px/1.1 var(--ui)!important}

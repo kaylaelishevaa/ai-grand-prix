@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
+import {existsSync} from 'node:fs';
 import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
-import {getSku} from '../lib/catalog';
+import {catalog,getSku} from '../lib/catalog';
 import {createProfile} from '../lib/profile';
 import {addDecision} from '../lib/guardrails';
 import {buildComparison} from '../lib/comparison';
@@ -60,11 +61,16 @@ test('memory evidence labels describe its source rather than presenting a probab
 });
 
 
-test('product images use only original reference photos and no fictional product illustration fallback',()=>{
+test('product images prefer original reference photos and use local catalog photos for missing or untrusted sources',()=>{
   const real=getSku('1814412512')!,synthetic=getSku('kettle')!;
   const photo=renderToStaticMarkup(createElement(evidence.ProductVisual,{sku:real}));assert(photo.includes(real.image!));assert.doesNotMatch(photo,/Photo unavailable/);
   for(const sku of [synthetic,{...real,image:undefined},{...real,image:'https://example.test/lookalike.jpg'},{...real,image:'/verified-products/../other.svg'},{...synthetic,image:real.image}]){
     const html=renderToStaticMarkup(createElement(evidence.ProductVisual,{sku}));
-    assert.match(html,/Photo unavailable/);assert.doesNotMatch(html,/<img|<linearGradient|data-product-art/);
+    assert.match(html,/src="\/generated-products\/[a-zA-Z0-9_-]+\.webp"/);
+    assert.doesNotMatch(html,/Photo unavailable|AI image|AI-generated|src="https:/);
+  }
+  for(const sku of catalog){
+    const html=renderToStaticMarkup(createElement(evidence.ProductVisual,{sku})),source=html.match(/<img[^>]*src="([^"]+)"/);
+    assert(source&&existsSync('public'+source[1]),`${sku.id} must render an existing local product image`);
   }
 });

@@ -198,7 +198,7 @@ export async function handleCall(profile:Profile, input:CallInput, now=new Date(
     return responseFor(finishedProfile(profile,state,now),'What do you want to buy?',{question:null,conversationMode:'conversation'});
   }
   if(input.action==='hatch') {
-    state.hatched=true;
+    state.hatched=true;state.firstCallRequested=true;
     recordCall(state,input,'ok',currentMode(state));
     return responseFor(finishedProfile(profile,state,now),"Before I show you anything — can I call you? I'd rather hear your story than show you a catalog.");
   }

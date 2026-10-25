@@ -74,3 +74,19 @@
 @media(max-width:380px){.coupi-main-page .coupi-main-frame .world-home .world-heading h1{font-size:34px}.coupi-main-page .coupi-main-frame .world-home .world-heading h1 em{font-size:38px}.coupi-main-page .coupi-main-frame .atlas-place-index{gap:7px}.coupi-main-page .coupi-main-frame .atlas-place-index>button{grid-template-columns:45px 1fr}.coupi-main-page .atlas-place-index .world-vignette{width:53px}.atlas-index-copy strong{font-size:10px}}
 @media(max-height:740px){.coupi-main-page .coupi-main-frame .world-atlas .atlas-stage{height:315px}.coupi-main-page .coupi-main-frame.journey-shell[data-scene-kind] .full-district .scene-diorama{height:330px;min-height:330px}}
 @media(prefers-reduced-motion:reduce){.companion-presence-dot{animation:none}.coupi-main-page .atlas-place-index>button{transition:none}}
+
+/* Keep the entire landscape in the opening phone view, with the journal below. */
+.coupi-main-page .coupi-main-frame[data-view=world] .world-home .world-heading{margin-bottom:14px}
+.coupi-main-page .coupi-main-frame[data-view=world] .world-heading .eyebrow{margin-bottom:9px}
+.coupi-main-page .coupi-main-frame[data-view=world] .world-home .world-overview-invitation{max-width:none;margin-top:8px;font-size:11px;line-height:1.5}
+.coupi-main-page .coupi-main-frame[data-view=world] .explore-week-note{margin:7px 1px 8px}
+.coupi-main-page .coupi-main-frame[data-view=world] .explore-companion{margin:8px 0;padding:0}
+@media(max-height:740px){
+  .coupi-main-page .coupi-main-frame[data-view=world] .main-shell-content{padding-top:12px}
+  .coupi-main-page .coupi-main-frame[data-view=world] .world-heading .eyebrow{display:none}
+  .coupi-main-page .coupi-main-frame[data-view=world] .world-home .world-heading h1{font-size:30px;line-height:1.02;letter-spacing:-1px}
+  .coupi-main-page .coupi-main-frame[data-view=world] .world-home .world-heading h1 em{font-size:34px;line-height:1.04;letter-spacing:-1px}
+  .coupi-main-page .coupi-main-frame[data-view=world] .explore-companion small{display:none}
+  .coupi-main-page .coupi-main-frame[data-view=world] .explore-companion strong{font-size:11px}
+  .coupi-main-page .coupi-main-frame[data-view=world] .world-atlas .atlas-stage{height:280px}
+}

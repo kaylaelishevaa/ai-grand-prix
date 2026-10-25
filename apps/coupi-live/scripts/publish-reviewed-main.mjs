@@ -9,7 +9,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const bundle=path.join(root,'COUPI-3D-branch.bundle');
 const reviewedMain='7e5b085e28ee598ddb3afb9edc69a50ae8d51bc5';
-const reviewedDesign='f1e51d18142be6a623079c7610c2c13a3c5024ca';
+const reviewedDesign='16b64a6714b31575c88130423e9f4d048fc46272';
 const remote='https://github.com/kaylaelishevaa/ai-grand-prix.git';
 const preview=process.argv.includes('--preview');
 if(process.argv.slice(2).some(arg=>arg!=='--preview'))throw new Error('Usage: node scripts/publish-reviewed-main.mjs [--preview]');

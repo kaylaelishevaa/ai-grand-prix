@@ -6,6 +6,9 @@ import {AppError,errorResponse} from './errors';
 import {requireLocalOrigin} from './http';
 import {sessionResponse,withSession} from './store';
 import {permittedVoiceWorlds} from './voice-world-products';
+import {usesFirstCall} from '../call-entry';
+import {FIRST_CALL_QUESTIONS} from '../call-questions';
+import {safePersonalizationCandidates} from './personalization';
 import {runtimeEnv} from './runtime';
 
 /** These are sourced historical references, kept separate from the synthetic review/catalog database. */
@@ -19,8 +22,9 @@ export function eligibleTeammateProducts(profile:Profile){
 export function teammateProfileContext(profile:Profile){
   const safe=sanitizeProfileForAI(profile);
   const draft=profile.journey?.personalizationDraft,count=draft?.answerCount??profile.journey?.interviewCount??0;
-  return {traits:safe.traits,memoryLines:safe.memoryLines.slice(-32),budget:safe.budget,worlds:permittedVoiceWorlds(profile),interview:{active:false,answeredCount:count,question:'',questions:[] as string[]},
-    personalization:{active:false,draft_pending:false,preferences:null,draftMemories:[] as {text:string;source:string;confidence:number}[]}};
+  const discovery=usesFirstCall(profile);
+  return {traits:safe.traits,memoryLines:safe.memoryLines.slice(-32),budget:safe.budget,worlds:permittedVoiceWorlds(profile),interview:{active:discovery&&count<5,answeredCount:count,question:discovery&&count<5?FIRST_CALL_QUESTIONS[count]:'',questions:discovery?[...FIRST_CALL_QUESTIONS]:[]},
+    personalization:{active:discovery&&!!draft,draft_pending:discovery&&draft?.reviewReady===true,preferences:null,draftMemories:discovery&&draft?safePersonalizationCandidates(profile,draft).slice(-8).map(line=>({text:line.text,source:line.source,confidence:line.confidence})):[]}};
 }
 /** Preserve the teammate's raw-SDP protocol while using the app's latest HttpOnly profile session. */
 export async function teammateVoiceRoute(request:Request):Promise<Response>{

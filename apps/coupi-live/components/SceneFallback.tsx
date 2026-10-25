@@ -9,6 +9,7 @@ import type {SceneBlueprint} from '@/lib/scene-blueprint';
 import {blueprintPaintOrder,createBlueprintProjection,validatedBlueprintForScene,type BlueprintProjection} from '@/lib/blueprint-projection';
 import {observeElementSize} from '@/lib/observe-element-size';
 import {productArt} from './art';
+import {ProductVisual} from './ProductEvidence';
 import {Glyph} from './Glyph';
 import './scene-fallback.css';
 
@@ -26,6 +27,10 @@ export function GeneratedBlueprintSVG({blueprint,width=900,height=620,x=0,y=0,th
     <g className="blueprint-depth-layers">{paintOrder.map((entry,index)=>{
       if(entry.kind==='face'){const face=entry.face;return <polygon key={`face-${face.nodeId}-${index}`} data-blueprint-node={face.nodeId} points={face.points} fill={face.fill} stroke={face.fill} strokeWidth=".4"/>;}
       const anchor=entry.product,sku=getSku(anchor.skuId);if(!sku)return null;
+      if(sku.origin==='coupang-reference')return <svg key={sku.id} data-blueprint-product={sku.id} data-product-source="listing-photo" className="blueprint-product-photo" x={anchor.x-anchor.width/2} y={anchor.y-anchor.height*.85} width={anchor.width} height={anchor.height} viewBox="0 0 220 180">
+        <rect x="1" y="1" width="218" height="178" rx="16" fill="#fffdf8" stroke="#d7e1dc" strokeWidth="2"/>
+        <foreignObject x="8" y="8" width="204" height="164"><ProductVisual sku={sku} className="fallback-listing-photo"/></foreignObject>
+      </svg>;
       // This markup is the existing authored catalog art, never model-authored SVG.
       const illustration=productArt(sku.type,sku.color).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
       return <svg key={sku.id} data-blueprint-product={sku.id} className="blueprint-product-art" x={anchor.x-anchor.width/2} y={anchor.y-anchor.height*.85} width={anchor.width} height={anchor.height} viewBox="0 0 220 180"><g dangerouslySetInnerHTML={{__html:illustration}}/></svg>;
@@ -131,9 +136,9 @@ export default function SceneFallback({scene,onSelect}:{scene:SceneResult;onSele
   return <div className={`scene-room fallback-room scenic-fallback room-${kind} setting-${context.setting}`} data-kind={kind} data-setting={context.setting} role="group" aria-label={`${scene.name}, illustrated world`}>
     <Landscape kind={kind} id={id} setting={context.setting}/>
     {scene.items.slice(0,6).map((item,index)=>{const sku=getSku(item.skuId);if(!sku)return null;
-      const clothing=['dress','blouse','apron'].includes(sku.type);
+      const clothing=['dress','blouse','apron','tshirt','hoodie','sweater'].includes(sku.type);
       const slot=context.setting==='riverside'?[{x:43,y:57},{x:57,y:58},{x:47,y:66},{x:64,y:68},{x:36,y:65},{x:68,y:53}][index]:context.setting==='rooftop'?[{x:43,y:51},{x:57,y:53},{x:47,y:66},{x:61,y:65},{x:36,y:62},{x:65,y:52}][index]:kind==='dressing'?placements.dressing[clothing?clothingIndex++%2:2+otherIndex++%6]:placements[kind][index];
-      return <button className={`fallback-object fallback-${sku.type}`} key={sku.id} onClick={()=>onSelect(sku.id)} aria-label={`Explore ${sku.name}`} style={{'--object-x':`${slot.x}%`,'--object-y':`${slot.y}%`,'--object-w':`${('w' in slot?slot.w:undefined)||16}%`,'--object-h':`${('h' in slot?slot.h:undefined)||24}%`} as CSSProperties}><span className="fallback-product-art" dangerouslySetInnerHTML={{__html:productArt(sku.type,sku.color)}}/><span className="fallback-product-dot"><Glyph name="plus"/></span><span className="fallback-product-name">{sku.name}</span></button>;
+      return <button className={`fallback-object fallback-${sku.type}`} key={sku.id} onClick={()=>onSelect(sku.id)} aria-label={`Explore ${sku.name}`} style={{'--object-x':`${slot.x}%`,'--object-y':`${slot.y}%`,'--object-w':`${('w' in slot?slot.w:undefined)||16}%`,'--object-h':`${('h' in slot?slot.h:undefined)||24}%`} as CSSProperties}>{sku.origin==='coupang-reference'?<span className="fallback-product-art fallback-reference-photo" data-product-source="listing-photo"><ProductVisual sku={sku} className="fallback-listing-photo"/></span>:<span className="fallback-product-art" dangerouslySetInnerHTML={{__html:productArt(sku.type,sku.color)}}/>}<span className="fallback-product-dot"><Glyph name="plus"/></span><span className="fallback-product-name">{sku.name}</span></button>;
     })}
     <span className="fallback-atmosphere-label">{context.setting==='rooftop'?'a little evening above the city':context.setting==='riverside'?'the river takes the long way. so can you.':context.setting==='cafe'?'a window seat, somewhere in your world':kind==='dressing'?'a little before the evening':kind==='reading'?'rain outside. a little quiet here.':kind==='desk'?'room for an idea':'the morning can wait'}</span>
   </div>;

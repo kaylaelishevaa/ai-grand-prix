@@ -758,3 +758,34 @@ test('skipping discovery invalidates a pending checked interview result without 
   assert(!f.channel.sent.some(event=>JSON.stringify(event).includes('OLD INTERVIEW RESULT')));
   assert.equal(f.voice.call.validating,false);
 });
+
+test('text-first transport never requests microphone and resolves only the actual typed turn',async t=>{
+  let checked=0;const f=fixture(t,{onResolveCall:async()=>{checked++;return {status:'ok',message:'A checked answer.',products:[]};}});
+  assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();
+  assert.equal(f.permissions,0);assert.equal(f.audio.muted,true);assert.equal(f.peers[0].addedTracks.length,0);assert.equal(f.voice.call.microphone,undefined);
+  assert.equal(f.transcripts.length,0,'Greeting and app context must not become user transcripts');
+  assert.equal(f.voice.sendText('A lamp under 30000 won'),true);await tick();assert.equal(checked,1);
+  assert.equal(f.transcripts.length,1);assert.equal(f.transcripts[0].role,'user');assert.equal(f.transcripts[0].text,'A lamp under 30000 won');
+  assert(f.channel.sent.some(event=>event.item?.content?.some(part=>part.text?.includes('A checked answer.'))));
+});
+
+test('voice and text switching preserves the call and releases the capture track immediately',async t=>{
+  const f=fixture(t);await connect(f);const call=f.voice.call,channel=f.channel;
+  assert.equal(await f.voice.setInputMode('text'),true);assert.equal(f.mic.track.stops,1);assert.equal(f.audio.muted,true);assert.equal(f.voice.call,call);assert.equal(f.channel,channel);
+  assert.equal(f.voice.call.microphone,null);assert.equal(f.peers[0].currentTrack,null);assert.equal(f.voice.sendText('Still here'),true);
+  assert.equal(await f.voice.setInputMode('voice'),true);assert.equal(f.permissions,2);assert.equal(f.voice.call,call);assert.equal(f.audio.muted,false);
+});
+
+test('denied voice permission leaves an existing text conversation ready',async t=>{
+  const f=fixture(t,{getUserMedia:async()=>{throw Object.assign(new Error('denied'),{name:'NotAllowedError'});}});
+  await f.voice.start({inputMode:'text'});const call=f.voice.call;
+  assert.equal(await f.voice.setInputMode('voice'),false);assert.equal(f.voice.call,call);assert.equal(call.ready,true);assert.equal(call.inputMode,'text');assert.equal(f.voice.sendText('Keep chatting'),true);
+  assert.match(f.states.at(-1).message,/keep chatting/);
+});
+
+test('late voice permission cannot turn on a cancelled or re-selected text session',async t=>{
+  const permission=deferred(),late=microphone();const f=fixture(t,{getUserMedia:()=>permission.promise});
+  await f.voice.start({inputMode:'text'});const switching=f.voice.setInputMode('voice');await tick();
+  await f.voice.setInputMode('text');permission.resolve(late);assert.equal(await switching,false);assert.equal(late.track.stops,1);assert.equal(f.voice.call.inputMode,'text');assert.equal(f.voice.call.microphone,undefined);
+  const endPermission=deferred(),endMic=microphone(),g=fixture(t,{getUserMedia:()=>endPermission.promise});await g.voice.start({inputMode:'text'});const ended=g.voice.setInputMode('voice');await tick();g.voice.end();endPermission.resolve(endMic);assert.equal(await ended,false);assert.equal(endMic.track.stops,1);assert.equal(g.voice.call,null);
+});

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
-import {readFileSync} from 'node:fs';
+import {existsSync,readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
 import * as profileModule from '../lib/profile';
@@ -9,7 +9,7 @@ import * as catalogModule from '../lib/catalog';
 import type {AskResponse,Profile,Verdict} from '../lib/types';
 
 const require=createRequire(import.meta.url),oldCss=require.extensions['.css'];require.extensions['.css']=()=>{};
-const {searchCatalog,validateSearchAnswer}=require('../components/SearchView.tsx') as typeof import('../components/SearchView');
+const {searchCatalog,discoveryCatalog,hasReferencePhoto,validateSearchAnswer}=require('../components/SearchView.tsx') as typeof import('../components/SearchView');
 if(oldCss)require.extensions['.css']=oldCss;else delete require.extensions['.css'];
 const initial=()=>profileModule.createProfile('search-test',new Date());
 const pick:Verdict={pickSkuId:'socks',reason:'Red crew socks from this catalog.',dissent:'Two reviews mention pilling.',citations:['M01'],runnerUpSkuId:'socksBudget',whyRunnerUpLost:'A documented tradeoff.',clarifyingQuestion:null};
@@ -19,6 +19,7 @@ const verdict=(profile:Profile,v:Verdict=pick):AskResponse=>({status:'verdict',v
 test('keyword search uses catalog words and excludes owned or private items on every pass',()=>{
  const p=initial();assert(searchCatalog(p,'red socks').some(s=>s.id==='socks'));assert(searchCatalog(p,'RED SOCKS').some(s=>s.id==='socks'));
  assert.equal(searchCatalog(p,'some completely nonexistent object').length,0);
+ assert.equal(searchCatalog(p,'mugs')[0].id,'7434051500');assert(searchCatalog(p,'mugs').some(sku=>sku.id==='mugs'));
  assert.deepEqual(searchCatalog(p,'').map(s=>s.id),profileModule.eligibleCatalog(p).map(s=>s.id));
  assert(!searchCatalog(p,'detergent').some(s=>s.id==='detergent'));
  const privateProfile={...p,quarantine:[...p.quarantine,{category:catalogModule.getSku('socks')!.category,sensitive:true as const,note:'private'}]};
@@ -62,9 +63,12 @@ function fixture(){
  return{props,requests,updates,opened,nodes,find,text:()=>text(tree),flush,reply(fn:(body:any)=>Promise<Response>|Response){replies.push(fn);},async query(value:string){find(n=>n.props.id==='coopy-search').props.onChange({target:{value}});await flush();},async ask(){find(n=>n.type==='button'&&n.props.className==='search-ask').props.onClick();await flush();},updateProfile(p:Profile){props.profile=p;queue();},dispose(){disposed=true;for(const cleanup of cleanups)cleanup?.();}};
 }
 
-test('local search and pagination need no network and keep every eligible match reachable',async t=>{
+test('local search starts with sourced photos; explicit full catalog keeps every eligible match reachable',async t=>{
  const f=fixture();t.after(()=>f.dispose());await f.flush();
  const total=profileModule.eligibleCatalog(f.props.profile).length;
+ const discovery=discoveryCatalog(f.props.profile);assert(discovery.length>8);assert.equal(discovery[0].id,'7434051500');
+ assert(f.nodes().filter(n=>n.type?.displayName==='ProductVisual').every(n=>hasReferencePhoto(n.props.sku)));
+ f.find(n=>n.props.className==='search-include-demo').props.onClick();await f.flush();
  while(f.nodes().some(n=>n.props.className==='search-more')){f.find(n=>n.props.className==='search-more').props.onClick();await f.flush();}
  assert.equal(f.nodes().filter(n=>n.props.className==='search-product').length,total);assert.equal(f.requests.length,0);
  await f.query('red socks');f.find(n=>n.type==='form'&&n.props.role==='search').props.onSubmit({preventDefault(){}});await f.flush();assert.equal(f.requests.length,0);assert.match(f.text(),/Keyword matches/);
@@ -107,14 +111,25 @@ test('owned-item refusal renders an explanation without opening a recommendation
  f.reply(()=>Response.json({status:'blocked',message:'You already have this detergent.',skuId:'detergent',profile:{...f.props.profile,revision:1}}));await f.ask();assert.match(f.text(),/You already have/);assert.match(f.text(),/Nothing added/);assert.equal(f.opened.length,0);assert.equal(f.nodes().some(n=>n.props.className==='search-open-pick'),false);
 });
 
-test('illustrated discovery uses only eligible products and invitations only run local searches',async t=>{
+test('photographic discovery keeps its actual sources, eligibility, and local interactions',async t=>{
  const f=fixture();t.after(()=>f.dispose());await f.flush();
+ const photos=discoveryCatalog(f.props.profile);assert(photos.every(sku=>existsSync(new URL('../public'+sku.image,import.meta.url))));
+ assert(!hasReferencePhoto(catalogModule.getSku('mugs')!));assert(!hasReferencePhoto({...photos[0],image:'https://outside.test/a.jpg'}));
+ f.find(n=>String(n.props.className).includes('search-still-object')).props.onClick();assert.equal(f.opened[0].id,'9026994633');assert.equal(f.requests.length,0);
  const invitation=f.find(n=>n.props.className==='search-invitation');invitation.props.onClick();await f.flush();
  assert.equal(f.requests.length,0);assert.equal(f.find(n=>n.props.id==='coopy-search').props.value,'mugs');
  assert.equal(f.find(n=>n.props.className==='search-view').props['data-searching'],true);
- await f.query('');const category=catalogModule.getSku('mugs')!.category;
- f.updateProfile({...f.props.profile,revision:1,quarantine:[...f.props.profile.quarantine,{category,sensitive:true,note:'private'}],owned:[...f.props.profile.owned,{skuId:'socks',source:'approved',acquiredAt:new Date().toISOString()}]});await f.flush();
+ await f.query('');const category=catalogModule.getSku('7434051500')!.category;
+ f.updateProfile({...f.props.profile,revision:1,quarantine:[...f.props.profile.quarantine,{category,sensitive:true,note:'private'}],owned:[...f.props.profile.owned,{skuId:'9474375760',source:'approved',acquiredAt:new Date().toISOString()}]});await f.flush();
  const visualSkus=f.nodes().filter(n=>n.type?.displayName==='ProductVisual').map(n=>n.props.sku);
- assert(!visualSkus.some(sku=>sku.category===category||sku.id==='socks'));
+ assert(!visualSkus.some(sku=>sku.category===category||sku.id==='9474375760'));assert(visualSkus.every(hasReferencePhoto));
  assert.equal(f.nodes().filter(n=>n.props.className==='search-invitation').length,1);
+});
+
+test('even an exhausted reference collection does not turn default discovery into placeholder tiles',async t=>{
+ const f=fixture();t.after(()=>f.dispose());await f.flush();
+ f.updateProfile({...f.props.profile,revision:1,owned:[...f.props.profile.owned,...discoveryCatalog(f.props.profile).map(sku=>({skuId:sku.id,source:'approved' as const,acquiredAt:new Date().toISOString()}))]});await f.flush();
+ assert.equal(f.nodes().filter(n=>n.props.className==='search-product').length,0);
+ assert.equal(f.nodes().filter(n=>n.type?.displayName==='ProductVisual').length,0);
+ await f.query('red socks');assert(f.nodes().some(n=>n.props.className==='search-product'));assert.match(f.text(),/Simulated catalog/);
 });

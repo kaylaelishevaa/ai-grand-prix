@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {initialMainView,mainHref,mainLocation} from '../components/main-shell-routes';
+import GuidedPage from '../app/guided/page';
+
+test('the guided entry redirects to the canonical egg, whose next onboarding state is the interview call',()=>{
+  assert.throws(()=>GuidedPage(),error=>error instanceof Error&&'digest' in error&&String(error.digest).split(';')[2]==='/hatch');
+  assert.equal(initialMainView(mainLocation('/'),{hatched:true,interviewComplete:false}),'call');
+});
 
 test('fresh, partial and returning visitors have different default routes while explicit Explore stays open',()=>{
   const home=mainLocation('/');assert.equal(initialMainView(home),'hatch');

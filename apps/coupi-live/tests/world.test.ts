@@ -3,14 +3,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createProfile,deleteMemory,eligibleCatalog} from '../lib/profile';
 import {remember} from '../lib/memory';
-import {districtBudget,generateWorld,validateWorld} from '../lib/server/world';
+import {districtBudget,generateWorld,validateWorld,worldCatalog} from '../lib/server/world';
 import {structuredCall} from '../lib/server/llm';
 import type {Profile,CallMeta} from '../lib/types';
 import {getSku} from '../lib/catalog';
 const now=new Date('2026-10-25T01:00:00.000Z');
 const meta:CallMeta={cached:false,offline:false,model:'fixture',inputTokens:0,outputTokens:0,latencyMs:1,cacheKey:'fixture'};
 function profile(){let value=createProfile('world',now);value=remember(value,{id:'mornings',text:'I make matcha slowly on weekend mornings.',source:'from our first call',confidence:0.9,kind:'call'},now);value.journey={hatched:true,interviewCount:5,interviewComplete:true,nextQuestion:'',districts:[],processedCallIds:[]};return value;}
-const district=(name='Your Mornings')=>({blueprint:fixtureBlueprint(['matcha','mugs']),name,explanation:'A place for your morning matcha.',sourceMemoryIds:['memory-1'],items:[{skuId:'matcha',oneLiner:'For your morning matcha.'},{skuId:'mugs',oneLiner:'A pair for your table.'}]});
+const district=(name='Your Mornings')=>({blueprint:fixtureBlueprint(['1539744911','7434051500']),name,explanation:'A place for your morning matcha.',sourceMemoryIds:['memory-1'],items:[{skuId:'1539744911',oneLiner:'For your morning matcha.'},{skuId:'7434051500',oneLiner:'A pair for your table.'}]});
 function provider(output:unknown,inputs:unknown[]=[]):typeof structuredCall {
   return (async(request:Parameters<typeof structuredCall>[0])=>{inputs.push(request.input);return{data:request.validate(output),meta};}) as typeof structuredCall;
 }
@@ -21,8 +21,8 @@ test('world validation rejects invented provenance, SKU IDs, duplicates and over
   assert.equal(validate({districts:[district(),district('Your Kitchen')]}).districts.length,2);
   assert.throws(()=>validate({districts:[district()]}),/district count/);
   assert.throws(()=>validate({districts:[{...district(),sourceMemoryIds:['invented']},district('Kitchen')]}),/provenance/);
-  for(const skuId of ['not-real','detergent','skinCream'])assert.throws(()=>validate({districts:[{...district(),items:[{skuId,oneLiner:'A thing.'},{skuId:'mugs',oneLiner:'A mug.'}]},district('Kitchen')]}),/product/);
-  assert.throws(()=>validate({districts:[{...district(),items:[{skuId:'mugs',oneLiner:'One.'},{skuId:'mugs',oneLiner:'Two.'}]},district('Kitchen')]}),/product/);
+  for(const skuId of ['not-real','detergent','skinCream'])assert.throws(()=>validate({districts:[{...district(),items:[{skuId,oneLiner:'A thing.'},{skuId:'7434051500',oneLiner:'A mug.'}]},district('Kitchen')]}),/product/);
+  assert.throws(()=>validate({districts:[{...district(),items:[{skuId:'7434051500',oneLiner:'One.'},{skuId:'7434051500',oneLiner:'Two.'}]},district('Kitchen')]}),/product/);
   assert.throws(()=>validateWorld({districts:[district(),district('Kitchen')]},allowed,memories,{min:2,max:4},20000),/budget/);
 });
 
@@ -71,7 +71,7 @@ test('unfinished interview and impossible caps fail before any provider call',as
 test('a new date-night district uses catalog wardrobe and beauty items and persists dressing architecture',async()=>{
   const initial=profile(),inputs:unknown[]=[];
   initial.journey!.districts=[{id:'morning-room',name:'Your Mornings',provenance:'from your story',sourceMemoryIds:['mornings'],scene:{name:'Your Mornings',explanation:'Your morning matcha.',kind:'kitchen',items:district().items},createdAt:now.toISOString()}];
-  const dateIds=['dateDress','littleHandbag','roseLipstick','softCompact'];
+  const dateIds=['8310483629-brown','7612276799','1814412512','341621790-cherry-shine'];
   for(const id of dateIds)assert(getSku(id),`The date product ${id} must exist in the catalog.`);
   const output={districts:[{blueprint:fixtureBlueprint(dateIds),name:'Your Getting-Ready Corner',explanation:'A closet and vanity for the date you described.',sourceMemoryIds:['memory-2'],items:dateIds.map(skuId=>({skuId,oneLiner:getSku(skuId)!.description}))}]};
   const result=await generateWorld(initial,{requestId:'date-room',command:'A date-night closet and makeup corner under ₩100k'},{call:provider(output,inputs)});
@@ -91,12 +91,31 @@ test('a new date-night district uses catalog wardrobe and beauty items and persi
 test('closet plus makeup needs both product categories, while explicit no-makeup keeps cosmetics out',async()=>{
   const initial=profile();
   const allowed=eligibleCatalog(initial),memory=[{id:'memory-1',text:'a closet and makeup vanity'}];
-  const allClothes={districts:[{blueprint:fixtureBlueprint(['dateDress','littleHandbag']),name:'A closet',explanation:'Getting ready.',sourceMemoryIds:['memory-1'],items:[{skuId:'dateDress',oneLiner:'A dress.'},{skuId:'littleHandbag',oneLiner:'A bag.'}]}]};
+  const allClothes={districts:[{blueprint:fixtureBlueprint(['8310483629-brown','7612276799']),name:'A closet',explanation:'Getting ready.',sourceMemoryIds:['memory-1'],items:[{skuId:'8310483629-brown',oneLiner:'A dress.'},{skuId:'7612276799',oneLiner:'A bag.'}]}]};
   assert.throws(()=>validateWorld(allClothes,allowed,memory,{min:1,max:1},150000,{wardrobe:true,beauty:true}),/both wardrobe and beauty/);
   initial.journey!.districts=[{id:'old',name:'Your Mornings',provenance:'from your story',sourceMemoryIds:['mornings'],scene:{name:'Your Mornings',explanation:'Morning.',items:district().items},createdAt:now.toISOString()}];
   const inputs:unknown[]=[],result=await generateWorld(initial,{requestId:'no-cosmetics',command:'A simple wardrobe, no makeup'},{call:provider(allClothes,inputs)});
   assert.equal(result.districts.at(-1)!.scene.kind,'dressing');
   const input=inputs[0] as {catalog:{id:string}[]};
-  assert(!input.catalog.some(item=>['roseLipstick','softCompact','blendingBrush'].includes(item.id)));
-  assert(input.catalog.some(item=>item.id==='dateDress'));
+  assert(!input.catalog.some(item=>['1814412512','7322824636','7185725748'].includes(item.id)));
+  assert(input.catalog.some(item=>item.id==='8310483629-brown'));
+});
+
+
+test('live worlds accept only sourced photo-backed products and keep ownership and quarantine exclusions',async()=>{
+  const initial=profile();
+  initial.owned.push({skuId:'7434051500',acquiredAt:now.toISOString(),source:'approved'});
+  initial.quarantine.push({category:'beauty',sensitive:true,note:'Private category'});
+  const available=worldCatalog(initial);
+  assert(available.length>10);
+  assert(available.every(sku=>sku.origin==='coupang-reference'&&sku.image&&sku.sourceUrl&&sku.priceBasis==='historical-reference'));
+  assert(!available.some(sku=>sku.id==='7434051500'||sku.category==='beauty'||sku.id==='matcha'));
+  const inputs:unknown[]=[];
+  await assert.rejects(()=>generateWorld(initial,{requestId:'old-anchor',selectedSkuIds:['matcha']},{call:provider({},inputs)}),/sourced photo/);
+  assert.equal(inputs.length,0,'Unavailable demo anchors fail before any model call');
+  const output={districts:[district(),{...district('An invented demo'),items:[{skuId:'matcha',oneLiner:'A fake replacement.'},{skuId:'mugs',oneLiner:'Fake cups.'}],blueprint:fixtureBlueprint(['matcha','mugs'])}]};
+  await assert.rejects(()=>generateWorld(profile(),{requestId:'fabricated-products'},{call:provider(output,inputs)}),/Invalid or duplicate product/);
+  const input=inputs[0] as {catalog:{id:string;origin:string}[]};
+  assert(input.catalog.every(sku=>sku.origin==='coupang-reference'));
+  assert(!input.catalog.some(sku=>sku.id==='matcha'||sku.id==='mugs'));
 });

@@ -13,6 +13,13 @@ type SearchRequest={question:string;requestId:string;clarification?:{question:st
 type SearchAnswer={response:AskResponse;question:string;profileId:string;revision:number;};
 const normalize=(text:string)=>text.normalize('NFKC').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
 const money=(amount:number)=>'₩'+amount.toLocaleString('en-US');
+const discoveryOrder=['7434051500','9026994633','7612276799','1814412512','9474375760','6775922884','8561267958','6994027284'];
+/** Only locally stored, sourced listing photos belong in the discovery surface. */
+export function hasReferencePhoto(sku:SKU):boolean{return sku.origin==='coupang-reference'&&!!sku.image&&/^\/(?:verified-products|live-call\/products|home-reference\/products|scene-reference\/products)\/[a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|webp)$/.test(sku.image);}
+export function discoveryCatalog(profile:Profile):SKU[]{
+ const available=eligibleCatalog(profile,'ask').filter(hasReferencePhoto),featured=discoveryOrder.map(id=>available.find(sku=>sku.id===id)).filter((sku):sku is SKU=>!!sku),seen=new Set(featured.map(sku=>sku.id));
+ return [...featured,...available.filter(sku=>!seen.has(sku.id))];
+}
 
 /** Literal keyword search only. Eligibility is recalculated after every profile change. */
 export function searchCatalog(profile:Profile,query:string):SKU[]{
@@ -23,7 +30,7 @@ export function searchCatalog(profile:Profile,query:string):SKU[]{
   if(!terms.every(term=>text.includes(term)))return null;
   const rank=terms.reduce((score,term)=>score+(name.includes(term)?4:aliases.some(alias=>alias.includes(term))?3:1),0);
   return{sku,rank};
- }).filter((item):item is {sku:SKU;rank:number}=>!!item).sort((a,b)=>b.rank-a.rank||a.sku.name.localeCompare(b.sku.name)).map(item=>item.sku);
+ }).filter((item):item is {sku:SKU;rank:number}=>!!item).sort((a,b)=>Number(hasReferencePhoto(b.sku))-Number(hasReferencePhoto(a.sku))||b.rank-a.rank||a.sku.name.localeCompare(b.sku.name)).map(item=>item.sku);
 }
 
 /** The server validates facts; the client also rejects foreign/stale profiles and unknown evidence. */
@@ -53,11 +60,13 @@ export default function SearchView({profile,onProfile,onOpenProduct,offline=fals
  const active=result?.profileId===profile.id&&result.revision===profile.revision?result:null;
  const response=active?.response,verdict=response?.status==='verdict'?response.verdict:null;
  const eligible=eligibleCatalog(profile,'ask'),allowed=new Set(eligible.map(sku=>sku.id));
- const stillLife=['smallLamp','mugs','socks'].map(id=>eligible.find(sku=>sku.id===id)).filter((sku):sku is SKU=>!!sku);
- const invitations=[{id:'mugs',query:'mugs',title:'Slow mornings',note:'make room for a pause',tone:'peach'},{id:'socks',query:'socks',title:'Out the door',note:'little everyday upgrades',tone:'blue'},{id:'roseLipstick',query:'lipstick',title:'A little color',note:'try a different feeling',tone:'rose'}].map(item=>({...item,sku:eligible.find(sku=>sku.id===item.id)})).filter(item=>!!item.sku);
+ const discovery=discoveryCatalog(profile),discoveryIds=new Set(discovery.map(sku=>sku.id));
+ const stillLife=['9026994633','7434051500','7612276799'].map(id=>discovery.find(sku=>sku.id===id)).filter((sku):sku is SKU=>!!sku);
+ const invitations=[{id:'7434051500',query:'mugs',title:'Slow mornings',note:'a cup, a little pause',tone:'peach'},{id:'9474375760',query:'tshirt',title:'Out the door',note:'find your everyday fit',tone:'blue'},{id:'1814412512',query:'lipstick',title:'A little color',note:'a shade for your day',tone:'rose'}].map(item=>({...item,sku:discovery.find(sku=>sku.id===item.id)})).filter(item=>!!item.sku);
  const pick=verdict?.pickSkuId&&allowed.has(verdict.pickSkuId)?getSku(verdict.pickSkuId):undefined;
  const fallbackIds=response?.status==='fallback'?new Set(response.catalog.map(sku=>sku.id)):null;
- const matches=showAll?eligible.filter(sku=>!fallbackIds||fallbackIds.has(sku.id)):searchCatalog(profile,query);
+ const allBySource=[...discovery,...eligible.filter(sku=>!discoveryIds.has(sku.id))];
+ const matches=showAll?allBySource.filter(sku=>!fallbackIds||fallbackIds.has(sku.id)):query.trim()?searchCatalog(profile,query):discovery;
  function changeQuery(value:string){setQuery(value);setResult(null);setAnswer('');setError('');setShowAll(false);setLimit(8);receipt.current=null;lastRequest.current=null;}
  function localSearch(event:FormEvent){event.preventDefault();setResult(null);setAnswer('');setError('');setShowAll(false);setLimit(8);}
  function cancel(){epoch.current++;flight.current?.abort();flight.current=null;setBusy(false);}
@@ -82,7 +91,7 @@ export default function SearchView({profile,onProfile,onOpenProduct,offline=fals
   <header className="search-heading search-discovery-hero">
    <svg className="search-landscape-lines" viewBox="0 0 440 300" preserveAspectRatio="none" aria-hidden="true"><path d="M-30 230C74 169 112 308 244 247S412 199 470 230"/><path d="M-30 245C74 184 112 323 244 262S412 214 470 245"/><path d="M315-60C223 39 435 104 427 211"/></svg>
    <div className="search-hero-copy"><span className="search-eyebrow"><i/> DISCOVER WITH COOPY</span><h1>a little<br/><em>more you.</em></h1><p>A softer morning.<br/>A brighter way out the door.</p></div>
-   <div className="search-still-life" aria-label="A few little possibilities"><span className="search-still-halo" aria-hidden="true"/>{stillLife.map((sku,index)=><button type="button" key={sku.id} className={`search-still-object object-${index+1}`} onClick={()=>changeQuery(sku.name)} aria-label={`Search for ${sku.name}`}><ProductVisual sku={sku}/><span className="search-object-dot" aria-hidden="true"><Glyph name="plus"/></span></button>)}</div>
+   <div className="search-still-life" aria-label="Sourced Coupang product photographs"><span className="search-still-halo" aria-hidden="true"/>{stillLife.map((sku,index)=><button type="button" key={sku.id} className={`search-still-object search-photo-${index+1}`} onClick={()=>open(sku.id)} aria-label={`Explore ${sku.name}`}><ProductVisual sku={sku}/><span className="search-object-dot" aria-hidden="true"><Glyph name="plus"/></span></button>)}</div>
    <div className="search-companion-note"><img src="/main-shell/coupi.png" alt=""/><span>Tell me the little thing<br/>you have in mind.</span><Glyph name="spark"/></div>
   </header>
   <form className="search-form" onSubmit={localSearch} role="search">
@@ -90,7 +99,7 @@ export default function SearchView({profile,onProfile,onOpenProduct,offline=fals
    <div className="search-actions"><button className="search-local" type="submit" disabled={busy||!query.trim()}>Search products</button><button className="search-ask" type="button" disabled={busy||!query.trim()} onClick={()=>void ask()}><Glyph name="spark"/>{busy?'Checking…':'Ask Coopy'}</button></div>
    <p className="search-form-note">{offline?'Offline rehearsal · keyword search is local. Coopy uses cached answers only.':'Search matches catalog words. Coopy checks the evidence and your preferences.'}</p>
   </form>
-  {!query&&!result&&invitations.length>0&&<section className="search-invitations" aria-label="Try a product search"><div className="search-invitations-heading"><h2>Start with a feeling.</h2><span>A FEW POSSIBILITIES</span></div><div className="search-invitation-rail">{invitations.map(item=><button type="button" key={item.id} className="search-invitation" data-tone={item.tone} onClick={()=>changeQuery(item.query)}><span className="search-invitation-image"><ProductVisual sku={item.sku!}/><Glyph name="arrow-up"/></span><strong>{item.title}</strong><small>{item.note}</small></button>)}</div></section>}
+  {!query&&!result&&invitations.length>0&&<section className="search-invitations" aria-label="Try a product search"><div className="search-invitations-heading"><h2>Start with a feeling.</h2><span>SOURCED PRODUCT PHOTOS</span></div><div className="search-invitation-rail">{invitations.map(item=><button type="button" key={item.id} className="search-invitation" data-tone={item.tone} onClick={()=>changeQuery(item.query)}><span className="search-invitation-image"><ProductVisual sku={item.sku!}/><Glyph name="arrow-up"/></span><strong>{item.title}</strong><small>{item.note}</small></button>)}</div></section>}
   {busy&&<div className="search-pending" role="status"><span className="search-working"><i/><i/><i/></span><p>Checking the catalog and the evidence.<small>Nothing is added or bought.</small></p><button type="button" onClick={cancel}>Cancel</button></div>}
   {error&&<div className="search-error" role="alert"><p>{error}</p>{lastRequest.current&&<button type="button" disabled={busy} onClick={()=>void ask(lastRequest.current!)}>Try again <Glyph name="refresh"/></button>}</div>}
   {result&&!active&&!busy&&<p className="search-change-note">Your preferences changed. Ask again for an updated recommendation.</p>}
@@ -98,10 +107,11 @@ export default function SearchView({profile,onProfile,onOpenProduct,offline=fals
   {response?.status==='blocked'&&<section className="search-blocked"><Glyph name="check"/><div><span className="search-eyebrow">ALREADY IN YOUR WORLD</span><h2>{response.message}</h2><p>One is enough. Nothing added.</p></div></section>}
   {response?.status==='fallback'&&<section className="search-fallback"><h2>I’m not sure yet.</h2><p>{response.message}</p><p>The available catalog is below. Open any product to see its evidence.</p></section>}
   {pick&&verdict&&<article className="search-verdict"><div className="search-verdict-top"><ProductVisual sku={pick}/><div><span className="search-eyebrow">COOPY’S PICK</span><h2>{pick.name}</h2><strong>{money(pick.price)}</strong><small>{pick.priceBasis==='historical-reference'?'Historical reference price':'Simulated catalog price'}</small></div></div><p className="search-reason">{verdict.reason}</p><p className="search-dissent">{verdict.dissent}</p><div className="search-citations">{verdict.citations.map((id,index)=>{const review=getReview(id);return review?<details key={id}><summary>Review {index+1} · {review.stars}<Glyph name="star"/></summary><div><strong>{review.title}</strong><p>{review.text}</p><small>{review.author} · {review.date} · {review.helpful} helpful{review.photo?' · photo':''}</small></div></details>:null;})}</div><ProductEvidence sku={pick}/><button type="button" className="search-open-pick" onClick={()=>open(pick.id,verdict)}>Why this one & next steps <Glyph name="arrow-right"/></button><span className="search-response-note">{response&&(response.status==='verdict'||response.status==='clarify')?(response.meta.offline?'Cached rehearsal':response.meta.cached?'From cache':'Live recommendation'):''} · your approval comes last</span></article>}
-  <section className="search-results" aria-label="Available catalog products"><header><div><h2>{showAll?'Available products':query.trim()?'Keyword matches':'Browse the catalog'}</h2><p role="status">{matches.length} {matches.length===1?'product':'products'}{query.trim()&&!showAll?' matching your words':''}</p></div>{query.trim()&&!showAll&&<button type="button" onClick={()=>{setShowAll(true);setLimit(8);}}>See all</button>}</header>
-   {!matches.length?<div className="search-empty"><Glyph name="search"/><h3>No exact keyword matches.</h3><p>Try a product name, or ask Coopy to understand what you need.</p><button type="button" onClick={()=>{setShowAll(true);setLimit(8);}}>Browse available products <Glyph name="arrow-right"/></button></div>:<ul>{matches.slice(0,limit).map(sku=><li key={sku.id}><button type="button" className="search-product" onClick={()=>open(sku.id)}><ProductVisual sku={sku}/><span className="search-product-copy"><strong>{sku.name}</strong><span>{money(sku.price)}</span><small>{sku.origin==='coupang-reference'?'Coupang reference · historical price':'Simulated catalog'} · {sku.delivery}</small></span><Glyph name="arrow-right"/></button></li>)}</ul>}
+  <section className="search-results" aria-label="Available catalog products"><header><div><h2>{showAll?'Available products':query.trim()?'Keyword matches':'A few things to meet.'}</h2><p role="status">{!query.trim()&&!showAll?'Sourced listings · reference prices':`${matches.length} ${matches.length===1?'product':'products'}${query.trim()&&!showAll?' matching your words':''}`}</p></div>{query.trim()&&!showAll&&<button type="button" onClick={()=>{setShowAll(true);setLimit(8);}}>See all</button>}</header>
+   {!matches.length?<div className="search-empty"><Glyph name="search"/><h3>{query.trim()?'No exact keyword matches.':'No new photo finds, for now.'}</h3><p>{query.trim()?'Try a product name, or ask Coopy to understand what you need.':'Your owned items and private categories are still respected. You can search or explore the labeled demo catalog.'}</p><button type="button" onClick={()=>{setShowAll(true);setLimit(8);}}>Browse available products <Glyph name="arrow-right"/></button></div>:<ul>{matches.slice(0,limit).map(sku=><li key={sku.id}><button type="button" className="search-product" onClick={()=>open(sku.id)}><ProductVisual sku={sku}/><span className="search-product-copy"><strong>{sku.name}</strong><span>{money(sku.price)}</span><small>{sku.origin==='coupang-reference'?'Coupang reference · historical price':'Simulated catalog'} · {sku.delivery}</small></span><Glyph name="arrow-right"/></button></li>)}</ul>}
    {matches.length>limit&&<button type="button" className="search-more" onClick={()=>setLimit(value=>value+8)}>Show {Math.min(8,matches.length-limit)} more <span>{limit} of {matches.length}</span><Glyph name="plus"/></button>}
-   <p className="search-catalog-note">Owned items and private categories stay out of these results. Local demo catalog; prices and delivery are not live quotes.</p>
+   {!query.trim()&&!showAll&&<button type="button" className="search-include-demo" onClick={()=>{setShowAll(true);setLimit(8);}}>Include the simulated catalog <Glyph name="arrow-right"/></button>}
+   <p className="search-catalog-note">{!query.trim()&&!showAll?'Original listing photos. Prices are historical references; stock and delivery are unverified. Keyword search also includes clearly labeled demo products.':'Sourced listings and simulated products are labeled separately. Prices and delivery are not live quotes.'} Owned items and private categories stay out.</p>
   </section>
  </section>;
 }

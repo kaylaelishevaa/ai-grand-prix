@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {usesFirstCall} from '@/lib/call-entry';
 import {handleCall} from '@/lib/server/call';
 import {withSession,sessionResponse} from '@/lib/server/store';
 import {readJson,requireLocalOrigin} from '@/lib/server/http';
@@ -6,7 +7,7 @@ import {errorResponse,AppError} from '@/lib/server/errors';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
-const inputSchema=z.object({action:z.enum(['hatch','start','message','resumeInterview','finishInterview']),requestId:z.string().trim().min(1).max(100),message:z.string().trim().max(3000).optional(),personalizationDraftId:z.string().trim().min(1).max(100).optional()});
+const inputSchema=z.object({action:z.enum(['hatch','start','message','resumeInterview','finishInterview']),beginInterview:z.boolean().optional(),requestId:z.string().trim().min(1).max(100),message:z.string().trim().max(3000).optional(),personalizationDraftId:z.string().trim().min(1).max(100).optional()});
 
 export async function POST(request:Request) {
   try {
@@ -24,7 +25,7 @@ export async function POST(request:Request) {
     } else raw=await readJson(request);
     const input=inputSchema.parse(raw);
     const result=await withSession(request,async session=>{
-      const data=await handleCall(session.profile,{...input,image,shoppingOnly:true});
+      const data=await handleCall(session.profile,{...input,image,shoppingOnly:!usesFirstCall(session.profile,input.action==='hatch'&&input.beginInterview?'hatch':undefined)});
       session.profile=data.profile;
       return data;
     });

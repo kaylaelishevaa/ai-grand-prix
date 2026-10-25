@@ -26,7 +26,7 @@ test('world and delegation routes persist, guard approvals, and replay cached ge
       calls++;
       const payload=JSON.parse(String(init?.body)),input=JSON.parse(payload.input[0].content[0].text);
       assert(!input.catalog.some((sku:Json)=>['skinCream','detergent'].includes(sku.id)));
-      const district=(name:string)=>({blueprint:fixtureBlueprint(['matcha','mugs']),name,explanation:'For the mornings you described.',sourceMemoryIds:[input.memories[0].id],items:[{skuId:'matcha',oneLiner:'For your matcha.'},{skuId:'mugs',oneLiner:'For your tea.'}]});
+      const district=(name:string)=>({blueprint:fixtureBlueprint(['1539744911','7434051500']),name,explanation:'For the mornings you described.',sourceMemoryIds:[input.memories[0].id],items:[{skuId:'1539744911',oneLiner:'For your matcha.'},{skuId:'7434051500',oneLiner:'For your tea.'}]});
       const text=JSON.stringify({districts:[district('Your Mornings'),district('Your Kitchen')]});
       return Response.json({status:'completed',output:[{content:[{type:'output_text',text}]}],usage:{input_tokens:10,output_tokens:10}});
     };
@@ -44,14 +44,14 @@ test('world and delegation routes persist, guard approvals, and replay cached ge
     assert.deepEqual(world.body.profile.journey.districts[0].sourceMemoryIds,['story']);
     const duplicate=await send(worldRoute,'/api/world',{requestId:'world-one'});
     assert.equal(duplicate.status,200);assert.equal(calls,1);
-    const assign=await send(delegateRoute,'/api/delegate',{action:'assign',skuId:'mugs',budgetCap:18900,watchPrice:true,haggle:true,bundle:true,scheduleDelivery:true});
-    assert.equal(assign.status,200);assert.equal(assign.body.decision.delegation.status,'haggled');
+    const assign=await send(delegateRoute,'/api/delegate',{action:'assign',skuId:'7434051500',budgetCap:18900,watchPrice:true,haggle:true,bundle:true,scheduleDelivery:true});
+    assert.equal(assign.status,200);assert.equal(assign.body.decision.delegation.status,'haggled');assert.equal(assign.body.decision.delegation.simulation,true);
     const approved=await send(decisionsRoute,'/api/decisions',{action:'approve',ids:[assign.body.decision.id]});
     assert.equal(approved.body.approved.length,1);assert.equal(approved.body.profile.xp,0);
     const owned=await send(delegateRoute,'/api/delegate',{action:'assign',skuId:'detergent',budgetCap:15000,watchPrice:true,haggle:true,bundle:false,scheduleDelivery:false});
     assert.match(owned.body.blocked,/3 weeks ago/);assert.equal(calls,1);
     await send(profileRoute,'/api/profile',{action:'settings',pretend2am:true});
-    const late=await send(delegateRoute,'/api/delegate',{action:'assign',skuId:'matcha',budgetCap:30000,watchPrice:true,haggle:true,bundle:false,scheduleDelivery:false});
+    const late=await send(delegateRoute,'/api/delegate',{action:'assign',skuId:'1539744911',budgetCap:30000,watchPrice:true,haggle:true,bundle:false,scheduleDelivery:false});
     const blocked=await send(decisionsRoute,'/api/decisions',{action:'approve',ids:[late.body.decision.id]});
     assert.deepEqual(blocked.body.approved,[]);assert.match(blocked.body.blocked[0],/held until 7:00 AM/);
     const origin=await send(delegateRoute,'/api/delegate',{action:'refresh',id:late.body.decision.id},'https://elsewhere.example');

@@ -150,13 +150,15 @@ test('every catalog item has a volumetric model, and rebuilding reuses its GPU r
 
 test('photo-backed source categories have recognizable pooled shapes instead of generic cartons',()=>{
   const resources=new Set<{dispose():void}>(),library=createProductMeshLibrary(resource=>{resources.add(resource);return resource;});
-  const expected={chair:'chair-seat',glasses:'eyeglass-bridge',tshirt:'tshirt-fabric',hoodie:'hood',sweater:'ribbed-neckline',lipbalm:'lipbalm-tube'};
+  const expected={mug:'mug-handle',mugs:'mug-body',kettle:'kettle-body',cushion:'cushion-piping',lamp:'lamp-shade',lipstick:'lipstick-bullet',chair:'chair-seat',glasses:'eyeglass-bridge',tshirt:'tshirt-fabric',hoodie:'hood',sweater:'ribbed-neckline',lipbalm:'lipbalm-tube'};
   try{
     for(const [type,landmark] of Object.entries(expected)){
       const model=library.build({skuId:`source-${type}`,type,name:type});
       assert(model.getObjectByName(landmark),`${type} has its physical defining feature`);
       const bounds=new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());assert(bounds.x>.15&&bounds.y>.15&&bounds.z>.02);
       if(type==='chair')assert.equal(model.children.filter(p=>p.name==='chair-caster').length,5);
+      if(type==='mug'||type==='mugs')assert.equal(model.children.filter(p=>p.name==='mug-body').length,type==='mug'?1:2);
+      if(type==='cushion')assert.equal(((model.getObjectByName('cushion-body') as THREE.Mesh).material as THREE.Material).userData.surface,'fabric');
       if(['tshirt','hoodie','sweater'].includes(type)){const fabric=model.getObjectByName(`${type}-fabric`) as THREE.Mesh;assert.equal((fabric.material as THREE.Material).userData.surface,'fabric');}
     }
     const count=resources.size;for(let i=0;i<30;i++)for(const type of Object.keys(expected))library.build({skuId:type,type,name:type});assert.equal(resources.size,count);

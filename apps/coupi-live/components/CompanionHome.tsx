@@ -7,6 +7,8 @@ import {Glyph} from './Glyph';
 import {applyHomeDemoAction,buildDemoHome,buildLiveHome,createHomeDemo,demoDeliveryTime,HOME_SCENARIOS,homeMoney,referenceById,referenceName,type HomeCard,type HomeDemoAction,type HomeReference,type HomeScenario} from '@/lib/home-feed';
 import type {Profile,SKU} from '@/lib/types';
 import {getSku} from '@/lib/catalog';
+import {eligibleCatalog,scoreSku} from '@/lib/profile';
+import {ProductVisual} from './ProductEvidence';
 import {sanitizeProfileForAI} from '@/lib/profile';
 import './companion-home.css';
 import './companion-home-visual.css';
@@ -84,6 +86,13 @@ export default function CompanionHome({profile,onCall,onExplore,onOpenProduct,of
   const live=useMemo(()=>buildLiveHome(profile,clock),[profile,clock]);
   const feed=useMemo(()=>demo?buildDemoHome(demo):live,[demo,live]);
   const extras=useMemo(()=>homeExtras(profile,clock),[profile,clock]);
+  const recommendation=useMemo(()=>{
+    const sourced=eligibleCatalog(profile,'today').filter(sku=>sku.origin==='coupang-reference'&&!!sku.image&&/^\/(?:verified-products|home-reference\/products|scene-reference\/products|live-call\/products)\/[a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|webp)$/.test(sku.image));
+    const preferred=['7434051500','9026994633','8561267958','7612276799','1814412512'];
+    const rank=(id:string)=>{const index=preferred.indexOf(id);return index<0?preferred.length:index;};
+    return sourced.sort((a,b)=>scoreSku(profile,b)-scoreSku(profile,a)||rank(a.id)-rank(b.id)||a.name.localeCompare(b.name))[0];
+  },[profile]);
+  const recommendationPersonalized=!!recommendation&&scoreSku(profile,recommendation)>0;
   const showMemory=!demo&&extras.firstCallCount>0&&feed.cards.length<3;
   const mood=demo?.scenario||(live.cards.some(card=>card.kind==='problem')?'problem':live.mood==='night'?'night':showMemory?'first':live.mood);
   const mascotMood=mood==='night'?'sleepy':mood==='first'?'excited':mood==='problem'?'attentive':mood==='quiet'?'relaxed':'calm';
@@ -109,11 +118,12 @@ export default function CompanionHome({profile,onCall,onExplore,onOpenProduct,of
       <span className="ch-card-art">{card.sku?<HomeProductImage sku={card.sku}/>:card.reference?<ReferenceImage product={card.reference}/>:<Glyph name="spark"/>}</span>
       <div className="ch-card-copy"><span className="ch-card-label">{card.demo?'PREPARED / ':''}{card.kind==='problem'?'A LITTLE DETOUR':card.kind==='decision'?'YOUR WORD COMES NEXT':card.kind==='receipt'?'YOUR APPROVAL, KEPT':card.kind==='arrival'?'ON ITS WAY':card.kind==='followup'?'HOW DID IT FEEL?':'A GENTLE PAUSE'}</span><h2>{card.title}</h2><p>{card.line}</p><button className="ch-card-action" onClick={()=>openCard(card)}>{card.action}<Glyph name={card.locked?'lock':'arrow-right'}/></button></div>
     </article>)}</div>}
+    {!demo&&recommendation&&<article className="ch-first-find"><div className="ch-first-find-photo"><ProductVisual sku={recommendation}/></div><div className="ch-first-find-copy"><span className="ch-card-label">{recommendationPersonalized?'FROM WHAT YOU’VE SHARED':'A FIRST LOOK · COUPANG LISTING'}</span><h2>{recommendation.name}</h2><strong>₩{recommendation.price.toLocaleString('en-US')}</strong><p>{recommendationPersonalized?'A little match from the preferences you shared.':'I’m still learning your taste. Here’s one real listing to explore.'}</p><button className="ch-card-action" onClick={()=>onOpenProduct(recommendation.id)}>Take a look <Glyph name="arrow-right"/></button><small>Just a recommendation · no order or tracking yet</small></div></article>}
     {showMemory&&<article className="ch-memory-card"><div><h2>I learned {extras.firstCallCount} {extras.firstCallCount===1?'thing':'things'} about you</h2><p>Make sure I got them right</p></div><a href="/privacy">Check</a></article>}
     {!feed.cards.length&&<WorldInvitation owned={demo?[]:extras.owned} onExplore={onExplore}/>}
     {!!feed.cards.length&&<button className="ch-explore-link ch-explore-window" onClick={onExplore}><WorldWindow compact/><span><small>A CHANGE OF SCENERY</small><strong>A little wander?</strong></span><Glyph name="arrow-right"/></button>}
     {!demo&&live.pendingCount>3&&<p className="ch-more-note">The closest things first. Your other plans are in Decisions.</p>}
-    <p className="ch-local-note">{demo?'PREPARED EVENTS · REAL LISTING PHOTOS · REFERENCE PRICES':'Local simulation · approval always comes first'}</p>
+    <p className="ch-local-note">{demo?'PREPARED EVENTS · REAL LISTING PHOTOS · REFERENCE PRICES':live.pendingCount?'Your choices · checkout happens only after your approval':'Browse freely · nothing to approve until you choose to buy'}</p>
     <p className="ch-notice" role="status">{notice}</p>
     {sheet&&product&&demo&&createPortal(<div className="ch-modal-host"><Modal title="PREPARED DAY / DEMO DETAILS" onClose={closeSheet}><div className="ch-sheet">
       <p className="ch-sheet-demo">SIMULATION · changes stay in this prepared day</p>

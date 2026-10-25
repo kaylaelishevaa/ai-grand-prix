@@ -3,8 +3,8 @@ export type SceneTouchpoint=ProjectedTouchpoint&{anchorX:number;anchorY:number};
 
 /** Six real 44px hit targets must never compete for the same screen pixels.
  * Stable SKU order makes the result independent of renderer traversal order. */
-export function separateTouchpoints(points:ProjectedTouchpoint[],width:number,height:number):SceneTouchpoint[] {
-  const margin=24,gap=46,minX=Math.min(margin,width/2),maxX=Math.max(minX,width-margin),minY=Math.min(margin,height/2),maxY=Math.max(minY,height-margin);
+export function separateTouchpoints(points:ProjectedTouchpoint[],width:number,height:number,targetSize=44):SceneTouchpoint[] {
+  const size=Math.max(44,Math.min(64,targetSize)),margin=size/2+2,gap=size+2,minX=Math.min(margin,width/2),maxX=Math.max(minX,width-margin),minY=Math.min(margin,height/2),maxY=Math.max(minY,height-margin);
   const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
   const placed:SceneTouchpoint[]=[];
   for(const point of [...points].sort((a,b)=>a.skuId.localeCompare(b.skuId))){

@@ -15,7 +15,7 @@ import {structuredCall,type StructuredRequest} from '../lib/server/llm';
 import {AppError} from '../lib/server/errors';
 import {catalog} from '../lib/catalog';
 
-const ids=['matcha','mugs'];
+const ids=['1539744911','7434051500'];
 test('blueprint contract is strict declarative JSON with derived support heights and no tuple schema',()=>{
   const plan=validateSceneBlueprint(fixtureBlueprint(ids),ids);
   assert.equal(plan.nodes.length,8);assert.equal(resolveBlueprintAnchors(plan)[0].y,.58);
@@ -84,7 +84,7 @@ test('one geometry failure reports multiple measured repairs together with a twe
   assert.throws(()=>validateSceneBlueprint(invalid,ids),error=>{
     assert(error instanceof BlueprintValidationError);const feedback=blueprintValidationFeedback(error);
     assert(feedback.includes(invalid.nodes[1].id));assert(feedback.includes(invalid.nodes[2].id));
-    assert.match(feedback,/rotated bounds/);assert.match(feedback,/matcha refers to missing/);assert.match(feedback,/mugs.*clearance/);
+    assert.match(feedback,/rotated bounds/);assert.match(feedback,/1539744911 refers to missing/);assert.match(feedback,/7434051500.*clearance/);
     assert(feedback.split('\n').length>=4);return true;
   });
   for(const node of invalid.nodes){node.position={x:3.7,y:.18,z:3.2};node.scale={x:2,y:2,z:2};}
@@ -105,16 +105,16 @@ test('blueprint feedback sanitizes parser and schema diagnostics instead of copy
 });
 
 test('compiler grounds the observed shallow floor penetration and packs coincident products without replacing authored design',()=>{
-  const selected=['matcha','mugs','bambooTray'],raw=fixtureBlueprint(selected);
+  const selected=['1539744911','7434051500','8059518763'],raw=fixtureBlueprint(selected);
   raw.nodes=[
     {...raw.nodes[0],id:'tray-plinth',shape:'box',position:{x:.38,y:.26,z:-.36},scale:{x:.56,y:.24,z:.44},rotation:{x:0,y:.06,z:0}},
     {...raw.nodes[0],id:'table-low',shape:'box',position:{x:.8,y:.26,z:.4},scale:{x:1,y:.24,z:.8},rotation:{x:0,y:-.3,z:0}},
     ...raw.nodes.slice(1).map((node,index)=>({...node,position:{...node.position,y:.22},scale:{x:.2,y:.2+(index%3)*.02,z:.2}})),
   ];
   raw.anchors=[
-    {skuId:'matcha',supportId:'tray-plinth',x:.38,z:-.36,yaw:.1,scale:1.02},
-    {skuId:'mugs',supportId:'table-low',x:.95,z:.62,yaw:0,scale:.78},
-    {skuId:'bambooTray',supportId:'tray-plinth',x:.4,z:-.34,yaw:.06,scale:.86},
+    {skuId:'1539744911',supportId:'tray-plinth',x:.38,z:-.36,yaw:.1,scale:1.02},
+    {skuId:'7434051500',supportId:'table-low',x:.95,z:.62,yaw:0,scale:.78},
+    {skuId:'8059518763',supportId:'tray-plinth',x:.4,z:-.34,yaw:.06,scale:.86},
   ];
   const before=structuredClone(raw);assert.throws(()=>validateSceneBlueprint(raw,selected));
   const plan=compileSceneBlueprint(raw,selected);assert.deepEqual(raw,before,'Compilation must not mutate the raw model answer');
@@ -171,7 +171,7 @@ test('compiler preserves generated oval and arch scenery while moving products o
 });
 
 test('new scenes require a blueprint while legacy saved SceneResult can still omit one',()=>{
-  const skuIds=['kettle','mugs','apron','tray','speaker'];
+  const skuIds=['kettle','7434051500','apron','tray','speaker'];
   const scene={name:'A composed morning',explanation:'A new space.',items:skuIds.map(skuId=>({skuId,oneLiner:'A listed product.'}))};
   assert.throws(()=>validateScene(scene,catalog));
   assert.deepEqual(validateScene({...scene,blueprint:fixtureBlueprint(skuIds)},catalog).blueprint,fixtureBlueprint(skuIds));
@@ -223,12 +223,12 @@ test('different commands persist actual different plans; exact cached plans repl
 test('rebuild references exclude newly owned products and withhold a district whose sources are no longer permitted',async()=>{
   let profile=remember(createProfile('prior-context'),{id:'story',text:'I enjoy a quiet cup of tea.',source:'from our first call',confidence:.95,kind:'call'});
   profile.journey={hatched:true,interviewCount:5,interviewComplete:true,nextQuestion:'',processedCallIds:[],districts:[{id:'old',name:'My tea place',provenance:'from your story',sourceMemoryIds:['story'],createdAt:new Date().toISOString(),scene:{name:'My tea place',explanation:'For your tea.',items:ids.map(skuId=>({skuId,oneLiner:'A known product.'})),blueprint:fixtureBlueprint(ids)}}]};
-  profile.owned.push({skuId:'mugs',acquiredAt:new Date().toISOString(),source:'approved'});
+  profile.owned.push({skuId:'7434051500',acquiredAt:new Date().toISOString(),source:'approved'});
   let captured:Record<string,any>={};
   const call=<T,>(request:StructuredRequest<T>):Promise<never>=>{captured=request.input as Record<string,any>;return Promise.reject(new AppError('TEST_CAPTURE','Only inspecting the request.'));};
   await assert.rejects(()=>generateWorld(profile,{requestId:'inspect',districtId:'old',command:'make this warmer'},{call}),/Only inspecting/);
-  assert.deepEqual(captured.previousDistrict.items.map((item:{skuId:string})=>item.skuId),['matcha']);
-  assert.deepEqual(captured.previousDistrict.blueprint.anchors.map((item:{skuId:string})=>item.skuId),['matcha']);
+  assert.deepEqual(captured.previousDistrict.items.map((item:{skuId:string})=>item.skuId),['1539744911']);
+  assert.deepEqual(captured.previousDistrict.blueprint.anchors.map((item:{skuId:string})=>item.skuId),['1539744911']);
   profile.memoryLines[0].excludedFromAI=true;
   await assert.rejects(()=>generateWorld(profile,{requestId:'inspect-hidden',districtId:'old',command:'a new quiet courtyard'},{call}),/Only inspecting/);
   assert.equal(captured.previousDistrict,null);

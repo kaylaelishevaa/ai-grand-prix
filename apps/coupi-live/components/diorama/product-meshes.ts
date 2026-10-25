@@ -38,7 +38,7 @@ export function createProductMeshLibrary(own: Own) {
   const geometry = {
     box: own(new RoundedBoxGeometry(1,1,1,3,.035)),
     cylinder: own(new THREE.CylinderGeometry(.5, .5, 1, 24)),
-    cone: own(new THREE.CylinderGeometry(.22, .5, 1, 10)),
+    cone: own(new THREE.CylinderGeometry(.22, .5, 1, 32)),
     sphere: own(new THREE.SphereGeometry(.5,20,12)),
     leaf: own(new THREE.IcosahedronGeometry(.5, 0)),
     ring: own(new THREE.TorusGeometry(.5, .095, 10, 28)),
@@ -79,8 +79,8 @@ export function createProductMeshLibrary(own: Own) {
       return ring(color, x, y, z, size, size * 1.15, size * .8);
     }
     function cup(x: number, z: number, color = main, size = .4) {
-      part('cup', color, x, 0, z, size, size * .85, size);
-      handle(x + size * .48, size * .43, z, color, size * .48);
+      part('cup', color, x, 0, z, size, size * .85, size).name='mug-body';
+      handle(x + size * .48, size * .43, z, color, size * .48).name='mug-handle';
       cylinder(wood, x, size * .22, z, size * .68, .012);
     }
     function pot(x: number, z: number, size = .5) {
@@ -96,13 +96,15 @@ export function createProductMeshLibrary(own: Own) {
 
     if (type === 'kettle') {
       cylinder(dark, 0, .025, 0, .69, .05);
-      part('kettle', main, 0, .05, 0, .64, .64, .64);
+      part('kettle', main, 0, .05, 0, .64, .64, .64).name='kettle-body';
       handle(-.34, .36, 0, wood, .4).scale.y = .53;
       const spout = part('cone', main, .36, .36, 0, .19, .45, .19); spout.rotation.z = -.95;
       const mouth = cylinder(dark, .53, .49, 0, .085, .012); mouth.rotation.z = -.95;
       cylinder(main, 0, .61, 0, .37, .04);
       cylinder(wood, 0, .66, 0, .11, .07);
       cylinder(orange, .17, .09, .24, .035, .018).rotation.x = Math.PI / 2;
+    } else if (type === 'mug') {
+      cup(0,0,main,.55);
     } else if (type === 'mugs' || type === 'glass') {
       cup(-.18, -.05, main, .39);
       cup(.2, .13, type === 'glass' ? '#B4C9BF' : clay, .33);
@@ -265,7 +267,7 @@ export function createProductMeshLibrary(own: Own) {
     } else if (type === 'lamp') {
       cylinder(main, 0, .035, 0, .51, .07);
       cylinder(wood, 0, .4, 0, .055, .7);
-      part('cone', main, 0, .79, 0, .66, .36, .66);
+      part('cone', main, 0, .79, 0, .66, .36, .66).name='lamp-shade';
       cylinder('#FFE5AA', 0, .61, 0, .51, .02);
       cylinder(orange, .16, .081, 0, .035, .025);
     } else if (type === 'cooker') {
@@ -298,8 +300,8 @@ export function createProductMeshLibrary(own: Own) {
       for (let i = 0; i < 3; i++) part('box', '#DEC6A1', 0, .06 + i * .09, .253, .63, .015, .012);
       for (const x of [-.32, .32]) handle(x, .28, 0, wood, .22).rotation.y = Math.PI / 2;
     } else if (type === 'cushion') {
-      part('sphere', main, 0, .14, 0, .79, .3, .66);
-      part('box', clay, 0, .27, 0, .58, .014, .035);
+      part('sphere', main, 0, .15, 0, .79, .3, .66).name='cushion-body';
+      const piping=ring(main,0,.15,0,.665,.55,.08);piping.rotation.x=Math.PI/2;piping.name='cushion-piping';
     } else if (type === 'milk') {
       part('box', cream, 0, .29, 0, .29, .58, .26);
       part('cone', cream, 0, .64, 0, .3, .14, .27);

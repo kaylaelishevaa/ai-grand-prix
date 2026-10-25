@@ -1,4 +1,5 @@
 import test from 'node:test';
+import * as callEntry from '../lib/call-entry';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createContext,runInContext} from 'node:vm';
@@ -65,7 +66,7 @@ function componentHarness(initial:Profile|null,transport:typeof fetch,wrapper=fa
     useEffect(callback:()=>void,deps:any[]){const at=cursor++,old=hooks[at];if(forceEffects||!old||deps.some((value,i)=>value!==old.deps[i])){effects.push(()=>{old?.cleanup?.();const cleanup=callback();hooks[at]={deps,cleanup};});}},
   };
   const Review=()=>null,jsx=(type:unknown,properties:Record<string,unknown>)=>({type,props:properties});
-  const imports:Record<string,unknown>={'react':react,'react-dom':{createPortal:(children:unknown)=>({type:'portal',props:{children}})},'react/jsx-runtime':{jsx,jsxs:jsx},'@/lib/catalog':catalog,'@/lib/profile':profileLibrary,'@/lib/call-bridge':bridge,'@/lib/live-call-session':sessionLibrary,'./FirstCallReview':{__esModule:true,default:Review},'./Glyph':{Glyph:()=>null},'./live-call-experience.css':{}};
+  const imports:Record<string,unknown>={'react':react,'react-dom':{createPortal:(children:unknown)=>({type:'portal',props:{children}})},'react/jsx-runtime':{jsx,jsxs:jsx},'@/lib/catalog':catalog,'@/lib/profile':profileLibrary,'@/lib/call-bridge':bridge,'@/lib/live-call-session':sessionLibrary,'@/lib/call-entry':callEntry,'./FirstCallController':{__esModule:true,default:()=>null},'./FirstCallReview':{__esModule:true,default:Review},'./Glyph':{Glyph:()=>null},'./live-call-experience.css':{}};
   const module={exports:{} as any},context=createContext({module,exports:module.exports,require:(name:string)=>{if(!(name in imports))throw Error('Unexpected import '+name);return imports[name];},fetch:transport,AbortController,setTimeout,clearTimeout,crypto:{randomUUID},location:{origin},window:{addEventListener(type:string,fn:(event:any)=>void){if(!listeners.has(type))listeners.set(type,new Set());listeners.get(type)!.add(fn);},removeEventListener(type:string,fn:(event:any)=>void){listeners.get(type)?.delete(fn);}},console});
   const source=readFileSync(new URL('../components/LiveCallExperience.tsx',import.meta.url),'utf8');
   runInContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,context);

@@ -110,8 +110,11 @@ export function createWorldAtlas(canvas:HTMLCanvasElement,places:AtlasPlace[],op
       if(!options.reducedMotion){clouds.position.x=Math.sin(elapsed*.08)*.18;weather.forEach((air,index)=>{air.position.y=layout[index].y+(rainy[index]?-(elapsed*.24% .45):Math.sin(elapsed*.5+index)*.05);});motions.forEach(motion=>{const sway=Math.sin(elapsed*.7+motion.offset);motion.object.rotation.z=motion.rotation.z+sway*(motion.type==='curtain'?.018:motion.type==='tree'||motion.type==='sway'?.012:.008);if(motion.type==='paper'||motion.type==='water'||motion.type==='float')motion.object.position.y=motion.position.y+sway*.018;});}
       companion.update(elapsed,dt,yaw,options.reducedMotion);companionShadow.position.set(companion.group.position.x,-.21,companion.group.position.z);
       scene.updateMatrixWorld();camera.updateMatrixWorld();if(elapsed<2.1&&elapsed-lastShadow>.14){renderer!.shadowMap.needsUpdate=true;lastShadow=elapsed;}renderer!.render(scene,camera);
-      options.onProjection(anchors.map((anchor,index)=>{anchor.getWorldPosition(projected);projected.project(camera);return{id:places[index].id,x:clamp((projected.x*.5+.5)*width,22,width-22),y:Math.min((-projected.y*.5+.5)*height,height-30),visible:elapsed>.7&&Math.abs(projected.x)<1&&Math.abs(projected.y)<1};}));
-      if(!ready){ready=true;options.onReady();}
+      const assembled=options.reducedMotion||elapsed>.7;
+      options.onProjection(anchors.map((anchor,index)=>{anchor.getWorldPosition(projected);projected.project(camera);return{id:places[index].id,x:clamp((projected.x*.5+.5)*width,22,width-22),y:Math.min((-projected.y*.5+.5)*height,height-30),visible:assembled&&Math.abs(projected.x)<1&&Math.abs(projected.y)<1};}));
+      // Keep the illustrated landscape until the first usable assembled frame.
+      // Hiding it after frame zero exposed an empty canvas during the entrance.
+      if(!ready&&assembled){ready=true;options.onReady();}
     };
     canvas.addEventListener('webglcontextlost',lost);document.addEventListener('visibilitychange',visibility);
     resize(canvas.clientWidth||800,canvas.clientHeight||600);frameId=requestAnimationFrame(frame);
