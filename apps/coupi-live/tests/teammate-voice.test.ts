@@ -71,7 +71,7 @@ test('direct Realtime keeps profile context and automatic replies without waitin
     profile.journey={hatched:true,interviewCount:count,interviewComplete:false,nextQuestion:FIRST_CALL_QUESTIONS[count],districts:[],processedCallIds:[]};
     const context=teammateProfileContext(profile),config=sessionConfiguration({OPENAI_REALTIME_MODEL:'test-realtime'},context);
     assert(!config.tools.some(tool=>tool.name==='resolve_shopping_request'));assert(config.tools.some(tool=>tool.name==='look_at_camera'));assert.equal((config.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,true);assert.equal(context.interview.answeredCount,count);assert.equal(context.interview.question,'');
-    assert.doesNotMatch(config.instructions,/FIRST CALL OVERRIDE|warm reverse-onboarding interview|CHECKED CALL BRIDGE OVERRIDE/);assert.match(config.instructions,/DIRECT SHOPPING/);assert.match(config.instructions,/Hi Kayleen! What can I help you find today/);assert.equal(context.callMode,'direct');assert.match(config.instructions,/Every public call starts directly with shopping/);
+    assert.doesNotMatch(config.instructions,/FIRST CALL OVERRIDE|warm reverse-onboarding interview|CHECKED CALL BRIDGE OVERRIDE/);assert.match(config.instructions,/DIRECT SHOPPING/);assert.match(config.instructions,/greeting for the opening response only/);assert.equal(context.callMode,'direct');assert.match(config.instructions,/Every public call starts directly with shopping/);
     assert(config.instructions.includes(JSON.stringify({active:false,answeredCount:count,question:'',questions:[]})));
     assert.equal(context.personalization.active,false);assert.equal(context.personalization.draft_pending,false);
   }

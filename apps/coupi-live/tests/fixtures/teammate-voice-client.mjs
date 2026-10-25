@@ -427,8 +427,8 @@ for (const code of ['credit_balance_exhausted', 'insufficient_quota', 'invalid_a
 test('phone-call greeting is used once and position controls reach the local camera hook', async t => {
   const f=fixture(t,{greeting:'How can I help you today?'});
   await connect(f);
-  const greeting=f.channel.sent.find(e=>e.item?.type==='message');
-  assert.match(greeting.item.content[0].text,/How can I help you today/);
+  const greeting=f.channel.sent.find(e=>e.type==='response.create');
+  assert.match(greeting.response.instructions,/How can I help you today/);
   f.emit({type:'response.created',response:{id:'r-position'}});
   const item=tool(f,'position-1','set_tryon',{mode:'desk',x:.2,y:.8,rotation:-25,scale:1.2},'r-position');
   done(f,'r-position',[item]);await tick();await tick();
@@ -437,6 +437,29 @@ test('phone-call greeting is used once and position controls reach the local cam
   const clear=tool(f,'clear-1','set_tryon',{mode:'none'},'r-clear');
   done(f,'r-clear',[clear]);await tick();
   assert.equal(f.tryons[1].mode,'none');
+});
+
+test('opening greeting is scoped to one response and never persists into shopping, reconnect or mode changes',async t=>{
+  const f=fixture(t,{directShopping:true});await connect(f);
+  const opening=f.channel.sent.find(event=>event.type==='response.create');assert.match(opening.response.instructions,/Hi Kayleen!/);
+  const messages=f.channel.sent.filter(event=>event.type==='conversation.item.create');assert(!messages.some(event=>JSON.stringify(event).includes('Hi Kayleen')));assert(!messages.some(event=>JSON.stringify(event).includes('Begin with this brief greeting')));
+  done(f,'opening');f.emit({type:'session.updated',session:{id:'same-session'}});f.emit({type:'session.created',session:{id:'same-session'}});
+  await f.voice.setInputMode('text');await f.voice.setInputMode('voice');await tick();assert.equal(countReplies(f.channel),1);
+  assert.equal(f.voice.sendText('Show me black glasses'),true);await tick();assert.equal(countReplies(f.channel),2);
+  f.emit({type:'response.created',response:{id:'shopping'}});const search=tool(f,'shopping-search','search_products',{query:'black glasses'},'shopping');done(f,'shopping',[search]);await tick();await tick();
+  const responses=f.channel.sent.filter(event=>event.type==='response.create');assert.equal(responses.length,3);assert(responses.slice(1).every(event=>event.response.instructions===undefined));
+});
+
+test('a shopper turn or mode change before the scheduled opening cancels the unused greeting',async t=>{
+  for(const first of ['text','speech','mode']){
+    const f=fixture(t,{directShopping:true});assert.equal(await f.voice.start(),true);
+    if(first==='text')assert.equal(f.voice.sendText('Find me a lamp'),true);
+    else if(first==='speech'){f.emit({type:'input_audio_buffer.speech_started',item_id:'first-request'});f.emit({type:'input_audio_buffer.speech_stopped'});}
+    else await f.voice.setInputMode('text');
+    await tick();await tick();const responses=f.channel.sent.filter(event=>event.type==='response.create');
+    assert.equal(responses.length,first==='text'?1:0);assert(responses.every(event=>event.response.instructions===undefined));
+    f.emit({type:'session.updated',session:{id:'same-session'}});await tick();assert.equal(f.channel.sent.filter(event=>event.response?.instructions?.includes('Hi Kayleen')).length,0);
+  }
 });
 
 test('card actions use the application hook and return its grounded result without making purchases',async t=>{

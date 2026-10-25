@@ -104,7 +104,7 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.equal(config.audio.input.turn_detection.interrupt_response,true);
   assert.equal(config.audio.input.turn_detection.create_response,true);
   assert.doesNotMatch(config.instructions,/CHECKED CALL BRIDGE OVERRIDE/);
-  assert.match(config.instructions,/Hi Kayleen! What can I help you find today/);
+  assert.match(config.instructions,/greeting for the opening response only/);
   assert.deepEqual(config.tools.map(t=>t.name).sort(),['draft_preferences','skip_personalization','search_products','set_tryon','product_action','look_at_camera','compare_products','start_checkout'].sort());
 });
 

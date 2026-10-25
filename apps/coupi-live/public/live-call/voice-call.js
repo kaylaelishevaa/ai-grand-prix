@@ -171,6 +171,7 @@
     }
     _interruptOutput(c,{automatic=false,supersede=false}={}) {
       clearTimeout(c.replyTimer);c.nextAudioReplyAt=0;
+      if(c.openingInstructions){c.openingInstructions=null;c.needsReply=false;}
       const active=[...c.activeResponses];
       for(const id of active)c.cancelledResponses.add(id);
       if(c.playingResponseId)c.cancelledResponses.add(c.playingResponseId);
@@ -489,11 +490,13 @@
       c.greeted=true;
       if(c.inputMode==='text'||this.options.onResolveCall)this._configureInputMode(c);
       if(c.shoppingTransition){this._syncMemories(c);this._flushShoppingTransition(c);return;}
+      if(c.userTurn>0)return;
       const context=this.options.getContext?.() || {};
       c.lastContext=contextText(context);
       const greeting=typeof this.options.greeting==='string'?this.options.greeting.trim().slice(0,300):'Hi Kayleen! What can I help you find today?';
       this._captureCamera(c,'call-start');
-      this._text(c,`App context, not a spoken shopper request: ${c.lastContext}. The shopper answered the call. Begin with this brief greeting: ${JSON.stringify(greeting)}. Camera vision is available only when you have actually received camera images and sharing is not paused. Only mention camera availability if the shopper asks about seeing something. Say the supplied greeting exactly and stop, without extra questions or requests for photos. These are periodic snapshots, not continuous video.`);
+      this._text(c,`App context, not a spoken shopper request: ${c.lastContext}. The shopper answered the call. Camera vision is available only when you have actually received camera images and sharing is not paused. Only mention camera availability if the shopper asks about seeing something. These are periodic snapshots, not continuous video.`);
+      c.openingInstructions=`For this opening response only, say exactly ${JSON.stringify(greeting)} and stop. Do not call tools, add another question, or request photos. This one-time opening instruction does not apply to later responses.`;
       this._syncMemories(c);
       c.needsReply=true;this._reply(c);
     }
@@ -505,8 +508,9 @@
         const shopping=c.shoppingTransition;
         if(shopping&&!shopping.complete&&!shopping.failed&&(!shopping.acked||shopping.waitingForResponse))return;
         c.needsReply=false;c.replyRequested=true;
-        if(!this._send(c,{type:'response.create',response:{output_modalities:[c.inputMode==='text'?'text':'audio']}})){c.replyRequested=false;c.needsReply=true;}
-        else if(shopping&&!shopping.complete&&!shopping.failed)shopping.requested=true;
+        const opening=c.openingInstructions;
+        if(!this._send(c,{type:'response.create',response:{output_modalities:[c.inputMode==='text'?'text':'audio'],...(opening?{instructions:opening}:{})}})){c.replyRequested=false;c.needsReply=true;}
+        else {c.openingInstructions=null;if(shopping&&!shopping.complete&&!shopping.failed)shopping.requested=true;}
       },c.inputMode==='voice'?Math.max(0,(c.nextAudioReplyAt||0)-Date.now()):0);
     }
     async _directAction(c,command){
