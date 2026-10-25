@@ -1,4 +1,4 @@
-/* Real OpenAI Realtime audio and opt-in camera snapshots. Server API keys never enter this module. */
+/* Real OpenAI Realtime voice, text and opt-in images. Server API keys never enter this module. */
 (() => {
   'use strict';
   const MAX_CALL_MS = 10 * 60 * 1000;
@@ -71,10 +71,10 @@
       const serialized=JSON.stringify(safe);
       if(serialized.length<=1600)return serialized;
       const short=value=>typeof value==='string'?value.slice(0,120):['number','boolean'].includes(typeof value)?value:undefined;
-      const product=value=>value&&typeof value==='object'?Object.fromEntries(['id','title','category','productType','price','preview_kind','shade_color','shade_estimated'].filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
+      const product=value=>value&&typeof value==='object'?Object.fromEntries(['id','title','category','productType','price','preview_kind','finish','preview_available','preview_unavailable_reason','shade_color','shade_estimated'].filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
       const fields=(value,keys)=>value&&typeof value==='object'?Object.fromEntries(keys.filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
       const ids=value=>Array.isArray(value)?[...new Set(value.filter(id=>typeof id==='string'&&PRODUCT_ID.test(id)))].slice(0,10):[];
-      const compact={mode:short(safe.mode),screen:short(safe.screen),visible_panel:short(safe.visible_panel),cameraRunning:safe.cameraRunning===true,
+      const compact={mode:short(safe.mode),interaction_format:short(safe.interaction_format),input_mode:short(safe.input_mode),screen:short(safe.screen),visible_panel:short(safe.visible_panel),cameraRunning:safe.cameraRunning===true,
         vision:fields(safe.vision,['enabled','last_image_at','state']),
         tried_product:product(safe.tried_product),overlay:fields(safe.overlay,['color','opacity','scale','x','y','rotation','mirror']),
         visible_product:product(safe.visible_product),comparison_ids:ids(safe.comparison_ids).slice(0,3),cart_ids:ids(safe.cart_ids),group_label:typeof safe.group_label==='string'?safe.group_label.slice(0,120):undefined,cart_count:Array.isArray(safe.cart_ids)?safe.cart_ids.length:0,
@@ -108,13 +108,11 @@
       this.call = null;
       this.counter = 0;
       this.state = 'idle';
-      this.textMode = false;
-      this.audioMutedBeforeText = false;
       this.checkoutReceipts = new Set();
     }
     _state(state, message) {
       this.state = state;
-      this.options.onState?.({state, message, muted:!!this.call?.muted, connectedAt:this.call?.connectedAt || null});
+      this.options.onState?.({state, message, muted:!!this.call?.muted, inputMode:this.call?.inputMode || null, connectedAt:this.call?.connectedAt || null});
     }
     async configuration(signal) {
       const r = await this.fetch('/api/voice/status', {credentials:'same-origin', cache:'no-store', signal});
@@ -124,6 +122,23 @@
       return data;
     }
     _current(c) { return this.call === c && !c.ended; }
+    _connectedMessage(c) {return c.inputMode==='text'?'Connected. Send a message or photo.':c.muted?'Microphone muted. You can still hear Coupi.':'Connected. Tell Coupi what you’re looking for.';}
+    _microphone() {return this.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:{ideal:1}},video:false});}
+    _watchMicrophone(c,stream) {
+      for(const track of stream.getAudioTracks())track.addEventListener('ended',()=>{
+        if(this._current(c)&&c.microphone===stream&&c.inputMode==='voice'){this._cleanup(c);this._state('error','Microphone disconnected or permission was revoked. Start again when ready.');}
+      },{once:true});
+    }
+    async _playAudio(c) {
+      if(!this._current(c)||c.inputMode==='text')return false;
+      const sequence=c.modeSequence;
+      try {await this.audio.play();if(this._current(c)&&c.inputMode==='voice'&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(false);return true;}
+      catch {if(this._current(c)&&c.inputMode==='voice'&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(true);return false;}
+    }
+    _configureInputMode(c) {
+      const text=c.inputMode==='text';
+      return this._send(c,{type:'session.update',session:{type:'realtime',output_modalities:[text?'text':'audio'],audio:{input:{turn_detection:text?null:c.voiceTurnDetection}}}});
+    }
     _send(c, event) {
       if(!this._current(c) || c.channel?.readyState !== 'open') return false;
       try {c.channel.send(JSON.stringify(event));return true;} catch {return false;}
@@ -327,31 +342,41 @@
       if(this.call) this._cleanup(this.call);
       this._state('idle',message);
     }
-    async start() {
+    // Text mode uses the same server tools and conversation, without media permission.
+    // Camera access is controlled separately by the page in every input mode.
+    async start({inputMode='voice'} = {}) {
       if(this.call) return false;
-      if(!window.isSecureContext || !this.mediaDevices?.getUserMedia || !this.PeerConnection) {
-        this._state('error','Voice requires microphone support on HTTPS or localhost. Open this page in Chrome or Safari.');return false;
+      if(!['voice','text'].includes(inputMode)){this._state('error','Choose voice or text for this conversation.');return false;}
+      if(!window.isSecureContext || !this.PeerConnection || (inputMode==='voice'&&!this.mediaDevices?.getUserMedia)) {
+        this._state('error',inputMode==='text'?'Chat requires a secure connection. Open this page on HTTPS or localhost in Chrome or Safari.':'Voice requires microphone support on HTTPS or localhost. Open this page in Chrome or Safari.');return false;
       }
-      const c = {number:++this.counter,abort:new AbortController(),toolControllers:new Set(),tools:new Map(),activeResponses:new Set(),completedResponses:new Set(),visionSnapshots:new Map(),visionDeleteQueue:new Set(),visionSequence:0,visionPaused:true,clientItemSequence:0,timeline:[],predecessors:new Map(),transcripts:new Map(),transcriptEvents:new Set(),uploads:new Map(),checkoutNotifications:new Map(),ended:false,ready:false,greeted:false,muted:this.textMode,mutedBeforeText:false,speaking:false,awaitingVad:false,needsReply:false,replyRequested:false,connectedAt:null,callId:null};
+      const c = {number:++this.counter,abort:new AbortController(),toolControllers:new Set(),tools:new Map(),activeResponses:new Set(),completedResponses:new Set(),visionSnapshots:new Map(),visionDeleteQueue:new Set(),visionSequence:0,visionPaused:true,clientItemSequence:0,timeline:[],predecessors:new Map(),transcripts:new Map(),transcriptEvents:new Set(),uploads:new Map(),checkoutNotifications:new Map(),ended:false,ready:false,greeted:false,muted:false,speaking:false,awaitingVad:false,needsReply:false,replyRequested:false,connectedAt:null,callId:null,inputMode,modeSequence:0,voiceTurnDetection:{type:'server_vad',create_response:true,interrupt_response:true,prefix_padding_ms:500,silence_duration_ms:850}};
       this.call = c;
-      c.setupTimer = setTimeout(()=>{if(this._current(c)){this._cleanup(c);this._state('error','Microphone permission timed out. Allow microphone access, then answer the call again.');}},PERMISSION_MS);
-      this._state('connecting','Checking the voice connection…');
+      this.audio.muted=inputMode==='text';this.audio.autoplay=inputMode==='voice';
+      c.setupTimer = setTimeout(()=>{if(this._current(c)){this._cleanup(c);this._state('error',inputMode==='text'?'The chat connection timed out. Check your connection, then try again.':'Microphone permission timed out. Allow microphone access, then answer the call again.');}},inputMode==='text'?SETUP_MS:PERMISSION_MS);
+      this._state('connecting','Checking the connection…');
       try {
         const config = await this.configuration(c.abort.signal);
         if(!this._current(c)) return false;
         if(!config.ready) throw new Error(config.reason || 'Voice is not configured yet. The Site owner must connect an OpenAI API key on the server.');
-        this._state('connecting','Allow microphone access to start your AI voice call.');
-        const microphone = await this.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:{ideal:1}},video:false});
-        if(!this._current(c)){microphone.getTracks().forEach(track=>track.stop());return false;}
-        c.microphone = microphone;
-        microphone.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
+        let microphone=null;
+        if(c.inputMode==='voice') {
+          this._state('connecting','Allow microphone access to start your AI voice call.');
+          try {microphone=await this._microphone();}
+          catch(error) {if(c.inputMode!=='text')throw error;}
+          if(!this._current(c)){microphone?.getTracks().forEach(track=>track.stop());return false;}
+          // A shopper may choose Chat while the permission prompt is still open.
+          // A late permission grant must never activate that discarded microphone.
+          if(c.inputMode==='text'){microphone?.getTracks().forEach(track=>track.stop());microphone=null;}
+          else {c.microphone=microphone;this._watchMicrophone(c,microphone);}
+        }
         clearTimeout(c.setupTimer);
         c.setupTimer = setTimeout(()=>{if(this._current(c)){this._cleanup(c);this._state('error','The voice connection timed out. Check your connection, then try again.');}},SETUP_MS);
         const peer = new this.PeerConnection();c.peer = peer;
         peer.addEventListener('track',event=>{
           if(!this._current(c)) return;
           this.audio.srcObject = event.streams?.[0] || new MediaStream([event.track]);
-          this.audio.play().then(()=>{if(this._current(c)&&!this.textMode)this.options.onPlaybackBlocked?.(false);}).catch(()=>{if(this._current(c)&&!this.textMode)this.options.onPlaybackBlocked?.(true);});
+          this._playAudio(c);
         });
         peer.addEventListener('connectionstatechange',()=>{
           if(!this._current(c)) return;
@@ -360,12 +385,12 @@
           else if(peer.connectionState==='disconnected') {
             this._state('reconnecting','The voice connection was interrupted. Reconnecting…');
             c.disconnectTimer=setTimeout(()=>{if(this._current(c)){this._cleanup(c);this._state('error','Voice disconnected. Your microphone is off. Start again when your connection recovers.');}},8000);
-          } else if(peer.connectionState==='connected' && c.ready) this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Connected. Tell Coupi what you’re looking for.');
+          } else if(peer.connectionState==='connected' && c.ready) this._state('connected',this._connectedMessage(c));
         });
-        for(const track of microphone.getAudioTracks()) {
-          peer.addTrack(track,microphone);
-          track.addEventListener('ended',()=>{if(this._current(c)){this._cleanup(c);this._state('error','Microphone disconnected or permission was revoked. Start again when ready.');}},{once:true});
-        }
+        if(microphone)for(const track of microphone.getAudioTracks())c.audioSender=peer.addTrack(track,microphone);
+        // Negotiate an audio sender now so a later explicit Voice click can attach a
+        // microphone with replaceTrack, preserving this chat's session and history.
+        else c.audioSender=peer.addTransceiver('audio',{direction:'sendrecv'}).sender;
         c.channel=peer.createDataChannel('oai-events');
         c.channel.addEventListener('message',event=>{if(!this._current(c))return;try{this._event(c,JSON.parse(event.data));}catch{this._state('connected','A voice event could not be read. Please repeat your last request.');}});
         c.channel.addEventListener('open',()=>{if(this._current(c)&&c.ready)this._greet(c);});
@@ -400,13 +425,14 @@
       if(c.ready)return;
       c.ready=true;c.connectedAt=Date.now();clearTimeout(c.setupTimer);
       c.callTimer=setTimeout(()=>{if(this._current(c))this.end('This 10-minute demo call has ended. Start another call to continue.');},MAX_CALL_MS);
-      this._state('connected','Connected. Tell Coupi what you’re looking for.');
+      this._state('connected',this._connectedMessage(c));
       if(c.transcriptionModel)this.options.onTranscriptionState?.({model:c.transcriptionModel,compatibilityMode:c.transcriptionModel!=='gpt-4o-transcribe'});
       this._greet(c);
     }
     _greet(c) {
       if(c.greeted || !c.ready || c.channel?.readyState!=='open')return;
       c.greeted=true;
+      if(c.inputMode==='text')this._configureInputMode(c);
       const context=this.options.getContext?.() || {};
       c.lastContext=contextText(context);
       const greeting=typeof this.options.greeting==='string'?this.options.greeting.trim().slice(0,300):'What do you want to buy?';
@@ -421,7 +447,7 @@
       c.replyTimer=setTimeout(()=>{
         if(!this._current(c)||!c.ready||!c.needsReply||c.replyRequested||c.activeResponses.size||c.speaking||c.awaitingVad||[...c.tools.values()].some(t=>!t.done))return;
         c.needsReply=false;c.replyRequested=true;
-        if(!this._send(c,{type:'response.create'})){c.replyRequested=false;c.needsReply=true;}
+        if(!this._send(c,{type:'response.create',response:{output_modalities:[c.inputMode==='text'?'text':'audio']}})){c.replyRequested=false;c.needsReply=true;}
       },0);
     }
     _fatalApiError(c,error) {
@@ -434,17 +460,19 @@
     _event(c,event) {
       if(!this._current(c))return;
       switch(event.type) {
-        case 'session.created': case 'session.updated': this._ready(c);break;
+        case 'session.created': case 'session.updated':
+          if(event.session?.audio?.input?.turn_detection)c.voiceTurnDetection=event.session.audio.input.turn_detection;
+          this._ready(c);break;
         case 'conversation.item.added':case 'conversation.item.done':case 'conversation.item.created':this._conversationItem(c,event);break;
         case 'response.output_item.added':case 'response.output_item.done':this._conversationItem(c,event);break;
         case 'response.created':
           if(event.response?.id){c.activeResponses.add(event.response.id);this._positionItem(c,`response:${event.response.id}`);}
           c.replyRequested=false;c.awaitingVad=false;this._state('thinking','Coupi is thinking…');break;
         case 'input_audio_buffer.speech_started':
-          if(this.textMode)break;this._syncMemories(c);
+          if(c.inputMode==='text')break;this._syncMemories(c);
           if(event.item_id)this._transcript(c,{role:'user',key:event.item_id,text:'',pending:true,final:false},event);
           c.speaking=true;c.awaitingVad=true;this._captureCamera(c,'speech-start');this._state('listening','Listening to you…');break;
-        case 'input_audio_buffer.speech_stopped':if(this.textMode)break;c.speaking=false;this._state('thinking','Coupi is considering your request…');break;
+        case 'input_audio_buffer.speech_stopped':if(c.inputMode==='text')break;c.speaking=false;this._state('thinking','Coupi is considering your request…');break;
         case 'input_audio_buffer.committed':
           if(event.item_id)this._transcript(c,{role:'user',key:event.item_id},event);break;
         case 'conversation.item.input_audio_transcription.delta':
@@ -459,9 +487,9 @@
           this._transcript(c,{role:'assistant',key:event.item_id || `response-text:${event.response_id || 'current'}`,delta:event.delta || '',final:false},event);break;
         case 'response.output_audio_transcript.done': case 'response.audio_transcript.done': case 'response.output_text.done':
           this._transcript(c,{role:'assistant',key:event.item_id || `response-text:${event.response_id || 'current'}`,text:event.transcript ?? event.text ?? '',final:true},event);break;
-        case 'output_audio_buffer.started':this._state('speaking','Coupi is speaking. You can interrupt naturally.');break;
+        case 'output_audio_buffer.started':if(c.inputMode!=='text')this._state('speaking','Coupi is speaking. You can interrupt naturally.');break;
         case 'output_audio_buffer.stopped':case 'output_audio_buffer.cleared':
-          if(!c.speaking)this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Listening. What would you like to try next?');break;
+          if(!c.speaking)this._state('connected',this._connectedMessage(c));break;
         case 'response.function_call_arguments.done':
           if(event.response_id && !c.completedResponses.has(event.response_id))c.activeResponses.add(event.response_id);
           this._tool(c,event);break;
@@ -475,7 +503,7 @@
           if(response.status==='failed') {
             const detail=response.status_details?.error?.message;
             this._state('connected',detail || 'Coupi could not complete that reply. Please try again.');
-          } else if(!c.speaking && !c.activeResponses.size)this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Connected. You can keep talking or trying things on.');
+          } else if(!c.speaking && !c.activeResponses.size)this._state('connected',this._connectedMessage(c));
           this._reply(c);break;
         }
         case 'error': {
@@ -537,8 +565,8 @@
           }
           if(!this.options.onTryon)throw new Error('Camera controls are not available on this page.');
           const applied=await this.options.onTryon(args.mode,overlay);
-          if(applied && typeof applied==='object' && applied.ok===false)throw new Error(applied.error || 'That product preview could not be adjusted.');
-          result={ok:true,mode:args.mode,overlay,...(applied && typeof applied==='object'?{preview:applied}:{}),camera_started_by_agent:false,notice:args.mode==='none'?'The product preview was cleared.':args.mode==='makeup'?'The selected lipstick preview uses an approximate colour. A custom colour adjustment does not verify a matching product shade.':args.mode==='glasses'?'The selected glasses frame follows face landmarks. Fit, lens optics and product details remain approximate.':args.mode==='clothes'?'The selected product listing photo follows body landmarks. This is approximate alignment, not fabric simulation or verified sizing.':'The selected product listing photo was adjusted as a 2D room preview, not measured fit, physical scale or a 3D surface anchor.'};
+          if(applied && typeof applied==='object' && applied.ok===false)result={...applied,ok:false,error:applied.error || applied.unavailableReason || 'That product preview could not be adjusted.',camera_started_by_agent:false,instruction:'Explain the returned reason briefly. Do not claim the preview was shown or adjusted. Offer only matching available alternatives returned by the application; if none were returned, search for another matching product.'};
+          else result={ok:true,mode:args.mode,overlay,...(applied && typeof applied==='object'?{preview:applied}:{}),camera_started_by_agent:false,notice:args.mode==='none'?'The product preview was cleared.':args.mode==='makeup'?'The selected lipstick preview uses an approximate colour. A custom colour adjustment does not verify a matching product shade.':args.mode==='glasses'?'The selected glasses frame follows face landmarks. Fit, lens optics and product details remain approximate.':args.mode==='clothes'?'The selected product listing photo follows body landmarks. This is approximate alignment, not fabric simulation or verified sizing.':'The selected product listing photo was adjusted as a 2D room preview, not measured fit, physical scale or a 3D surface anchor.'};
         } else if(event.name==='product_action') {
           if(!['skip','save','try_on','details','browse'].includes(args.action))throw new Error('Choose skip, save, try_on, details, or browse.');
           if(args.product_id!==undefined && (typeof args.product_id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(args.product_id)))throw new Error('Use an exact catalog product ID.');
@@ -639,33 +667,63 @@
         this._text(c,`App context changed (not a spoken shopper message): ${clean}. Keep this context for the next reply; no immediate reply is needed.`);
       },350);
     }
-    setTextMode(enabled) {
-      const next=enabled===true;
-      if(next===this.textMode)return next;
-      this.textMode=next;
+    // Call only from the shopper's explicit mode control. A Voice permission
+    // failure leaves Chat connected. Neither direction resets the conversation.
+    async setInputMode(inputMode) {
       const c=this.call;
-      if(next){
-        this.audioMutedBeforeText=!!this.audio.muted;this.audio.muted=true;
-        if(c){c.mutedBeforeText=c.muted;c.muted=true;c.speaking=false;c.awaitingVad=false;}
+      if(!c||!['voice','text'].includes(inputMode)||(!c.ready&&inputMode==='voice'))return false;
+      if(inputMode==='voice'&&c.switchingInputMode==='voice')return false;
+      const sequence=++c.modeSequence;
+      c.switchingInputMode=null;
+      if(inputMode===c.inputMode)return true;
+      if(inputMode==='text') {
+        c.inputMode='text';c.muted=false;c.speaking=false;c.awaitingVad=false;
+        const stream=c.microphone;c.microphone=null;
+        stream?.getTracks().forEach(track=>track.stop());
+        this.audio.muted=true;this.audio.autoplay=false;this.audio.pause();
         this.options.onPlaybackBlocked?.(false);
-      }else{
-        this.audio.muted=this.audioMutedBeforeText;
-        if(c)c.muted=!!c.mutedBeforeText;
-        if(c?.ready)this.audio.play().then(()=>{if(this._current(c))this.options.onPlaybackBlocked?.(false);}).catch(()=>{if(this._current(c))this.options.onPlaybackBlocked?.(!this.textMode);});
+        this._configureInputMode(c);
+        this._send(c,{type:'input_audio_buffer.clear'});
+        this._send(c,{type:'output_audio_buffer.clear'});
+        try {await c.audioSender?.replaceTrack(null);} catch {} // Stopped tracks cannot keep recording.
+        if(!this._current(c)||sequence!==c.modeSequence)return false;
+        this._state(c.ready?'connected':'connecting',c.ready?this._connectedMessage(c):'Connecting to Chat…');this._reply(c);return true;
       }
-      c?.microphone?.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
-      if(c?.ready)this._state(this.state,next?'Text mode. Microphone and speaker are off.':c.muted?'Microphone muted. You can still hear Coupi.':'Microphone on. You can speak to Coupi.');
-      return next;
+      if(!this.mediaDevices?.getUserMedia||!c.audioSender?.replaceTrack) {
+        this._state('connected','Microphone support is unavailable. You can keep chatting or send a photo.');return false;
+      }
+      let stream;
+      c.switchingInputMode='voice';
+      this._state('connected','Allow microphone access to switch to voice.');
+      try {
+        stream=await this._microphone();
+        if(!this._current(c)||sequence!==c.modeSequence){stream.getTracks().forEach(track=>track.stop());return false;}
+        const track=stream.getAudioTracks()[0];
+        if(!track)throw new Error('No microphone was found.');
+        await c.audioSender.replaceTrack(track);
+        if(!this._current(c)||sequence!==c.modeSequence){stream.getTracks().forEach(track=>track.stop());return false;}
+        c.microphone=stream;c.inputMode='voice';c.muted=false;
+        this._watchMicrophone(c,stream);
+        if(!this._configureInputMode(c))throw new Error('The connection is unavailable.');
+        c.switchingInputMode=null;
+        this.audio.muted=false;this.audio.autoplay=true;
+        if(this.audio.srcObject)this._playAudio(c);
+        this._state('connected',this._connectedMessage(c));return true;
+      } catch(error) {
+        stream?.getTracks().forEach(track=>track.stop());
+        if(!this._current(c)||sequence!==c.modeSequence)return false;
+        c.microphone=null;c.inputMode='text';c.switchingInputMode=null;
+        this._state('connected',error.name==='NotAllowedError'?'Microphone access was denied. You can keep chatting or send a photo.':error.message || 'Could not enable the microphone. Chat is still connected.');return false;
+      }
     }
     mute() {
-      const c=this.call;if(!c?.ready)return false;
-      if(this.textMode)return true;
+      const c=this.call;if(!c?.ready||c.inputMode==='text')return false;
       c.muted=!c.muted;
       if(c.muted){c.speaking=false;c.awaitingVad=false;}
       c.microphone?.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
       this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Microphone on. You can speak to Coupi.');return c.muted;
     }
-    async resumeAudio() {const c=this.call;if(!c||this.textMode)return false;await this.audio.play();if(this._current(c)&&!this.textMode)this.options.onPlaybackBlocked?.(false);}
+    async resumeAudio() {const c=this.call;if(!c||c.inputMode==='text')return false;const sequence=c.modeSequence;await this.audio.play();if(this._current(c)&&c.inputMode==='voice'&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(false);}
   }
   window.NookVoiceSession=NookVoiceSession;
 

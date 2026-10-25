@@ -60,7 +60,9 @@ function fixture(t, options = {}) {
       this.addedTracks = [];
       peers.push(this);
     }
-    addTrack(track, stream) {this.addedTracks.push([track, stream]);}
+    sender(track=null) {return {track,replacements:[],async replaceTrack(next){this.track=next;this.replacements.push(next);}};}
+    addTrack(track, stream) {this.addedTracks.push([track, stream]);return this.sender(track);}
+    addTransceiver(kind, options) {assert.equal(kind,'audio');assert.equal(options.direction,'sendrecv');return {sender:this.sender()};}
     createDataChannel(name) {assert.equal(name, 'oai-events'); return this.channel;}
     async createOffer() {return {sdp: 'v=0\no=offer'};}
     async setLocalDescription(description) {this.localDescription = description;}
@@ -104,7 +106,7 @@ function fixture(t, options = {}) {
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
     onTranscriptionState: value => transcriptionStates.push(value),
-    onRecommendations: (products, message, metadata) => recommendations.push({products, message, metadata}),
+    onRecommendations: (products, message, metadata, retrievalStatus) => recommendations.push({products, message, metadata, retrievalStatus}),
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return {ok:true,action,product_id:product_id || "324548922",purchased:false};},
     onPreferences: options.preferencesUnavailable?undefined:async value=>{preferences.push(value);return options.onPreferences?options.onPreferences(value):{ok:true,saved:false,...(value.action==='skip'?{skipped:true}:{draft_ready:true})};},
@@ -127,13 +129,16 @@ const memoryContexts = channel => channel.sent.flatMap(event => {
   return text.startsWith(prefix) ? [JSON.parse(text.slice(prefix.length))] : [];
 });
 
-test('voice product search sends active memories and requests ten results',async t=>{
+for(const inputMode of ['voice','text'])test(`${inputMode} product search sends saved preferences and preserves retrieval metadata`,async t=>{
   let body;
-  const f=fixture(t,{storage:{getItem:key=>key==='coupi_memory'?JSON.stringify([{text:'I like neutral frames'}]):null},search:params=>{body=JSON.parse(params.body);return response({products:[],message:'No matches'});}});
-  await connect(f);
+  const search={query:'neutral eyeglasses',category:'glasses',max_price:25000};
+  const f=fixture(t,{storage:{getItem:key=>key==='coupi_memory'?JSON.stringify([{text:'I like neutral frames'}]):null},search:params=>{body=JSON.parse(params.body);return response({products:[],message:'No matches',search,retrieval_status:'live'});}});
+  assert.equal(await f.voice.start({inputMode}),true);await tick();
   const item=tool(f,'memory-search','search_products',{query:'glasses',category:'glasses',max_price:30000},'r-memory-search');
   done(f,'r-memory-search',[item]);await tick();await tick();
   assert.deepEqual(body,{query:'glasses',category:'glasses',max_price:30000,memories:['I like neutral frames'],limit:10});
+  assert.equal(f.recommendations[0].metadata.query,search.query);assert.equal(f.recommendations[0].metadata.maxPrice,search.max_price);
+  assert.equal(f.recommendations[0].retrievalStatus,'live');assert.equal(f.permissions,inputMode==='text'?0:1);
 });
 async function connect(f) {assert.equal(await f.voice.start(), true); await tick();}
 function done(f, id, output = []) {f.emit({type: 'response.done', response: {id, status: 'completed', output}});}
@@ -218,41 +223,41 @@ test('explicit audio-only start, one greeting, mute, and end release all call re
   assert.deepEqual(JSON.parse(end[1].body), {call_id: 'call_mock'});
 });
 
-test('text mode mutes both directions without ending the connection or blocking typed replies',async t=>{
+test('Chat releases microphone and silences speaker without ending the connection or blocking typed replies',async t=>{
   const f=fixture(t);await connect(f);done(f,'greeting');await tick();
   const call=f.voice.call,channel=f.channel,replies=countReplies(channel);
   f.emit({type:'input_audio_buffer.speech_started'});
-  assert.equal(f.voice.setTextMode(true),true);
-  assert.equal(f.mic.track.enabled,false);assert.equal(f.audio.muted,true);assert.equal(call.muted,true);
-  assert.equal(call.speaking,false);assert.equal(call.awaitingVad,false);assert.equal(f.voice.call,call);assert.equal(channel.readyState,'open');assert.equal(f.mic.track.stops,0);
-  assert.equal(f.voice.mute(),true);assert.equal(f.mic.track.enabled,false);
+  assert.equal(await f.voice.setInputMode('text'),true);
+  assert.equal(call.microphone,null);assert.equal(call.audioSender.track,null);assert.equal(f.audio.muted,true);assert.equal(call.inputMode,'text');
+  assert.equal(call.speaking,false);assert.equal(call.awaitingVad,false);assert.equal(f.voice.call,call);assert.equal(channel.readyState,'open');assert.equal(f.mic.track.stops,1);
+  assert.equal(f.voice.mute(),false);assert.equal(call.microphone,null);
   f.emit({type:'input_audio_buffer.speech_started'});assert.equal(call.speaking,false);
   await tick();assert.equal(countReplies(channel),replies,'Switching input mode does not generate a new greeting');
   assert.equal(f.voice.sendText('Show black glasses'),true);await tick();assert.equal(countReplies(channel),replies+1);
   f.emit({type:'response.output_audio_transcript.delta',item_id:'text-reply',delta:'Here are black frames.'});
   assert.equal(f.transcripts.at(-1).text,'Here are black frames.');assert.equal(f.audio.muted,true);
-  assert.equal(f.voice.setTextMode(false),false);assert.equal(f.mic.track.enabled,true);assert.equal(f.audio.muted,false);assert.equal(call.muted,false);
+  assert.equal(await f.voice.setInputMode('voice'),true);assert.equal(f.permissions,2);assert.equal(f.audio.muted,false);assert.equal(call.muted,false);
 });
 
-test('leaving text mode restores an existing microphone and speaker mute preference',async t=>{
+test('selecting Chat repeatedly never reacquires or restores a muted microphone',async t=>{
   const f=fixture(t);await connect(f);f.voice.mute();f.audio.muted=true;
-  f.voice.setTextMode(true);f.voice.setTextMode(true);f.voice.setTextMode(false);
-  assert.equal(f.mic.track.enabled,false);assert.equal(f.voice.call.muted,true);assert.equal(f.audio.muted,true);
+  await f.voice.setInputMode('text');await f.voice.setInputMode('text');
+  assert.equal(f.permissions,1);assert.equal(f.mic.track.stops,1);assert.equal(f.voice.call.microphone,null);assert.equal(f.audio.muted,true);
 });
 
-test('text mode stays silent when a new call starts or microphone permission resolves later',async t=>{
+test('Chat stays silent when microphone permission resolves late and when a new Chat starts',async t=>{
   const permission=deferred();const f=fixture(t,{getUserMedia:()=>permission.promise});
   const starting=f.voice.start();await tick();assert.equal(f.permissions,1);
-  f.voice.setTextMode(true);permission.resolve(f.mic);assert.equal(await starting,true);await tick();
-  assert.equal(f.voice.call.muted,true);assert.equal(f.mic.track.enabled,false);assert.equal(f.audio.muted,true);
-  f.voice.end();await connect(f);
-  assert.equal(f.voice.textMode,true);assert.equal(f.voice.call.muted,true);assert.equal(f.mic.track.enabled,false);assert.equal(f.audio.muted,true);
-  f.voice.setTextMode(false);assert.equal(f.mic.track.enabled,true);assert.equal(f.audio.muted,false);
+  assert.equal(await f.voice.setInputMode('text'),true);permission.resolve(f.mic);assert.equal(await starting,true);await tick();
+  assert.equal(f.voice.call.inputMode,'text');assert.equal(f.voice.call.microphone,null);assert.equal(f.mic.track.stops,1);assert.equal(f.audio.muted,true);
+  assert.equal(f.peers[0].addedTracks.length,0);
+  f.voice.end();assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();
+  assert.equal(f.permissions,1);assert.equal(f.voice.call.inputMode,'text');assert.equal(f.peers[1].addedTracks.length,0);assert.equal(f.audio.muted,true);
 });
 
 test('late playback errors cannot offer speaker activation while text mode is enabled',async t=>{
   const playback=deferred();const f=fixture(t,{play:()=>playback.promise});await connect(f);
-  f.peers[0].emit('track',{streams:[{}]});f.voice.setTextMode(true);
+  f.peers[0].emit('track',{streams:[{}]});await f.voice.setInputMode('text');
   playback.reject(Error('Playback blocked'));await tick();
   assert.equal(f.playbackBlocked.at(-1),false);assert.equal(f.audio.muted,true);
   const plays=f.audio.plays;assert.equal(await f.voice.resumeAudio(),false);assert.equal(f.audio.plays,plays);
@@ -511,11 +516,11 @@ test('glasses search preserves the requested category and returns only the catal
   assert.equal(f.recommendations.length,1);
 });
 
-test('long context remains valid bounded JSON and preserves live glasses and sharing state', async t => {
-  const context={mode:'glasses',screen:'active',cameraRunning:true,
+test('long context preserves input mode, product finish, availability and camera sharing state', async t => {
+  const context={mode:'glasses',interaction_format:'video',input_mode:'voice',screen:'active',cameraRunning:true,
     vision:{enabled:true,state:'received',last_image_at:'2026-10-25T01:00:00Z'},
     tried_product:{id:'900001',productType:'glasses',title:'Long catalog name '.repeat(1000)},
-    visible_product:{id:'900001',title:'Another long catalog name '.repeat(1000)},
+    visible_product:{id:'900002',productType:'lipbalm',finish:'clear-balm',preview_available:true,title:'Another long catalog name '.repeat(1000)},
     unused:'x'.repeat(6000)};
   const f=fixture(t,{getContext:()=>context});await connect(f);
   const greeting=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context,'));
@@ -533,6 +538,8 @@ test('long context remains valid bounded JSON and preserves live glasses and sha
   assert.equal(decoded.vision.state,'paused');
   assert.equal(decoded.tried_product.id,'900001');
   assert.equal(decoded.tried_product.productType,'glasses');
+  assert.equal(decoded.interaction_format,'video');assert.equal(decoded.input_mode,'voice');
+  assert.equal(decoded.visible_product.finish,'clear-balm');assert.equal(decoded.visible_product.preview_available,true);
 });
 
 test('failed peer connection releases microphone immediately', async t => {
@@ -1308,4 +1315,109 @@ test('skipping while a preference draft is pending cannot announce a stale revie
   const f=fixture(t,{getContext:()=>({personalization:{active}}),onPreferences:()=>pending.promise});await connect(f);
   tool(f,'prefs-late-skip','draft_preferences',preferenceDraft());await tick();active=false;pending.resolve({ok:true,draft_ready:true,saved:false});await tick();
   const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);assert.equal(result.ok,false);assert.match(result.error,/Personalization ended/);assert.equal(result.draft_ready,undefined);
+});
+
+test('Chat starts without microphone support, requests text replies and stays silent',async t=>{
+  const f=fixture(t,{getVisionEnabled:()=>false});let plays=0;f.audio.play=async()=>{plays++;};
+  f.voice.mediaDevices=undefined;
+  assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();
+  assert.equal(f.permissions,0);assert.equal(f.peers[0].addedTracks.length,0);
+  assert.equal(f.voice.call.inputMode,'text');assert.equal(f.audio.muted,true);
+  const configuration=f.channel.sent.find(event=>event.type==='session.update');
+  assert.deepEqual(configuration.session.output_modalities,['text']);assert.equal(configuration.session.audio.input.turn_detection,null);
+  assert.deepEqual(f.channel.sent.find(event=>event.type==='response.create').response.output_modalities,['text']);
+  f.peers[0].emit('track',{streams:[{}]});await f.voice.resumeAudio();await tick();
+  assert.equal(plays,0);assert.equal(f.voice.mute(),false);
+  assert.match(f.states.at(-1).message,/message or photo/);
+});
+
+test('Chat sends typed messages and uploaded photos through the same real conversation',async t=>{
+  const f=fixture(t,{getVisionEnabled:()=>false});assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();done(f,'greeting');
+  assert.equal(f.voice.sendText('Find a pink lip tint under 10000 won'),true);await tick();
+  const user=f.channel.sent.find(event=>event.item?.id?.startsWith('coupi_text_')).item;
+  f.emit({type:'response.created',response:{id:'text-answer'}});
+  f.emit({type:'response.output_text.done',item_id:'assistant-text',response_id:'text-answer',text:'I will look for a pink tint within that budget.'});
+  done(f,'text-answer');
+  assert.deepEqual(latestTranscript(f).map(row=>row.key),[user.id,'assistant-text']);
+  const sent=f.voice.sendImage(uploadImage),event=f.channel.sent.at(-1);
+  f.emit({type:'conversation.item.added',item:event.item});assert.equal(await sent,true);await tick();
+  assert.equal(f.transcripts.at(-1).delivery,'sent');
+  assert(f.channel.sent.filter(event=>event.type==='response.create').every(event=>event.response.output_modalities[0]==='text'));
+  assert.equal(f.permissions,0);
+});
+
+test('Voice to Chat stops recording and playback while preserving the peer and conversation',async t=>{
+  const f=fixture(t);await connect(f);const call=f.voice.call,peer=call.peer,channel=f.channel;
+  f.voice.sendText('I like pink');f.emit({type:'input_audio_buffer.speech_started',item_id:'last-spoken'});
+  assert.equal(await f.voice.setInputMode('text'),true);
+  assert.equal(f.mic.track.stops,1);assert.equal(call.microphone,null);assert.equal(call.audioSender.track,null);
+  assert.equal(call.inputMode,'text');assert.equal(call.awaitingVad,false);assert.equal(f.audio.paused,true);assert.equal(f.audio.muted,true);
+  assert.equal(f.voice.call,call);assert.equal(call.peer,peer);assert.equal(f.channel,channel);
+  assert(latestTranscript(f).some(row=>row.text==='I like pink'));
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'stale-voice-event'});
+  assert.equal(call.awaitingVad,false);assert.equal(latestTranscript(f).some(row=>row.key==='stale-voice-event'),false);
+  assert.equal(f.voice.sendText('Now show me another option'),true);
+  assert.equal(f.calls.filter(([url])=>url.endsWith('/session')).length,1);
+});
+
+test('explicit Voice switch acquires microphone and restores audio in the same Chat session',async t=>{
+  const f=fixture(t);assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();
+  const call=f.voice.call;assert.equal(f.permissions,0);f.voice.sendText('Find glasses');
+  assert.equal(await f.voice.setInputMode('voice'),true);
+  assert.equal(f.permissions,1);assert.equal(f.voice.call,call);assert.equal(call.audioSender.track,f.mic.track);
+  assert.equal(call.inputMode,'voice');assert.equal(f.audio.muted,false);assert.equal(f.audio.autoplay,true);
+  const configuration=f.channel.sent.findLast(event=>event.type==='session.update');
+  assert.deepEqual(configuration.session.output_modalities,['audio']);assert.equal(configuration.session.audio.input.turn_detection.type,'server_vad');
+  assert.equal(f.calls.filter(([url])=>url.endsWith('/session')).length,1);
+  assert.equal(f.voice.mute(),true);assert.equal(f.mic.track.enabled,false);
+});
+
+test('denied microphone permission leaves Chat usable without resetting its transcript',async t=>{
+  const f=fixture(t,{getUserMedia:()=>Promise.reject(Object.assign(new Error('Denied'),{name:'NotAllowedError'}))});
+  assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();const call=f.voice.call;
+  f.voice.sendText('I prefer blue');
+  assert.equal(await f.voice.setInputMode('voice'),false);
+  assert.equal(f.voice.call,call);assert.equal(call.inputMode,'text');assert.equal(f.audio.muted,true);
+  assert.match(f.states.at(-1).message,/denied.*keep chatting/);
+  assert.equal(f.voice.sendText('Show blue hoodies'),true);assert(latestTranscript(f).some(row=>row.text==='I prefer blue'));
+});
+
+test('returning to Chat while voice permission is pending releases the late microphone',async t=>{
+  const permission=deferred(),lateMic=microphone();const f=fixture(t,{getUserMedia:()=>permission.promise});
+  assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();const call=f.voice.call;
+  const voiceSwitch=f.voice.setInputMode('voice');assert.equal(f.permissions,1);
+  assert.equal(await f.voice.setInputMode('text'),true);
+  permission.resolve(lateMic);assert.equal(await voiceSwitch,false);
+  assert.equal(lateMic.track.stops,1);assert.equal(call.inputMode,'text');assert.equal(call.audioSender.track,null);
+});
+
+test('ending Chat during a pending Voice permission request stops the newly granted microphone',async t=>{
+  const permission=deferred(),lateMic=microphone();const f=fixture(t,{getUserMedia:()=>permission.promise});
+  assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();const voiceSwitch=f.voice.setInputMode('voice');
+  f.voice.end();permission.resolve(lateMic);assert.equal(await voiceSwitch,false);
+  assert.equal(lateMic.track.stops,1);assert.equal(f.voice.call,null);
+});
+
+test('a delayed playback failure cannot show a speaker prompt after switching to silent Chat',async t=>{
+  const f=fixture(t),playing=deferred(),blocked=[];f.voice.options.onPlaybackBlocked=value=>blocked.push(value);
+  await connect(f);f.audio.play=()=>playing.promise;f.peers[0].emit('track',{streams:[{}]});
+  await f.voice.setInputMode('text');playing.reject(new Error('Interrupted playback'));await tick();
+  assert.deepEqual(blocked,[false]);assert.equal(f.audio.muted,true);
+});
+
+test('Voice can return after Chat with a new microphone without an old track ending the call',async t=>{
+  const first=microphone(),second=microphone(),f=fixture(t,{getUserMedia:attempt=>attempt===1?first:second});await connect(f);
+  const call=f.voice.call;await f.voice.setInputMode('text');assert.equal(first.track.stops,1);
+  assert.equal(await f.voice.setInputMode('voice'),true);assert.equal(f.permissions,2);
+  first.track.emit('ended');assert.equal(f.voice.call,call);assert.equal(call.microphone,second);
+  assert.equal(call.audioSender.track,second.track);f.voice.end();assert.equal(second.track.stops,1);
+});
+
+test('unavailable try-on keeps the real reason and offered alternatives without claiming an adjustment',async t=>{
+  const alternative={id:'clean-frame',name:'Available matching glasses'};
+  const f=fixture(t,{onTryon:()=>({ok:false,unavailableReason:'The source photo shows a person wearing the frames.',alternatives:[alternative]})});await connect(f);
+  tool(f,'unavailable-preview','set_tryon',{mode:'glasses',scale:1.1});await tick();
+  const result=JSON.parse(toolOutputs(f.channel).at(-1).item.output);
+  assert.equal(result.ok,false);assert.match(result.error,/shows a person/);assert.deepEqual(result.alternatives,[alternative]);
+  assert.match(result.instruction,/Do not claim the preview/);assert.equal(result.preview,undefined);assert.equal(result.notice,undefined);
 });

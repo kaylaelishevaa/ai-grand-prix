@@ -1,0 +1,534 @@
+{
+  "schema": "demo-catalog-patch-v1",
+  "purpose": "Replace blocked demo glasses with audited sourced front-facing photos; keep four currently supported frames. Apply the supplied E03 packshot mask before enabling that record.",
+  "checkedAt": "2026-10-25",
+  "removeIds": [
+    "7612276799-black",
+    "7612276799-silver",
+    "7235424403-round",
+    "7235424403-square",
+    "6511312982",
+    "2082223437",
+    "9461808186",
+    "9514031816",
+    "8197877328",
+    "6774150396"
+  ],
+  "upsertProducts": [
+    {
+      "id": "6974242810-gray",
+      "sourceProductId": "6974242810",
+      "name": "리끌로우 안경 FBB82, 그레이, FREE",
+      "category": "glasses",
+      "productType": "glasses",
+      "url": "https://www.coupang.com/vp/products/6974242810?itemId=17018766666",
+      "price": 23390,
+      "priceStatus": "reference",
+      "image": "/products/6974242810-gray.jpg",
+      "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/12/06/18/5/011d1367-814b-4a18-afd0-f549b92fade9.jpg",
+      "imageSourcePage": "https://fallcent.com/product/?item_id=17018766666&product_id=6974242810",
+      "sourceNote": "Real Coupang product family and title verified from public official Coupang pages. The original Coupang CDN image was recovered from the exact item-linked public Fallcent page and is stored unchanged. Price is an indexed reference; current stock, seller options, and price are unverified. The preview shows the frame pictured in that source image as approximate 2D placement, not physical size or lens performance. Gray color and item 17018766666 are also explicitly identified by the official indexed listing.",
+      "checkedAt": "2026-10-25",
+      "brand": "RECLOW / 리끌로우",
+      "aliases": [
+        "RECLOW FBB82 gray browline eyeglasses"
+      ],
+      "tags": [
+        "glasses",
+        "eyeglasses",
+        "optical",
+        "gray",
+        "gold",
+        "round",
+        "안경",
+        "그레이"
+      ],
+      "verifiedAttributes": [
+        "RECLOW FBB82 gray browline eyeglasses",
+        "Preview uses the pictured frame variant; confirm the color option and sizing on Coupang."
+      ],
+      "preview": {
+        "kind": "glasses",
+        "image": "/products/6974242810-gray.jpg",
+        "background": "white",
+        "available": true,
+        "crop": {
+          "x": 0,
+          "y": 0.35,
+          "width": 1,
+          "height": 0.36
+        },
+        "bridgeX": 0.5,
+        "bridgeY": 0.267,
+        "frameWidth": 0.98,
+        "lensClear": true,
+        "lensTransparent": true,
+        "lensMasks": [
+          {
+            "x": 0.255,
+            "y": 0.5,
+            "rx": 0.174,
+            "ry": 0.37
+          },
+          {
+            "x": 0.742,
+            "y": 0.5,
+            "rx": 0.174,
+            "ry": 0.37
+          }
+        ]
+      },
+      "imageSha256": "553d6502d2433a0c78e2dba566532b4c5a58c6a2ea70224fda68d32760afe16b",
+      "reviewEvidence": {
+        "status": "unavailable",
+        "rating": null,
+        "reviewCount": null,
+        "sourceUrl": "https://www.coupang.com/vp/products/6974242810?itemId=17018766666",
+        "checkedAt": "2026-10-25",
+        "summary": null,
+        "pros": [],
+        "cons": [],
+        "reviews": [],
+        "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      }
+    },
+    {
+      "id": "6331079250-cream",
+      "sourceProductId": "6331079250",
+      "name": "리끌로우 선글라스 E03, FREE",
+      "category": "glasses",
+      "productType": "glasses",
+      "url": "https://www.coupang.com/vp/products/6331079250?itemId=13239160062",
+      "price": 14220,
+      "priceStatus": "reference",
+      "image": "/products/6331079250.jpg",
+      "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2022/02/09/15/7/f275b47d-8127-4690-ba8e-1aa8046e3314.jpg",
+      "imageSourcePage": "https://fallcent.com/product/?item_id=13239160062&product_id=6331079250",
+      "sourceNote": "Real Coupang product family and title verified from public official Coupang pages. The original Coupang CDN image was recovered from the exact item-linked public Fallcent page and is stored unchanged. Price is an indexed reference; current stock, seller options, and price are unverified. The preview shows the frame pictured in that source image as approximate 2D placement, not physical size or lens performance. The mirror photo depicts a cream frame; official indexed default color metadata conflicts with this picture, so confirm the pictured color option on Coupang. The lens tint is sampled approximately from the picture; it is not calibrated optical transmission.",
+      "checkedAt": "2026-10-25",
+      "brand": "RECLOW / 리끌로우",
+      "aliases": [
+        "RECLOW E03 cream frame sunglasses"
+      ],
+      "tags": [
+        "glasses",
+        "sunglasses",
+        "cream",
+        "beige",
+        "round",
+        "선글라스"
+      ],
+      "verifiedAttributes": [
+        "RECLOW E03 cream frame sunglasses",
+        "Preview uses the pictured frame variant; confirm the color option and sizing on Coupang."
+      ],
+      "preview": {
+        "kind": "glasses",
+        "image": "/products/6331079250.jpg",
+        "background": "white",
+        "available": true,
+        "crop": {
+          "x": 0.045,
+          "y": 0.28,
+          "width": 0.84,
+          "height": 0.36
+        },
+        "bridgeX": 0.5,
+        "bridgeY": 0.35,
+        "frameWidth": 0.98,
+        "lensClear": true,
+        "lensTransparent": true,
+        "lensMasks": [
+          {
+            "x": 0.245,
+            "y": 0.5,
+            "rx": 0.17,
+            "ry": 0.37
+          },
+          {
+            "x": 0.755,
+            "y": 0.5,
+            "rx": 0.17,
+            "ry": 0.37
+          }
+        ],
+        "lensTint": "#8c8174"
+      },
+      "imageSha256": "8a1f2c719f7a001e053e2ef9eb65978755ca8069707b7a0817e21dd773d281b6",
+      "reviewEvidence": {
+        "status": "unavailable",
+        "rating": null,
+        "reviewCount": null,
+        "sourceUrl": "https://www.coupang.com/vp/products/6331079250?itemId=13239160062",
+        "checkedAt": "2026-10-25",
+        "summary": null,
+        "pros": [],
+        "cons": [],
+        "reviews": [],
+        "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+      }
+    }
+  ],
+  "packshotMasks": {
+    "6331079250-cream": {
+      "size": 492,
+      "image": "/products/6331079250.jpg",
+      "keep": [
+        [
+          [
+            28,
+            163
+          ],
+          [
+            46,
+            157
+          ],
+          [
+            78,
+            153
+          ],
+          [
+            111,
+            151
+          ],
+          [
+            145,
+            155
+          ],
+          [
+            170,
+            164
+          ],
+          [
+            191,
+            179
+          ],
+          [
+            207,
+            196
+          ],
+          [
+            219,
+            196
+          ],
+          [
+            237,
+            197
+          ],
+          [
+            246,
+            195
+          ],
+          [
+            262,
+            177
+          ],
+          [
+            286,
+            162
+          ],
+          [
+            313,
+            155
+          ],
+          [
+            345,
+            150
+          ],
+          [
+            372,
+            150
+          ],
+          [
+            399,
+            152
+          ],
+          [
+            425,
+            155
+          ],
+          [
+            422,
+            184
+          ],
+          [
+            416,
+            218
+          ],
+          [
+            409,
+            253
+          ],
+          [
+            398,
+            277
+          ],
+          [
+            380,
+            295
+          ],
+          [
+            357,
+            306
+          ],
+          [
+            331,
+            311
+          ],
+          [
+            304,
+            309
+          ],
+          [
+            284,
+            301
+          ],
+          [
+            266,
+            287
+          ],
+          [
+            255,
+            269
+          ],
+          [
+            249,
+            249
+          ],
+          [
+            246,
+            223
+          ],
+          [
+            246,
+            206
+          ],
+          [
+            231,
+            203
+          ],
+          [
+            216,
+            203
+          ],
+          [
+            208,
+            207
+          ],
+          [
+            207,
+            233
+          ],
+          [
+            201,
+            260
+          ],
+          [
+            191,
+            282
+          ],
+          [
+            173,
+            299
+          ],
+          [
+            151,
+            309
+          ],
+          [
+            125,
+            312
+          ],
+          [
+            99,
+            309
+          ],
+          [
+            77,
+            300
+          ],
+          [
+            59,
+            286
+          ],
+          [
+            47,
+            268
+          ],
+          [
+            39,
+            244
+          ],
+          [
+            33,
+            216
+          ]
+        ]
+      ],
+      "clear": [
+        [
+          [
+            51,
+            196
+          ],
+          [
+            63,
+            181
+          ],
+          [
+            82,
+            171
+          ],
+          [
+            108,
+            166
+          ],
+          [
+            136,
+            166
+          ],
+          [
+            164,
+            175
+          ],
+          [
+            184,
+            189
+          ],
+          [
+            195,
+            211
+          ],
+          [
+            196,
+            235
+          ],
+          [
+            189,
+            260
+          ],
+          [
+            175,
+            281
+          ],
+          [
+            154,
+            296
+          ],
+          [
+            126,
+            301
+          ],
+          [
+            99,
+            297
+          ],
+          [
+            77,
+            286
+          ],
+          [
+            61,
+            268
+          ],
+          [
+            51,
+            244
+          ],
+          [
+            47,
+            219
+          ]
+        ],
+        [
+          [
+            261,
+            197
+          ],
+          [
+            278,
+            178
+          ],
+          [
+            304,
+            169
+          ],
+          [
+            331,
+            165
+          ],
+          [
+            358,
+            168
+          ],
+          [
+            383,
+            176
+          ],
+          [
+            399,
+            191
+          ],
+          [
+            405,
+            211
+          ],
+          [
+            403,
+            235
+          ],
+          [
+            395,
+            260
+          ],
+          [
+            379,
+            280
+          ],
+          [
+            357,
+            293
+          ],
+          [
+            332,
+            300
+          ],
+          [
+            307,
+            298
+          ],
+          [
+            285,
+            288
+          ],
+          [
+            270,
+            272
+          ],
+          [
+            259,
+            250
+          ],
+          [
+            255,
+            225
+          ]
+        ]
+      ]
+    }
+  },
+  "rendererNotes": [
+    "Add packshotMasks[6331079250-cream] to PACKSHOT_MASKS. Current mask resolver should use gold frame finish for this cream frame so white backdrop is cleaned while preserving the warm frame. Lens tint is approximate, derived from source photo.",
+    "E03 bridgeX should be 0.50 after the specified crop; bridgeY 0.35. Gray FBB82 uses existing crop + ellipse lens clearing only.",
+    "Do not enable other ten rejected frames without obtaining clean sourced photographs. Do not substitute any newly sourced product photo under a removed product ID."
+  ],
+  "verification": {
+    "supportedBefore": 4,
+    "supportedAfter": 6,
+    "knownLimitations": [
+      "New gray FBB82 has clear photographic nose pads and minor temple stubs near outer rim; glasses geometry is original source pixels.",
+      "E03 exact item mirror image is cream but official indexed color metadata says blue; sourceNote preserves this conflict and preview must be labeled pictured variant.",
+      "All live placements are 2D face tracking, not 3D fit simulation."
+    ]
+  }
+}

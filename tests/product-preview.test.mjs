@@ -131,3 +131,18 @@ test('white garment silhouette keeps the fabric and remaps source shoulder ancho
   assert.equal(result.cleanSilhouette,true);assert.equal(result.backgroundRemoved,true);assert(result.width>400&&result.width<600);assert(result.height>450&&result.height<600);
   assert(Math.abs(result.shoulderWidth-.5*640/result.width)<.0001);assert(result.shoulderY>.02&&result.shoulderY<.15);
 });
+
+test('clear balm preserves natural colour and does not sample a coloured cap',async()=>{
+  const {Preview}=fixture(),preview=new Preview({canvasFactory:canvasFactory(pixels(10,10,[20,30,190,255])),loadImage:async()=>({width:10,height:10})});
+  const result=await preview.load({...product('clear','lipbalm'),category:'makeup',preview:{kind:'lip',finish:'clear-balm',image:'/products/clear.jpg',available:true,glossStrength:.12}});
+  assert.equal(result.ok,true);assert.equal(result.shadeColor,null);assert.equal(result.shadeEstimated,false);assert.equal(result.finish,'clear-balm');assert.equal(result.glossStrength,.12);assert.match(result.notice,/natural lip colour/);
+});
+test('clear balm renders clipped sheen without any colour multiply fill',()=>{
+  const {context}=fixture();vm.runInContext(engine,context);const fills=[],clips=[];
+  const ctx={save(){},restore(){},beginPath(){},closePath(){},moveTo(){},lineTo(){},ellipse(){},clip(rule){clips.push(rule);},fill(){fills.push({blend:this.globalCompositeOperation,color:this.fillStyle,alpha:this.globalAlpha});}};
+  const camera=new context.window.NookCamera({video:{},canvas:{getContext:()=>ctx}});
+  camera.productPreview={kind:'lip',finish:'clear-balm',glossStrength:.12,lipOpacity:.18};
+  const points=face();points[61]={x:.4,y:.6};points[291]={x:.6,y:.6};points[17]={x:.5,y:.65};points[14]={x:.5,y:.62};
+  camera._makeup(points,720,1280);assert.deepEqual(clips,['evenodd']);assert.equal(fills.length,2);assert(fills.every(f=>f.blend==='screen'&&f.color==='#ffffff'&&f.alpha>0&&f.alpha<=.3));
+  camera.productPreview={...camera.productPreview,finish:'tinted-balm',lipOpacity:.2};fills.length=0;camera._makeup(points,720,1280);assert.equal(fills[0].blend,'multiply');assert(fills[0].alpha<.3);assert.equal(fills.length,3);
+});

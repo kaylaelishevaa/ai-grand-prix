@@ -4,12 +4,13 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 import catalog from '../data/catalog.json' with {type:'json'};
+import {demoCatalog} from '../lib/demo-catalog.mjs';
 import replacements from '../data/catalog-replacements.json' with {type:'json'};
 const root=new URL('../',import.meta.url);
 
 test('source catalog and public catalog agree; every listing retains an unchanged local source image',async()=>{
  const browser={window:{}};vm.runInNewContext(await readFile(new URL('public/coupang-products.js',root),'utf8'),browser);
- assert.deepEqual(JSON.parse(JSON.stringify(browser.window.COUPANG_PRODUCTS)),catalog);
+ assert.deepEqual(JSON.parse(JSON.stringify(browser.window.COUPANG_PRODUCTS)),demoCatalog(catalog));
  assert.equal(new Set(catalog.map(p=>p.id)).size,catalog.length);
  for(const product of catalog){
   assert.equal(new URL(product.url).hostname,'www.coupang.com');

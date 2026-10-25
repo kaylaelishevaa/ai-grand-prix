@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-25",
+  "purpose": "Enable sourced balm-finish previews for six existing Coupang products. Replace each matching preview object, do not merge its old unavailableReason.",
+  "rendererContract": {
+    "finish": [
+      "clear-balm",
+      "tinted-balm"
+    ],
+    "opacity": "0..1; strength of tinted pigment at normal camera-engine opacity. Clear balm has zero pigment.",
+    "glossStrength": "0..0.3; small face-tracked highlights inside outer lip minus inner-mouth opening.",
+    "clearBalm": "Do not require color, call estimateLipColor, or multiply a synthetic white/neutral colour across lips. Preserve natural lip colour.",
+    "tintedBalm": "Use supplied color with low opacity and preserve lip texture. Colors are explicitly illustrative, not sampled from package caps.",
+    "disclosure": "Use shadeLabel in the short preview chip. The longer previewNote belongs in detail/help, not a blocking message."
+  },
+  "updates": [
+    {
+      "id": "7505441634-derma-sos",
+      "name": "니베아 립밤 립케어, 더마 SOS 케어, 4.8g, 1개",
+      "preview": {
+        "kind": "lip",
+        "image": "/products/7505441634-derma-sos.jpg",
+        "background": "white",
+        "available": true,
+        "finish": "clear-balm",
+        "opacity": 0,
+        "glossStrength": 0.055,
+        "shadeLabel": "Clear balm finish",
+        "shadeVerified": false,
+        "finishEstimated": true,
+        "sourceUrls": [
+          "https://www.nivea.co.kr/products/니베아-립케어-더마-sos-케어-40058088506310076.html"
+        ],
+        "finishSource": "Official Korean Derma SOS Care identifies the care balm. The preview preserves natural lip colour rather than inferring a pigment from its white tube; subtle sheen is illustrative, not manufacturer-measured.",
+        "previewNote": "Natural lip colour with an illustrative balm finish. This is not a calibrated prediction of texture, hydration or shine."
+      }
+    },
+    {
+      "id": "341621790-cherry-shine",
+      "name": "니베아 립케어 립밤, 체리 샤인, 4.8g, 2개",
+      "preview": {
+        "kind": "lip",
+        "image": "/products/341621790-cherry-shine.png",
+        "background": "white",
+        "available": true,
+        "finish": "tinted-balm",
+        "opacity": 0.2,
+        "glossStrength": 0.1,
+        "shadeLabel": "Cherry · sheer red",
+        "shadeVerified": false,
+        "finishEstimated": true,
+        "sourceUrls": [
+          "https://www.nivea.co.kr/products/니베아-립케어-체리-샤인-40058085175890076.html",
+          "https://www.nivea.co.uk/products/nivea-cherry-shine-lip-balm-40059009839160045.html"
+        ],
+        "finishSource": "Official Korean page confirms Cherry Shine colour, and the UK page describes a soft ruby-red shine. Regional formulas may vary. The exact RGB and opacity are illustrative, not colour-matched.",
+        "previewNote": "Illustrative sheer tint and sheen based on the named balm’s documented finish. Exact pigment, opacity and lighting are not calibrated.",
+        "color": "#b84251",
+        "colorSource": "Illustrative RGB chosen for the manufacturer-described colour family. Not sampled from the closed cap or packaging and not a measured on-lip swatch."
+      }
+    },
+    {
+      "id": "8063356643-strawberry",
+      "name": "니베아 립케어 립밤, 스트로베리 샤인, 4.8g, 2개",
+      "preview": {
+        "kind": "lip",
+        "image": "/products/8063356643-strawberry.png",
+        "background": "white",
+        "available": true,
+        "finish": "tinted-balm",
+        "opacity": 0.16,
+        "glossStrength": 0.11,
+        "shadeLabel": "Strawberry · soft red",
+        "shadeVerified": false,
+        "finishEstimated": true,
+        "sourceUrls": [
+          "https://www.nivea.co.kr/products/니베아-립케어-스트로베리-샤인-40058083728810076.html",
+          "https://www.nivea.com.my/en-my/products/strawberry-shine-caring-lip-balm-40058083729040058.html"
+        ],
+        "finishSource": "Official Korean page confirms Strawberry Shine colour; the Malaysian page describes soft red/reddish shine. Regional formulas may vary. The warmer RGB and opacity are illustrative, not colour-matched.",
+        "previewNote": "Illustrative sheer tint and sheen based on the named balm’s documented finish. Exact pigment, opacity and lighting are not calibrated.",
+        "color": "#d75163",
+        "colorSource": "Illustrative RGB chosen for the manufacturer-described colour family. Not sampled from the closed cap or packaging and not a measured on-lip swatch."
+      }
+    },
+    {
+      "id": "6193917913-essential",
+      "name": "니베아 립케어 립밤, 에센셜 케어, 4.8g, 4개",
+      "preview": {
+        "kind": "lip",
+        "image": "/products/6193917913-essential.jpg",
+        "background": "white",
+        "available": true,
+        "finish": "clear-balm",
+        "opacity": 0,
+        "glossStrength": 0.05,
+        "shadeLabel": "Clear balm finish",
+        "shadeVerified": false,
+        "finishEstimated": true,
+        "sourceUrls": [
+          "https://www.nivea.co.kr/products/니베아-립케어-에센셜-케어-40058083694850076.html"
+        ],
+        "finishSource": "Official Korean Essential Care page describes a nourishing care balm and lists its formula without a lip colour claim. Natural lip colour is preserved; subtle sheen is an illustrative care-balm effect rather than a sampled cap colour or measured finish.",
+        "previewNote": "Natural lip colour with an illustrative balm finish. This is not a calibrated prediction of texture, hydration or shine."
+      }
+    },
+    {
+      "id": "120680-original",
+      "name": "히말라야 립 밤, 오리지널, 10g, 1개",
+      "preview": {
+        "kind": "lip",
+        "image": "/products/120680-original.png",
+        "background": "white",
+        "available": true,
+        "finish": "clear-balm",
+        "opacity": 0,
+        "glossStrength": 0.055,
+        "shadeLabel": "Clear balm finish",
+        "shadeVerified": false,
+        "finishEstimated": true,
+        "sourceUrls": [
+          "https://himalayawellness.in/collections/meta-fbn20/products/lip-balm",
+          "https://www.hwahae.com/en/products/Himalaya-Lip-balm/1892530/reviews?skin_type=dry"
+        ],
+        "finishSource": "Manufacturer page identifies the 10g oil-and-wax lip balm; Korean product feedback describes a clear texture. The photographed 10g tube matches this family. Natural lip colour is retained; subtle sheen is illustrative, not a measured reflectance or exact treatment outcome.",
+        "previewNote": "Natural lip colour with an illustrative balm finish. This is not a calibrated prediction of texture, hydration or shine."
+      }
+    },
+    {
+      "id": "7480865203-herbal",
+      "name": "히말라야 립밤 10g 튜브형, 허벌, 3개",
+      "preview": {
+        "kind": "lip",
+        "image": "/products/7480865203-herbal.jpg",
+        "background": "white",
+        "available": true,
+        "finish": "clear-balm",
+        "opacity": 0,
+        "glossStrength": 0.055,
+        "shadeLabel": "Clear balm finish",
+        "shadeVerified": false,
+        "finishEstimated": true,
+        "sourceUrls": [
+          "https://himalayawellness.in/collections/meta-fbn20/products/lip-balm",
+          "https://www.hwahae.com/en/products/Himalaya-Lip-balm/1892530/reviews?skin_type=dry"
+        ],
+        "finishSource": "Manufacturer page identifies the 10g oil-and-wax lip balm; Korean product feedback describes a clear texture. The photographed 10g tube matches this family. Natural lip colour is retained; subtle sheen is illustrative, not a measured reflectance or exact treatment outcome.",
+        "previewNote": "Natural lip colour with an illustrative balm finish. This is not a calibrated prediction of texture, hydration or shine."
+      }
+    }
+  ],
+  "excludedIds": [
+    "166915136-grapefruit",
+    "4322127769-lemon-grapefruit",
+    "7656224848-grapefruit-care",
+    "7702523687-juicy-trio"
+  ],
+  "exclusions": [
+    {
+      "id": "166915136-grapefruit",
+      "reason": "The exact Korean Grapefruit Tea finish could not be verified from available manufacturer evidence. Do not guess from a fruit illustration or closed tube."
+    },
+    {
+      "id": "4322127769-lemon-grapefruit",
+      "reason": "Lemon is documented as clear in external comparisons, but the exact Grapefruit Tea component remains unverified. Exclude this mixed set from the curated demo rather than silently render an unknown component."
+    },
+    {
+      "id": "7656224848-grapefruit-care",
+      "reason": "Local sourced photo visibly says Mellow Rose and Kissing Red, mismatching the named Gorgeous Grapefruit option. Coral-orange shade evidence exists, but the mismatched product photo should not remain in the demo.",
+      "finishEvidenceUrl": "https://global.oliveyoung.com/product/detail?accParam=50&prdtNo=GA230619394"
+    },
+    {
+      "id": "7702523687-juicy-trio",
+      "reason": "The manufacturer and retailer document a tint-free matte Mango balm within this trio. The current renderer adds sheen and has no component picker, so omit the mixed set from this demo. Do not claim a shiny effect for the matte product.",
+      "sourceUrls": [
+        "https://www.burtsbees.ca/wp-content/uploads/sites/4/2023/01/BB_PKHandOut_Lip-Balms-and-Lip-Colour_F23.pdf",
+        "https://www.bigw.com.au/product/burt-s-bees-moisturising-lip-balm-mango/p/104945"
+      ]
+    }
+  ],
+  "limitations": [
+    "Neither these references nor the camera establish calibrated colour or physical balm appearance. Finish is a lightweight face-tracked visualization.",
+    "No live Coupang prices, stock, exact option selection, ratings or reviews are newly verified by this patch.",
+    "Original sourced listing assets are retained unchanged; no image crop is required for a lip-mask effect."
+  ]
+}

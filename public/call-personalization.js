@@ -8,7 +8,7 @@
       this.api=window.CoupiPreferences;this.profile=this.api.load();this.pending=null;this.onChange=onChange;this.onSaved=onSaved;this.onSkip=onSkip;
       const params=new URLSearchParams(window.location?.search||'');this.isNew=!this.profile?.completed;this.active=this.isNew||params.get('intent')==='personalize';
       this.world=this.api.buildWorlds(catalog,this.profile).find(world=>world.id===params.get('world'))||null;
-      $('personalization-skip').onclick=()=>this.skip();$('incoming-skip-personalization').onclick=()=>this.skip();$('personalization-save').onclick=()=>this.save();
+      $('personalization-skip').onclick=()=>this.skip();$('personalization-save').onclick=()=>this.save();
       $('personalization-edit-later').onclick=()=>{this.pending=null;$('personalization-dialog').close();this.onChange();};
       $('personalization-dialog').addEventListener('cancel',()=>{this.pending=null;this.onChange();});
       $('personalization-dialog').addEventListener('close',()=>{if(!$('personalization-dialog').open)this.pending=null;this.onChange();});
@@ -20,16 +20,11 @@
     }
     get context(){return {active:this.active,draft_pending:!!this.pending,preferences:this.profile?.completed?{interests:this.profile.interests,vibe:this.profile.vibe,budget:this.profile.budget,story:this.profile.story}:null};}
     render(){
-      $('personalization-strip').hidden=!this.active;$('incoming-skip-personalization').hidden=!this.active;
-      if(this.active){
-        $('incoming-promise').textContent=this.isNew?'Welcome new user!':'Let’s get to know you.';
-        $('incoming-status').textContent=this.isNew?'We want to learn more about you to personalize your experience.':'Tell Coupi what you enjoy. Skip whenever you like.';
-        $('incoming-status').hidden=false;
-      }else{
-        $('incoming-promise').textContent='Let’s find your kind of thing.';
-        $('incoming-status').textContent=this.world?.title||'';$('incoming-status').hidden=!this.world;
-      }
+      $('personalization-strip').hidden=!this.active;$('update-preferences').hidden=!this.profile?.completed;
+      $('incoming-promise').textContent='Let’s find your kind of thing.';
+      $('incoming-status').textContent=this.world?.title||'';$('incoming-status').hidden=!this.world;
     }
+    startUpdate(){this.resetDraft();this.active=true;this.isNew=!this.profile?.completed;this.world=null;this.render();this.onChange();}
     handle({action,preferences}={}){
       if(!this.active)throw Error('Preference discovery is not active.');
       if(action==='skip'){this.skip();return {ok:true,skipped:true,saved:false};}

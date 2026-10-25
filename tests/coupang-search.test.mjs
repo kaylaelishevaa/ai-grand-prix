@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {searchCoupang,coupangSearchQueries,coupangListing,coupangImage,productImage} from '../lib/coupang-search.mjs';
 import {createVoiceHandler} from '../lib/nook-voice.mjs';
+import {isDemoProduct,demoCatalog} from '../lib/demo-catalog.mjs';
+import catalog from '../data/catalog.json' with {type:'json'};
 
 const image='https://thumbnail.coupangcdn.com/image/example.jpg';
 const product=(i=0)=>({url:`https://www.coupang.com/vp/products/${900000+i}`,name:`White glasses ${i}`,product_type:'glasses',price:100+i,image_url:image});
@@ -132,11 +134,30 @@ test('Coupang item and image URLs reject credentials, redirects and lookalike ho
   for(const url of ['http://thumbnail.coupangcdn.com/image/example.jpg','https://thumbnail.coupangcdn.com.evil.test/image/example.jpg','https://x@thumbnail.coupangcdn.com/image/example.jpg','https://thumbnail.coupangcdn.com/image/example.svg',image+'?redirect=https://evil.test'])assert.equal(coupangImage(url),null);
 });
 
-test('product search endpoint returns sourced Coupang listings',async()=>{
-  const handler=createVoiceHandler({fetchImpl:async()=>response([product()])});
+test('explicit live mode returns sourced Coupang listings without promising unreviewed try-on support',async()=>{
+  const liveEnv={...env,COUPI_PRODUCT_SEARCH_MODE:'live'};
+  let calls=0;
+  const handler=createVoiceHandler({fetchImpl:async()=>{calls++;return response([product()]);}});
   const request=new Request('https://coupi.test/api/products/search',{method:'POST',headers:{origin:'https://coupi.test','Content-Type':'application/json'},body:JSON.stringify({query:'glasses',category:'glasses'})});
-  const responseValue=await handler(request,env);assert.equal(responseValue.status,200);
+  const responseValue=await handler(request,liveEnv);assert.equal(responseValue.status,200);
   const body=await responseValue.json();assert.equal(body.products.length,1);assert.equal(body.products[0].source,'coupang_web');
+  assert.equal(body.products[0].preview.available,false);assert.match(body.products[0].preview.unavailableReason,/not been reviewed/);
+  const status=await(await handler(new Request('https://coupi.test/api/voice/status'),liveEnv)).json();
+  assert.equal(status.productSearchMode,'live');assert.equal(calls,1);
+});
+
+test('configured API keys keep default demo search local and every returned product preview-ready',async()=>{
+  let calls=0;
+  const handler=createVoiceHandler({fetchImpl:async()=>{calls++;throw Error('Demo search must not use live retrieval');}});
+  for(const config of [env,{...env,COUPI_PRODUCT_SEARCH_MODE:'demo'},{...env,COUPI_PRODUCT_SEARCH_MODE:'unknown'}]){
+    const request=new Request('https://coupi.test/api/products/search',{method:'POST',headers:{origin:'https://coupi.test','Content-Type':'application/json'},body:JSON.stringify({query:'glasses',category:'glasses'})});
+    const result=await handler(request,config);assert.equal(result.status,200);
+    const body=await result.json();assert.ok(body.products.length>0);assert.ok(body.products.every(isDemoProduct));
+    assert.ok(body.products.every(p=>p.source!=='coupang_web'&&catalog.some(record=>record.id===p.id)));
+    const status=await(await handler(new Request('https://coupi.test/api/voice/status'),config)).json();
+    assert.equal(status.ready,true);assert.equal(status.productSearchMode,'demo');assert.equal(status.catalogCount,demoCatalog(catalog).length);
+  }
+  assert.equal(calls,0);
 });
 
 test('missing configuration and upstream errors are explicit',async()=>{

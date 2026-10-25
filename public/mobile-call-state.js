@@ -14,7 +14,7 @@
         const previous=this.catalog.get(p.id),hasNewImage=typeof p.image==='string'&&p.image.startsWith('/api/products/image?url=');
         const sameVariant=previous?.productType===p.productType&&(!url.searchParams.has('itemId')||new URL(previous.url).searchParams.get('itemId')===url.searchParams.get('itemId'));
         const image=hasNewImage?p.image:sameVariant?previous.image:null;
-        const preview=!hasNewImage&&sameVariant?previous.preview:undefined;
+        const preview=p.preview?.available===false?{available:false,unavailableReason:typeof p.preview.unavailableReason==='string'?p.preview.unavailableReason:typeof p.preview.reason==='string'?p.preview.reason:'This newly found listing has no reviewed try-on photo.'}:!hasNewImage&&sameVariant?previous.preview:undefined;
         this.catalog.set(p.id,{id:p.id,name:p.name.slice(0,300),description:typeof p.description==='string'?p.description.slice(0,400):'',url:canonical.href,category:p.category,productType:p.productType,price:p.price,currency:'KRW',image,...(preview?{preview}:{}),source:p.source,priceStatus:'listed',verifiedAttributes:[]});
       }
     }
