@@ -1,8 +1,6 @@
 import type {Profile} from './types';
 
-/** Ordinary calls start shopping. Hatching explicitly opts into the first-call interview. */
-export function usesFirstCall(profile:Profile,action?:string):boolean {
-  const journey=profile.journey;
-  if(action==='hatch')return !journey?.interviewComplete;
-  return journey?.firstCallRequested===true&&!journey.interviewComplete&&!journey.interviewPaused;
+/** Keep the published shopping-first call and its existing controls for every entry. */
+export function usesFirstCall(_profile:Profile,_action?:string):boolean {
+  return false;
 }

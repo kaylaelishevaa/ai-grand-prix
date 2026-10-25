@@ -5,7 +5,6 @@ import {handleCall,journeyFor} from '../lib/server/call';
 import {teammateProfileContext} from '../lib/server/teammate-voice';
 import {sessionConfiguration} from '../lib/teammate/nook-voice.mjs';
 import {usesFirstCall} from '../lib/call-entry';
-import {FIRST_CALL_QUESTIONS} from '../lib/call-questions';
 
 test('shopping-only calls preserve the latest direct-shopping flow, including old draft profiles',async()=>{
  for(const oldDraft of [false,true]){
@@ -25,16 +24,15 @@ test('shopping-only calls preserve the latest direct-shopping flow, including ol
 });
 
 
-test('hatching opts into the first interview while ordinary and completed calls stay shopping-first',async()=>{
+test('hatching retains the existing shopping-first call without restoring interview controls',async()=>{
  const profile=createProfile('first-hatch');assert.equal(usesFirstCall(profile),false);
- assert.equal(usesFirstCall(profile,'hatch'),true);
+ assert.equal(usesFirstCall(profile,'hatch'),false);
  const result=await handleCall(profile,{action:'hatch',requestId:'hatch',shoppingOnly:!usesFirstCall(profile,'hatch')});
- assert.equal(usesFirstCall(result.profile),true);assert.equal(result.profile.journey?.interviewComplete,false);
- const context=teammateProfileContext(result.profile);assert.equal(context.interview.active,true);assert.equal(context.interview.question,FIRST_CALL_QUESTIONS[0]);
- assert.match(sessionConfiguration({},context).instructions,/FIRST CALL OVERRIDE/);
- const resumed=await handleCall(result.profile,{action:'start',requestId:'start',shoppingOnly:!usesFirstCall(result.profile)});
- assert.equal(resumed.conversationMode,'interview');assert.equal(resumed.question,FIRST_CALL_QUESTIONS[0]);
- result.profile.journey!.interviewPaused=true;assert.equal(usesFirstCall(result.profile),false);
+ assert.equal(usesFirstCall(result.profile),false);
+ assert.equal(result.message,'What do you want to buy?');assert.equal(result.question,null);
+ const context=teammateProfileContext(result.profile);assert.equal(context.interview.active,false);assert.equal(context.interview.question,'');
+ assert(!sessionConfiguration({},context).instructions.includes('FIRST CALL OVERRIDE'));
+ result.profile.journey!.firstCallRequested=true;result.profile.journey!.interviewComplete=false;
+ assert.equal(usesFirstCall(result.profile),false,'An older hatch opt-in must not restore removed controls');
  assert.equal(teammateProfileContext(result.profile).interview.active,false);
- result.profile.journey!.interviewComplete=true;assert.equal(usesFirstCall(result.profile,'hatch'),false);
 });
