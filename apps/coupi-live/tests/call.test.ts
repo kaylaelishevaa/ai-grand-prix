@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import {mkdtemp,readFile,readdir,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {POST as callRoute} from '../app/api/call/route';
 import {POST as profileRoute} from '../app/api/profile/route';
 import {createProfile,deleteMemory,eligibleCatalog} from '../lib/profile';
 import {getReview,getSku} from '../lib/catalog';
 import {comparisonGroupForSku} from '../lib/comparison-groups';
-import {handleCall,journeyFor,validateCallOutput,mapCallGaps,FIRST_CALL_QUESTIONS,WORLD_BUILDING_MESSAGE,hasCallWorldContext} from '../lib/server/call';
+import {handleCall,journeyFor,validateCallOutput,mapCallGaps,callCandidates,FIRST_CALL_QUESTIONS,WORLD_BUILDING_MESSAGE,hasCallWorldContext} from '../lib/server/call';
+import approvedProducts from '../data/teammate-catalog.json';
 import type {CallResponse} from '../lib/journey-types';
 import type {Profile} from '../lib/types';
 import {remember} from '../lib/memory';
@@ -21,6 +23,8 @@ const initial=()=>createProfile('test-call-profile',now);
 const completed=():Profile=>({...initial(),journey:{...journeyFor(initial()),hatched:true,interviewCount:5,interviewComplete:true,nextQuestion:''}});
 const talk=(message:string)=>({intent:'talk',message:'That helps me understand your day.',memories:[{text:message,evidenceQuote:message,confidence:0.9}],verdict:null,inventory:null});
 const kettleVerdict={pickSkuId:'kettle',reason:'A compact cream pour-over kettle.',dissent:'Two seeded reviews report a loose lid.',citations:['kettle-013','kettle-014'],runnerUpSkuId:'kettleAlt',whyRunnerUpLost:'The alternative has a different finish.',clarifyingQuestion:null};
+const sourcedVerdict={pickSkuId:'1814412512-pink-sand',reason:'The sourced listing names Pink Sand.',dissent:'Its current price and stock are unverified.',citations:[],runnerUpSkuId:null,whyRunnerUpLost:'',clarifyingQuestion:null};
+function savedWorld(ids:string[]):Profile{const profile=completed();profile.journey!.districts=[{id:'saved-world',name:'My existing world',provenance:'Your saved selection',sourceMemoryIds:[],createdAt:now.toISOString(),scene:{name:'My existing world',explanation:'A saved selection',items:ids.map(skuId=>({skuId,oneLiner:getSku(skuId)!.name}))}}];return profile;}
 function assertStrictSchema(node:Json) {
   if(node.type==='object') {
     assert.equal(node.additionalProperties,false);
@@ -76,49 +80,49 @@ class Browser {
   }
 }
 
-test('hatch → first call → five answers persists visible sourced memory; duplicate turns do not advance twice',{concurrency:false},async()=>{
+test('public shopping calls retain volunteered memory without onboarding; duplicate turns stay idempotent',{concurrency:false},async()=>{
   await fixture(async({calls,root})=>{
     const browser=new Browser();
     const hatch=await browser.send({action:'hatch',requestId:'hatch'});
     assert.equal(hatch.status,200);
     assert.equal(hatch.body.profile.journey?.hatched,true);
-    assert.match(hatch.body.message,/can I call you/);
+    assert.equal(hatch.body.message,'What do you want to buy?');
     const start=await browser.send({action:'start',requestId:'start'});
-    assert.equal(start.body.message,'Hi Kayleen!');
-    assert.equal(start.body.question,FIRST_CALL_QUESTIONS[0]);
+    assert.equal(start.body.message,'What do you want to buy?');
+    assert.equal(start.body.question,null);
     assert.equal(calls.length,0);
     let latest:CallResponse=start.body;
     for(let i=0;i<5;i++) {
       latest=(await browser.send({action:'message',requestId:'answer-'+i,message:['I drink matcha in the morning.','I cook for one on weekends.','My desk is tiny.','I am saving for a holiday.','I want less clutter.'][i]})).body;
-      assert.equal(latest.interviewCount,i+1);
+      assert.equal(latest.interviewCount,0);
       assert.equal(latest.memories.length,1);
-      assert.equal(latest.memories[0].source,'from our first call');
+      assert.match(latest.memories[0].source,/^from your call, /);
       assert.equal(latest.memories[0].confidence,0.9);
       assert(latest.memories[0].createdAt);
       assert.equal(latest.proposedSkuIds.length,0);
       assert.equal(latest.profile.decisions.length,0);
-      assert(calls.at(-1)!.input.catalog.some((sku:Json)=>sku.id==='kettle'),'The same call can handle an immediate need without a second intent-classifier request');
-      assert(calls.at(-1)!.input.reviews.length>0);
-      assert.equal(latest.conversationMode,i===4?'conversation':'interview');
+      assert(calls.at(-1)!.input.catalog.some((sku:Json)=>sku.id===sourcedVerdict.pickSkuId),'The same call can handle a sourced shopping need without a second classifier');
+      assert.equal(calls.at(-1)!.input.reviews.length,0,'Synthetic reviews do not enter ordinary shopping');
+      assert.equal(latest.conversationMode,'conversation');
       assert.equal(latest.worldReady,true);
       assert.match(calls.at(-1)!.body.instructions,/Accept spoken and typed requests in English and respond in English/);
       assert.match(calls.at(-1)!.body.instructions,/Please rephrase your request in English/);
       assert.match(calls.at(-1)!.body.instructions,/English request containing Korean proper names or a won amount is valid/);
       const duplicate=await browser.send({action:'message',requestId:'answer-'+i,message:['I drink matcha in the morning.','I cook for one on weekends.','My desk is tiny.','I am saving for a holiday.','I want less clutter.'][i]});
-      assert.equal(duplicate.body.interviewCount,i+1);
+      assert.equal(duplicate.body.interviewCount,0);
       assert.equal(calls.length,i+1);
     }
     assert.equal(latest.interviewComplete,true);
     assert.equal(latest.question,null);
-    assert.equal(latest.message,WORLD_BUILDING_MESSAGE);
+    assert.equal(latest.message,'That helps me understand your day.');
     assert.equal(latest.profile.xp,25);
     assert(!JSON.stringify(calls.at(-1)!.input).includes('lastReply'));
     const stored=JSON.parse(await readFile(path.join(root,'profiles',latest.profile.id+'.json'),'utf8'));
-    assert.equal(stored.journey.interviewCount,5);
+    assert.equal(stored.journey.interviewCount,0);
     assert.equal(stored.journey.transcript,undefined);
     const resume=await browser.send({action:'start',requestId:'resume'});
     assert.equal(resume.body.question,null);
-    assert.match(resume.body.message,/Tell me, or show me/);
+    assert.equal(resume.body.message,'What do you want to buy?');
     assert.equal(calls.length,5);
   });
 });
@@ -157,13 +161,13 @@ test('account requests navigate without provider calls, shopping side effects or
 
 test('later calls infer shopping from the conversation and put only validated picks into the locked approval queue',{concurrency:false},async()=>{
   await fixture(async({calls,setOutput})=>{
-    setOutput(()=>({intent:'buy',message:'This kettle fits a slow morning.',memories:[],verdict:kettleVerdict,inventory:null}));
+    setOutput(()=>({intent:'buy',message:'Here is the sourced Pink Sand lipstick.',memories:[],verdict:sourcedVerdict,inventory:null}));
     const profile={...completed(),pretend2am:true};
-    const result=await handleCall(profile,{action:'message',requestId:'buy-kettle',message:'Find me a compact kettle.'},now);
+    const result=await handleCall(profile,{action:'message',requestId:'buy-lipstick',message:'Find me pink lipstick.'},now);
     assert.equal(result.status,'ok');
-    assert.equal(result.verdict?.pickSkuId,'kettle');
-    assert(result.verdict?.citations.every(id=>getReview(id)));
-    assert.deepEqual(result.proposedSkuIds,['kettle']);
+    assert.equal(result.verdict?.pickSkuId,sourcedVerdict.pickSkuId);
+    assert.deepEqual(result.verdict?.citations,[]);
+    assert.deepEqual(result.proposedSkuIds,[sourcedVerdict.pickSkuId]);
     assert.equal(result.profile.decisions.length,1);
     assert(result.profile.decisions[0].lockedUntil);
     assert.equal(result.profile.decisions[0].approvedAt,null);
@@ -177,20 +181,25 @@ test('later calls infer shopping from the conversation and put only validated pi
 
 test('a fresh shopping need is fulfilled in one call without consuming the first interview question',{concurrency:false},async()=>{
   await fixture(async({calls,setOutput})=>{
-    setOutput(()=>({intent:'buy',message:'Here is a compact kettle with its review evidence.',memories:[],verdict:kettleVerdict,inventory:null}));
+    setOutput(()=>({intent:'buy',message:'Here is the sourced Pink Sand lipstick.',memories:[],verdict:sourcedVerdict,inventory:null}));
     const browser=new Browser();
-    const request={action:'message',requestId:'first-need',message:'A compact kettle, please.'};
+    const request={action:'message',requestId:'first-need',message:'A pink lipstick, please.'};
     const result=await browser.send(request);
     assert.equal(result.status,200);assert.equal(calls.length,1);
+    assert(calls[0].input.catalog.every((sku:Json)=>approvedProducts.some(product=>product.id===sku.id)));
+    assert.equal(calls[0].input.reviews.length,0);assert(JSON.stringify(calls[0].input).length<100000,'Ordinary shopping does not resend the 1202-review synthetic corpus');
+    assert.deepEqual(calls[0].input.catalog.find((sku:Json)=>sku.id===sourcedVerdict.pickSkuId).sourceReviewEvidence,approvedProducts.find(product=>product.id===sourcedVerdict.pickSkuId)!.reviewEvidence);
+    const verdictSchema=calls[0].body.text.format.schema.properties.verdict.anyOf.find((schema:Json)=>schema.type==='object');
+    assert.equal(verdictSchema.properties.citations.maxItems,0,'The generated response cannot cite family-feedback IDs as seeded reviews');
     assert.equal(result.body.conversationMode,'request');assert.equal(result.body.interviewCount,0);
-    assert.equal(result.body.interviewComplete,false);assert.equal(result.body.profile.journey?.interviewPaused,true);
+    assert.equal(result.body.interviewComplete,true);assert.equal(result.body.profile.journey?.interviewPaused,true);
     assert.equal(result.body.question,null);assert.equal(result.body.worldReady,true);
-    assert.equal(result.body.verdict?.pickSkuId,'kettle');assert.deepEqual(result.body.proposedSkuIds,['kettle']);
+    assert.equal(result.body.verdict?.pickSkuId,sourcedVerdict.pickSkuId);assert.deepEqual(result.body.proposedSkuIds,[sourcedVerdict.pickSkuId]);
     assert.equal(result.body.profile.decisions[0].approvedAt,null);
     assert(result.body.memories.some(line=>line.kind==='call-request'&&line.text===request.message));
     const duplicate=await browser.send(request);
     assert.equal(duplicate.status,200);assert.equal(duplicate.body.conversationMode,'request');
-    assert.deepEqual(duplicate.body.proposedSkuIds,['kettle']);assert.equal(duplicate.body.profile.decisions.length,1);
+    assert.deepEqual(duplicate.body.proposedSkuIds,[sourcedVerdict.pickSkuId]);assert.equal(duplicate.body.profile.decisions.length,1);
     assert.equal(duplicate.body.profile.xp,result.body.profile.xp);assert.equal(calls.length,1);
     const conflict=await browser.send({...request,message:'A different item now.'});
     assert.equal(conflict.status,409);assert.equal(conflict.body.code,'CALL_REQUEST_CONFLICT');assert.equal(calls.length,1);
@@ -201,14 +210,14 @@ test('shopping clarification pauses at the current question; answering it and un
   await fixture(async({calls,setOutput})=>{
     const first=await handleCall(initial(),{action:'message',requestId:'one-story',message:'I make matcha every morning.'},now);
     assert.equal(first.interviewCount,1);
-    setOutput(()=>({intent:'clarify',message:'Which kettle capacity do you need?',memories:[],verdict:null,inventory:null}));
-    const ask=await handleCall(first.profile,{action:'message',requestId:'need-question',message:'Help me choose a kettle.'},now);
+    setOutput(()=>({intent:'clarify',message:'Which lipstick shade do you need?',memories:[],verdict:null,inventory:null}));
+    const ask=await handleCall(first.profile,{action:'message',requestId:'need-question',message:'Help me choose a lipstick.'},now);
     assert.equal(ask.interviewCount,1);assert.equal(ask.conversationMode,'request');
-    assert.equal(ask.question,'Which kettle capacity do you need?');assert.equal(ask.profile.journey?.nextQuestion,FIRST_CALL_QUESTIONS[1]);
-    setOutput(()=>({intent:'buy',message:'This is the catalog option.',memories:[],verdict:kettleVerdict,inventory:null}));
-    const answer=await handleCall(ask.profile,{action:'message',requestId:'need-answer',message:'A small one.'},now);
+    assert.equal(ask.question,'Which lipstick shade do you need?');assert.equal(ask.profile.journey?.nextQuestion,FIRST_CALL_QUESTIONS[1]);
+    setOutput(()=>({intent:'buy',message:'This is the sourced catalog option.',memories:[],verdict:sourcedVerdict,inventory:null}));
+    const answer=await handleCall(ask.profile,{action:'message',requestId:'need-answer',message:'A pink one.'},now);
     assert.equal(answer.interviewCount,1);assert.equal(answer.interviewComplete,false);assert.equal(answer.question,null);
-    assert.equal(calls.at(-1)!.input.interview.active,false);assert.equal(calls.at(-1)!.input.pendingCall.request,'Help me choose a kettle.');
+    assert.equal(calls.at(-1)!.input.interview.active,false);assert.equal(calls.at(-1)!.input.pendingCall.request,'Help me choose a lipstick.');
     setOutput(input=>talk(input.message));
     const chat=await handleCall(answer.profile,{action:'message',requestId:'side-chat',message:'I also enjoy quiet mornings.'},now);
     assert.equal(chat.interviewCount,1);assert.equal(chat.conversationMode,'conversation');assert.equal(chat.question,null);
@@ -227,24 +236,24 @@ test('greetings do not count as interview answers, and model attempts to advance
     setOutput(()=>({intent:'talk',answeredInterviewQuestion:false,message:'Hello. What brings you here?',memories:[],verdict:null,inventory:null}));
     const hello=await handleCall(initial(),{action:'message',requestId:'hello',message:'Hi there.'},now);
     assert.equal(hello.interviewCount,0);assert.equal(hello.worldReady,false);assert.equal(hello.question,FIRST_CALL_QUESTIONS[0]);
-    setOutput(()=>({intent:'buy',answeredInterviewQuestion:true,message:'A kettle.',memories:[],verdict:kettleVerdict,inventory:null}));
-    const failed=await handleCall(hello.profile,{action:'message',requestId:'bad-progress',message:'I need a kettle.'},now);
+    setOutput(()=>({intent:'buy',answeredInterviewQuestion:true,message:'A pink lipstick.',memories:[],verdict:sourcedVerdict,inventory:null}));
+    const failed=await handleCall(hello.profile,{action:'message',requestId:'bad-progress',message:'I need a pink lipstick.'},now);
     assert.equal(failed.status,'fallback');assert.equal(failed.interviewCount,0);assert.equal(failed.interviewComplete,false);
     assert.equal(failed.profile.decisions.length,0);assert.equal(calls.length,3);
-    setOutput(()=>({intent:'buy',answeredInterviewQuestion:false,message:'A kettle.',memories:[],verdict:kettleVerdict,inventory:null}));
-    const retried=await handleCall(failed.profile,{action:'message',requestId:'bad-progress',message:'I need a kettle.'},now);
-    assert.equal(retried.status,'ok');assert.equal(retried.interviewCount,0);assert.deepEqual(retried.proposedSkuIds,['kettle']);
+    setOutput(()=>({intent:'buy',answeredInterviewQuestion:false,message:'A pink lipstick.',memories:[],verdict:sourcedVerdict,inventory:null}));
+    const retried=await handleCall(failed.profile,{action:'message',requestId:'bad-progress',message:'I need a pink lipstick.'},now);
+    assert.equal(retried.status,'ok');assert.equal(retried.interviewCount,0);assert.deepEqual(retried.proposedSkuIds,[sourcedVerdict.pickSkuId]);
   });
 });
 
-test('a photo-only first turn can scan and fill without answering lifestyle questions',{concurrency:false},async()=>{
+test('a photo-only first turn inventories without inventing a matching demo product',{concurrency:false},async()=>{
   await fixture(async({calls,setOutput})=>{
     setOutput(()=>({intent:'scan',message:'The visible oat milk looks low.',memories:[],verdict:null,inventory:{items:[{name:'oat milk',quantity:'small visible amount',status:'low'}],lowOrMissing:[{name:'oat milk',reason:'visible low amount',confidence:'high'}],uncertainties:[]}}));
     const browser=new Browser(),result=await browser.photo('');
     assert.equal(result.status,200);assert.equal(calls.length,1);
     assert.equal(result.body.conversationMode,'request');assert.equal(result.body.interviewCount,0);
-    assert.equal(result.body.interviewComplete,false);assert.equal(result.body.worldReady,true);
-    assert.deepEqual(result.body.proposedSkuIds.map(id=>comparisonGroupForSku(getSku(id)!)),['oat-milk']);
+    assert.equal(result.body.interviewComplete,true);assert.equal(result.body.worldReady,true);
+    assert.deepEqual(result.body.proposedSkuIds,[],'Visible groceries do not become fictional shopping cards');
     assert(result.body.memories.some(line=>line.kind==='inventory'));
     assert(calls[0].body.input[0].content.some((part:Json)=>part.type==='input_image'));
   });
@@ -259,13 +268,13 @@ test('early finish requires current safe sourced context, costs no model call or
     const story=await browser.send({action:'message',requestId:'story-to-keep',message:'I make matcha slowly every morning.'});
     assert.equal(story.body.worldReady,true);
     const before=calls.length,finish=await browser.send({action:'finishInterview',requestId:'finish-early'});
-    assert.equal(finish.status,200);assert.equal(finish.body.interviewCount,1);assert.equal(finish.body.interviewComplete,true);
+    assert.equal(finish.status,200);assert.equal(finish.body.interviewCount,0);assert.equal(finish.body.interviewComplete,true);
     assert.equal(finish.body.conversationMode,'conversation');assert.equal(finish.body.question,null);
     assert.equal(finish.body.profile.xp,story.body.profile.xp);assert.equal(calls.length,before);
     const replay=await browser.send({action:'finishInterview',requestId:'finish-early'});
     assert.equal(replay.body.profile.revision,finish.body.profile.revision);
     const later=await browser.send({action:'message',requestId:'later-talk',message:'I like calm evenings too.'});
-    assert.equal(later.body.interviewCount,1);assert.equal(later.body.interviewComplete,true);assert.equal(later.body.question,null);
+    assert.equal(later.body.interviewCount,0);assert.equal(later.body.interviewComplete,true);assert.equal(later.body.question,null);
     const erased=deleteMemory(story.body.profile,story.body.memories[0].id,now);
     assert.equal(hasCallWorldContext(erased),false);
     await assert.rejects(()=>handleCall(erased,{action:'finishInterview',requestId:'erased-finish'},now),error=>(error as {code:string}).code==='WORLD_NEEDS_CONTEXT');
@@ -334,7 +343,7 @@ test('one photo call inventories a shelf or fridge and code maps supported gaps 
   await fixture(async({root,calls,setOutput})=>{
     setOutput(()=>({intent:'scan',message:'Milk looks low. The label on the other container is unclear.',memories:[],verdict:null,inventory:{items:[{name:'oat milk',quantity:'small visible amount',status:'low'}],lowOrMissing:[{name:'oat milk',reason:'visible low amount',confidence:'high'},{name:'spinach',reason:'unclear bag',confidence:'low'},{name:'unknown widget',reason:'not in this catalog',confidence:'medium'}],uncertainties:['I cannot read the other label.']}}));
     const result=await handleCall(completed(),{action:'message',requestId:'fridge',message:'Can you look at this?',image:{buffer:png,mime:'image/png'}},now);
-    assert.deepEqual(result.proposedSkuIds.map(id=>comparisonGroupForSku(getSku(id)!)),['oat-milk']);
+    assert.deepEqual(result.proposedSkuIds,[],'A gap outside the sourced demo catalog is not silently filled with a synthetic SKU');
     assert.equal(result.inventory?.items[0].name,'oat milk');
     assert(calls[0].body.input[0].content.some((part:Json)=>part.type==='input_image'));
     assert(result.memories.some(line=>line.kind==='inventory'&&line.source==='from your call, 25 Oct 2026'));
@@ -347,7 +356,7 @@ test('one photo call inventories a shelf or fridge and code maps supported gaps 
 test('the same photo endpoint can compare user-identified products for their current profile',{concurrency:false},async()=>{
   await fixture(async({calls,setOutput})=>{
     setOutput(()=>({intent:'compare',message:'The cream kettle on the left matches the slow morning you described.',memories:[],verdict:kettleVerdict,inventory:null}));
-    const result=await handleCall(completed(),{action:'message',requestId:'compare',message:'Left is the Sunday pour-over kettle, right is Everyday enamel kettle. Which fits my morning?',image:{buffer:png,mime:'image/png'}},now);
+    const result=await handleCall(savedWorld(['kettle','kettleAlt']),{action:'message',requestId:'compare',message:'In my existing world, left is the Sunday pour-over kettle, right is Everyday enamel kettle. Which fits my morning?',image:{buffer:png,mime:'image/png'}},now);
     assert.equal(result.verdict?.pickSkuId,'kettle');assert.equal(result.verdict?.runnerUpSkuId,'kettleAlt');assert.deepEqual(result.proposedSkuIds,['kettle']);
     assert.equal(calls[0].input.mode,undefined);assert(calls[0].body.input[0].content.some((part:Json)=>part.type==='input_image'));
     assert.equal(result.profile.decisions[0].approvedAt,null);
@@ -378,9 +387,12 @@ test('call verdicts cannot turn absent reports into no-pilling guarantees or inv
 test('a grounding failure retries once with a concrete correction and can recover real runner-up citations',{concurrency:false},async()=>{
   await fixture(async({calls,setOutput})=>{
     setOutput(()=>({intent:'buy',message:'The cheaper pair has two pilling reports in the seeded sample.',memories:[],inventory:null,verdict:{pickSkuId:'socks',reason:'A red crew sock.',dissent:'One seeded review reports a thick toe seam.',citations:calls.length===1?['M04']:['M04','B04','B14'],runnerUpSkuId:'socksBudget',whyRunnerUpLost:'Two seeded reviews describe pilling.',clarifyingQuestion:null}}));
-    const result=await handleCall(completed(),{action:'message',requestId:'grounded-retry',message:'Find red socks under 8000 won; I care about pilling.'},now);
+    const result=await handleCall(savedWorld(['socks','socksBudget']),{action:'message',requestId:'grounded-retry',message:'In my existing world, find red socks under 8000 won; I care about pilling.'},now);
     assert.equal(calls.length,2);assert.equal(result.status,'ok');assert.deepEqual(result.verdict?.citations,['M04','B04','B14']);
     assert.match(calls[1].body.instructions,/B04 and B14/);assert.match(calls[1].body.instructions,/rather than guessing a replacement reason/);
+    const citationSchema=calls[0].body.text.format.schema.properties.verdict.anyOf.find((schema:Json)=>schema.type==='object').properties.citations;
+    assert.equal(citationSchema.maxItems,8);assert.deepEqual([...citationSchema.items.enum].sort(),calls[0].input.reviews.map((review:Json)=>review.id).sort());
+    assert(citationSchema.items.enum.includes('B04'));assert(citationSchema.items.enum.includes('B14'));assert(!citationSchema.items.enum.includes('kettle-013'));
   });
 });
 
@@ -391,6 +403,39 @@ test('owned requests are refused before model or credential access; ownership st
     const story=await handleCall(completed(),{action:'message',requestId:'story',message:'I use laundry detergent on Sundays.'},now);
     assert.equal(story.status,'ok');assert.equal(calls.length,1);assert.equal(story.memories[0].source,'from your call, 25 Oct 2026');
   });
+});
+
+test('ordinary shopping rejects a synthetic lipstick even though it exists elsewhere in the app',{concurrency:false},async()=>{
+ await fixture(async({calls,setOutput})=>{
+  setOutput(()=>({intent:'buy',answeredInterviewQuestion:false,message:'A rose lipstick.',memories:[],inventory:null,verdict:{...sourcedVerdict,pickSkuId:'roseLipstick',citations:getSku('roseLipstick')!.reviewIds.slice(0,2)}}));
+  const result=await handleCall(completed(),{action:'message',requestId:'no-fictional-lipstick',message:'Find me pink lipstick under 15000 won.'},now);
+  assert.equal(result.status,'fallback');assert.deepEqual(result.proposedSkuIds,[]);assert.equal(result.profile.decisions.length,0);assert.equal(calls.length,2);
+  assert.match(calls[1].body.instructions,/Unknown or disallowed pick/);assert(!calls[0].input.catalog.some((sku:Json)=>sku.id==='roseLipstick'));
+ });
+});
+
+test('saved-world products require an explicit world request and retain ordinary eligibility checks',()=>{
+ const profile=savedWorld(['kettle','kettleAlt']);
+ assert(!callCandidates(profile,'Find a lipstick').some(sku=>sku.id==='kettle'));
+ const world=callCandidates(profile,'Compare the kettles in my existing world');assert(world.some(sku=>sku.id==='kettle'));assert(!world.some(sku=>sku.id==='mugs'));
+ profile.owned.push({skuId:'kettle',source:'approved',acquiredAt:now.toISOString()});assert(!callCandidates(profile,'My existing world').some(sku=>sku.id==='kettle'));
+});
+
+test('old shopping receipts cannot resurrect synthetic recommendations outside an explicit saved world',{concurrency:false},async()=>{
+ await fixture(async({calls})=>{
+  for(const [index,{profile,message,skuId,expected}] of [
+   {profile:completed(),message:'Find me pink lipstick under 15000 won.',skuId:'roseLipstick',expected:[]},
+   {profile:savedWorld(['roseLipstick']),message:'Find me pink lipstick under 15000 won.',skuId:'roseLipstick',expected:[]},
+   {profile:savedWorld(['kettle','kettleAlt']),message:'Show the kettle in my existing world.',skuId:'kettle',expected:['kettle']},
+  ].entries()){
+   const input={action:'message' as const,requestId:'old-receipt-'+index,message};
+   const requestHash=createHash('sha256').update(JSON.stringify({action:input.action,message,image:null})).digest('hex');
+   profile.journey!.callReceipts=[{requestId:input.requestId,requestHash,status:'ok',conversationMode:'request',proposedSkuIds:[skuId]}];
+   profile.decisions=[{id:'old-decision',skuId,source:'earlier call',addedAt:now.toISOString(),lockedUntil:null,approvedAt:null}];
+   const result=await handleCall(profile,input,now);assert.deepEqual(result.proposedSkuIds,expected);assert.equal(result.profile.decisions[0].skuId,skuId,'Filtering replay does not rewrite purchase history');
+  }
+  assert.equal(calls.length,0,'Receipt replay remains idempotent without another model request');
+ });
 });
 
 test('the call rejects invented memory quotes and citations, retries once, and preserves the unanswered interview step',{concurrency:false},async()=>{

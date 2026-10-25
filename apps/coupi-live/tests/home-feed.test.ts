@@ -22,7 +22,7 @@ test('live home is driven by profile facts and never manufactures retailer deliv
   const profile=createProfile('home',now);profile.decisions=[decision('kettle')];
   const before=structuredClone(profile),feed=buildLiveHome(profile,now);
   assert.equal(feed.cards.length,1);assert.equal(feed.cards[0].sku?.id,'kettle');assert.equal(feed.cards[0].demo,false);
-  assert.match(feed.brief,/needs your OK/);assert.doesNotMatch(JSON.stringify(feed),/arriv|delivered|on its way/i);
+  assert.match(feed.brief,/needs your approval/);assert.doesNotMatch(JSON.stringify(feed),/arriv|delivered|on its way/i);
   assert.deepEqual(profile,before);
   profile.decisions[0].approvedAt=now.toISOString();
   const approved=buildLiveHome(profile,now);assert.equal(approved.cards[0].kind,'receipt');assert.match(approved.cards[0].line,/no order or payment/);assert.match(approved.brief,/nothing was purchased/);
@@ -31,7 +31,7 @@ test('live home is driven by profile facts and never manufactures retailer deliv
 test('night locks are represented honestly and never presented as ready to approve',()=>{
   const profile=createProfile('night',now);profile.pretend2am=true;profile.decisions=[{...decision('kettle'),lockedUntil:'2026-10-26T07:00:00+09:00'}];
   const home=buildLiveHome(profile,now);
-  assert.equal(home.mood,'night');assert.equal(home.cards[0].locked,true);assert.equal(home.cards[0].action,'See the plan');assert.match(home.brief,/held until morning/);assert.doesNotMatch(home.brief,/needs your OK/);
+  assert.equal(home.mood,'night');assert.equal(home.cards[0].locked,true);assert.equal(home.cards[0].action,'See the plan');assert.match(home.brief,/held until morning/);assert.doesNotMatch(home.brief,/needs your approval/);
 });
 
 test('quarantined items are excluded before the three-card limit and brief count',()=>{
@@ -48,7 +48,7 @@ test('live priorities keep pending choices ahead of receipts, with at most three
 
 test('a plan with an invalid or watching quote does not get a ready-for-approval brief',()=>{
   const profile=createProfile('watching',now);profile.decisions=[{...decision('kettle'),delegation:{budgetCap:100,watchPrice:true,haggle:false,bundle:false,scheduleDelivery:false,status:'watching',quotedPrice:100,discount:0,floorPrice:100,bundledDecisionIds:[],deliveryPlan:null,checkedAt:now.toISOString(),simulation:true}}];
-  assert.doesNotMatch(buildLiveHome(profile,now).brief,/needs your OK/);assert.match(buildLiveHome(profile,now).brief,/limits/);
+  assert.doesNotMatch(buildLiveHome(profile,now).brief,/needs your approval/);assert.match(buildLiveHome(profile,now).brief,/limits/);
 });
 
 test('a persisted commerce order links to tracking instead of duplicating its older approved Decision receipt',()=>{
@@ -66,7 +66,7 @@ test('a persisted pending compensation claim outranks ready Decisions and remain
   const profile=createProfile('claim-home',now);profile.decisions=['socks','lamp','apron'].map((id,index)=>decision(id,index));
   const order=persistedOrder(['kettle'],'delayed-order',true);profile.commerce={version:1,orders:[order],returns:[],refunds:[],receipts:[]};
   const feed=buildLiveHome(profile,now);assert.equal(feed.cards.length,3);assert.equal(feed.pendingCount,3);
-  assert.equal(feed.cards[0].kind,'problem');assert.equal(feed.cards[0].action,'Review claim');assert.equal(feed.cards[0].sourceId,order.id);assert.match(feed.cards[0].line,/₩3,000.*needs your OK/);assert.match(feed.brief,/compensation claim needs your OK/);
+  assert.equal(feed.cards[0].kind,'problem');assert.equal(feed.cards[0].action,'Review claim');assert.equal(feed.cards[0].sourceId,order.id);assert.match(feed.cards[0].line,/₩3,000.*awaits your approval/);assert.match(feed.brief,/compensation claim awaits your approval/);
   assert(feed.cards.slice(1).every(card=>card.kind==='decision'));
   order.compensation!.status='approved';const approved=buildLiveHome(profile,now);assert(!approved.cards.some(card=>card.kind==='problem'));assert.doesNotMatch(approved.brief,/compensation claim/);
 });
@@ -100,7 +100,7 @@ test('ratings dismiss followups without becoming catalog reviews, and nudge revi
   assert(!buildDemoHome(rated).cards.some(card=>card.kind==='followup'));assert(buildDemoHome(rated).cards.some(card=>card.id==='saved:7185725748'));
   const saved=applyHomeDemoAction(rated,{kind:'save',itemId:'7185725748'}),home=buildDemoHome(saved);
   assert(home.cards.some(card=>card.kind==='decision'&&card.reference?.id==='7185725748'));
-  assert.match(home.brief,/lipstick still needs/);assert.doesNotMatch(home.brief,/glasses/);assert.equal(homeReferences.length,count);
+  assert.match(home.brief,/lipstick is awaiting your approval/);assert.doesNotMatch(home.brief,/glasses/);assert.equal(homeReferences.length,count);
   assert.equal(applyHomeDemoAction(initial,{kind:'rate',orderId:'1042',rating:9}).orders.find(order=>order.id==='1042')!.rated,undefined);
 });
 

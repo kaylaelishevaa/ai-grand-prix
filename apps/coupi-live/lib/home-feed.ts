@@ -24,7 +24,7 @@ export function buildLiveHome(profile:Profile,now:Date):LiveHomeFeed {
   const pending=visible.filter(item=>!item.approvedAt).sort((a,b)=>Date.parse(a.addedAt)-Date.parse(b.addedAt));
   const cards:HomeCard[]=pending.map(item=>{
     const sku=getSku(item.skuId)!,locked=isDecisionLocked(profile,item,now),plan=item.delegation,issue=decisionApprovalIssue(item);
-    const line=locked?'held until 07:00 · morning-you gets a vote':plan?.status==='watching'?'watching your cap · price checks are simulated':issue||`${homeMoney(plan?.quotedPrice??sku.price)} · ${plan?.status==='haggled'?`−${homeMoney(plan.discount)} simulated saving`:'waiting for your OK'}`;
+    const line=locked?'held until 07:00 · morning-you gets a vote':plan?.status==='watching'?'watching your cap · price checks are simulated':issue||`${homeMoney(plan?.quotedPrice??sku.price)} · ${plan?.status==='haggled'?`−${homeMoney(plan.discount)} simulated saving`:'awaiting your approval'}`;
     return {id:'live:'+item.id,sourceId:item.id,kind:locked?'nudge':'decision',title:sku.name,line,action:locked?'See the plan':'Review',sku,locked,demo:false};
   });
   cards.sort((a,b)=>Number(!!a.locked)-Number(!!b.locked));
@@ -34,7 +34,7 @@ export function buildLiveHome(profile:Profile,now:Date):LiveHomeFeed {
     const first=order.lines[0];if(!first)continue;
     const sku=getSku(first.skuId);if(!sku||sku.sensitive||profile.quarantine.some(q=>q.category===sku.category))continue;
     const claim=order.compensation?.status==='pending';
-    cards.push({id:'order:'+order.id,sourceId:order.id,kind:claim?'problem':order.status==='delivered'?'receipt':'arrival',title:first.name+(order.lines.length>1?` + ${order.lines.length-1} more`:''),line:claim?'simulated delay · ₩3,000 claim needs your OK':`local order · ${order.status} · simulated delivery`,action:claim?'Review claim':'Track',sku,demo:false,href:`/orders/${encodeURIComponent(order.id)}/tracking`});
+    cards.push({id:'order:'+order.id,sourceId:order.id,kind:claim?'problem':order.status==='delivered'?'receipt':'arrival',title:first.name+(order.lines.length>1?` + ${order.lines.length-1} more`:''),line:claim?'simulated delay · ₩3,000 claim awaits your approval':`local order · ${order.status} · simulated delivery`,action:claim?'Review claim':'Track',sku,demo:false,href:`/orders/${encodeURIComponent(order.id)}/tracking`});
   }
   const rank={problem:0,decision:1,arrival:2,receipt:3,followup:3,nudge:4};cards.sort((a,b)=>rank[a.kind]-rank[b.kind]);
   const recent=visible.filter(item=>item.approvedAt&&Date.parse(item.approvedAt)<=now.getTime()&&!allOrders.some(order=>order.lines.some(line=>line.decisionId===item.id))).sort((a,b)=>Date.parse(b.approvedAt!)-Date.parse(a.approvedAt!));
@@ -42,8 +42,8 @@ export function buildLiveHome(profile:Profile,now:Date):LiveHomeFeed {
   const shown=cards.slice(0,3),night=localClock(effectiveNow(profile,now),profile.timezone).hour;
   const mood=night>=22||night<7?'night':shown.length?'normal':'quiet';
   const locked=pending.filter(item=>isDecisionLocked(profile,item,now)).length,ready=pending.filter(item=>!isDecisionLocked(profile,item,now)&&!decisionApprovalIssue(item)).length;
-  const brief=ready?`${ready===1?'one little plan needs':`${ready} little plans need`} your OK. ${locked?'the late-night ones can wait.':'i’ve kept the details close.'}`:locked?`it’s late. ${locked===1?'your little plan is':'your plans are'} held until morning. nothing needs deciding now.`:pending.length?'your plans need a little look first. nothing gets approved above your limits.':recent.length?'your approval is saved. nothing was purchased. shall we wander a little?':'nothing needs you right now. a little breathing room looks good on you.';
-  const orderBrief=orders.some(order=>order.compensation?.status==='pending')?'a little delivery detour in your simulation. the compensation claim needs your OK.':orders.length&&!pending.length?'your order is here with me. you can follow every step, at your pace.':brief;
+  const brief=ready?`${ready===1?'one little plan needs':`${ready} little plans need`} your approval. ${locked?'the late-night ones can wait.':'i’ve kept the details close.'}`:locked?`it’s late. ${locked===1?'your little plan is':'your plans are'} held until morning. nothing needs deciding now.`:pending.length?'your plans need a little look first. nothing gets approved above your limits.':recent.length?'your approval is saved. nothing was purchased. shall we wander a little?':'nothing needs you right now. a little breathing room looks good on you.';
+  const orderBrief=orders.some(order=>order.compensation?.status==='pending')?'a little delivery detour in your simulation. the compensation claim awaits your approval.':orders.length&&!pending.length?'your order is here with me. you can follow every step, at your pace.':brief;
   return {cards:shown,brief:orderBrief,mood,pendingCount:pending.length};
 }
 
@@ -71,7 +71,7 @@ export function buildDemoHome(data:HomeDemoState):{cards:HomeCard[];brief:string
     else if(order.status==='delivered'&&!order.rated)add(order.id,order.itemId,'followup',`${name} arrived`,'how does it feel?','Rate it');
     else if(order.status!=='delivered')add(order.id,order.itemId,'arrival',name,`prepared arrival · ${demoDeliveryTime(order.eta)}`,'Track');
   }
-  for(const item of data.decisions)if(item.status==='waiting'){const p=referenceById(item.itemId);if(p)add('decision:'+item.itemId,item.itemId,'decision',referenceName(p),`${homeMoney(p.price)} reference · waiting for your OK`,'Review');}
+  for(const item of data.decisions)if(item.status==='waiting'){const p=referenceById(item.itemId);if(p)add('decision:'+item.itemId,item.itemId,'decision',referenceName(p),`${homeMoney(p.price)} reference · awaiting your approval`,'Review');}
   const problem=cards.some(card=>card.kind==='problem');
   if(!problem){
     for(const item of data.held)if(!item.removed){const p=referenceById(item.itemId);if(p)add('held:'+item.itemId,item.itemId,'nudge',referenceName(p),'held until 7am · morning-you gets a vote','A closer look','Added at 23:10 in this prepared night. Held until 07:00.');}
@@ -81,7 +81,7 @@ export function buildDemoHome(data:HomeDemoState):{cards:HomeCard[];brief:string
   cards.sort((a,b)=>priority[a.kind]-priority[b.kind]);
   let nudged=false;const shown=cards.filter(card=>card.kind!=='nudge'||(!nudged&&(nudged=true))).slice(0,problem?2:3);
   const arrival=shown.find(card=>card.kind==='arrival'),decision=shown.find(card=>card.kind==='decision');
-  const decisionBrief=decision?.reference?.productType==='glasses'?'those glasses still need your OK.':`your ${decision?.reference?.productType||'little find'} still needs your OK.`;
+  const decisionBrief=decision?.reference?.productType==='glasses'?'Your selected glasses are awaiting your approval.':`Your selected ${decision?.reference?.productType||'item'} is awaiting your approval.`;
   const brief=problem?'your chair is running late. i found a possible swap. your say, as always.':decision?`${arrival?`your ${arrival.reference?.productType||'little find'} is on its way. `:''}${decisionBrief}`:shown.some(c=>c.id.startsWith('held:'))?'it’s late. i’ll hold the lipstick until morning. you get some sleep.':arrival?`${data.scenario==='first'?'that was a lovely first hello. ':''}your ${arrival.reference?.productType||'little find'} is on its way in this story.`:shown.some(c=>c.kind==='followup')?'a little follow-up. how did your lipstick feel?':'nothing needs you today. enjoy it.';
   return {cards:shown,brief};
 }

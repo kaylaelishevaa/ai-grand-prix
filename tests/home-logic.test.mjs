@@ -297,7 +297,7 @@ test('section 14 card copy and short names are exact', () => {
   const card = (state, type, when = now) => buildCards(createDemoScenario(data, state, when), when).find(c => c.type === type);
   const copy = c => [c.title, c.line, c.action];
   assert.deepEqual(copy(card('normal', 'arrival')), ['Desk lamp arrives today', 'By 12:00', 'Track order']);
-  assert.deepEqual(copy(card('normal', 'decision')), ['Blue-light glasses', '₩19,900 · waiting for your OK', 'Review']);
+  assert.deepEqual(copy(card('normal', 'decision')), ['Blue-light glasses', '₩19,900 · awaiting your approval', 'Review']);
   assert.deepEqual(copy(card('normal', 'nudge')), ['Lip Monster 03 is back in stock', 'You saved it on Wednesday', 'View']);
   assert.deepEqual(copy(card('problem', 'problem')), ['Your chair is running late', 'Now Friday, not Wednesday. A similar chair can come tomorrow for ₩37,930 more.', 'Get it tomorrow']);
   assert.deepEqual(copy(card('night', 'nudge', new Date(2026, 9, 26, 23))), ['MAC Powder Kiss', "I'll ask you again at 7am · ₩35,700", 'Remove']);

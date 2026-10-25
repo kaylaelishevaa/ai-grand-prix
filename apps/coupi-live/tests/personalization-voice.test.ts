@@ -7,22 +7,21 @@ import {teammateProfileContext} from '../lib/server/teammate-voice';
 import {sessionConfiguration} from '../lib/teammate/nook-voice.mjs';
 import {liveCallBody,publicCallResult} from '../lib/call-bridge';
 import type {CallResponse} from '../lib/journey-types';
-import {FIRST_CALL_QUESTIONS} from '../lib/server/call';
 
-test('reconnecting voice resumes the draft question without promoting draft facts to saved memory',()=>{
+test('reconnecting voice starts shopping without exposing or discarding unfinished draft facts',()=>{
   let profile=handlePersonalization(createProfile('draft-voice'),{action:'start',requestId:'start'}).profile;
   const draft=profile.journey!.personalizationDraft!;
   const line=remember(profile,{id:'candidate',text:'I draw by my bedroom window.',source:'from our first call',confidence:.9,kind:'call'}).memoryLines.at(-1)!;
   draft.candidates=[line];draft.answerCount=3;
   const context=teammateProfileContext(profile);
-  assert.equal(context.interview.question,FIRST_CALL_QUESTIONS[3]);assert.equal(context.interview.answeredCount,3);
-  assert.equal(context.personalization.active,true);assert.equal(context.personalization.draftMemories?.[0].text,line.text);
+  assert.equal(context.interview.question,'');assert.equal(context.interview.answeredCount,3);
+  assert.equal(context.personalization.active,false);assert.deepEqual(context.personalization.draftMemories,[]);assert.equal(draft.candidates[0].text,line.text);
   assert.equal(context.memoryLines.length,0);assert(!JSON.stringify(context).includes(draft.id));
   profile.quarantine.push({category:'wardrobe',sensitive:true,note:'private'});
   draft.candidates=[{...line,text:'I want a midi dress.'}];
   assert.equal(teammateProfileContext(profile).personalization.draftMemories?.length,0);
   draft.answerCount=5;draft.reviewReady=true;
-  const ready=teammateProfileContext(profile);assert.equal(ready.interview.active,false);assert.equal(ready.interview.question,'');assert.equal(ready.personalization.draft_pending,true);
+  const ready=teammateProfileContext(profile);assert.equal(ready.interview.active,false);assert.equal(ready.interview.question,'');assert.equal(ready.personalization.draft_pending,false);
   profile.journey!.interviewPaused=true;assert.equal(teammateProfileContext(profile).personalization.active,false);
 });
 
@@ -30,7 +29,7 @@ test('Realtime review tools remain draft-only, bounded and optional',()=>{
   const profile=handlePersonalization(createProfile('draft-tools'),{action:'start',requestId:'start'}).profile;
   const configuration=sessionConfiguration({},teammateProfileContext(profile));
   const draft=configuration.tools.find(tool=>tool.name==='draft_preferences') as unknown as {description:string;parameters:Record<string,any>},skip=configuration.tools.find(tool=>tool.name==='skip_personalization') as unknown as {parameters:Record<string,any>};
-  assert(draft&&skip);assert.match(draft.description,/never saves/);assert.match(configuration.instructions,/Only the shopper pressing Build my worlds/);
+  assert(draft&&skip);assert.match(draft.description,/never saves/);assert.doesNotMatch(configuration.instructions,/FIRST CALL OVERRIDE|OPTIONAL DISCOVERY REVIEW/);assert.match(configuration.instructions,/Every public call starts directly with shopping/);
   assert.equal(draft.parameters.additionalProperties,false);assert.deepEqual(draft.parameters.required,['interests','vibe','budget','story']);
   const properties=draft.parameters.properties as Record<string,any>;
   assert.equal(properties.story.maxLength,1200);assert.equal(properties.budget.maximum,10000000);assert.equal(properties.interests.maxItems,5);

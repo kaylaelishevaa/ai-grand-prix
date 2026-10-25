@@ -5,11 +5,11 @@ const DAY = 24 * HOUR;
 const priorities = { problem: 0, decision: 1, arrival: 2, followup: 3, nudge: 4 };
 export const HOME_MOODS = { first: 'excited', normal: 'calm', problem: 'attentive', quiet: 'relaxed', night: 'sleepy', loading: 'idle', offline: 'calm' };
 export const HOME_LINES = {
-  normal: 'Morning, Mina. Your desk lamp arrives today, and your glasses need your OK.',
-  problem: 'Your chair is running late, Mina. I found one that can come tomorrow.',
-  first: 'That was fun, Mina! Your lipstick arrives tomorrow morning.',
-  quiet: 'Nothing needs you today, Mina. Enjoy it.',
-  night: "It's late, Mina. I'll hold the lipstick until morning."
+  normal: 'Morning, Kayleen. Your desk lamp arrives today, and your selected glasses are awaiting your approval.',
+  problem: 'Your chair is running late, Kayleen. I found one that can come tomorrow.',
+  first: 'That was fun, Kayleen! Your lipstick arrives tomorrow morning.',
+  quiet: 'Nothing needs you today, Kayleen. Enjoy it.',
+  night: "It's late, Kayleen. I'll hold the lipstick until morning."
 };
 export const PRESENTER_STATES = ['normal', 'problem', 'first', 'night'];
 export const money = value => '₩' + Number(value).toLocaleString('en-US');
@@ -72,9 +72,9 @@ export function buildCards(data, now) {
     const product = products.get(String(decision.item));
     if (!product) continue;
     const expiring = time(decision.expiresAt) >= current && time(decision.expiresAt) <= current + DAY;
-    add('decision', decision.item, decision, { line: money(product.price) + (expiring ? ' · quote expires ' + clock(decision.expiresAt) : ' · waiting for your OK'), action: 'Review',
+    add('decision', decision.item, decision, { line: money(product.price) + (expiring ? ' · quote expires ' + clock(decision.expiresAt) : ' · awaiting your approval'), action: 'Review',
       urgency: expiring ? time(decision.expiresAt) : Infinity,
-      brief: `Your ${noun(product)} ${expiring ? 'quote expires at ' + clock(decision.expiresAt) : 'need' + (product.productType === 'glasses' ? '' : 's') + ' your OK'}` });
+      brief: `Your ${noun(product)} ${expiring ? 'quote expires at ' + clock(decision.expiresAt) : (product.productType === 'glasses' ? 'are' : 'is') + ' awaiting your approval'}` });
   }
   const problems = candidates.some(c => c.type === 'problem');
   // Evidence-backed nudges are only considered after all higher priorities.

@@ -11,6 +11,8 @@
   const requiresContext=params.get('embedded')==='1'||params.get('interview')==='1'||params.get('intent')==='personalize';
   let availabilityReady=false,availabilityChecking=false,checkedTurnId='',interviewContext=null,bridgePanelVisible=false;
   const appPrompts=new Set(),uploadedPhotos=new Map();
+  const approvedCatalog=new Map((window.COUPANG_PRODUCTS||[]).map(product=>[String(product.id),product])),checkedQueries=new Map(),checkedEvidence=new Map();
+  let checkedRequestText='';
   let pendingPhoto=Promise.resolve(),bridgeTurnEpoch=0;
   function reportMedia(){bridge.state({phase,cameraActive:camera.running,microphoneActive:!!voice?.call?.microphone?.getAudioTracks?.().some(track=>track.readyState==='live'&&track.enabled)});}
   function sendAppPrompt(value){appPrompts.add(value);const sent=voice.sendText(value);if(!sent)appPrompts.delete(value);return sent;}
@@ -138,6 +140,7 @@
       const frame=snapshots.capture('validated-turn'),image=frame?.images?.find(image=>image.kind==='camera');
       if(image)photo={dataUrl:image.dataUrl,mime:'image/jpeg',capturedAt:frame.metadata.capturedAt};
     }
+    if(entry.role==='user'&&entry.final&&entry.synthetic!==true&&entry.superseded!==true&&entry.delivery!=='failed')checkedRequestText=entry.text;
     const prepared=forwardTurn(entry,photo);
     if(entry.role==='user'&&entry.final&&!entry.superseded)pendingPhoto=prepared||Promise.resolve();
 
@@ -198,7 +201,7 @@
     searchController?.abort();searchController=null;$('catalog-search-submit').disabled=false;$('catalog-refresh').disabled=false;
     if(ending)return;
     const completed=markCompleted&&phase==='active'&&!document.hidden;
-    ending=true;generation++;bridge.cancelPreferences();hideBridgePanel();appPrompts.clear();uploadedPhotos.clear();pendingPhoto=Promise.resolve();bridgeTurnEpoch++;previewEpoch++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;formatBusy=false;composerWanted=false;
+    ending=true;generation++;bridge.cancelPreferences();hideBridgePanel();appPrompts.clear();uploadedPhotos.clear();checkedQueries.clear();checkedEvidence.clear();checkedRequestText='';pendingPhoto=Promise.resolve();bridgeTurnEpoch++;previewEpoch++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;formatBusy=false;composerWanted=false;
     snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});
     loadingEpoch=0;loadingProductId=null;$('product-try').disabled=false;$('answer-call').disabled=false;show('tryon-chip',false);show('live-caption',false);connectedAt=null;
     screen(message==='Call ended'?'incoming':'ended');cameraUI();selectEntry();personalization?.render();
@@ -304,14 +307,14 @@
     text('product-title',p.name);text('product-category',discovery.label||typeLabels[p.productType]);
     const price=$('product-price');price.replaceChildren();const amount=document.createElement('span');amount.textContent=priceText(p);const note=document.createElement('small');note.textContent=isLiveListing(p)?'listed price':'reference price';price.append(amount,note);
     const position=discovery.products.findIndex(x=>String(x.id)===String(p.id))+1;text('product-position',`${position} / ${Math.min(discovery.limit,discovery.total)}`);
-    text('product-selected-note','Selected · '+(p.brand||typeLabels[p.productType]||'Coupang'));text('product-try',p.preview?.available===false?'No preview':'Try it');$('product-try').disabled=p.preview?.available===false;
+    text('product-selected-note','Selected · '+(checkedEvidence.get(String(p.id))?.callId===checkedTurnId&&checkedEvidence.get(String(p.id))?.primary?'Coupi’s checked pick':p.brand||typeLabels[p.productType]||'Coupang'));text('product-try',p.preview?.available===false?'No preview':'Try it');$('product-try').disabled=p.preview?.available===false;
     sync();
   }
   function recommend(list,message,options={}){if(!['connecting','active'].includes(phase))return;discovery.recommend(list,options);catalogType=discovery.productType||catalogType;adoptDiscovery({resetScroll:true});scrollToCollection();if($('catalog-dialog').open)renderCatalog();if(!store.current)toast('No matching listing in this catalog. Try another colour or budget.');if(bridgePanelVisible)showBridgePanel();}
   function updateBag(){text('cart-count',String(store.cart.size));$('cart-button').setAttribute('aria-label',`Open bag, ${store.cart.size} items`);sync();}
   function addToBag(p){p=trusted(p);if(!p)return;store.cart.set(String(p.id),p);updateBag();toast('Selected product added to your bag');}
   function nextStyle(){const previous=store.current;const next=discovery.nextCollection();if(!next.changed){toast('No related collection within these preferences. Ask Coupi for a new direction.');return false;}if(previous)store.skipped.push(String(previous.id));adoptDiscovery({resetScroll:true});if($('catalog-dialog').open)renderCatalog();toast(discovery.label);sync();return true;}
-  function productDetails(p=store.current){p=trusted(p);if(!p)return;store.detailProduct=p;text('detail-title',p.name);const img=$('detail-image');img.hidden=!p.image;if(p.image){img.src=p.image;img.alt=p.name;}const attributes=(p.verifiedAttributes||[]).filter(x=>!/^Preview depicts/.test(x)).slice(0,4).join(' · ');const introduction=p.description?.trim()||attributes;const price=Number.isFinite(p.price)?(isLiveListing(p)?'Listed price: ':'Reference price: ')+priceText(p)+'.':'Price unavailable.';text('detail-body',(introduction?introduction+(/[.!?。！？]$/u.test(introduction)?' ':'. '):'')+price);text('detail-preview-note',!p.image?'No preview photo is available for this product.':p.preview?.available===false?previewUnavailable(p):p.preview?.previewNote||(p.category==='makeup'?'Approximate shade preview; lighting and finish vary.':'Placement and fit are approximate.'));$('detail-link').href=p.url;$('detail-try').disabled=(!p.image||p.preview?.available===false);text('detail-try',(!p.image||p.preview?.available===false)?'Preview unavailable':'Try this product');window.CoupiEvidence.renderReviews($('detail-reviews'),p);text('detail-review-shortcut',window.CoupiEvidence.reviewStats(p).label+' ↓');text('detail-compare',discovery.comparison.some(x=>x.id===p.id)?'Remove compare':'Compare');if(!$('details-dialog').open)$('details-dialog').showModal();$('details-dialog').scrollTop=0;sync();}
+  function productDetails(p=store.current){p=trusted(p);if(!p)return;store.detailProduct=p;text('detail-title',p.name);const img=$('detail-image');img.hidden=!p.image;if(p.image){img.src=p.image;img.alt=p.name;}const attributes=(p.verifiedAttributes||[]).filter(x=>!/^Preview depicts/.test(x)).slice(0,4).join(' · ');const introduction=p.description?.trim()||attributes;const price=Number.isFinite(p.price)?(isLiveListing(p)?'Listed price: ':'Reference price: ')+priceText(p)+'.':'Price unavailable.';text('detail-body',(introduction?introduction+(/[.!?。！？]$/u.test(introduction)?' ':'. '):'')+price);text('detail-preview-note',!p.image?'No preview photo is available for this product.':p.preview?.available===false?previewUnavailable(p):p.preview?.previewNote||(p.category==='makeup'?'Approximate shade preview; lighting and finish vary.':'Placement and fit are approximate.'));$('detail-link').href=p.url;$('detail-try').disabled=(!p.image||p.preview?.available===false);text('detail-try',(!p.image||p.preview?.available===false)?'Preview unavailable':'Try this product');window.CoupiEvidence.renderReviews($('detail-reviews'),p);appendCheckedDetails(p);text('detail-review-shortcut',window.CoupiEvidence.reviewStats(p).label+' ↓');text('detail-compare',discovery.comparison.some(x=>x.id===p.id)?'Remove compare':'Compare');if(!$('details-dialog').open)$('details-dialog').showModal();$('details-dialog').scrollTop=0;sync();}
   function updateCompare(){text('inline-compare-count',String(discovery.comparison.length));$('inline-compare').disabled=discovery.comparison.length<2;text('compare-count',String(discovery.comparison.length));$('compare-open').disabled=discovery.comparison.length<2;sync();}
   function toggleCompare(p){const result=discovery.toggleCompare(p.id);if(!result.ok){toast(result.error);return;}updateCompare();renderInline();if($('catalog-dialog').open)renderCatalog();if($('compare-dialog').open)renderComparison();if(store.detailProduct)text('detail-compare',discovery.comparison.some(x=>x.id===store.detailProduct.id)?'Remove compare':'Compare');}
   function setCollectionView(visible,{resetScroll=false}={}){
@@ -336,7 +339,7 @@
       const brand=document.createElement('span');brand.className='inline-item-brand';brand.textContent=p.brand||'COUPANG PICK';
       const name=document.createElement('strong');name.className='inline-item-name';name.textContent=p.name;
       const price=document.createElement('span');price.className='inline-item-price';price.textContent=priceText(p);const ref=document.createElement('small');ref.textContent=isLiveListing(p)?'listed':'reference';price.append(ref);
-      const selected=document.createElement('span');selected.className='inline-item-selected';selected.textContent=row.dataset.selected==='true'?'● Selected product':'Tap to select';
+      const selected=document.createElement('span');selected.className='inline-item-selected';const checked=checkedEvidence.get(String(p.id));selected.textContent=checked?.callId===checkedTurnId&&checked.primary?(row.dataset.selected==='true'?'● Selected · Coupi’s checked pick':'Coupi’s checked pick'):row.dataset.selected==='true'?'● Selected product':'Tap to select';
       select.append(img,brand,name,price,selected);select.onclick=()=>selectProduct(p);
       const actions=document.createElement('div');actions.className='inline-item-actions';
       for(const [label,action] of [['Details',()=>productDetails(p)],['Try on',async()=>{selectProduct(p);closeDialogs();backToCamera();try{await tryOn(p);}catch(error){notice(error.message);}}],['Add to bag',()=>addToBag(p)],['Compare',()=>toggleCompare(p)]]){
@@ -537,18 +540,53 @@
     if(result.proposedSkuIds.includes(product.skuId))card.append(checkedNode('p','checked-note','PENDING YOUR APPROVAL · nothing ordered'));
     card.append(checkedOpen(product.skuId,id));return card;
   }
+  function appendCheckedDetails(product){
+    const evidence=checkedEvidence.get(String(product.id));if(!evidence)return;
+    const section=checkedNode('section','checked-product'),result=evidence.result;
+    section.append(checkedNode('h3','checked-name','Why Coupi suggested this'));
+    if(evidence.primary&&result.verdict){
+      if(result.verdict.reason)section.append(checkedNode('p','checked-reason',result.verdict.reason));
+      if(result.verdict.dissent)section.append(checkedNode('p','checked-dissent',result.verdict.dissent));
+      const citations=checkedNode('div','checked-citations');
+      for(const [index,reviewId] of result.verdict.citations.entries())citations.append(checkedOpen(String(product.id),evidence.callId,reviewId,'Checked review '+(index+1)+' ↗'));
+      if(citations.children.length)section.append(citations);
+    }else if(result.verdict?.runnerUpSkuId===String(product.id)&&result.verdict.whyRunnerUpLost)section.append(checkedNode('p','checked-reason',result.verdict.whyRunnerUpLost));
+    else if(result.message)section.append(checkedNode('p','checked-reason',result.message));
+    if(result.inventory){const list=checkedNode('ul','checked-inventory');for(const item of result.inventory.items)list.append(checkedNode('li','',item.name+(item.quantity?' · '+item.quantity:'')+' — '+item.status));section.append(list);for(const gap of result.inventory.lowOrMissing)section.append(checkedNode('p','checked-gap',gap.name+' · '+gap.reason));for(const uncertain of result.inventory.uncertainties)section.append(checkedNode('p','checked-note',uncertain));}
+    $('detail-body').append(section);
+  }
+  function displayCheckedCatalog(result,callId){
+    if(result.status!=='ok')return false;
+    const pick=result.verdict?.pickSkuId,allowed=new Set([pick,result.verdict?.runnerUpSkuId,...result.proposedSkuIds].filter(Boolean));
+    const candidates=result.products.filter(product=>allowed.has(product.skuId));
+    // Exact approved IDs unlock local media. A world-only or mixed result keeps its checked world flow.
+    if(!candidates.length||candidates.some(product=>!approvedCatalog.has(String(product.skuId))))return false;
+    const seeds=candidates.map(product=>approvedCatalog.get(String(product.skuId))).sort((a,b)=>(String(b.id)===pick?1:0)-(String(a.id)===pick?1:0));
+    for(const product of seeds){store.catalog.set(String(product.id),product);discovery.catalog.set(String(product.id),product);checkedEvidence.set(String(product.id),{callId,result,primary:String(product.id)===pick});}
+    const query=checkedQueries.get(callId)||'',first=seeds[0],probe=new window.CoupiDiscovery([...approvedCatalog.values()],{storage:null});
+    const sameType=seeds.every(product=>product.productType===first.productType);
+    let options={mixed:true,sourceOnly:true,groupLabel:'Your checked picks'},related=seeds;
+    if(sameType){probe.recommend(seeds,{query,productType:first.productType,category:first.category});if(probe.products.some(product=>String(product.id)===String(first.id))){options={query,productType:first.productType,category:first.category,sourceOnly:true};related=probe.products;}}
+    for(const product of related){store.catalog.set(String(product.id),product);discovery.catalog.set(String(product.id),product);}
+    hideBridgePanel();recommend(related,result.message,options);
+    // The winner is checked; extra rows are sourced alternatives from the existing constrained catalog.
+    if(related.length>seeds.length)text('inline-description','Similar sourced picks. Coupi’s checked pick is marked; tap any product for details or try-on.');
+    if($('details-dialog').open&&store.detailProduct)productDetails(store.detailProduct);
+    return true;
+  }
   bridge.subscribe(event=>{
     if(event.state==='personalization-context')return;
     if(!['active','connecting'].includes(phase))return;
     const root=$('validated-call-content');
     if(event.state==='pending'){
-      checkedTurnId=event.id;root.replaceChildren();show('validated-call',true);show('world-picks',false);showBridgePanel();
+      checkedTurnId=event.id;if(!checkedQueries.has(event.id))checkedQueries.set(event.id,checkedRequestText);if(checkedQueries.size>24)checkedQueries.delete(checkedQueries.keys().next().value);root.replaceChildren();show('validated-call',true);show('world-picks',false);showBridgePanel();
       $('validated-call').dataset.state='pending';text('validated-call-status','CHECKING YOUR WORDS · catalog + your context');controlsExpanded=true;updateFocusUI();if(event.retry)voice.resolveAppTurn?.();return;
     }
     if(event.id!==checkedTurnId)return;
     const result=event.result;root.replaceChildren();$('validated-call').dataset.state=event.state;
     if(event.state==='error'){text('validated-call-status','COULDN’T CHECK THAT');root.append(checkedNode('p','checked-reason',event.error||result.message));return;}
     interviewContext={answeredCount:result.interviewCount||0,nextQuestion:result.question||'',complete:result.interviewComplete===true,paused:result.conversationMode==='request',conversationMode:result.conversationMode,worldReady:result.worldReady===true};sync();
+    if(displayCheckedCatalog(result,event.id))return;
     const substantive=result.conversationMode==='request'||result.verdict||result.inventory||result.status!=='ok'||result.proposedSkuIds.length;
     show('validated-call',!!substantive);if(!substantive){hideBridgePanel();show('product-zone',!!store.current||viewingCollection);return;}showBridgePanel();
     text('validated-call-status',result.status==='blocked'?'LOOKING OUT FOR YOU':result.status==='fallback'?'NOT ENOUGH EVIDENCE':'CHECKED FOR YOU');

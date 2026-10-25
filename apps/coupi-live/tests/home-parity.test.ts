@@ -26,7 +26,7 @@ test('first-call check count uses recent surviving safe memories and never inven
 test('live cards retain exact catalog photos and no invented delivery details',()=>{
   const p=profile(),sku=getSku('1814412512')!;assert(sku.image);
   p.decisions=[{id:'sample-plan',skuId:sku.id,source:'from your call',addedAt:now.toISOString(),lockedUntil:null,approvedAt:null}];
-  const html=render(p);assert(html.includes(sku.image));assert.match(html,/waiting for your OK/);assert.doesNotMatch(html,/arrives tomorrow|delivery by|Mina/);
+  const html=render(p);assert(html.includes(sku.image));assert.match(html,/awaiting your approval/);assert.doesNotMatch(html,/arrives tomorrow|delivery by|Mina/);
 });
 
 test('empty main-style world card exposes only non-private owned products',()=>{

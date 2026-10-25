@@ -87,7 +87,7 @@ test('a sourced product keeps its actual identity and historical provenance in t
   assert.equal(product.image,sku.image);assert.equal(product.sourceUrl,sku.sourceUrl);assert.match(product.delivery,/unknown/i);assert.deepEqual(output.verdict!.citations,[]);
 });
 
-test('a genuine bridged frame uses the same first-call route, creates one proposal and replays without another model request',{concurrency:false},async()=>{
+test('a genuine bridged frame uses the same shopping route, creates one proposal and replays without another model request',{concurrency:false},async()=>{
   const root=await mkdtemp(path.join(tmpdir(),'coupi-call-bridge-'));
   const names=['COUPI_DATA_DIR','COUPI_CACHE_DIR','OPENAI_API_KEY','OPENAI_MODEL','DEMO_OFFLINE'] as const;
   const before=Object.fromEntries(names.map(name=>[name,process.env[name]])),originalFetch=globalThis.fetch,originalInfo=console.info;
@@ -96,16 +96,16 @@ test('a genuine bridged frame uses the same first-call route, creates one propos
   globalThis.fetch=(async(url,init)=>{
     assert.equal(String(url),'https://api.openai.com/v1/responses');calls++;
     const body=JSON.parse(String(init?.body)),input=JSON.parse(body.input[0].content[0].text);
-    assert.equal(input.message,'A small kettle, please.');assert.equal(input.interview.active,true);
+    assert.equal(input.message,'A pink lipstick, please.');assert.equal(input.interview.active,false);
     assert(body.input[0].content.some((part:{type:string;image_url?:string})=>part.type==='input_image'&&part.image_url===photo.dataUrl));
-    return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({intent:'buy',answeredInterviewQuestion:false,message:'Here is a compact kettle.',memories:[],verdict,inventory:null})}]}],usage:{input_tokens:10,output_tokens:10}});
+    return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({intent:'buy',answeredInterviewQuestion:false,message:'Here is the sourced Pink Sand lipstick.',memories:[],verdict:{...verdict,pickSkuId:'1814412512-pink-sand',reason:'The listing names Pink Sand.',dissent:'Current stock is unverified.',citations:[],runnerUpSkuId:null,whyRunnerUpLost:''},inventory:null})}]}],usage:{input_tokens:10,output_tokens:10}});
   }) as typeof fetch;
   try{
-    const turn=parseLiveCallTurn({...message,photo})!,origin='http://localhost:3007';
+    const turn=parseLiveCallTurn({...message,text:'A pink lipstick, please.',photo})!,origin='http://localhost:3007';
     async function send(){const input=liveCallBody(turn);const response=await callRoute(new Request(origin+'/api/call',{method:'POST',headers:{origin,cookie,...input.headers},body:input.body}));if(response.headers.has('set-cookie'))cookie=response.headers.get('set-cookie')!.split(';')[0];assert.equal(response.status,200);return await response.json() as CallResponse;}
-    const first=await send();assert.equal(first.conversationMode,'request');assert.equal(first.interviewCount,0);assert.equal(first.interviewComplete,false);assert.deepEqual(first.proposedSkuIds,['kettle']);
+    const first=await send();assert.equal(first.conversationMode,'request');assert.equal(first.interviewCount,0);assert.equal(first.interviewComplete,true);assert.deepEqual(first.proposedSkuIds,['1814412512-pink-sand']);
     assert.equal(first.profile.journey?.callReceipts?.[0].requestId,'live-call:'+turn.id);assert.equal(first.profile.decisions.length,1);assert.equal(first.profile.decisions[0].approvedAt,null);
     assert(!JSON.stringify(publicCallResult(first)).includes(photo.dataUrl));assert(!('profile'in publicCallResult(first)));
-    const replay=await send();assert.equal(calls,1);assert.equal(replay.profile.decisions.length,1);assert.equal(replay.profile.revision,first.profile.revision);assert.deepEqual(replay.proposedSkuIds,['kettle']);
+    const replay=await send();assert.equal(calls,1);assert.equal(replay.profile.decisions.length,1);assert.equal(replay.profile.revision,first.profile.revision);assert.deepEqual(replay.proposedSkuIds,['1814412512-pink-sand']);
   }finally{globalThis.fetch=originalFetch;console.info=originalInfo;for(const name of names){if(before[name]===undefined)delete process.env[name];else process.env[name]=before[name];}await rm(root,{recursive:true,force:true});}
 });

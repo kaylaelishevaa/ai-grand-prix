@@ -12,7 +12,7 @@ const scale=z.object({x:z.number().min(.04).max(7.6),y:z.number().min(.04).max(7
 const angle=z.number().min(-Math.PI).max(Math.PI);
 const rotation=z.object({x:angle,y:angle,z:angle}).strict();
 const nodeFields={id:z.string().regex(/^[a-z][a-z0-9-]{0,39}$/),label:z.string().min(1).max(60),material:z.enum(BLUEPRINT_MATERIALS),position,scale};
-const nodeSchema=z.object({...nodeFields,shape:z.enum(BLUEPRINT_SHAPES),rotation,motion:z.enum(['none','sway','float']),support:z.boolean()}).strict();
+const nodeSchema=z.object({...nodeFields,shape:z.enum(BLUEPRINT_SHAPES),rotation,motion:z.enum(['none','sway','float']),support:z.boolean().describe('True only for a box or cylinder with rotation.x=0, rotation.z=0 and motion=none. Oval, arch, sphere, leaf, tapered, ring and wallArc are decoration: support=false. Use a shallow upright cylinder for an oval tabletop.')}).strict();
 const point=z.object({x:z.number().min(-3.8).max(3.8),z:z.number().min(-3.3).max(3.3)}).strict();
 const palette=z.object({ground:hex,structure:hex,wood:hex,foliage:hex,accent:hex,water:hex}).strict();
 export const sceneBlueprintSchema=z.object({
@@ -148,8 +148,11 @@ export function compileSceneBlueprint(value:unknown,skuIds:string[]):WorldBluepr
   const blueprint=sceneBlueprintSchema.parse(value);
   const ids=blueprint.anchors.map(anchor=>anchor.skuId);
   if(new Set(ids).size!==ids.length||ids.length!==skuIds.length||skuIds.some(id=>!ids.includes(id)))throw new BlueprintValidationError('Blueprint anchors must match every selected product exactly once.');
-  // Never shrink, reshape or move the scenery in X/Z. Only resolve floor penetration in Y.
+  // Never shrink, reshape or move the scenery in X/Z. Unsupported primitives
+  // remain exactly as authored decoration; they cannot carry product anchors.
+  // The existing placement pass below reassigns those anchors to valid surfaces.
   for(const node of blueprint.nodes){
+    if(node.support&&(!['box','cylinder'].includes(node.shape)||Math.abs(node.rotation.x)>EPS||Math.abs(node.rotation.z)>EPS||node.motion!=='none'))node.support=false;
     const bottom=Math.min(...blueprintNodeCorners(node).map(point=>point.y));
     if(bottom<BLUEPRINT_FLOOR_Y-EPS)node.position.y+=BLUEPRINT_FLOOR_Y-bottom;
   }

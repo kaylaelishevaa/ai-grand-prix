@@ -85,19 +85,6 @@ test('the wrapper always includes one static-src iframe before a profile exists,
   h.props.profile=draftProfile();h.props.visible=true;h.render();assert.equal(flatten(h.tree()).filter(node=>node.type==='iframe').length,1);assert.deepEqual(h.navigations,[]);h.unmount();
 });
 
-test('actual parent Strict Mode bootstrap waits for the live mount and retries the same start receipt',{concurrency:false},async()=>{
-  const initial=fresh(),requests:{body:any;signal:AbortSignal;resolve:(value:Response)=>void}[]=[];
-  const h=componentHarness(initial,((_url,init)=>new Promise(resolve=>requests.push({body:JSON.parse(String(init?.body)),signal:init!.signal as AbortSignal,resolve}))) as typeof fetch);
-  await tick();assert.equal(requests.length,1);assert.equal(h.ready(),false);
-  h.strictReplay();assert.equal(requests[0].signal.aborted,true);
-  const saved=handlePersonalization(initial,requests[0].body);requests[0].resolve(Response.json(saved));await tick();await tick();
-  assert.equal(h.profiles.length,0,'The old mount cannot accept its successful but cancelled response');assert.equal(requests.length,2);assert.equal(requests[1].body.requestId,requests[0].body.requestId);
-  requests[1].resolve(Response.json(handlePersonalization(saved.profile,requests[1].body)));await tick();await tick();
-  assert.equal(h.profiles.length,1);assert.equal(h.ready(),true);assert.equal(h.completed.length,0);h.unmount();
-  assert.deepEqual(h.navigations,[]);
-  assert(h.posts.some(message=>message.type==='coupi-live-call-stop'));
-});
-
 test('an initially ready controller never navigates its existing iframe across profile updates and Strict Mode',{concurrency:false},async()=>{
   const profile=fresh();profile.journey={hatched:true,interviewComplete:true,interviewCount:5,nextQuestion:'',districts:[],processedCallIds:[]};
   const h=componentHarness(profile,(async()=>{throw Error('An already completed call needs no bootstrap request');}) as typeof fetch);
@@ -107,28 +94,36 @@ test('an initially ready controller never navigates its existing iframe across p
   assert.deepEqual(h.navigations,[],'A memory update or effect replay must not reload an active voice/camera document');h.unmount();
 });
 
-test('actual parent opens only a server review and replays a lost confirmation response without duplicate completion',{concurrency:false},async()=>{
-  let server=draftProfile(),failConfirm=true;const bodies:any[]=[];
-  const h=componentHarness(server,(async(_url,init)=>{const body=JSON.parse(String(init?.body));bodies.push(body);const result=handlePersonalization(server,body);server=result.profile;if(body.action==='confirm'&&failConfirm){failConfirm=false;throw Error('Simulated lost response');}return Response.json(result);}) as typeof fetch);
-  await tick();await tick();assert(h.button('Review story'));assert(!h.button('Skip for now'));
-  h.emit({type:'coupi-personalization-review',id:'personalization-tool1',review:{story:'TOOL_INVENTED_FACT'}});await tick();await tick();
-  assert(h.review());assert(!h.review()!.props.review.story.includes('TOOL_INVENTED_FACT'));assert.equal(h.completed.length,0);assert.equal(server.memoryLines.length,0);
-  h.review()!.props.onConfirm(review);await tick();await tick();assert.equal(h.completed.length,0);assert(h.review());
-  h.review()!.props.onConfirm(review);await tick();await tick();
-  const confirms=bodies.filter(body=>body.action==='confirm');assert.equal(confirms.length,2);assert.equal(confirms[0].requestId,confirms[1].requestId);assert.equal(h.completed.length,1);assert.equal(h.completed[0].journey?.personalizationDraft,undefined);h.unmount();
+
+function shoppingResult(profile:Profile){return{profile,status:'ok',message:'What do you want to buy?',question:null,conversationMode:'request',interviewCount:0,interviewComplete:false,worldReady:false,proposedSkuIds:[]};}
+
+test('new and unfinished profiles become call-ready immediately without starting or resuming an interview',{concurrency:false},async()=>{
+  for(const profile of [fresh(),draftProfile()]){
+    const requests:string[]=[],h=componentHarness(profile,(async url=>{requests.push(String(url));throw Error('No bootstrap request expected');}) as typeof fetch);
+    assert.equal(h.ready(),true);h.strictReplay();await tick();assert.deepEqual(requests,[]);assert(!h.review());assert(!h.button('Review story'));assert(!h.button('Keep sharing'));
+    const context=h.posts.filter(value=>value.type==='coupi-personalization-context').at(-1);assert.equal(context.active,false);assert.equal(context.question,'');assert.equal(context.draftPending,false);assert.equal(context.memories.length,0);h.unmount();
+  }
 });
 
-test('actual parent refuses a bootstrap response belonging to a previously selected profile',{concurrency:false},async()=>{
-  const initial=fresh();let requestBody:any,resolve!:(value:Response)=>void;
-  const h=componentHarness(initial,((_url,init)=>{requestBody=JSON.parse(String(init?.body));return new Promise(done=>resolve=done);}) as typeof fetch);
-  await tick();h.props.profile=fresh();h.render();resolve(Response.json(handlePersonalization(initial,requestBody)));await tick();await tick();
-  assert.equal(h.profiles.length,0);assert.equal(h.completed.length,0);assert.equal(h.ready(),false);h.unmount();
+test('shopping turns omit an unfinished draft ID and cannot reopen automatic preference review',{concurrency:false},async()=>{
+  const profile=draftProfile(),requests:{url:string;body:any}[]=[],h=componentHarness(profile,(async(url,init)=>{requests.push({url:String(url),body:JSON.parse(String(init?.body))});return Response.json({...shoppingResult(profile),personalization:{reviewReady:true},conversationMode:'interview'});}) as typeof fetch);
+  h.emit({type:'coupi-live-call-transcript',role:'user',id:'shopping-now',text:'Find me pink lipstick'});await tick();await tick();
+  assert.equal(requests.length,1);assert.equal(requests[0].url,'/api/call');assert.equal(requests[0].body.personalizationDraftId,undefined);assert.equal(requests[0].body.message,'Find me pink lipstick');assert(!h.review());assert.equal(h.completed.length,0);h.unmount();
 });
 
-test('actual parent aborts confirmation on exit and never completes after a late successful response',{concurrency:false},async()=>{
-  let server=draftProfile(),confirmResolve!:(value:Response)=>void,confirmSignal:AbortSignal|undefined,confirmation:unknown;
-  const h=componentHarness(server,(async(_url,init)=>{const body=JSON.parse(String(init?.body)),result=handlePersonalization(server,body);server=result.profile;if(body.action==='confirm'){confirmation=result;confirmSignal=init!.signal as AbortSignal;return new Promise(resolve=>confirmResolve=resolve);}return Response.json(result);}) as typeof fetch);
-  await tick();await tick();h.emit({type:'coupi-personalization-review',id:'personalization-review'});await tick();await tick();
-  h.review()!.props.onConfirm(review);await tick();h.unmount();assert.equal(confirmSignal?.aborted,true);
-  confirmResolve(Response.json(confirmation));await tick();await tick();assert.equal(h.completed.length,0);
+test('legacy preference controls are rejected without saving, discarding or exposing a review',{concurrency:false},async()=>{
+  let requests=0;const profile=draftProfile(),h=componentHarness(profile,(async()=>{requests++;throw Error('No preference request expected');}) as typeof fetch);
+  for(const type of ['coupi-personalization-review','coupi-personalization-skip'])h.emit({type,id:'personalization-legacy'});
+  await tick();assert.equal(requests,0);assert(!h.review());assert.equal(h.completed.length,0);assert(h.props.profile.journey.personalizationDraft);assert(h.posts.some(value=>value.type==='coupi-personalization-result'&&value.error.includes('shopping')));h.unmount();
+});
+
+test('a shopping response cannot update a different selected profile',{concurrency:false},async()=>{
+  const initial=fresh();let resolve!:(value:Response)=>void;const h=componentHarness(initial,(()=>new Promise(done=>resolve=done)) as typeof fetch);
+  h.emit({type:'coupi-live-call-transcript',role:'user',id:'old-profile-turn',text:'A lamp please'});await tick();h.props.profile=fresh();h.render();resolve(Response.json(shoppingResult(initial)));await tick();await tick();
+  assert.equal(h.profiles.length,0);assert.equal(h.completed.length,0);h.unmount();
+});
+
+test('leaving a shopping call aborts its pending request and ignores a late successful response',{concurrency:false},async()=>{
+  const profile=fresh();let resolve!:(value:Response)=>void,signal:AbortSignal|undefined;const h=componentHarness(profile,((_url,init)=>{signal=init?.signal as AbortSignal;return new Promise(done=>resolve=done);}) as typeof fetch);
+  h.emit({type:'coupi-live-call-transcript',role:'user',id:'ending-turn',text:'A lamp please'});await tick();h.unmount();assert.equal(signal?.aborted,true);resolve(Response.json(shoppingResult(profile)));await tick();assert.equal(h.profiles.length,0);assert.equal(h.completed.length,0);
 });

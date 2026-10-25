@@ -1045,13 +1045,13 @@ test('checked call cards use returned exact products, citations and safe fields 
   assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,1);
 });
 
-test('checked inventories keep uncertainty, proposed cards and exact numeric sourced identities',async t=>{
+test('checked inventories keep uncertainty, proposed cards and exact numeric identities outside the approved try-on catalog',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'scan',text:'what is missing?',final:true});
   const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
-  parentResult(f,id,{...checkedResult(),verdict:undefined,inventory:{items:[{name:'milk',quantity:'one carton',status:'low'}],lowOrMissing:[{name:'greens',reason:'not visible',confidence:'low'}],uncertainties:['The back shelf is obscured.']},proposedSkuIds:['1814412512'],products:[{id:'1814412512',name:'Sourced reference',price:10000,priceBasis:'historical-reference',image:'/live-call/products/example.jpg',delivery:'Current delivery unknown'}]});
+  parentResult(f,id,{...checkedResult(),verdict:undefined,inventory:{items:[{name:'milk',quantity:'one carton',status:'low'}],lowOrMissing:[{name:'greens',reason:'not visible',confidence:'low'}],uncertainties:['The back shelf is obscured.']},proposedSkuIds:['9999999998'],products:[{id:'9999999998',name:'Sourced reference',price:10000,priceBasis:'historical-reference',image:'/live-call/products/example.jpg',delivery:'Current delivery unknown'}]});
   const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='milk · one carton — low'));assert(nodes.some(n=>n.textContent==='The back shelf is obscured.'));assert(nodes.some(n=>n.textContent==='REFERENCE PRICE · confirm current price on Coupang'));
-  f.context.fetch=async()=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'1814412512'})});
-  await nodes.find(n=>n.textContent==='Details & approval').onclick();assert.equal(f.messages.find(row=>row.data.type==='coupi-live-call-product').data.skuId,'1814412512');
+  f.context.fetch=async()=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'9999999998'})});
+  await nodes.find(n=>n.textContent==='Details & approval').onclick();assert.equal(f.messages.find(row=>row.data.type==='coupi-live-call-product').data.skuId,'9999999998');
 });
 
 test('retry reopens the same checked turn while unknown or stale results cannot replace the latest card',async t=>{
@@ -1079,62 +1079,20 @@ test('late prior transcripts persist their actual words without replacing the cu
   parentResult(f,current.id,checkedResult());assert.equal((await waiting).verdict.pickSkuId,'socks');assert(!descendants(f.nodes.get('validated-call-content')).some(n=>n.textContent==='OLD ANSWER'));
 });
 
-test('voice preference draft opens parent review without saving or adding a transcript',async t=>{
-  const f=fixture(t,{search:'?interview=1'});personalizationContext(f);await f.nodes.get('answer-call').onclick();
-  const before=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length;
-  const pending=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});const request=f.messages.find(row=>row.data.type==='coupi-personalization-review').data;
-  assert.deepEqual(JSON.parse(JSON.stringify(request.preferences)),editablePreferences);assert(request.id.startsWith('personalization-'));assert.equal(f.cameraStarts,1);
-  personalizationContext(f,{draftPending:true});assert.equal(f.voice.opts.getContext().personalization.draft_pending,true);
-  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:request.id,result:{ok:true,draft_ready:true,saved:false}}});
-  const result=await pending;assert.equal(result.draft_ready,true);assert.equal(result.saved,false);assert.equal(f.voice.call.ready,true);assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,before);
+
+test('embedded entry waits for its parent then starts shopping even if legacy context still contains interview questions',async t=>{
+  const f=fixture(t,{search:'?embedded=1'});await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,0);
+  personalizationContext(f,{count:0,question:'What makes a good weekend for you?',draftPending:true});await f.nodes.get('answer-call').onclick();
+  assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,1);assert.equal(f.voice.opts.greeting,'What do you want to buy?');assert.equal(f.voice.opts.getContext().personalization.active,false);assert.equal(f.voice.opts.getContext().personalization.draft_pending,false);
+  assert.equal(f.nodes.get('personalization-strip').hidden,true);assert.equal(f.nodes.get('update-preferences').hidden,true);assert.equal(f.nodes.get('personalization-summary-dialog')?.open||false,false);
+  f.nodes.get('end-call').onclick();await f.nodes.get('entry-chat').onclick();assert.equal(f.voice.opts.greeting,'What do you want to buy?');assert.equal(f.voice.inputMode,'text');
 });
 
-test('skip personalization keeps voice running and late review replies cannot revive an ended call',async t=>{
-  const f=fixture(t,{search:'?interview=1'});personalizationContext(f);await f.nodes.get('answer-call').onclick();
-  const draft=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});const draftId=f.messages.find(row=>row.data.type==='coupi-personalization-review').data.id;
-  const skip=f.voice.opts.onPreferences({action:'skip'});assert.equal((await draft).ok,false);const skipId=f.messages.find(row=>row.data.type==='coupi-personalization-skip').data.id;
-  personalizationContext(f,{active:false});f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:skipId,result:{ok:true,skipped:true,saved:false}}});assert.equal((await skip).skipped,true);assert.equal(f.voice.call.ready,true);
-  assert.throws(()=>f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences}),/optional introduction/);
-  personalizationContext(f);const last=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});f.nodes.get('end-call').onclick();assert.equal((await last).ok,false);
-  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:draftId,result:{ok:true,draft_ready:true,saved:false}}});assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
-});
-
-test('preference acknowledgements reject foreign origins and any claim of tool persistence',async t=>{
-  const f=fixture(t,{search:'?intent=personalize'});personalizationContext(f);await f.nodes.get('answer-call').onclick();let settled=false;
-  const pending=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences}).then(result=>{settled=true;return result;});const id=f.messages.find(row=>row.data.type==='coupi-personalization-review').data.id;
-  f.events.emit('message',{origin:'https://attacker.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id,result:{ok:true,draft_ready:true,saved:false}}});await tick();assert.equal(settled,false);
-  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id,result:{ok:true,draft_ready:true,saved:true}}});assert.equal((await pending).ok,false);
-});
-
-
-test('embedded starts only after parent context and uses its first interview question inside the call',async t=>{
-  const f=fixture(t,{search:'?embedded=1'});await f.nodes.get('answer-call').onclick();
-  assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);
-  personalizationContext(f,{count:0,question:'What makes a good weekend for you?'});await f.nodes.get('answer-call').onclick();
-  assert.equal(f.cameraStarts,1);assert.equal(f.voice.opts.greeting,'Hi Kayleen! What makes a good weekend for you?');
-  assert.equal(f.nodes.get('incoming-promise').textContent,'Let’s find your kind of thing.');
-  assert.equal(f.nodes.get('update-preferences').hidden,true);assert.equal(f.nodes.get('personalization-strip').hidden,false);
-});
-
-test('Skip interrupts immediately, preserves the active call, and permits retry when the parent cannot discard',async t=>{
-  const f=fixture(t,{search:'?embedded=1'});personalizationContext(f,{count:0});await f.nodes.get('answer-call').onclick();
-  const call=f.voice.call,button=f.nodes.get('personalization-skip'),pending=button.onclick();
-  assert.equal(f.voice.skips,1);assert.equal(f.voice.opts.getContext().personalization.active,false);assert.equal(button.disabled,true);
-  const first=f.messages.filter(row=>row.data.type==='coupi-personalization-skip').at(-1).data;
-  parentResult(f,first.id,{ok:false,error:'Please try again.'},'coupi-personalization-result');await pending;
-  assert.equal(button.disabled,false);assert.equal(f.voice.opts.getContext().personalization.active,true);assert.equal(f.voice.call,call);
-  const retry=button.onclick(),second=f.messages.filter(row=>row.data.type==='coupi-personalization-skip').at(-1).data;
-  personalizationContext(f,{active:false});parentResult(f,second.id,{ok:true,skipped:true,saved:false},'coupi-personalization-result');await retry;
-  assert.equal(f.voice.skips,2);assert.equal(f.voice.call,call);assert.equal(f.voice.opts.getContext().personalization.active,false);
-  assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,0);
-});
-
-test('Skip while camera permission is pending starts the same call with the shopping greeting',async t=>{
-  const permission=deferred(),f=fixture(t,{search:'?embedded=1',cameraPermission:()=>permission.promise});personalizationContext(f,{count:0});
-  const starting=f.nodes.get('answer-call').onclick();await tick();assert.equal(f.cameraStarts,1);assert.equal(f.voiceStarts,0);
-  const skipping=f.nodes.get('personalization-skip').onclick(),request=f.messages.find(row=>row.data.type==='coupi-personalization-skip').data;
-  personalizationContext(f,{active:false});parentResult(f,request.id,{ok:true,skipped:true,saved:false},'coupi-personalization-result');await skipping;
-  permission.resolve();await starting;assert.equal(f.voiceStarts,1);assert.equal(f.voice.opts.greeting,'What do you want to buy?');assert.equal(f.voice.skips,1);
+test('removed preference tools cannot open review while the shopping call remains available',async t=>{
+  const f=fixture(t,{search:'?interview=1'});personalizationContext(f);await f.nodes.get('answer-call').onclick();const call=f.voice.call;
+  assert.throws(()=>f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences}));assert.throws(()=>f.voice.opts.onPreferences({action:'skip'}));
+  assert.equal(f.voice.call,call);assert.equal(f.messages.filter(row=>row.data.type==='coupi-personalization-review'||row.data.type==='coupi-personalization-skip').length,0);
+  await f.nodes.get('text-toggle').onclick();assert.equal(f.voice.inputMode,'text');assert.equal(f.camera.running,true);
 });
 
 test('offline calls request no camera or microphone even when an entry handler is invoked directly',async t=>{
@@ -1170,4 +1128,49 @@ test('checked answers wait for large uploaded photos to resize before resolving 
   decode.onload();await tick();const turn=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data;
   assert.equal(turn.text,'What fits this room?');assert.equal(turn.photo.dataUrl,'data:image/jpeg;base64,AQID');assert.equal(settled,false);
   parentResult(f,turn.id,checkedResult());assert.equal((await answer).status,'ok');
+});
+
+
+function checkedCatalogResult(product){return {...checkedResult(),verdict:{...checkedResult().verdict,pickSkuId:String(product.id),reason:'A sourced option for your request.',dissent:'Check the exact shade and current price.',citations:[]},proposedSkuIds:[String(product.id)],products:[{id:String(product.id),name:'Server result name',price:product.price}]};}
+
+test('checked approved products open the fixed six-to-ten collection with real images, details, try-on and bag',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='lipstick'),call=f.voice.call;
+  f.voice.opts.onTranscript({role:'user',key:'local-checked',text:'Find me lipstick',final:true});const id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
+  parentResult(f,id,checkedCatalogResult(pick));assert.equal(f.nodes.get('bridge-panel').hidden,true);assert.equal(f.nodes.get('product-zone').hidden,false);
+  assert.equal(f.store.current.id,pick.id);assert.equal(f.nodes.get('product-image').src,pick.image);assert.equal(f.nodes.get('product-title').textContent,pick.name);assert.equal(inlineRows(f).length,6);
+  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.match(f.nodes.get('product-selected-note').textContent,/checked pick/);
+  f.nodes.get('inline-more').onclick();assert.equal(inlineRows(f).length,10);
+  const selected=inlineRows(f).find(row=>row.dataset.id===String(pick.id));inlineAction(selected,'Details').onclick();assert.equal(f.nodes.get('details-dialog').open,true);
+  assert.match(f.nodes.get('detail-body').textContent,/A sourced option for your request/);assert.match(f.nodes.get('detail-body').textContent,/Check the exact shade/);
+  assert.equal(f.voice.call,call);f.nodes.get('close-details').onclick();await inlineAction(selected,'Try on').onclick();assert.equal(f.camera.product.id,pick.id);
+  inlineAction(selected,'Add to bag').onclick();assert(f.store.cart.has(String(pick.id)));assert.equal(f.voice.call,call);assert(!f.messages.some(row=>row.data.type==='coupi-live-call-product'));
+});
+
+test('checked local alternatives retain the spoken budget and exclusions and never absorb injected live listings',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='lipstick'&&p.price<10000&&!p.tags.includes('red'));
+  const rogue={...pick,id:'dynamic-rogue',name:'Injected lipstick',source:'coupang_web'};f.store.catalog.set(rogue.id,rogue);f.discovery.catalog.set(rogue.id,rogue);
+  f.voice.opts.onTranscript({role:'user',key:'bounded',text:'Find lipstick under 10000, not red',final:true});const id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
+  parentResult(f,id,checkedCatalogResult(pick));assert(f.discovery.products.length>1);
+  for(const product of f.discovery.products){assert(product.price<=10000);assert(!product.tags.includes('red'));assert.notEqual(product.id,rogue.id);}
+  assert.equal(f.store.current.id,pick.id);assert.equal(f.nodes.get('bridge-panel').hidden,true);
+});
+
+test('a checked selection with an unparsed request stays exact, and blocked recommendations never unlock local cards',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const pick=catalog.find(p=>p.productType==='glasses');
+  f.voice.opts.onTranscript({role:'user',key:'exact',text:'A mysterious style that works for me',final:true});let id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
+  parentResult(f,id,checkedCatalogResult(pick));assert.deepEqual(Array.from(f.discovery.products,p=>p.id),[pick.id]);
+  f.voice.opts.onTranscript({role:'user',key:'blocked',text:'Another choice',final:true});id=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data.id;
+  parentResult(f,id,{...checkedCatalogResult(pick),status:'blocked'});assert.equal(f.nodes.get('bridge-panel').hidden,false);assert.equal(f.nodes.get('product-zone').hidden,true);
+});
+
+
+test('identical transcript keys and words deduplicate within a call but receive fresh receipt IDs in later calls and reloads',async t=>{
+  const entry={role:'user',key:'user-1',text:'Find me pink lipstick under 15000 won',final:true};
+  const f=fixture(t);await f.nodes.get('entry-chat').onclick();f.voice.opts.onTranscript(entry);f.voice.opts.onTranscript(entry);
+  const first=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');assert.equal(first.length,1);assert.match(first[0].data.id,/^[A-Za-z0-9:_-]{1,90}$/);
+  await f.nodes.get('toggle-camera').onclick();f.voice.opts.onTranscript(entry);assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,1);
+  f.nodes.get('end-call').onclick();await f.nodes.get('entry-chat').onclick();f.voice.opts.onTranscript(entry);
+  const repeated=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');assert.equal(repeated.length,2);assert.notEqual(repeated[0].data.id,repeated[1].data.id);
+  const reloaded=fixture(t);await reloaded.nodes.get('entry-chat').onclick();reloaded.voice.opts.onTranscript(entry);
+  const fresh=reloaded.messages.find(row=>row.data.type==='coupi-live-call-transcript');assert.notEqual(fresh.data.id,repeated[0].data.id);assert.notEqual(fresh.data.id,repeated[1].data.id);
 });

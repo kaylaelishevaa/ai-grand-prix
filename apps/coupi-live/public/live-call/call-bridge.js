@@ -4,7 +4,9 @@
   const origin = window.location.origin;
   const seen = new Set();
   const turns = new Map(), listeners = new Set(), waiting = new Set();
-  let latestId = '';
+  let latestId = '',lastPhase='incoming';
+  const newCallNonce=()=>globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+  let callNonce=newCallNonce();
   let personalization={active:false,question:'',count:0,draftPending:false,memories:[],received:false},preferenceSerial=0;
   const preferenceRequests=new Map();
   let stop = () => {}, lastState = '', availability;
@@ -14,7 +16,7 @@
   function stableId(value) {
     let hash = 2166136261;
     for (let i = 0; i < value.length; i++) hash = Math.imul(hash ^ value.charCodeAt(i), 16777619);
-    return 'live-call-' + (hash >>> 0).toString(16);
+    return 'live-call-' + callNonce + '-' + (hash >>> 0).toString(16);
   }
   const string=(value,max=2000)=>typeof value==='string'?value.slice(0,max):'';
   const ids=value=>Array.isArray(value)?value.filter(id=>typeof id==='string'&&/^[A-Za-z0-9][A-Za-z0-9:_-]{0,119}$/.test(id)).slice(0,12):[];
@@ -95,6 +97,10 @@
     },
     state(value) {
       const message = {type:'coupi-live-call-state', phase:String(value.phase || 'incoming').slice(0,24), cameraActive:value.cameraActive === true, microphoneActive:value.microphoneActive === true};
+      // Transcript item counters restart in every Realtime session. Namespace new calls
+      // so an identical prompt never replays a persisted receipt from an earlier call.
+      if(['connecting','active'].includes(message.phase)&&!['connecting','active'].includes(lastPhase))callNonce=newCallNonce();
+      lastPhase=message.phase;
       const serialized = JSON.stringify(message);
       if (serialized !== lastState) { lastState = serialized; post(message); }
     },

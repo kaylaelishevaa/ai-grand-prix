@@ -146,6 +146,30 @@ test('compiler uses clear authored terrain when supports cannot fit, and never r
   ]){const invalid=structuredClone(raw);mutate(invalid);assert.throws(()=>compileSceneBlueprint(invalid,ids));}
 });
 
+test('compiler preserves generated oval and arch scenery while moving products off invalid support flags',()=>{
+  const raw=fixtureBlueprint(ids);
+  raw.nodes[0].shape='oval';
+  raw.nodes[1].shape='arch';raw.nodes[1].support=true;
+  raw.nodes[2].motion='sway';raw.nodes[2].support=true;
+  const before=structuredClone(raw);
+  assert.throws(()=>validateSceneBlueprint(raw,ids),/stationary upright box\/cylinder/);
+  const compiled=compileSceneBlueprint(raw,ids);
+  assert.deepEqual(raw,before,'Compilation cannot mutate the model answer');
+  assert.deepEqual(compiled.terrain,raw.terrain);
+  assert.deepEqual(compiled.palette,raw.palette);
+  assert.deepEqual(compiled.atmosphere,raw.atmosphere);
+  for(let index=0;index<compiled.nodes.length;index++){
+    assert.deepEqual(compiled.nodes[index],{...raw.nodes[index],support:false},'Only support eligibility changes; every authored shape and transform survives');
+  }
+  assert.deepEqual(compiled.anchors.map(anchor=>anchor.skuId),ids);
+  assert(compiled.anchors.every(anchor=>anchor.supportId===null));
+  assert.doesNotThrow(()=>validateSceneBlueprint(compiled,ids));
+  assert.deepEqual(compileSceneBlueprint(compiled,ids),compiled,'Replaying a compiled scene must not drift');
+  const outside=structuredClone(raw);outside.nodes[1].position.x=3.7;outside.nodes[1].position.z=3.2;
+  assert.throws(()=>compileSceneBlueprint(outside,ids),/outside the terrain|rotated bounds/,'Decorative demotion must not hide unsafe geometry');
+  assert.match(JSON.stringify(z.toJSONSchema(sceneBlueprintSchema)),/Use a shallow upright cylinder for an oval tabletop/);
+});
+
 test('new scenes require a blueprint while legacy saved SceneResult can still omit one',()=>{
   const skuIds=['kettle','mugs','apron','tray','speaker'];
   const scene={name:'A composed morning',explanation:'A new space.',items:skuIds.map(skuId=>({skuId,oneLiner:'A listed product.'}))};

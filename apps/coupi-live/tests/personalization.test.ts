@@ -10,6 +10,7 @@ import {remember} from '../lib/memory';
 import {handlePersonalization,personalizationProposal,safePersonalizationCandidates} from '../lib/server/personalization';
 import {handleCall,hasCallWorldContext,FIRST_CALL_QUESTIONS} from '../lib/server/call';
 import {generateWorld} from '../lib/server/world';
+import {saveProfile} from '../lib/server/store';
 import type {PersonalizationResponse,PersonalizationReview} from '../lib/personalization';
 import type {CallResponse} from '../lib/journey-types';
 import type {Profile} from '../lib/types';
@@ -87,7 +88,7 @@ async function fixture(run:(context:{root:string;calls:Record<string,any>[];setB
   let buy=false;const calls:Record<string,any>[]=[];console.info=()=>{};
   globalThis.fetch=(async(url,init)=>{
     assert.equal(String(url),'https://api.openai.com/v1/responses');const body=JSON.parse(String(init?.body)),value=JSON.parse(body.input[0].content[0].text);calls.push(value);
-    const output=buy?{intent:'buy',answeredInterviewQuestion:false,message:'A cream kettle.',memories:[],verdict:{pickSkuId:'kettle',reason:'A cream pour-over kettle.',dissent:'Two seeded reviews report a loose lid.',citations:['kettle-013','kettle-014'],runnerUpSkuId:null,whyRunnerUpLost:'',clarifyingQuestion:null},inventory:null}:{intent:'talk',answeredInterviewQuestion:value.interview.active,message:'That helps me understand.',memories:[{text:value.message,evidenceQuote:value.message,confidence:.9}],verdict:null,inventory:null};
+    const output=buy?{intent:'buy',answeredInterviewQuestion:false,message:'Here is the sourced Pink Sand lipstick.',memories:[],verdict:{pickSkuId:'1814412512-pink-sand',reason:'The listing names Pink Sand.',dissent:'Current stock and price are unverified.',citations:[],runnerUpSkuId:null,whyRunnerUpLost:'',clarifyingQuestion:null},inventory:null}:{intent:'talk',answeredInterviewQuestion:value.interview.active,message:'That helps me understand.',memories:[{text:value.message,evidenceQuote:value.message,confidence:.9}],verdict:null,inventory:null};
     return Response.json({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify(output)}]}],usage:{input_tokens:20,output_tokens:20}});
   }) as typeof fetch;
   try{await run({root,calls,setBuy(value){buy=value;}});}finally{globalThis.fetch=oldFetch;console.info=oldInfo;for(const name of names)if(previous[name]===undefined)delete process.env[name];else process.env[name]=previous[name];await rm(root,{recursive:true,force:true});}
@@ -98,19 +99,20 @@ class Browser{
   async send<T>(route:typeof personalizationRoute|typeof callRoute,body:unknown){const response=await route(new Request(origin+'/api/'+(route===callRoute?'call':'personalization'),{method:'POST',headers:{origin,cookie:this.cookie,'content-type':'application/json'},body:JSON.stringify(body)}));this.cookie=response.headers.get('set-cookie')?.split(';')[0]||this.cookie;return{status:response.status,body:await response.json() as T};}
 }
 
-test('five real talk turns stage a review; explicit confirmation alone unlocks current-profile world generation',{concurrency:false},async()=>{
+test('explicit preference service stages a review; confirmation alone unlocks current-profile world generation',{concurrency:false},async()=>{
   await fixture(async({calls,root})=>{
     const browser=new Browser();const started=await browser.send<PersonalizationResponse>(personalizationRoute,input('start','start'));assert.equal(started.status,200);
     const draftId=started.body.draftId!;let last:CallResponse|undefined;
     for(let i=0;i<5;i++){
-      last=(await browser.send<CallResponse>(callRoute,{action:'message',requestId:'talk-'+i,personalizationDraftId:draftId,message:`I enjoy quiet activity ${i+1}.`})).body;
+      last=await handleCall(last?.profile||started.body.profile,{action:'message',requestId:'talk-'+i,personalizationDraftId:draftId,message:`I enjoy quiet activity ${i+1}.`});
+      await saveProfile(last.profile);
       assert.equal(last.interviewCount,i+1);assert.equal(last.interviewComplete,false);assert.equal(last.worldReady,false);assert.equal(last.profile.memoryLines.length,0);assert.deepEqual(last.profile.traits,{});assert.equal(last.memories.length,1);
       assert.equal(last.profile.journey?.nextQuestion,i===4?'':FIRST_CALL_QUESTIONS[i+1]);
       assert.equal(calls[i].profile.memoryLines.length,0);assert.equal(calls[i].unconfirmedCallContext.length,i);
     }
     assert.equal(last!.personalization?.reviewReady,true);assert.equal(last!.question,null);assert.doesNotMatch(last!.message,/building your world/);
-    const duplicate=await browser.send<CallResponse>(callRoute,{action:'message',requestId:'talk-4',personalizationDraftId:draftId,message:'I enjoy quiet activity 5.'});
-    assert.equal(duplicate.body.interviewCount,5);assert.equal(duplicate.body.profile.journey?.personalizationDraft?.candidates.length,5);assert.equal(calls.length,5);
+    const duplicate=await handleCall(last!.profile,{action:'message',requestId:'talk-4',personalizationDraftId:draftId,message:'I enjoy quiet activity 5.'});
+    assert.equal(duplicate.interviewCount,5);assert.equal(duplicate.profile.journey?.personalizationDraft?.candidates.length,5);assert.equal(calls.length,5);
     await assert.rejects(generateWorld(last!.profile,{requestId:'not-yet'}),/finish our first call/);
     const draft=await browser.send<PersonalizationResponse>(personalizationRoute,input('draft','draft',draftId,{...emptyReview,story:'INVENTED TOOL FACT'}));
     assert.match(draft.body.review!.story,/quiet activity 1/);assert(!draft.body.review!.story.includes('INVENTED'));
@@ -133,8 +135,8 @@ test('shopping interrupts draft discovery without committing staged preferences;
     let started=handlePersonalization(createProfile('interrupt-review',now),input('start','start'),now);
     const talk=await handleCall(started.profile,{action:'message',requestId:'talk',personalizationDraftId:started.draftId,message:'I paint at weekends.'},now);
     setBuy(true);
-    const buy=await handleCall(talk.profile,{action:'message',requestId:'buy',personalizationDraftId:started.draftId,message:'I need a kettle.'},now);
-    assert.equal(buy.conversationMode,'request');assert.equal(buy.interviewCount,1);assert.equal(buy.profile.journey?.interviewPaused,true);assert.equal(buy.proposedSkuIds[0],'kettle');
+    const buy=await handleCall(talk.profile,{action:'message',requestId:'buy',personalizationDraftId:started.draftId,message:'I need a pink lipstick.'},now);
+    assert.equal(buy.conversationMode,'request');assert.equal(buy.interviewCount,1);assert.equal(buy.profile.journey?.interviewPaused,true);assert.equal(buy.proposedSkuIds[0],'1814412512-pink-sand');
     assert(!buy.profile.memoryLines.some(line=>line.text.includes('paint')));assert.equal(buy.profile.journey!.personalizationDraft!.candidates.length,1);
     const resumed=await handleCall(buy.profile,{action:'resumeInterview',requestId:'resume',personalizationDraftId:started.draftId},now);
     assert.equal(resumed.question,FIRST_CALL_QUESTIONS[1]);assert.equal(resumed.profile.journey?.nextQuestion,FIRST_CALL_QUESTIONS[1]);

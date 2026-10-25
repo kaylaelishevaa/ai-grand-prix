@@ -1,7 +1,7 @@
 /* Orders and decisions are synthetic. Product facts come from the existing catalog. */
 window.HOME_DEMO = {
   catalog: window.COUPANG_PRODUCTS || [],
-  user: { name: 'Mina' },
+  user: { name: 'Kayleen' },
   now: '2026-10-26T08:10:00',
   orders: [
     { id: '1042', items: ['1814412512'], status: 'delivered', deliveredAt: '2026-10-25T07:02' },

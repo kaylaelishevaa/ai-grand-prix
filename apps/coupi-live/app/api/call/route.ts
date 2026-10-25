@@ -24,7 +24,7 @@ export async function POST(request:Request) {
     } else raw=await readJson(request);
     const input=inputSchema.parse(raw);
     const result=await withSession(request,async session=>{
-      const data=await handleCall(session.profile,{...input,image});
+      const data=await handleCall(session.profile,{...input,image,shoppingOnly:true});
       session.profile=data.profile;
       return data;
     });
