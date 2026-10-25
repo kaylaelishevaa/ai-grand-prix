@@ -1,0 +1,97 @@
+[
+  {
+    "id": "7395651009",
+    "sourceProductId": "7395651009",
+    "name": "듀오백 사무용 의자 DK073W, 그린",
+    "category": "desk",
+    "productType": "chair",
+    "url": "https://www.coupang.com/vp/products/7395651009",
+    "price": 130070,
+    "priceStatus": "reference",
+    "image": "/home-reference/products/7395651009.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/1278590551040429-07e8f8d5-8e9f-40ba-acdc-b4585ba63dc0.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%EC%98%A4%EB%B0%B1%20%EC%9D%98%EC%9E%90",
+    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "Duoback / 듀오백",
+    "aliases": [
+      "Duoback DK073W office chair green"
+    ],
+    "tags": [
+      "chair",
+      "green"
+    ],
+    "verifiedAttributes": [
+      "Duoback DK073W office chair green",
+      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/home-reference/products/7395651009.jpg",
+      "background": "white",
+      "available": false,
+      "unavailableReason": "The source photo needs a clean frontal product cutout; no unreliable overlay is shown for this listing."
+    },
+    "imageSha256": "30ae67e631db50b282ba66aa3b6d879fa517b345ac8da0dce235260f148b5b0c",
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/7395651009",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    },
+    "chairStyle": "office"
+  },
+  {
+    "id": "7330605115",
+    "sourceProductId": "7330605115",
+    "name": "듀오백 독서실 스터디의자 DK073B, 그레이",
+    "category": "desk",
+    "productType": "chair",
+    "url": "https://www.coupang.com/vp/products/7330605115",
+    "price": 168000,
+    "priceStatus": "reference",
+    "image": "/home-reference/products/7330605115.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/d00d/1e93a636fd79a96c855539a7b89e9b0ae5ba255820f44b2e2c8f6334f5cc.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%EC%98%A4%EB%B0%B1%20%EC%9D%98%EC%9E%90",
+    "sourceNote": "Coupang product-family ID verified against a public indexed Coupang listing. This named option, unchanged original Coupang CDN photo and historical reference price come from the matching product name on the cited Fallcent search page. The family link may open another option: select the named variant on Coupang before buying. Current seller, availability, exact option IDs and live price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "Duoback / 듀오백",
+    "aliases": [
+      "Duoback DK073B study chair gray"
+    ],
+    "tags": [
+      "chair",
+      "gray"
+    ],
+    "verifiedAttributes": [
+      "Duoback DK073B study chair gray",
+      "Product option and pack quantity are as written in the sourced listing title. Confirm the selected option on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/home-reference/products/7330605115.jpg",
+      "background": "white",
+      "available": true
+    },
+    "imageSha256": "52180648f8f7e2764b8b0805208dd37530d7849d089919ee59715ee5a1870b3a",
+    "reviewEvidence": {
+      "status": "unavailable",
+      "rating": null,
+      "reviewCount": null,
+      "sourceUrl": "https://www.coupang.com/vp/products/7330605115",
+      "checkedAt": "2026-10-25",
+      "summary": null,
+      "pros": [],
+      "cons": [],
+      "reviews": [],
+      "scopeNote": "Written reviews and ratings have not been verified for this catalog option. Open Coupang to check current customer feedback."
+    },
+    "chairStyle": "office"
+  }
+]

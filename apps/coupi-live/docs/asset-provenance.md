@@ -1,0 +1,3 @@
+Prepared delivery photo: `public/commerce/doorstep.png`. Generated with the built-in imagegen tool for the local tracking simulation. It contains no real address, person, shipping label or proof of delivery.
+
+Prompt: “A simple unbranded brown cardboard parcel with plain paper tape on a clean cream tiled apartment doorstep, beside a muted deep teal apartment door and a small natural woven mat. Candid slightly top-down courier phone-photo framing, soft early morning light, warm realistic texture, no person, no address, no apartment number, no shipping label, no text, no logo, no UI, no watermark. Square composition, package fully visible. This is a fictional prepared scene, not evidence of a real delivery.”

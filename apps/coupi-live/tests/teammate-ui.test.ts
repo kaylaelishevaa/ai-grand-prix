@@ -1,0 +1,466 @@
+// @ts-nocheck — VM browser fixtures exercise the imported plain-JavaScript call runtime.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import catalog from '../data/teammate-catalog.json';
+const html=readFileSync(new URL('../public/live-call/index.html',import.meta.url),'utf8');
+const stateSource=readFileSync(new URL('../public/live-call/mobile-call-state.js',import.meta.url),'utf8');
+const source=readFileSync(new URL('../public/live-call/mobile-call.js',import.meta.url),'utf8');
+const bridgeSource=readFileSync(new URL('../public/live-call/call-bridge.js',import.meta.url),'utf8');
+const comparisonSource=readFileSync(new URL('../public/live-call/reference-comparison.js',import.meta.url),'utf8');
+const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
+function deferred(){let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};}
+class Element {
+  constructor(){this.hidden=false;this.disabled=false;this.open=false;this.dataset={};this.style={};this.children=[];this.attributes={};this.listeners=new Map();const classes=new Set();this.classList={add:(...c)=>c.forEach(x=>classes.add(x)),remove:(...c)=>c.forEach(x=>classes.delete(x)),toggle:(c,on)=>on?classes.add(c):classes.delete(c)};}
+  setAttribute(k,v){this.attributes[k]=v;} removeAttribute(k){delete this.attributes[k];if(k==='src')delete this.src;}
+  append(...nodes){this.children.push(...nodes);} replaceChildren(...nodes){this.children=nodes;}
+  addEventListener(k,fn){if(!this.listeners.has(k))this.listeners.set(k,[]);this.listeners.get(k).push(fn);}
+  emit(k,event={}){for(const fn of this.listeners.get(k)||[])fn(event);}
+  showModal(){this.open=true;} close(){this.open=false;this.emit('close');}
+  focus(){} scrollIntoView(){} setPointerCapture(){} closest(){return null;}
+}
+function fixture(t,options={}){
+  const nodes=new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>[m[1],new Element()]));
+  const events=new Element(),docEvents=new Element(),sequence=[],intervals=[],messages=[];
+  nodes.get('vision-consent').checked=true;
+  let cameraStarts=0,voiceStarts=0;
+  class Camera {
+    constructor(opts){this.opts=opts;this.running=false;this.options={};this.errors={};this.canvas={width:720,height:1280};this.gen=0;this.productGen=0;this.stops=0;this.starts=[];}
+    setOptions(opts){Object.assign(this.options,opts);}
+    async start(settings={}){sequence.push('camera');cameraStarts++;this.starts.push({...settings});const token=++this.gen;this.running=false;this.opts.onStatus('Opening camera','loading');if(options.cameraPermission)await options.cameraPermission(cameraStarts);const allowed=options.cameraStart?await options.cameraStart(settings,cameraStarts):true;if(token!==this.gen)return false;if(allowed===false){this.lastCameraError={message:'Requested camera is unavailable.'};return false;}this.actualFacingMode=options.actualFacingMode||settings.facingMode||'user';this.running=true;this.opts.onStatus('Live','success');return true;}
+    stop(){this.gen++;this.productGen++;this.running=false;this.stops++;}
+    async setMode(mode){this.mode=mode;if(options.modelLoad)await options.modelLoad();}
+    async setProduct(product){const token=++this.productGen;if(product&&options.productLoad)await options.productLoad(product);if(token!==this.productGen)return {ok:false,stale:true};this.product=product;return product?{ok:true,productId:product.id,kind:product.category==='makeup'?'lip':product.category==='clothes'?'garment':product.category==='glasses'?'glasses':'object',shadeColor:product.category==='makeup'?'#bc3c57':undefined,shadeEstimated:product.category==='makeup'}:{ok:true};}
+  }
+  class Voice {
+    constructor(opts){this.opts=opts;this.options=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;}
+    async start(){sequence.push('voice');voiceStarts++;this.call={ready:true};this.opts.onState({state:'connected',muted:false,connectedAt:Date.now()});return true;}
+    end(){this.ends++;this.call=null;this.opts.onState({state:'idle',muted:false,connectedAt:null});}
+    updateContext(value){this.contexts.push(value);} mute(){} sendText(text){if(!this.call)return false;this.opts.onTranscript({role:'user',key:'typed-'+Date.now(),text,final:true});return true;} async resumeAudio(){}
+    sendCameraSnapshot(frame){if(!this.opts.getVisionEnabled())return false;this.images.push(frame);this.opts.onVisionState({state:'received',capturedAt:frame.metadata.capturedAt});return true;}
+    clearCameraSnapshots(){this.imageClears++;this.opts.onVisionState({state:'paused'});return true;}
+  }
+  class Snapshots {constructor(opts){this.opts=opts;}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
+  class Hands {constructor(opts){this.opts=opts;this.running=false;}async start(){this.running=true;}stop(){this.running=false;}reset(){}}
+  const context={window:{location:{origin:'https://coupi.test',assign(){}},parent:{postMessage:(data,target)=>messages.push({data,target})},matchMedia:()=>({matches:false}),COUPANG_PRODUCTS:catalog,NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{head:new Element(),querySelectorAll:()=>[],getElementById:id=>nodes.get(id)||null,createElement:()=>new Element(),addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,URLSearchParams,fetch:async()=>({ok:true,json:async()=>options.status||{ready:true,offline:false}})};
+  context.location=context.window.location;context.location.search=options.search||'';
+  vm.createContext(context);vm.runInContext(stateSource,context);vm.runInContext(bridgeSource,context);vm.runInContext(comparisonSource,context);vm.runInContext(source,context);
+  const mobile=context.window.NookMobile;
+  t.after(()=>nodes.get('end-call').onclick());
+  return {...mobile,nodes,context,sequence,docEvents,events,messages,visionTick:()=>intervals.find(i=>i.ms===3000).fn(),get cameraStarts(){return cameraStarts;},get voiceStarts(){return voiceStarts;}};
+}
+
+test('camera sharing follows consent, pause/resume, camera-off and end while local try-on remains usable',async t=>{
+  const f=fixture(t);f.visionTick();assert.equal(f.voice.images.length,0);
+  await f.nodes.get('answer-call').onclick();f.visionTick();assert.equal(f.voice.images.length,1);
+  assert.equal(f.nodes.get('vision-status').textContent,'Coopy sees snapshots');
+  f.nodes.get('vision-toggle').onclick();f.visionTick();assert.equal(f.voice.images.length,1);assert(f.voice.imageClears>0);assert.equal(f.camera.running,true);
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));await f.voice.opts.onTryon('desk',{x:.25});assert.equal(f.camera.options.x,.25);assert.equal(f.voice.opts.getCameraSnapshot('tool'),null);
+  f.nodes.get('vision-toggle').onclick();assert.equal(f.voice.images.length,2);assert.equal(f.voice.images[1].metadata.reason,'resume');
+  await f.nodes.get('toggle-camera').onclick();f.visionTick();assert.equal(f.voice.images.length,2);
+  f.nodes.get('end-call').onclick();f.visionTick();assert.equal(f.voice.images.length,2);
+});
+
+test('world product open rechecks the server and stops camera/microphone before the exact parent event',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const requests=[];
+  f.context.fetch=async(url,init)=>{requests.push({url,body:JSON.parse(init.body)});return{ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'socks'})};};
+  f.context.window.parent.postMessage=(data,target)=>{if(data.type==='coupi-live-call-product'){assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);}f.messages.push({data,target});};
+  const result=await f.voice.opts.onWorldProduct('socks');assert.equal(result.ok,true);
+  assert.deepEqual(requests,[{url:'/api/products/world',body:{action:'open',skuId:'socks'}}]);
+  const event=f.messages.find(message=>message.data.type==='coupi-live-call-product');
+  assert.deepEqual(JSON.parse(JSON.stringify(event)),{data:{type:'coupi-live-call-product',namespace:'world-simulation',skuId:'socks'},target:'https://coupi.test'});
+  assert.equal(f.store.cart.size,0);assert(!f.store.catalog.has('socks'));
+});
+
+test('excluded and unknown products do not navigate or stop the active call, including numeric source IDs',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();let requests=0;
+  f.context.fetch=async()=>{requests++;return{ok:true,json:async()=>({ok:false,error:'Already owned or excluded.'})};};
+  assert.equal((await f.voice.opts.onWorldProduct('detergent')).ok,false);assert.equal(f.camera.running,true);assert(f.voice.call);
+  assert.equal((await f.voice.opts.onWorldProduct('9999999999')).ok,false);assert.equal(requests,2);
+  assert(!f.messages.some(message=>message.data.type==='coupi-live-call-product'));
+});
+
+test('world result rows retain their simulation namespace and Details opens the shared evidence flow',async t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();
+  f.voice.opts.onWorldRecommendations([{skuId:'socks',name:'Red socks',price:6900,catalog_namespace:'world-simulation'},{id:catalog[0].id,name:'Source listing',catalog_namespace:'sourced-listings'}]);
+  assert.equal(f.nodes.get('world-picks').hidden,false);assert.equal(f.nodes.get('product-zone').hidden,true);assert.equal(f.nodes.get('world-picks-list').children.length,1);
+  const row=f.nodes.get('world-picks-list').children[0];assert.equal(row.children[0].children[0].textContent,'Red socks');assert.equal(row.children[1].textContent,'Details ↗');
+  f.context.fetch=async()=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'socks'})});await row.children[1].onclick();
+  assert(f.messages.some(message=>message.data.type==='coupi-live-call-product'&&message.data.skuId==='socks'));assert.equal(f.voiceStarts,0);assert.equal(f.cameraStarts,0);
+});
+
+test('camera opt-out and hidden page never share a frame',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await f.nodes.get('answer-call').onclick();
+  f.visionTick();assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,1);assert.equal(f.voice.images.length,0);
+  f.context.document.hidden=true;f.nodes.get('vision-toggle').onclick();f.visionTick();assert.equal(f.voice.images.length,0);
+  f.docEvents.emit('visibilitychange');assert.equal(f.voice.call,null);assert.equal(f.camera.running,false);
+});
+
+test('mobile entry boots against real HTML IDs, and Browse requests no camera or voice',t=>{
+  const f=fixture(t);assert(f.voice);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);
+  f.nodes.get('decline-call').onclick();
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'browse');assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);
+  assert.equal(f.store.queue.length,new Set(catalog.map(p=>p.category)).size);assert.equal(f.nodes.get('product-zone').hidden,false);
+});
+
+test('consented Answer starts camera then voice; manual hangup returns incoming with both stopped',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  assert.deepEqual(f.sequence,['camera','voice']);assert.equal(f.nodes.get('phone-app').dataset.phase,'active');
+  f.nodes.get('end-call').onclick();assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
+  assert.equal(f.nodes.get('answer-call').disabled,false);assert.equal(f.voiceStarts,1);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,2);assert.equal(f.nodes.get('phone-app').dataset.phase,'active');
+});
+
+test('caption preserves the latest speaker and the two-message state when a user speaks first',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const emit=e=>f.voice.opts.onTranscript(e);
+  emit({role:'user',key:'early-user',text:'I want a shirt'});emit({role:'assistant',key:'reply',delta:'What colour?'});
+  assert.equal(f.store.messages.length,2);assert.equal(f.store.messages[0].key,'early-user');
+  emit({role:'user',key:'next-user',text:'Blue'});emit({role:'assistant',key:'next-reply',text:'Here are your picks'});
+  assert.equal(f.nodes.get('caption-speaker').textContent,'Coopy');assert.equal(f.nodes.get('caption-text').textContent,'Here are your picks');assert.deepEqual(Array.from(f.store.messages,m=>m.key),['next-user','next-reply']);
+});
+
+test('streaming captions keep stable DOM, follow new text and ignore superseded turns',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const root=f.nodes.get('transcript'),body=f.nodes.get('caption-text');
+  root.replaceChildren=()=>assert.fail('Streaming must preserve the caption DOM');
+  let writes=0,value=body.textContent;
+  Object.defineProperty(body,'textContent',{get:()=>value,set:next=>{writes++;value=next;}});body.scrollHeight=144;
+  f.voice.opts.onTranscript({role:'assistant',key:'stream',text:'A warm'});
+  f.voice.opts.onTranscript({role:'assistant',key:'stream',delta:' corner.'});
+  assert.equal(value,'A warm corner.');assert.equal(body.scrollTop,144);assert.equal(writes,2);
+  f.voice.opts.onTranscript({role:'assistant',key:'stream',text:'A warm corner.'});assert.equal(writes,2);
+  f.voice.opts.onTranscript({role:'user',key:'next',text:'For my desk'});assert.equal(f.nodes.get('caption-speaker').textContent,'You');
+  f.voice.opts.onTranscript({role:'user',key:'late',text:'Older audio',superseded:true});
+  assert.equal(value,'For my desk');assert.equal(writes,3);
+});
+
+test('camera status stays steady between sends, shows stale acknowledgements and clears on pause',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const status=f.nodes.get('vision-status'),toggle=f.nodes.get('vision-toggle'),emit=f.voice.opts.onVisionState;
+  emit({state:'received',capturedAt:new Date().toISOString()});
+  let writes=0,value=status.textContent;
+  Object.defineProperty(status,'textContent',{get:()=>value,set:next=>{writes++;value=next;}});
+  for(let i=0;i<3;i++){emit({state:'sent'});assert.equal(toggle.dataset.state,'received');emit({state:'received',capturedAt:new Date().toISOString()});}
+  assert.equal(value,'Coopy sees snapshots');assert.equal(writes,0);
+  emit({state:'received',capturedAt:new Date(Date.now()-15000).toISOString()});emit({state:'sent'});
+  assert.equal(value,'Refreshing Coopy’s view…');assert.equal(toggle.dataset.state,'refreshing');
+  emit({state:'error'});assert.equal(value,'Camera sharing delayed');
+  toggle.onclick();assert.equal(status.hidden,true);assert.equal(value,'');assert.equal(toggle.dataset.state,'paused');
+  toggle.onclick();assert.equal(status.hidden,false);assert.equal(value,'Coopy sees snapshots');
+  await f.nodes.get('toggle-camera').onclick();assert.equal(value,'Camera off · Coopy can’t see');assert.equal(toggle.dataset.state,'paused');
+});
+
+test('connection errors retain an ended explanation instead of silently returning incoming',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onState({state:'idle',message:'Connection interrupted.'});
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('end-summary').textContent,'Connection interrupted.');
+  assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
+});
+
+test('spoken partial overlay updates preserve existing settings and none fully clears',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));
+  await f.voice.opts.onTryon('desk',{opacity:.7,x:.3});
+  await f.voice.opts.onTryon('desk',{y:.8});
+  assert.equal(f.camera.options.opacity,.7);assert.equal(f.camera.options.x,.3);assert.equal(f.camera.options.y,.8);assert.equal(f.camera.product.id,f.store.current.id);
+  await assert.rejects(f.voice.opts.onTryon('desk',{color:'#123456'}),/real product photo/);
+  await f.voice.opts.onTryon('none',{opacity:.9});assert.equal(f.camera.options.opacity,0);assert.equal(f.nodes.get('tryon-chip').hidden,true);
+});
+
+test('selecting two products in one category changes the actual photo source and voice context',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const products=catalog.filter(p=>p.category==='clothes');f.voice.opts.onRecommendations(products);
+  const first=await f.voice.opts.onProductAction('try_on',products[0].id);assert.equal(first.product.id,products[0].id);assert.equal(f.camera.product.image,products[0].image);
+  await f.voice.opts.onProductAction('try_on',products[1].id);assert.equal(f.camera.product.id,products[1].id);assert.equal(f.camera.product.image,products[1].image);
+  const current=f.voice.opts.getContext();assert.equal(current.tried_product.id,products[1].id);assert.equal(current.tried_product.preview_kind,'garment');
+});
+
+test('catalog exposes all six groups and selecting a row tries its exact product',async t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();f.nodes.get('catalog-button').onclick();
+  for(const type of ['lipstick','chair','lamp','tshirt','hoodie','glasses']){f.nodes.get('type-'+type).onclick();assert.equal(f.nodes.get('catalog-items').children.length,3);}
+  const row=f.nodes.get('catalog-items').children[0];await row.children[2].children[0].onclick();
+  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.camera.product.productType,'glasses');assert.equal(f.camera.product.id,f.store.current.id);assert.equal(f.voiceStarts,0);
+});
+
+test('ending while a product image loads cannot restore try-on UI',async t=>{
+  const wait=deferred();const f=fixture(t,{productLoad:()=>wait.promise});await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));
+  const loading=f.nodes.get('product-try').onclick();await tick();f.nodes.get('end-call').onclick();wait.resolve();await loading;
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('tryon-chip').hidden,true);assert.equal(f.voice.opts.getContext().tried_product,null);
+});
+
+test('camera-off during product loading clears a stale product claim',async t=>{
+  let pending=false;const wait=deferred();const f=fixture(t,{productLoad:()=>pending?wait.promise:Promise.resolve()});await f.nodes.get('answer-call').onclick();const products=catalog.filter(p=>p.category==='desk');f.voice.opts.onRecommendations(products);
+  await f.voice.opts.onProductAction('try_on',products[0].id);pending=true;
+  const loading=f.voice.opts.onProductAction('try_on',products[1].id);const rejected=assert.rejects(loading,/cancelled/);await tick();await f.nodes.get('toggle-camera').onclick();wait.resolve();await rejected;
+  assert.equal(f.voice.opts.getContext().tried_product,null);assert.equal(f.nodes.get('tryon-chip').hidden,true);
+});
+
+test('voice cannot reactivate a camera the shopper turned off',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));await f.nodes.get('toggle-camera').onclick();const starts=f.cameraStarts;
+  await assert.rejects(f.voice.opts.onTryon('desk',{scale:1.1}),/Camera is off/);
+  await assert.rejects(f.voice.opts.onProductAction('try_on',f.store.current.id),/Camera is off/);
+  assert.equal(f.cameraStarts,starts);assert.equal(f.camera.running,false);
+});
+
+test('browse card action opens grounded details; saving only adds to local bag',async t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();const p=f.store.current;const size=f.store.queue.length;
+  const details=await f.voice.opts.onProductAction('browse',p.id);
+  assert.equal(f.nodes.get('details-dialog').open,true);assert.equal(f.nodes.get('detail-link').href,p.url);assert.equal(f.store.queue.length,size);assert.equal(details.purchased,false);
+  f.nodes.get('close-details').onclick();const result=await f.voice.opts.onProductAction('save',p.id);
+  assert.equal(f.store.cart.size,1);assert.equal(result.purchased,false);assert.equal(f.voiceStarts,0);
+});
+
+test('ending during swipe animation prevents late bag mutation',async t=>{
+  const f=fixture(t);f.nodes.get('decline-call').onclick();const pending=f.nodes.get('product-save').onclick();f.nodes.get('end-call').onclick();await pending;
+  assert.equal(f.store.cart.size,0);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
+});
+
+test('old camera-permission completion cannot start voice inside a newer pending call',async t=>{
+  const first=deferred(),second=deferred();const f=fixture(t,{cameraPermission:n=>n===1?first.promise:second.promise});
+  const oldAnswer=f.nodes.get('answer-call').onclick();await tick();f.nodes.get('end-call').onclick();
+  // The real Call again handler returns void; invoking Answer after its screen transition is equivalent.
+  f.nodes.get('call-again').onclick();await tick();first.resolve();await oldAnswer;await tick();
+  assert.equal(f.voiceStarts,0,'Old Answer must not start the new call before its own camera finishes');
+  second.resolve();await tick();await tick();assert.equal(f.voiceStarts,1);
+});
+
+test('try-on minimizes product controls and More, Less, and product bubble restore them',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='hoodie'));
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
+  await f.nodes.get('product-try').onclick();
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
+  assert.equal(f.nodes.get('focus-product').hidden,false);
+  assert.equal(f.nodes.get('focus-toggle-label').textContent,'More');
+  f.nodes.get('focus-toggle').onclick();
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
+  assert.equal(f.nodes.get('focus-toggle-label').textContent,'Less');
+  assert.equal(f.nodes.get('focus-toggle').attributes['aria-expanded'],'true');
+  f.nodes.get('focus-toggle').onclick();
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
+  f.nodes.get('focus-product').onclick();
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
+  assert.equal(f.nodes.get('focus-toggle-label').textContent,'Less');
+  assert.equal(f.camera.running,true);assert.equal(f.voice.call.ready,true);
+  assert.equal(f.nodes.has('render-generate'),false);
+  assert.equal(f.voice.opts.onRealisticPreviewRequested,undefined);
+});
+
+test('camera off and cleared try-on restore controls without ending voice',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lamp'));await f.nodes.get('product-try').onclick();
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
+  await f.nodes.get('toggle-camera').onclick();
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'false');assert.equal(f.nodes.get('focus-toggle').hidden,true);
+  assert.equal(f.voice.call.ready,true);
+  await f.nodes.get('toggle-camera').onclick();assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
+  await f.nodes.get('clear-tryon').onclick();
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'false');assert.equal(f.nodes.get('focus-product').hidden,true);
+  assert.equal(f.voice.opts.getContext().tried_product,null);
+});
+
+test('glasses selection uses the exact catalog image and reports its tracked preview mode',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const glasses=catalog.filter(p=>p.productType==='glasses');assert.equal(glasses.length,3);
+  f.voice.opts.onRecommendations(glasses);
+  await f.voice.opts.onProductAction('try_on',glasses[0].id);
+  const applied=await f.voice.opts.onTryon('glasses',{scale:1.12,rotation:3,opacity:.9});
+  assert.equal(f.camera.mode,'glasses');assert.equal(f.camera.product.image,glasses[0].image);
+  assert.equal(applied.product_id,glasses[0].id);assert.equal(applied.preview_kind,'glasses');
+  assert.equal(f.camera.options.scale,1.12);assert.equal(f.nodes.get('phone-app').dataset.focused,'true');
+  await assert.rejects(f.voice.opts.onTryon('glasses',{color:'#aa3355'}),/real product photo/);
+});
+
+test('Flip requests the opposite physical camera and keeps voice and selected product active',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lamp'));await f.nodes.get('product-try').onclick();
+  const productId=f.camera.product.id;
+  await f.nodes.get('flip-camera').onclick();
+  assert.deepEqual(JSON.parse(JSON.stringify(f.camera.starts[1])),{facingMode:'environment',portrait:true,strictFacing:true});
+  assert.equal(f.camera.options.mirror,false);assert.equal(f.voice.opts.getContext().facing_mode,'environment');
+  assert.equal(f.nodes.get('flip-camera').attributes['aria-label'],'Flip to front camera');
+  assert.equal(f.voiceStarts,1);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.product.id,productId);
+  await f.nodes.get('flip-camera').onclick();
+  assert.equal(f.camera.starts[2].facingMode,'user');assert.equal(f.camera.starts[2].strictFacing,true);
+  assert.equal(f.camera.options.mirror,true);assert.equal(f.nodes.get('flip-camera').attributes['aria-label'],'Flip to back camera');
+  assert.equal(f.voiceStarts,1);
+});
+
+test('unavailable opposite camera restores the original rather than pretending a mirror change is a flip',async t=>{
+  const f=fixture(t,{cameraStart:settings=>!settings.strictFacing});await f.nodes.get('answer-call').onclick();
+  await f.nodes.get('flip-camera').onclick();
+  assert.equal(f.camera.starts.length,3);
+  assert.equal(f.camera.starts[1].facingMode,'environment');assert.equal(f.camera.starts[1].strictFacing,true);
+  assert.equal(f.camera.starts[2].facingMode,'user');assert.equal(f.camera.starts[2].strictFacing,false);
+  assert.equal(f.camera.running,true);assert.equal(f.camera.options.mirror,true);
+  assert.equal(f.voice.opts.getContext().facing_mode,'user');assert.equal(f.voiceStarts,1);
+  assert.match(f.nodes.get('call-notice').textContent,/no available camera on the other side/);
+});
+
+test('ending while a physical-camera switch is pending cannot restart either camera or voice',async t=>{
+  const wait=deferred();const f=fixture(t,{cameraStart:settings=>settings.strictFacing?wait.promise:true});await f.nodes.get('answer-call').onclick();
+  const switching=f.nodes.get('flip-camera').onclick();await tick();f.nodes.get('end-call').onclick();wait.resolve(false);await switching;
+  assert.equal(f.camera.starts.length,2);assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
+});
+
+
+test('embedded camera is opt-in, namespaced, and has no conflicting old page navigation',()=>{
+  assert(!/id="vision-consent"[^>]*\bchecked\b/.test(html));
+  assert(!html.includes('class="app-nav"'));assert(!html.includes('href="/fonts/fonts.css"'));
+  assert(html.includes('call-side-panel'));
+  for(const product of catalog){assert.match(product.image,/^\/live-call\/products\//);assert.equal(product.image,product.preview.image);}
+});
+
+test('direct offline entry never starts camera, microphone, or tracking even if handlers are invoked',async t=>{
+  const f=fixture(t,{status:{ready:false,offline:true,reason:'Offline rehearsal'}});await tick();
+  for(const id of ['answer-call','product-try','toggle-camera','gesture-toggle'])assert.equal(f.nodes.get(id).disabled,true,id);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);
+  f.nodes.get('decline-call').onclick();await f.nodes.get('product-try').onclick();await f.nodes.get('toggle-camera').onclick();
+  assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,0);assert.equal(f.store.cart.size,0);assert.equal(f.context.document.head.children.length,0);
+});
+
+test('memory bridge sends final user words only, deduplicates, and rejects foreign stop messages',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onTranscript({role:'assistant',key:'a',text:'You like expensive things',final:true});
+  f.voice.opts.onTranscript({role:'user',key:'u',text:'I want a quiet lamp',final:false});
+  f.voice.opts.onTranscript({role:'user',key:'u',text:'I want a quiet lamp',final:true});
+  f.voice.opts.onTranscript({role:'user',key:'u',text:'I want a quiet lamp',final:true});
+  const entries=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');
+  assert.equal(entries.length,1);assert.equal(entries[0].data.text,'I want a quiet lamp');assert.equal(entries[0].target,'https://coupi.test');assert(entries[0].data.id.length<=90);
+  f.events.emit('message',{origin:'https://other.test',source:f.context.window.parent,data:{type:'coupi-live-call-stop'}});assert.equal(f.camera.running,true);
+  f.events.emit('message',{origin:'https://coupi.test',source:{},data:{type:'coupi-live-call-stop'}});assert.equal(f.camera.running,true);
+  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-live-call-stop'}});assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
+});
+
+test('generated product-explanation prompt never becomes a user memory; reference alternatives stay factual',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lamp'));
+  f.nodes.get('product-details').onclick();f.nodes.get('detail-ask').onclick();
+  assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,0);
+  f.nodes.get('product-details').onclick();
+  const root=f.nodes.get('reference-contenders'),cards=root.children.find(node=>node.className==='reference-cards');assert.equal(cards.children.length,2);const unknown=cards.children.find(node=>node.children.some(child=>child.className==='reference-price'&&child.textContent==='No reference price'));assert(unknown);assert(!unknown.children.some(child=>child.className==='reference-badge'));
+  cards.children[0].children.find(node=>node.className==='reference-compare').onclick();
+  const head=root.children.find(node=>node.className==='reference-head');
+  const allText=node=>[node.textContent||'',...(node.children||[]).map(allText)].join(' ');
+  assert.match(allText(head),/Not supplied for this listing/);assert.match(allText(head),/Current delivery window unknown/);assert.match(allText(head),/No tested-use evidence/);
+  assert(!/most loved|best for you|fastest/.test(allText(root)));
+  const previous=f.store.current.id;head.children.find(node=>node.className==='reference-choose').onclick();assert.notEqual(f.store.current.id,previous);assert.equal(f.store.current.productType,'lamp');assert.equal(f.store.cart.size,0);
+});
+
+
+test('media toggles begin off, and fonts load only after an online status check',async t=>{const f=fixture(t);assert.equal(f.nodes.get('toggle-camera').attributes['aria-pressed'],'false');assert.equal(f.nodes.get('gesture-toggle').attributes['aria-pressed'],'false');assert.equal(f.context.document.head.children.length,0);await tick();assert.equal(f.context.document.head.children[0].href,'/fonts/fonts.css');});
+
+const descendants=node=>[node,...(node.children||[]).flatMap(descendants)];
+function parentResult(f,id,result,type='coupi-call-result'){f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type,id,result}});}
+const checkedResult=()=>({status:'ok',message:'one considered pick.',conversationMode:'request',interviewCount:0,interviewComplete:false,worldReady:false,verdict:{pickSkuId:'socks',reason:'Red, under your stated budget.',dissent:'Two seeded reviews describe pilling.',citations:['socks-r-15','socks-r-16'],runnerUpSkuId:null,whyRunnerUpLost:'',clarifyingQuestion:null},proposedSkuIds:['socks'],products:[{id:'socks',name:'Red training socks',price:6900,delivery:'Demo delivery tomorrow',image:null}]});
+
+test('final actual turns attach one consented raw frame; periodic, partial and assistant snapshots never trigger requests',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.visionTick();f.voice.opts.onTranscript({role:'assistant',key:'a1',text:'which one?',final:true});f.voice.opts.onTranscript({role:'user',key:'u1',text:'this',final:false});
+  assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,0);
+  for(const [i,text] of ['which one?','what do I need?','what’s missing?','this or that?'].entries())f.voice.opts.onTranscript({role:'user',key:'camera-'+i,text,final:true});
+  const entries=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');assert.equal(entries.length,4);
+  for(const {data} of entries){assert.equal(data.photo.mime,'image/jpeg');assert.equal(data.photo.dataUrl,'data:image/jpeg;base64,AQID');assert(Number.isFinite(Date.parse(data.photo.capturedAt)));assert.equal(data.role,'user');}
+  f.nodes.get('vision-toggle').onclick();f.voice.opts.onTranscript({role:'user',key:'private',text:'my mornings are busy',final:true});
+  const privateTurn=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1);assert(!('photo' in privateTurn.data));
+  f.voice.opts.onTranscript({role:'user',key:'synthetic',text:'invented prompt',final:true,synthetic:true});assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,5);
+});
+
+test('checked call cards use returned exact products, citations and safe fields without another request',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onTranscript({role:'user',key:'shop',text:'red socks tomorrow',final:true});
+  const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
+  assert.equal(f.nodes.get('validated-call').dataset.state,'pending');assert.equal(f.nodes.get('validated-call').hidden,false);
+  let resolved=false;const waiting=f.voice.opts.onResolveCall().then(result=>{resolved=true;return result;});
+  const result=checkedResult();result.profile={secret:'PRIVATE_PROFILE'};result.diary='PRIVATE_DIARY';result.products.push({id:'rogue',name:'UNVALIDATED_PRODUCT',price:1});
+  f.events.emit('message',{origin:'https://attacker.test',source:f.context.window.parent,data:{type:'coupi-call-result',id,result}});await tick();assert.equal(resolved,false);
+  parentResult(f,id,result);const safe=await waiting;const serialized=JSON.stringify(safe);assert(!serialized.includes('PRIVATE_'));assert(!serialized.includes('UNVALIDATED_PRODUCT'));
+  const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='Red training socks'));assert(nodes.some(n=>n.textContent==='PENDING YOUR APPROVAL · nothing ordered'));assert(nodes.some(n=>n.textContent==='Two seeded reviews describe pilling.'));
+  f.context.fetch=async(_url,init)=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:JSON.parse(init.body).skuId})});
+  await nodes.find(n=>n.textContent==='review 1 ↗').onclick();
+  const opened=f.messages.find(row=>row.data.type==='coupi-live-call-product').data;assert.equal(opened.skuId,'socks');assert.equal(opened.callId,id);assert.equal(opened.reviewId,'socks-r-15');
+  assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,1);
+});
+
+test('checked inventories keep uncertainty, proposed cards and exact numeric sourced identities',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'scan',text:'what is missing?',final:true});
+  const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
+  parentResult(f,id,{...checkedResult(),verdict:undefined,inventory:{items:[{name:'milk',quantity:'one carton',status:'low'}],lowOrMissing:[{name:'greens',reason:'not visible',confidence:'low'}],uncertainties:['The back shelf is obscured.']},proposedSkuIds:['1814412512'],products:[{id:'1814412512',name:'Sourced reference',price:10000,priceBasis:'historical-reference',image:'/live-call/products/example.jpg',delivery:'Current delivery unknown'}]});
+  const nodes=descendants(f.nodes.get('validated-call-content'));assert(nodes.some(n=>n.textContent==='milk · one carton — low'));assert(nodes.some(n=>n.textContent==='The back shelf is obscured.'));assert(nodes.some(n=>n.textContent==='REFERENCE PRICE · confirm current price on Coupang'));
+  f.context.fetch=async()=>({ok:true,json:async()=>({ok:true,catalog_namespace:'world-simulation',skuId:'1814412512'})});
+  await nodes.find(n=>n.textContent==='Details & approval').onclick();assert.equal(f.messages.find(row=>row.data.type==='coupi-live-call-product').data.skuId,'1814412512');
+});
+
+test('retry reopens the same checked turn while unknown or stale results cannot replace the latest card',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onTranscript({role:'user',key:'retry',text:'socks',final:true});const id=f.messages.find(row=>row.data.type==='coupi-live-call-transcript').data.id;
+  const emit=data=>f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data});
+  emit({type:'coupi-call-error',id,error:'Connection paused.'});assert.equal(f.nodes.get('validated-call').dataset.state,'error');
+  let retries=0;f.voice.resolveAppTurn=()=>{retries++;};emit({type:'coupi-call-pending',id});emit({type:'coupi-call-pending',id});assert.equal(retries,1);
+  const waiting=f.voice.opts.onResolveCall();parentResult(f,'unknown',checkedResult());assert.equal(f.nodes.get('validated-call').dataset.state,'pending');
+  parentResult(f,id,checkedResult());assert.equal((await waiting).status,'ok');
+  f.voice.opts.onTranscript({role:'user',key:'next',text:'something else',final:true});parentResult(f,id,{...checkedResult(),message:'OLD ANSWER'});assert.equal(f.nodes.get('validated-call').dataset.state,'pending');assert(!descendants(f.nodes.get('validated-call-content')).some(n=>n.textContent==='OLD ANSWER'));
+});
+
+test('bridge drops oversized frames and only eligible result products can carry local images',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const bridge=f.context.window.CoupiCallBridge;
+  const id=bridge.transcript({role:'user',key:'image-bound',text:'this one',final:true},{dataUrl:'data:image/jpeg;base64,'+'A'.repeat(22001),mime:'image/jpeg',capturedAt:new Date().toISOString()});
+  assert(!('photo' in f.messages.find(row=>row.data.id===id).data));
+  const result=checkedResult();result.products[0].image='https://untrusted.example/pixel';parentResult(f,id,result);const safe=await bridge.resolveLatest();assert.equal(safe.products[0].image,null);
+});
+
+test('late prior transcripts persist their actual words without replacing the current checked turn',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onUserTurnStart();
+  f.voice.opts.onTranscript({role:'user',key:'current',text:'red socks',final:true});const current=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data;
+  f.voice.opts.onTranscript({role:'user',key:'older',text:'a kettle',final:true,superseded:true});const older=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data;assert(!('photo' in older));assert.equal(older.text,'a kettle');
+  let resolved=false;const waiting=f.voice.opts.onResolveCall().then(value=>{resolved=true;return value;});parentResult(f,older.id,{...checkedResult(),message:'OLD ANSWER'});await tick();assert.equal(resolved,false);assert.equal(f.nodes.get('validated-call').dataset.state,'pending');
+  parentResult(f,current.id,checkedResult());assert.equal((await waiting).verdict.pickSkuId,'socks');assert(!descendants(f.nodes.get('validated-call-content')).some(n=>n.textContent==='OLD ANSWER'));
+});
+
+function personalizationContext(f,values={}){f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-context',active:true,question:'What is your favorite quiet corner?',count:2,draftPending:false,memories:[],...values}});}
+
+test('the stable embedded frame waits for parent context and keeps the camera off in both first and later calls',async t=>{
+  const f=fixture(t,{search:'?embedded=1'});await tick();assert.equal(f.nodes.get('answer-call').disabled,true);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,0);assert.equal(f.cameraStarts,0);
+  personalizationContext(f);await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,0);assert.equal(f.nodes.get('incoming-title').textContent,'let’s get to know you.');
+  f.nodes.get('end-call').onclick();f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-live-call-open'}});
+  personalizationContext(f,{active:false,question:'',count:5});assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('incoming-title').textContent,'let’s look together.');
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,2);assert.equal(f.cameraStarts,0);
+  await f.nodes.get('toggle-camera').onclick();assert.equal(f.cameraStarts,1);
+});
+const editablePreferences={interests:['focused_work'],vibe:'calm',budget:30000,story:'I like reading beside my desk.'};
+test('personalization bootstraps the current parent question and starts voice with camera off',async t=>{
+  const f=fixture(t,{search:'?interview=1'});await tick();assert(f.messages.some(row=>row.data.type==='coupi-live-call-ready'));assert.equal(f.nodes.get('answer-call').disabled,true);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,0);assert.equal(f.cameraStarts,0);
+  personalizationContext(f,{memories:[{text:'Quiet evenings',source:'from this call · draft',confidence:.9}]});await f.nodes.get('answer-call').onclick();
+  assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,0);assert.equal(f.camera.running,false);assert.equal(f.voice.opts.greeting,'What is your favorite quiet corner?');assert.equal(f.voice.opts.getContext().personalization.active,true);
+  assert.equal(f.nodes.get('incoming-title').textContent,'let’s get to know you.');assert.equal(f.nodes.get('personalization-question').textContent,'What is your favorite quiet corner?');assert.equal(f.nodes.get('personalization-memory').hidden,false);
+  await f.nodes.get('toggle-camera').onclick();assert.equal(f.cameraStarts,1);assert.equal(f.camera.running,true);
+});
+
+test('voice preference draft opens parent review without saving or adding a transcript',async t=>{
+  const f=fixture(t,{search:'?interview=1'});personalizationContext(f);await f.nodes.get('answer-call').onclick();
+  const before=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length;
+  const pending=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});const request=f.messages.find(row=>row.data.type==='coupi-personalization-review').data;
+  assert.deepEqual(JSON.parse(JSON.stringify(request.preferences)),editablePreferences);assert(request.id.startsWith('personalization-'));assert.equal(f.cameraStarts,0);
+  personalizationContext(f,{draftPending:true});assert.equal(f.voice.opts.getContext().personalization.draft_pending,true);
+  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:request.id,result:{ok:true,draft_ready:true,saved:false}}});
+  const result=await pending;assert.equal(result.draft_ready,true);assert.equal(result.saved,false);assert.equal(f.voice.call.ready,true);assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,before);
+});
+
+test('skip personalization keeps voice running and late review replies cannot revive an ended call',async t=>{
+  const f=fixture(t,{search:'?interview=1'});personalizationContext(f);await f.nodes.get('answer-call').onclick();
+  const draft=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});const draftId=f.messages.find(row=>row.data.type==='coupi-personalization-review').data.id;
+  const skip=f.voice.opts.onPreferences({action:'skip'});assert.equal((await draft).ok,false);const skipId=f.messages.find(row=>row.data.type==='coupi-personalization-skip').data.id;
+  personalizationContext(f,{active:false});f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:skipId,result:{ok:true,skipped:true,saved:false}}});assert.equal((await skip).skipped,true);assert.equal(f.voice.call.ready,true);
+  assert.throws(()=>f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences}),/optional introduction/);
+  personalizationContext(f);const last=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});f.nodes.get('end-call').onclick();assert.equal((await last).ok,false);
+  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:draftId,result:{ok:true,draft_ready:true,saved:false}}});assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
+});
+
+test('preference acknowledgements reject foreign origins and any claim of tool persistence',async t=>{
+  const f=fixture(t,{search:'?intent=personalize'});personalizationContext(f);await f.nodes.get('answer-call').onclick();let settled=false;
+  const pending=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences}).then(result=>{settled=true;return result;});const id=f.messages.find(row=>row.data.type==='coupi-personalization-review').data.id;
+  f.events.emit('message',{origin:'https://attacker.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id,result:{ok:true,draft_ready:true,saved:false}}});await tick();assert.equal(settled,false);
+  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id,result:{ok:true,draft_ready:true,saved:true}}});assert.equal((await pending).ok,false);
+});

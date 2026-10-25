@@ -1,0 +1,29 @@
+{
+  "name": "coupi-live",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack --hostname 127.0.0.1 --port 3007",
+    "build": "next build --webpack",
+    "start": "next start --hostname 127.0.0.1 --port 3007",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "rehearse": "node --env-file=.env.local --import tsx scripts/rehearse.ts",
+    "rehearse:journey": "node --env-file=.env.local --import tsx scripts/rehearse-journey.ts"
+  },
+  "dependencies": {
+    "next": "16.2.5",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "4.4.3",
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "22.20.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "tsx": "4.23.13",
+    "@types/three": "0.186.0"
+  }
+}

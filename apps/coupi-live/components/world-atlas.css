@@ -1,0 +1,36 @@
+/* The first view is a single map of places, never a carousel of isolated rooms. */
+.atlas-overview .atlas-beacon {width: 36px; height: 36px;}
+.atlas-overview .atlas-beacon[data-highlighted=true] {background: #fff8f0; border-color: var(--place-accent); box-shadow: 0 0 0 4px color-mix(in srgb,var(--place-accent) 10%,transparent);}
+.atlas-overview .atlas-wayfinding {align-items: center; justify-content: space-between;}
+.atlas-overview .atlas-waypoint {flex: 1; max-width: 650px;}
+.atlas-place-count {font: 7px/1.9 var(--mono); letter-spacing: .06em; color: var(--muted); text-align: right;}
+.atlas-place-index {display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 16px 70px 0; padding-top: 14px; border-top: 1px solid var(--line);}
+.atlas-place-index > button {display: inline-flex; align-items: center; gap: 8px; padding: 5px 0; font: 11px/1.5 var(--ui); color: var(--muted); text-align: left;}
+.atlas-place-index > button > span {font: 7px var(--mono); color: var(--orange);}
+.atlas-place-index > button:hover {color: var(--ink);}
+.world-overview-invitation {display: none;}
+@media (max-width: 900px) {.atlas-place-index {margin-inline: 35px;}}
+@media (max-width: 640px) {
+  .journey-shell[data-view=world] .journey-system {display: none;}
+  .journey-main.journey-world {padding-top: 12px;}
+  .world-home .world-heading {margin-bottom: 10px;}
+  .world-home .world-heading h1 {font-size: 39px; line-height: 1.05;}
+  .world-home .world-heading .eyebrow, .world-home .world-intro, .world-home .atlas-context, .world-home .world-moment-count {display: none;}
+  .world-overview-invitation {display: block; margin-top: 6px; font: 9px/1.6 var(--ui); color: var(--muted);}
+  .world-home .world-atlas-navigation {padding-top: 0;}
+  .world-home .world-atlas-navigation [role=tab] {font-size: 10px; padding-block: 11px;}
+  .world-atlas.atlas-overview .atlas-stage {height: 318px;}
+  .atlas-overview .atlas-coordinate {display: none;}
+  .atlas-overview .atlas-invitation {bottom: 1px; font-size: 6px;}
+  .atlas-overview .atlas-beacon {width: 32px; height: 32px;}
+  .atlas-overview .atlas-beacon > span {font-size: 8px;}
+  .atlas-overview .atlas-wayfinding {margin: 8px 23px 0; padding: 14px 0 4px; gap: 12px;}
+  .atlas-overview .atlas-waypoint {gap: 11px;}
+  .atlas-overview .atlas-waypoint .destination-name {font-size: 25px; margin-top: 4px;}
+  .atlas-overview .atlas-waypoint .destination-weather {font-size: 6px;}
+  .atlas-overview .atlas-waypoint .destination-story {font-size: 7px; margin-top: 6px; -webkit-line-clamp: 1;}
+  .atlas-place-count {font-size: 5px; flex-shrink: 0;}
+  .atlas-place-index {margin: 12px 23px 0; gap: 3px 18px; padding-top: 10px;}
+  .atlas-place-index > button {font-size: 9px; gap: 6px;}
+  .atlas-place-index > button > span {font-size: 6px;}
+}

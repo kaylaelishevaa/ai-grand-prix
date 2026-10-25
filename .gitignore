@@ -14,3 +14,14 @@ node_modules/
 /.openai/execution-profile.json
 /.vinext/
 /next-env.d.ts
+
+# COUPI Node runtime: local secrets, state and build outputs
+.env
+.env.*
+!.env.example
+.dev.vars*
+apps/coupi-live/node_modules/
+apps/coupi-live/.next/
+apps/coupi-live/.data/
+apps/coupi-live/.cache/
+apps/coupi-live/tsconfig.tsbuildinfo

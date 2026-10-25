@@ -1,0 +1,2725 @@
+{
+  "format": 1,
+  "source": {
+    "mainCommit": "7e5b085e28ee598ddb3afb9edc69a50ae8d51bc5",
+    "integratedUiBaseCommit": "b3ed68003063020502f60c2cc6149b3539b932fe",
+    "personalizationSourceCommit": "12079ef"
+  },
+  "notes": [
+    "Source commit labels identify the inspected archives; this packager does not invent Git ancestry.",
+    "Original main package and gitignore are archived under integration/. No other original main file is changed.",
+    "Environment files, runtime data/cache, dependencies, build outputs, symlinks and artifact bundles are excluded."
+  ],
+  "changedMainFiles": [
+    "package.json",
+    ".gitignore"
+  ],
+  "mainFiles": [
+    {
+      "path": ".env.example",
+      "sha256": "3e43b632293c8908650cbad605b23f19dc494b5735230f61910085e8c09545ac"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "ce123917d95663fe506a4fc87d8d21dee64180112e7b2e366fdda77851c959b6"
+    },
+    {
+      "path": ".npmrc",
+      "sha256": "a3909ac0447c469fda12c57374993be70f47ce73e49fd3124678c7c047f2214d"
+    },
+    {
+      "path": ".openai/hosting.json",
+      "sha256": "f5f3e388216b8ed4ae0e9c1167900fe1b07ad16756203aa903923ca284e9edbd"
+    },
+    {
+      "path": "app/chatgpt-auth.ts",
+      "sha256": "4265a2e7c2dcb3a6f4b7026f762bf5b6e4caec76cc13c0a45987ee9a9f2e42cc"
+    },
+    {
+      "path": "app/globals.css",
+      "sha256": "8546d9b115f0addd582f7ceaaa6b1c069310bcc77c43ee7b8acfe0020be3afd7"
+    },
+    {
+      "path": "app/layout.tsx",
+      "sha256": "b2205af68e3c020784ea77e323a3ae90ebbf381c1df5328ef4d545eeb2bce859"
+    },
+    {
+      "path": "app/page.tsx",
+      "sha256": "7ab0483611cbc020583361657369ddc50ea6d4b09f56da9ada780008cba1c5d0"
+    },
+    {
+      "path": "CAMERA-README.txt",
+      "sha256": "06e0d45f6f172a0fe502f0689ac052860c0c0b47bb82b8314a8028ef87c63a19"
+    },
+    {
+      "path": "cloudflare-env.d.ts",
+      "sha256": "8b0eca84aa3364cc7ccc43cc3af6beb88dd34ebd410de08690bf094ce39fbcb0"
+    },
+    {
+      "path": "components/connector-error.tsx",
+      "sha256": "2d0d04559952ce9c9a327cca499f4b99f35d885cccfce375230e116695d3f155"
+    },
+    {
+      "path": "components/ui/accordion.tsx",
+      "sha256": "a4f153089ba886dfcf73fac26b5c01ca933fa12fbe88df6fb723912bfffdfbb0"
+    },
+    {
+      "path": "components/ui/alert-dialog.tsx",
+      "sha256": "9a8d950f2b9b4352d5ebb762fb44d5c28c2d353aa29712071973656a8736e311"
+    },
+    {
+      "path": "components/ui/alert.tsx",
+      "sha256": "2cc59b5f7bda91c1670884b1bf46bfc8a2a6f226cef184f5762acc037188885b"
+    },
+    {
+      "path": "components/ui/aspect-ratio.tsx",
+      "sha256": "b1c157886236782cb92d8fbcd4749532aaf6d8aabefd6e157ca40358f902f407"
+    },
+    {
+      "path": "components/ui/attachment.tsx",
+      "sha256": "ae8a25dd1a896d3964e3ef54d97e51221b418cde287dfd794428b89951c5c790"
+    },
+    {
+      "path": "components/ui/avatar.tsx",
+      "sha256": "58a846bf1617b94b9681921db9b8461d0145f311424663d11678a06b6153cb34"
+    },
+    {
+      "path": "components/ui/badge.tsx",
+      "sha256": "46a0de5224f6a5d5d63d45246534288518dce888f031064bff925bbc7fe6ad97"
+    },
+    {
+      "path": "components/ui/breadcrumb.tsx",
+      "sha256": "d4c0831bba2212e778248f54a6ace6ef378df8bba4616d1abf27787a31eabae5"
+    },
+    {
+      "path": "components/ui/bubble.tsx",
+      "sha256": "870cc0c5cfc8a515053f7e41e706a6bd017a909b45f1305fd3b164a52cc4483b"
+    },
+    {
+      "path": "components/ui/button-group.tsx",
+      "sha256": "784c89d8ee683e1bc972ae69e6ea8225a7f63abe22aa1b5fc3423ae8a2a399c0"
+    },
+    {
+      "path": "components/ui/button.tsx",
+      "sha256": "cc36af0f8b5019c33cc039fbf03bb952a513072b15b55b53c592b78af3e5f4c4"
+    },
+    {
+      "path": "components/ui/calendar.tsx",
+      "sha256": "3855fbe0d3f8ad3a4b93071f98b76a9f6782d46ec8b05f5d2ddbee1e4e39bc84"
+    },
+    {
+      "path": "components/ui/card.tsx",
+      "sha256": "c48dd3b96be90a7066f1aebf294f0af9d00ebcdc367d5d4aca55429ade570c1c"
+    },
+    {
+      "path": "components/ui/carousel.tsx",
+      "sha256": "b7ea0dda3903d972c186f739e23da61f547bc83b5a0bf13b16856577846d5fc3"
+    },
+    {
+      "path": "components/ui/chart.tsx",
+      "sha256": "45aa5ea4a386f4fb5b8869ff4bab3a08cf89255190ee322043baf84c3e950b6a"
+    },
+    {
+      "path": "components/ui/checkbox.tsx",
+      "sha256": "b23ab9d4deeedf2ac8f512c368361ede681aa383437ef48563a6f9b7dbe95f27"
+    },
+    {
+      "path": "components/ui/collapsible.tsx",
+      "sha256": "c6598e5584f4258b5d9fefadbc5ad6a66888ad58729f4b634a0bb2d9c513188b"
+    },
+    {
+      "path": "components/ui/combobox.tsx",
+      "sha256": "2d68e78b2dc7e38a085f222dede60a80b4f8229a6e91732c484605e204d46735"
+    },
+    {
+      "path": "components/ui/command.tsx",
+      "sha256": "361193df1e3d64a9e9b5048f045264782fcb387aab3f00f2b805fdcbf538b16a"
+    },
+    {
+      "path": "components/ui/context-menu.tsx",
+      "sha256": "2cf1fcf59df0649a3e2a126d1df2f639145f6b6bf5689ee54af1f40ab1245017"
+    },
+    {
+      "path": "components/ui/dialog.tsx",
+      "sha256": "dce39c6adc47d997bd2567f8b7a72f466b0134715105cd42f9194007b8ecdb14"
+    },
+    {
+      "path": "components/ui/direction.tsx",
+      "sha256": "84ae2ad658207f0e0f367978e5508cd8027cd00c29c41d3d13db21a708c3d1e6"
+    },
+    {
+      "path": "components/ui/drawer.tsx",
+      "sha256": "cb6eaf58eb0757ca91af284e5d925b89a42ad7eb19cb3f44c575a3487aa9350f"
+    },
+    {
+      "path": "components/ui/dropdown-menu.tsx",
+      "sha256": "98f0dcdae38225b73734aceeb9213dd751fea2c72ea520df31003cd133deac8a"
+    },
+    {
+      "path": "components/ui/empty.tsx",
+      "sha256": "ae95bdcf367a076ae02e7925f14522a148798f72d9651749c6d55497dba584c0"
+    },
+    {
+      "path": "components/ui/field.tsx",
+      "sha256": "ba67d76f017ac059fc86cf8c344e0b2991c4322d3619e125498c19b87f6eefbd"
+    },
+    {
+      "path": "components/ui/form.tsx",
+      "sha256": "315b46bb75ab7d1c6061b5d750aa4bedf6e7a455e15e2d7f9182f053d5972b1e"
+    },
+    {
+      "path": "components/ui/hover-card.tsx",
+      "sha256": "f5d8df42c59370ec14d61bcc54f7d68e9bb7dfa0d6a872b2f7cffc2aafbf23b8"
+    },
+    {
+      "path": "components/ui/input-group.tsx",
+      "sha256": "6afbd58fea4c438e6252dc4568bddc122e84ababead4ad5cee50ace01100c9a0"
+    },
+    {
+      "path": "components/ui/input-otp.tsx",
+      "sha256": "161946daa89f0eda2575b9271c0494e35807c4ffb55598a49f67160c17fec299"
+    },
+    {
+      "path": "components/ui/input.tsx",
+      "sha256": "8c4612a7c41319ac5049daa3b34b080f9784b6245c17780eb87c127e58e473db"
+    },
+    {
+      "path": "components/ui/item.tsx",
+      "sha256": "6e2144d6d87142dbbe56d568810bf546318c8aa661447ebb0d76ebbf382cb45f"
+    },
+    {
+      "path": "components/ui/kbd.tsx",
+      "sha256": "6088c3a5432338b1719c17e9b5d0e1fa74fd1f66060f248fc88909d33a82cd13"
+    },
+    {
+      "path": "components/ui/label.tsx",
+      "sha256": "a476e41f08b9de5bd447de66a33d8bc2ad18f2fa6b96c064778bab4b6f439f4c"
+    },
+    {
+      "path": "components/ui/marker.tsx",
+      "sha256": "3d798763f094b2bb5e7ade2d5cd1b9bab498bc8ca7fd4cfaf4e5835bdedc34a0"
+    },
+    {
+      "path": "components/ui/menubar.tsx",
+      "sha256": "9243af8afcea03703398ccd1c2a8c0a87ad6cbaf2bd272fb609f5b79fe46aebb"
+    },
+    {
+      "path": "components/ui/message-scroller.tsx",
+      "sha256": "bb7660a248e4e9589c3816c7c1c199ea1381a70d2c8476ae895b567a7a4d86cf"
+    },
+    {
+      "path": "components/ui/message.tsx",
+      "sha256": "9d2952bf3b641081f09aa2739535e6bbd1be0a4946789752a2c20d8aaef43185"
+    },
+    {
+      "path": "components/ui/native-select.tsx",
+      "sha256": "007516b111fca8c98a6c40c94ab91bb68cc5b52afce1ed1f5e510c3d86e7347c"
+    },
+    {
+      "path": "components/ui/navigation-menu.tsx",
+      "sha256": "889d358a77de88e9cb6f39ea4895ea4c76eaf01d731b74e44f1c41e97a78a044"
+    },
+    {
+      "path": "components/ui/pagination.tsx",
+      "sha256": "374ad135c3d4ff3ec080a0009cd9745cdd0e12faa89d2b0e86074f11e5127fd1"
+    },
+    {
+      "path": "components/ui/popover.tsx",
+      "sha256": "31c350309ff5d3034e6ecf1b0eda75ba8855bdbf987fc7ad6d71f0ef07c5a447"
+    },
+    {
+      "path": "components/ui/progress.tsx",
+      "sha256": "c8c26e8f5f041c3cdf4915347dc1d9c022f9448f149990fadcaf303e952fa57d"
+    },
+    {
+      "path": "components/ui/radio-group.tsx",
+      "sha256": "fe5ce39636d0818c2bf9c4eebddff893d1225fa2c81b5fa4bb8cbb39a8c913ce"
+    },
+    {
+      "path": "components/ui/resizable.tsx",
+      "sha256": "bc63958467aa00557c551bb0d96a5ae4c965c1e1ba2380e595949d933b132f7c"
+    },
+    {
+      "path": "components/ui/scroll-area.tsx",
+      "sha256": "8bd9d986b2844c9a87de825c6de4787b6739b36c3dc9a05ccf3eb107160e4043"
+    },
+    {
+      "path": "components/ui/select.tsx",
+      "sha256": "0b796a108a4eb5ba52d9ad938b7aea36dc56ae66c703a6d0a23dbc24f96daff3"
+    },
+    {
+      "path": "components/ui/separator.tsx",
+      "sha256": "6da346505c8629a4668420d2a5ca48891383bbe0b0ceb14163537c671879427e"
+    },
+    {
+      "path": "components/ui/sheet.tsx",
+      "sha256": "63863cf2df8f8973e52b3459ac9bdbf81be1262dbc70eb53d5271ffb03488e16"
+    },
+    {
+      "path": "components/ui/sidebar.tsx",
+      "sha256": "4a8d73e7730a2b1fcecfca31299ed26db65c2307b84197a59c6ec7c01c7ad28e"
+    },
+    {
+      "path": "components/ui/skeleton.tsx",
+      "sha256": "ba48dd5be5a6a1378bd4e011028654b5bf419f1e7d20ee4b9f8330c1264e7239"
+    },
+    {
+      "path": "components/ui/slider.tsx",
+      "sha256": "0e37484f4b416e79ac18c655cac961aefacf6e67085cfc2b320ea8af545635a3"
+    },
+    {
+      "path": "components/ui/sonner.tsx",
+      "sha256": "13ccc9b0fe4248e622f83a1d3b2f0566b72b5e04162d7d0c8db8945ecc71b55f"
+    },
+    {
+      "path": "components/ui/spinner.tsx",
+      "sha256": "3e6e6e8d37fb4069f8e43e55318f8db06fbc36e6c8be0096da3c9337c1c798b9"
+    },
+    {
+      "path": "components/ui/switch.tsx",
+      "sha256": "386d4d4deb39f34126f9700fe9bf5393d238485dd94018bba9d154dda84c62ae"
+    },
+    {
+      "path": "components/ui/table.tsx",
+      "sha256": "20e5a7f224959c6b75802995706a97e9da171f693d4b6b1b436388fcd9df96f3"
+    },
+    {
+      "path": "components/ui/tabs.tsx",
+      "sha256": "865d0194331b9b2be36723fa79d3575dc83078b4cb941cafee87cb72fc2cff46"
+    },
+    {
+      "path": "components/ui/textarea.tsx",
+      "sha256": "253cdeb487c73beaaccdf47fc163e36e7d5b7ae6ddf09a4f64998a109a112979"
+    },
+    {
+      "path": "components/ui/toggle-group.tsx",
+      "sha256": "69f643e889e933f05c1439084480d8646f66a161c7d1cf0730ee926382ade35e"
+    },
+    {
+      "path": "components/ui/toggle.tsx",
+      "sha256": "ba4d0b0a2b2fee75dc36dfc19e32082e721024b919050c97fd5dc70faa924e16"
+    },
+    {
+      "path": "components/ui/tooltip.tsx",
+      "sha256": "a0784eb77831a799fad7991df4f1b666f876201565a80175e1aa68733574a2e4"
+    },
+    {
+      "path": "components.json",
+      "sha256": "31f4ca67a4a62572571003d3d5aac85ee6fbfca67a192924bac6b168d95e98fd"
+    },
+    {
+      "path": "COUPANG-SOURCES.txt",
+      "sha256": "975307bca2e06d70b85c0ea8c08b96644e721eefe052eb5f4d86275af7c46e03"
+    },
+    {
+      "path": "data/catalog-replacements.json",
+      "sha256": "9d3bcf7b1cacfee53662e76c9650cfd3b265917e9356866b1f34402c1c96be0e"
+    },
+    {
+      "path": "data/catalog.json",
+      "sha256": "59265e28439b07861d9bec6cbfb8261d522c1baaf39555a2b2557b366b48a34e"
+    },
+    {
+      "path": "data/demo-extra-products.json",
+      "sha256": "5e03ebd606cc64c5777b302c407d96ad86704c05b80c0220d9322a0e3bdd7bfe"
+    },
+    {
+      "path": "data/demo-glasses-patch.json",
+      "sha256": "c48d6ff65e213d3713ac52bc4276ab64824cc6ccbb92d581fde6f26e4793c4fb"
+    },
+    {
+      "path": "data/demo-lipbalm-patch.json",
+      "sha256": "f5eda79b6f5d3550223b7949b30d6d5862d845cfeb6a60babfb7b12098006368"
+    },
+    {
+      "path": "docs/design-reference/Coupi.dc.html",
+      "sha256": "edb2da352587119840e277a8fc1e011d8ba0aada44b15a44b3e9c2b6cb325538"
+    },
+    {
+      "path": "docs/design-reference/CoupiHead.dc.html",
+      "sha256": "4ca01b204b4d5a0ff07aee82006be87f5f504785f6695ff4a2c12a16f8b9dec7"
+    },
+    {
+      "path": "docs/design-reference/HomeStates.dc.html",
+      "sha256": "02b4d86d329c6bd3a7f7a5436955844c3fd3fd4cb868c19762408a6ada6aaa48"
+    },
+    {
+      "path": "docs/design-reference/README.md",
+      "sha256": "fd5d403fbc522c1129484f2d1add8c6e8479f40a26a7eda31659e0427a97b128"
+    },
+    {
+      "path": "docs/HOME-SPEC.md",
+      "sha256": "b5062194f18904715c8e84c21cea87361de4a13d6f58527779fa8f50647f4bf1"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "eeda7faabe9560fa9fdb26675b0011fa78461ca7061989732f5da9245b87e315"
+    },
+    {
+      "path": "hooks/use-mobile.ts",
+      "sha256": "ad0936f84f1df79d3697bfbff9c18f8ad58431c1cbaf2359c6a853b0fcc9f28b"
+    },
+    {
+      "path": "lib/connector-context.ts",
+      "sha256": "bbddff68689cb0f6926fecd4b8b96f12f2054277c296e97b0df07d4ad5ece24e"
+    },
+    {
+      "path": "lib/connector-contract.mts",
+      "sha256": "e1a7b24a8793af34b595690d9b1300c897c7321c14f215cedf58ad95799d7c3e"
+    },
+    {
+      "path": "lib/connector-errors.mts",
+      "sha256": "a22edf13d6873ae832c4a2a0d579fc666c73ec996ef0722d39172649d38f0871"
+    },
+    {
+      "path": "lib/connector-preview.d.ts",
+      "sha256": "abd69a94f7f61f1359063bb557574faae35e8ff5a028cc4c04b9ee248ef52642"
+    },
+    {
+      "path": "lib/connectors.ts",
+      "sha256": "1c93d747e384c8e17e3e3dd5361b24412babf5eba2a11d2ae7a75f4e0924112c"
+    },
+    {
+      "path": "lib/coupang-search.mjs",
+      "sha256": "a16d056a7fb8fcf3c6eee0cf780a8fa80284a77073aa97a53f3b7af83fbaf42e"
+    },
+    {
+      "path": "lib/demo-catalog.mjs",
+      "sha256": "a25ca1bfed0bd0f04b4a6f1dfad3040aac3b787b938c9fabcf54815781277bb3"
+    },
+    {
+      "path": "lib/nook-voice.mjs",
+      "sha256": "293133c3b8d4d5752177ae915a1421455c064824309cc1bc403f60b4079516c6"
+    },
+    {
+      "path": "lib/utils.ts",
+      "sha256": "53f3d3d070f0a9082934da25b875f9499855c2b0693868dd28be8c23d8730f68"
+    },
+    {
+      "path": "MOBILE-CALL-README.txt",
+      "sha256": "2450717da80e83cc96f97a764ee7e6ef30ff2eda7af930c3b94eba82cdc01c12"
+    },
+    {
+      "path": "next.config.ts",
+      "sha256": "614bce25b089c3f19b1e17a6346c74b858034040154c6621e7d35303004767cc"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "eedaeab6870c0f70f9db869fcaa24abae9b0f945cbc9acb8a43b6e7ed6bcbfca"
+    },
+    {
+      "path": "package.json",
+      "sha256": "a1b8bbb406c412da55a88cc36f7b02a52294168b28cd5afffb10f584b728de8b"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "sha256": "dfac7ac2d86d326a0e5adb024e7943c181393ed17a5fcb8f0315b24c7da6ddde"
+    },
+    {
+      "path": "PROTOTYPE.txt",
+      "sha256": "9a9f46f517288a5508e12b3f05e950da9f0341af411ab6a6e980edc932d0a5c5"
+    },
+    {
+      "path": "public/app.js",
+      "sha256": "7ccc1c0b6738554572393f433d6bfb21479a64f14f690a4c85364d1709f606ae"
+    },
+    {
+      "path": "public/assets/chair.svg",
+      "sha256": "9072646f776ae8901d0f8c9e4578f3a1ac7ae86df9007f83068cde7a1791bd53"
+    },
+    {
+      "path": "public/assets/coupi.png",
+      "sha256": "7b8b3506e3d30ede5d3c3141186477c0676c614e66241922f5891d46ce032b9a"
+    },
+    {
+      "path": "public/assets/cushion.svg",
+      "sha256": "7a004faa9de89c50e70fd38d95fb510a790366432c295f55ce8159d3b1091836"
+    },
+    {
+      "path": "public/assets/lamp.svg",
+      "sha256": "1917d32c2b04e1857156f23b87579a70225457bbcbf8df6dea1e4b7bef64e415"
+    },
+    {
+      "path": "public/assets/plant.svg",
+      "sha256": "48d52e8d8769c03f992b3b2450d7034295337cc2394f132dd7c8b5345d418427"
+    },
+    {
+      "path": "public/assets/room-after.svg",
+      "sha256": "aaa1792de8b17be5c6553e83f1d2094a66a8956a50612823871c8537ef20419f"
+    },
+    {
+      "path": "public/assets/room-before.svg",
+      "sha256": "b9d3806fc51b881d4cdc54ce05b4c7823f7d0cf0e3a632631ab92f16ba1c90dc"
+    },
+    {
+      "path": "public/assets/rug.svg",
+      "sha256": "ce4e1a9a4b42c5ed7a3265f90a9576850387538c711da10c720e370e3f4c3f36"
+    },
+    {
+      "path": "public/assets/side-table.svg",
+      "sha256": "9b45e23b85b1d871114b87ee6cab502eb929afb498886b7f91d669abe527d0ee"
+    },
+    {
+      "path": "public/call-conversation.js",
+      "sha256": "e610a06512126eeeb27d1b36e7c222e46bbb04a21c753385a5d797c2f3a0b822"
+    },
+    {
+      "path": "public/call-discovery.css",
+      "sha256": "25392a0448e2f0d7a026683581315c8620512837a611efa87e79109a1e32a11a"
+    },
+    {
+      "path": "public/call-personalization.css",
+      "sha256": "1dbc7d9c84b34c63f51a54470edfc82cf5109cd013153ec4cc2da4fcc17846cb"
+    },
+    {
+      "path": "public/call-personalization.js",
+      "sha256": "782bf9447ec11b1c27bb3db233cbcc9dd4737f87602c7848f37e6c95e702d44c"
+    },
+    {
+      "path": "public/camera-engine.js",
+      "sha256": "a29f6d5b61499d9044057a0632020ce1dd2f4e4db6281e05cdbb6b18854502eb"
+    },
+    {
+      "path": "public/camera-snapshots.js",
+      "sha256": "7980ee4fa9c0708047d6f4701dcafaaa891400b9b14b8ff5530e536244be323f"
+    },
+    {
+      "path": "public/camera-studio.css",
+      "sha256": "a383757cc87742b6e9bd664b0d19799981d289e29bfed3fa7ec3fe39e5a7a4da"
+    },
+    {
+      "path": "public/camera-studio.js",
+      "sha256": "99d7e5c499594d6dffc3467cb8b40fac4a66512163bacce6832ee77215cad42f"
+    },
+    {
+      "path": "public/chat-images.js",
+      "sha256": "5f8aacebc9664ebf6bea2b28b5cdca01770676b26930d4b8c5c56f17ac488fa8"
+    },
+    {
+      "path": "public/checkout.css",
+      "sha256": "bf84e1610d9af227923faebcce11c92c86dc06d7210c11915e8c6b7b88a28be8"
+    },
+    {
+      "path": "public/cold-start.css",
+      "sha256": "c3764b5f31b0298dbddc62adf825e7563f45fbe59365bf521185bb4fdce8635d"
+    },
+    {
+      "path": "public/cold-start.js",
+      "sha256": "2f733da1937458f91df32c4b149fdc5b4b77fc1e5800a291544b359bf4bc8ea3"
+    },
+    {
+      "path": "public/coupang-products.js",
+      "sha256": "4efae416bf8deab6e04c86ecabba1df4a3472d4aa4b9e834e0bba16446a2f096"
+    },
+    {
+      "path": "public/coupi-call.css",
+      "sha256": "e1ea2039067158a2d2bd3f10173cf0fb7f8a7edfc8f5cf3455871ea98802702f"
+    },
+    {
+      "path": "public/coupi-shell.css",
+      "sha256": "7292d3784b6d656140a0603b1428d84d57b480ad14c57b4b6f50dd5e2f041409"
+    },
+    {
+      "path": "public/coupi.js",
+      "sha256": "4110aed6c450b13bfa2b80291efdec6fc6b369ce72bed3185e0b50fcedc43654"
+    },
+    {
+      "path": "public/demo-checkout.js",
+      "sha256": "540628c69c0f8271c52e9a758cc39fbaad34b4181ac279e9a0d81d6594859faa"
+    },
+    {
+      "path": "public/explore-worlds.css",
+      "sha256": "4e2efb928c6cdf5aa4bcb385fbbf74486c9b187da567cc11263ae8bd868ddd44"
+    },
+    {
+      "path": "public/explore-worlds.js",
+      "sha256": "e50319c9ab9644535448e49cbae830d32ff4a55fb761be1935ef8383a5338964"
+    },
+    {
+      "path": "public/final-polish.css",
+      "sha256": "f322678dc5e93022f23abaaf5e1e1e746f0f2da66749bd4c36acd458565ebfb0"
+    },
+    {
+      "path": "public/flexible-call.css",
+      "sha256": "cd4a0530aeee4252f95e0bc5056fa8eb5c358f6205fae994141b3c619a918d5c"
+    },
+    {
+      "path": "public/home-demo-data.js",
+      "sha256": "9d465fe6b176f580afcf852ecc714e827cea9898a3f42259a79995f426afff3f"
+    },
+    {
+      "path": "public/home.css",
+      "sha256": "a4288b175d7139aaed426a6df1e4fe3a9b6c19d103314fb826bd008461fd63c5"
+    },
+    {
+      "path": "public/home.js",
+      "sha256": "6aa55df1aa98b13f5b48608355d38edbb18857932ef7b6db558525b2db0a6f22"
+    },
+    {
+      "path": "public/inline-collections.css",
+      "sha256": "a973c9c2d2210c157e3e3d1b06a10739219e4537029647a64c515887476828dd"
+    },
+    {
+      "path": "public/main-page.css",
+      "sha256": "1155039e5cedc9840eb7065c7e92e945da94dfd0ca25374cac8ccb3a7e0fbec4"
+    },
+    {
+      "path": "public/mobile-call-state.js",
+      "sha256": "eef9dbe35ddf79e9219ee5ad9c6d172ef9046a9c958c156f0ffe80ba933a2233"
+    },
+    {
+      "path": "public/mobile-call.css",
+      "sha256": "247843505a0dbc5d50474ecdef9e8add20459478af597a8f98c03929e195495f"
+    },
+    {
+      "path": "public/mobile-call.js",
+      "sha256": "6c9738ff236ee412f35482080d011f779b1d226defdb83577d79c65376f94de0"
+    },
+    {
+      "path": "public/product-catalog.csv",
+      "sha256": "49bca6224815f1efb8341c33221f5e174f102450afeb4c9c2909dddf865b893e"
+    },
+    {
+      "path": "public/product-discovery.js",
+      "sha256": "68168c637b9141038346989e2eb168d3f0193233e600a402cbc6432d3ff3194e"
+    },
+    {
+      "path": "public/product-evidence.js",
+      "sha256": "1e56b5cf98682980f596e46a340243abad0f56241bcd03316625aa420a1dd7d1"
+    },
+    {
+      "path": "public/product-preview.js",
+      "sha256": "0fef6210b35ffab653d31d0a225cb5e77eeb4d6703e38ba9c103975167b853a3"
+    },
+    {
+      "path": "public/products/120680-original.png",
+      "sha256": "87d42bcb3eb7f7cf7300760a3e2c2862dbb8004f6c57c8183b1e0606ac83d4d1"
+    },
+    {
+      "path": "public/products/1463552408-kinda-pink.jpg",
+      "sha256": "641be234b32d73dfe0c61e50212eb4febfdb6e35ab42373a94f72b5300ec7fcc"
+    },
+    {
+      "path": "public/products/15089160.jpg",
+      "sha256": "8ac59c08a72b944be66c300504a2a1c60b83532d34e328efffa3eb2aab4d248f"
+    },
+    {
+      "path": "public/products/1547725003-bitten-pink.jpg",
+      "sha256": "8e53cfc144bba236a9388a0d63f1c5ce9253444997b10d5ddc37b0d6b1ebae34"
+    },
+    {
+      "path": "public/products/1547725003-maple-red.jpg",
+      "sha256": "6c08ab19cbb34ce24136e8182640175adb15b1422b208aad26de64a60ecd0195"
+    },
+    {
+      "path": "public/products/1547904141-purple.jpg",
+      "sha256": "d1f6ad64ba545e9b3f87a3026c6129df8311868372e1286d3db3219cb8bcaf72"
+    },
+    {
+      "path": "public/products/166915136-grapefruit.jpg",
+      "sha256": "8807aa18066f6577f5393ec087918c8c20cf804c0625fe16ba0e909653fec8a4"
+    },
+    {
+      "path": "public/products/1814412512-pink-sand.jpg",
+      "sha256": "56e9f1fa24c0a2ac3810f4449d457d5ccd51c6eb101fadf2c5093160afdd4a70"
+    },
+    {
+      "path": "public/products/1814412512.jpg",
+      "sha256": "d621ac13a506560760a9690d32b5ab5cd9859de18ba461ae108686b914b195a3"
+    },
+    {
+      "path": "public/products/2082223437.jpg",
+      "sha256": "dd36600bb21c09a099fa5ea4cde320b30115b60fc1cb78917c657aca643f91a7"
+    },
+    {
+      "path": "public/products/2371639363.jpg",
+      "sha256": "79cdd9691c578c26ed19cef7778f2e6fa4ab3a194f82515f978157f2f8fd761e"
+    },
+    {
+      "path": "public/products/341621790-cherry-shine.png",
+      "sha256": "1db74aaf4a4b13b4103b7c0407f05e14f39228e6235f4130ce049a292f2836c4"
+    },
+    {
+      "path": "public/products/345674940.jpg",
+      "sha256": "6688275480627c1fd47a4c0f90fac39f6418b49e8c9cbf1566889cc02afd2709"
+    },
+    {
+      "path": "public/products/4322127769-lemon-grapefruit.jpg",
+      "sha256": "ce282c470956b6e8001d1d35fa97f94887cc8290dc1286a7dc4edf12a6e77d4d"
+    },
+    {
+      "path": "public/products/5376120420-relentlessly-red.jpg",
+      "sha256": "bd60131861829682d07f5493cc716ecaed9dfa3c7b35b8d2b81f2e92a8a88f9c"
+    },
+    {
+      "path": "public/products/55518713.jpg",
+      "sha256": "ec939a8fb952c2d62d9903c8bbc76f81c5ca05baaeecc0852fbfba09c09475db"
+    },
+    {
+      "path": "public/products/5976056.jpg",
+      "sha256": "5fbc9c1da77911e20401ffe805229ac50e20df6d9ba9e34308026be3f8b64be7"
+    },
+    {
+      "path": "public/products/6015571890.png",
+      "sha256": "a5a667349e5d13e150c993b89dd6e942bd7023350654a3e5eec70ce239f36099"
+    },
+    {
+      "path": "public/products/6058070834.jpg",
+      "sha256": "8f5cdae5f6a4ae23fff76268c364a0d2f00a626fa89c7dbd3eab2064cb848190"
+    },
+    {
+      "path": "public/products/6193917913-essential.jpg",
+      "sha256": "245f0cb5ca1f2e3bf04181ef1830963a5c7e13b2b0bd7e89f5c443a865ab45e3"
+    },
+    {
+      "path": "public/products/6274724147.jpg",
+      "sha256": "500eb7621c71f2935fbe2a00bedcd4850e9a3dfc4a2896240edb9b680eb11efc"
+    },
+    {
+      "path": "public/products/6285676894.jpg",
+      "sha256": "ddd62c81fa7b1f83c990e0e0ac13e1ec35c41691918cdb6555c8adc895285f65"
+    },
+    {
+      "path": "public/products/6331079250.jpg",
+      "sha256": "8a1f2c719f7a001e053e2ef9eb65978755ca8069707b7a0817e21dd773d281b6"
+    },
+    {
+      "path": "public/products/6431292464.jpg",
+      "sha256": "29329808acf90d987ca63e040fff5c517b5affb026fc23dca0298d56d0e7746f"
+    },
+    {
+      "path": "public/products/6511312982.jpg",
+      "sha256": "fe62587fe4ab7d4d0b412248c6ddc0aaa52d94d8d67eea8ca066c8788f430fe5"
+    },
+    {
+      "path": "public/products/6520241489.jpg",
+      "sha256": "636ae7e2b79125aa1d1eb3edcfc920a413c6e9296bbfe949e17f55cb73842b06"
+    },
+    {
+      "path": "public/products/6774150396.jpg",
+      "sha256": "2e5b74d3c825e86004410ed1578dce402fedf14bcf6e337df5014a4e1b6c95bf"
+    },
+    {
+      "path": "public/products/6775922884-gray.jpg",
+      "sha256": "0f521bc4e2cc1a92333cc5ee291d7b857e4f8ff0037abc298bb90518190ab8aa"
+    },
+    {
+      "path": "public/products/6775922884.jpg",
+      "sha256": "996fd6ddd78f375169507b4808198f7f24e17edc571c2e6e0789316d95bbe3f1"
+    },
+    {
+      "path": "public/products/6908241889.jpg",
+      "sha256": "09d5a7d5fa2e2a2cc4999ff1ab5b855bd86e616143e4df5f09d3c1127d34d711"
+    },
+    {
+      "path": "public/products/6974242810-gray.jpg",
+      "sha256": "553d6502d2433a0c78e2dba566532b4c5a58c6a2ea70224fda68d32760afe16b"
+    },
+    {
+      "path": "public/products/6994027284.jpg",
+      "sha256": "5980af3f05b75962f798bb5c74da1f3da04c0bbf8916b68aebfe84ddbc11b586"
+    },
+    {
+      "path": "public/products/7116023545.jpg",
+      "sha256": "9f787216cccf3228f3971dabc30dd7c48c315831421d989882b28e83962b80ef"
+    },
+    {
+      "path": "public/products/7185725748-last-boss.jpg",
+      "sha256": "86eef15336ec72120aaac40963921d20a04dd20d8c1d4a1bc5e29368076a6e27"
+    },
+    {
+      "path": "public/products/7185725748-ruby-bow.jpg",
+      "sha256": "3433fb59a06b3d6ffb3dae0ac5ca35c2bf6254abfe0ca192a9bcd1225198a231"
+    },
+    {
+      "path": "public/products/7185725748.jpg",
+      "sha256": "084e8313062fbb4f2d8162bb54a87f47c717ad1fd6a158cb66e642a28644f373"
+    },
+    {
+      "path": "public/products/7187298300.jpg",
+      "sha256": "d44c6efd78850088b51fbb2796bce33a3e8a17f32570a1f39a5c226a00cf9feb"
+    },
+    {
+      "path": "public/products/7235424403-round.jpg",
+      "sha256": "b6468fd40fda8b2e623c39aa8d7d334db8049ebca230ec6eabf5703a180bf329"
+    },
+    {
+      "path": "public/products/7235424403-square.jpg",
+      "sha256": "d76c42f44f359ac9621f27111c64eab55defc4e82218863bd7ea6897f56d4b19"
+    },
+    {
+      "path": "public/products/72621661-pink.jpg",
+      "sha256": "d4b909d5c3681892ec3a1542e62d8c3dba1c368698d55db19fcff0d9c4418650"
+    },
+    {
+      "path": "public/products/7322824636.png",
+      "sha256": "f15b15bc49511b96f1977163d898dff252c21bd7ca1fe7a3228358717dd4a4d3"
+    },
+    {
+      "path": "public/products/7330605115.jpg",
+      "sha256": "52180648f8f7e2764b8b0805208dd37530d7849d089919ee59715ee5a1870b3a"
+    },
+    {
+      "path": "public/products/7395651009.jpg",
+      "sha256": "30ae67e631db50b282ba66aa3b6d879fa517b345ac8da0dce235260f148b5b0c"
+    },
+    {
+      "path": "public/products/7411084109.jpg",
+      "sha256": "f20d43b373bd0e69747d9a1967aa229a558db311a6b258dedf786f250237e600"
+    },
+    {
+      "path": "public/products/7480503353-love-pink.jpg",
+      "sha256": "8e18b7d330dcb2be11d0ec926a0a4210079d78944dafdabc580ba6b8f607f434"
+    },
+    {
+      "path": "public/products/7480503353-pink-afternoon.jpg",
+      "sha256": "c3c9835f8e5a6e9d1d6c1f06214cf4245b8780c552fa7c2c6d3faac79909a65e"
+    },
+    {
+      "path": "public/products/7480503353-pink-velvet.jpg",
+      "sha256": "f978cd908ee93f1f22da93836683d30e6f455023d29a443f93881aad58eb628b"
+    },
+    {
+      "path": "public/products/7480865203-herbal.jpg",
+      "sha256": "d06c129346fb7c50298658f551e234b27d2494e81fd59f4972ce20203f48cb52"
+    },
+    {
+      "path": "public/products/7505441634-derma-sos.jpg",
+      "sha256": "05a97ef6d79eebd8f3244769e0421e88b4e17c4397437a63afd01d14a16b7e39"
+    },
+    {
+      "path": "public/products/7612276799-black.png",
+      "sha256": "72d6f766fc2641fd857fc329b525a6d17809caf33afada893d933e8c95ea4f66"
+    },
+    {
+      "path": "public/products/7612276799-silver.jpg",
+      "sha256": "50d1c0a76a661a2780dcedea411bf0594838ee39c3f8c9dc8e2ee8f53aa1d5b8"
+    },
+    {
+      "path": "public/products/7612276799.jpg",
+      "sha256": "6df90fbb2d08cef997208771bb4c2574e9532e375c1f5302c905f57b91b1f87c"
+    },
+    {
+      "path": "public/products/7616878459.jpg",
+      "sha256": "59017f6ac8733bf15531fb57a4d0b92ba50d3c66ffb275025673591a159d1061"
+    },
+    {
+      "path": "public/products/7656224848-grapefruit-care.png",
+      "sha256": "54909d798ebc52b4fc2f274b8491028ae6e8465036304757cdb2bd19f0fca13c"
+    },
+    {
+      "path": "public/products/7702523687-juicy-trio.png",
+      "sha256": "dca7515636c19314d09d3e9a8bcd909bdfd30613198164ecd08500c149e78618"
+    },
+    {
+      "path": "public/products/7835573890.png",
+      "sha256": "50c7bd068918f35f2ab04ca339c77dd7370516744f8230e7ee97c3eef90109af"
+    },
+    {
+      "path": "public/products/7856352896.jpg",
+      "sha256": "463a1ea5e3923993cc62bf2a738bb120c9f2f67c3ef428cffd54e88402d5294d"
+    },
+    {
+      "path": "public/products/7909385138.jpg",
+      "sha256": "824b2a98b63ac9de6d980fee7101adde3210271ccac9b057d579468de87502bf"
+    },
+    {
+      "path": "public/products/7915055185.jpg",
+      "sha256": "7ccdec16ef5c855816084278d072179ccb319ade4ad4786ced2015ece0a0897e"
+    },
+    {
+      "path": "public/products/7925244997-red-rock.jpg",
+      "sha256": "d9050ea08f60d5f01cf1500213b338bdb0fccbe95240747b6ab00c42a90c7520"
+    },
+    {
+      "path": "public/products/7925244997-russian-red.jpg",
+      "sha256": "6f52dbb7474d30a9d188e247b15a0a33a15fb46d45ccf5458251ff16941fd43a"
+    },
+    {
+      "path": "public/products/7944769320.jpg",
+      "sha256": "08e05ec0c73b8396f528573ee11fbbc3f93414b8cda57780bec67deb89c5dc7f"
+    },
+    {
+      "path": "public/products/8063356643-strawberry.png",
+      "sha256": "7d8992591e57e938fa4d327ad0debb01cedd880b75aede974eef83f06a63bd82"
+    },
+    {
+      "path": "public/products/8197877328.png",
+      "sha256": "0c391617c988c06a1026b56edc911a4c6526222806a9c06e5b2b86bc5ee826c8"
+    },
+    {
+      "path": "public/products/8248027642-pink-chuchu.jpg",
+      "sha256": "ba142392c3961483afed51c0713ed58153682b4490dfe866b5c8d7afc970ed9f"
+    },
+    {
+      "path": "public/products/8248027642-pink-rise.jpg",
+      "sha256": "fa3233d1ae69c15df2c2e92e782c174666e78a4feb192fb3673c59a0156bf77f"
+    },
+    {
+      "path": "public/products/8308780384-pink-wish.jpg",
+      "sha256": "e2057e3526413cdc735ae0d8a80d2b63d9f2886e943f5aea503c7d0675bdc028"
+    },
+    {
+      "path": "public/products/8310483629-blue.png",
+      "sha256": "1d50977fe346e46d8afba2934a7c0f38138aca4c2d6663c6dc824a50ed9e4025"
+    },
+    {
+      "path": "public/products/8310483629-brown.png",
+      "sha256": "3bcdb9cb6acb498a87b54ecc91b1aa99472fa651eb367da6e50e592a3462d837"
+    },
+    {
+      "path": "public/products/8310483629-olive.png",
+      "sha256": "5206ba02cbe860ea1b36a6779c570bdf2c29909ab09328998590ae92d291c102"
+    },
+    {
+      "path": "public/products/8314847166-left-on-red.png",
+      "sha256": "67a89fc665d7c7c6df8c41dcba76180f21e97aed7a47973494d09561d745dc5c"
+    },
+    {
+      "path": "public/products/8321792986-redbrity.jpg",
+      "sha256": "9f3ed069145de459a21a08821c348a974179258e496260019af3dd36681ca72f"
+    },
+    {
+      "path": "public/products/8391704299.jpg",
+      "sha256": "feb57304d8377c22a7e1c93c4f4bed23c53502384e4da6ec5f590a3bad98edad"
+    },
+    {
+      "path": "public/products/8391704457.jpg",
+      "sha256": "d45b955116dd428918297580aa1c19bf81a5094ad22fbab47af52efd62374cac"
+    },
+    {
+      "path": "public/products/8491783776.jpg",
+      "sha256": "2f4a1bede5fdbe3d4c0028e8fd876a91fb38a6b39cfe44fffc2b1530586f5ff7"
+    },
+    {
+      "path": "public/products/8533828112.jpg",
+      "sha256": "b7e0644be8bbce43f69bca21c52f7728d6d33d5b4752c18e2645430d447efbd7"
+    },
+    {
+      "path": "public/products/8539057200.jpg",
+      "sha256": "0616dc644b7728d7318fab8581bfd3fae25cbe8e27679b5a575e5808c1e2c253"
+    },
+    {
+      "path": "public/products/8561267958.jpg",
+      "sha256": "01d27d94e36aac636399e4d43928d2343ba4c251cff935706a7230e543fb51d4"
+    },
+    {
+      "path": "public/products/8715669911.jpg",
+      "sha256": "a61c0f19b2b501f707f72707244ed8667a46770c8e33eca116d324968088defa"
+    },
+    {
+      "path": "public/products/9026994633.jpg",
+      "sha256": "0e65f012e45c8f832e9917755489288453e3abbb9244a84c4208ee7c981c076e"
+    },
+    {
+      "path": "public/products/9461808186.jpg",
+      "sha256": "c27068a71c5a3b38815e48745c9560195afd0b00c856720eaaa6b6b9434a74ce"
+    },
+    {
+      "path": "public/products/9474375760.jpg",
+      "sha256": "b2f9bee6267738f5b768c87ff9da1592699a1f8952f10bde581fa2afd992c8d7"
+    },
+    {
+      "path": "public/products/9514031816.jpg",
+      "sha256": "2772134af74e122d24515d4d0241f039737fdc6d162e9f0f54628b6c441b404a"
+    },
+    {
+      "path": "public/products/9604052548.jpg",
+      "sha256": "4331ac01987e0bff082ad956d40e2c6ad119818ca419c02d8eb2ab1d93c27cae"
+    },
+    {
+      "path": "public/products/demo-2124178650-black.jpg",
+      "sha256": "76f4405286c2624f2f4956f49c22280180d3b8faffd29a11362ef63469e8c0b6"
+    },
+    {
+      "path": "public/products/demo-22985509.jpg",
+      "sha256": "97042e69e39075326afb46a6b3d987b532806a42646042ed6a574d1a817430c7"
+    },
+    {
+      "path": "public/products/demo-6566125679.jpg",
+      "sha256": "3a6bf67dee11f13947a3c0c3c57c2ee47662af231fb90af80de79e51dc5337b9"
+    },
+    {
+      "path": "public/products/demo-7616878459-brown.png",
+      "sha256": "1a54a3867c017df9557c12126151a7aabc4f773b73e197f101c3fe9be4d9569e"
+    },
+    {
+      "path": "public/products/demo-7616878459-red.png",
+      "sha256": "d5b4a207952eff8f048e275012150c046f28f51e4f89c5d3587a1382965ea8f4"
+    },
+    {
+      "path": "public/purchase-pairings.js",
+      "sha256": "ff1da5f4990cc093fd16770a2ebdd0fde7206d618cb9b37adcc659c35e0ea3c0"
+    },
+    {
+      "path": "public/reviews-detail.css",
+      "sha256": "d615a8f164f373923db72ecee07e02b54844b20a9dfa1d2fd4210c9665b16456"
+    },
+    {
+      "path": "public/settings.js",
+      "sha256": "a3826a78113b430a08554b2d5a5f17e61c4cc5312203610cda2e7010ccd62648"
+    },
+    {
+      "path": "public/styles.css",
+      "sha256": "fc607909654b9ceb39b82b9462357b25bae403f301d4a429afdaaf43e293a396"
+    },
+    {
+      "path": "public/voice-call.css",
+      "sha256": "add7edc03d51e4b9f190c4a75b1c735dd6a54fec69ab3746f6d4723edfe53df3"
+    },
+    {
+      "path": "public/voice-call.js",
+      "sha256": "960a40a78e550294e4a97a7214a321fa1546af6f2ac57ab3acd7d3cb0b8d0aec"
+    },
+    {
+      "path": "README.md",
+      "sha256": "cfbbd5b13f46ea9e6eae31ca8db0f80e3bcb49f0412db8c5bac218eb28bf6bfc"
+    },
+    {
+      "path": "scripts/build-demo-catalog.mjs",
+      "sha256": "380c84f0fa4c23d0e1194d94a0cd3dae2e5fce1555929bebc06f82b1294eea6d"
+    },
+    {
+      "path": "scripts/build-verified.sh",
+      "sha256": "2ae5329ac860076070c9217a43106a15cb5ecf907a0f7baeb9ef903f76b53c68"
+    },
+    {
+      "path": "scripts/connector-preview/connector-preview-session.mjs",
+      "sha256": "57224ad185a25115a14fccc68d3217e55b199260c3dd98a2c807beffec1a0a9b"
+    },
+    {
+      "path": "scripts/connector-preview/host-binding.mjs",
+      "sha256": "9e44ab6864133a5c82f834a5904ebb7d6104cb783c24efba3c0fe1a161182cea"
+    },
+    {
+      "path": "scripts/connector-preview/protocol.mjs",
+      "sha256": "111e062ebf08d3f180130f5bc3dcb3c1414c1d7be3c032c9d675a61c0c7513a8"
+    },
+    {
+      "path": "scripts/connector-preview/worker.mjs",
+      "sha256": "bd9c98fc68f29d975fe10508dfc9029bb681dc5789a62861d5c938bdea2064bb"
+    },
+    {
+      "path": "scripts/execution-profile.mjs",
+      "sha256": "2e71116f4d2b70cff8bb70436f8dd5c709ec7ff62893424530f404e0193d3630"
+    },
+    {
+      "path": "scripts/install-ci.mjs",
+      "sha256": "4a5a92d60a08d0ba54effd8373da2da06284312c55b767287c68a0bec7200da7"
+    },
+    {
+      "path": "scripts/install-ci.sh",
+      "sha256": "10d8764a61be50351dc3496e13588270de7956f0aa5f1189c49cabb2d89fe5c0"
+    },
+    {
+      "path": "scripts/install-pnpm.sh",
+      "sha256": "a684c02c2b493dfbf262a66252a5cd36f81ca995a4024761728662ae63aa40c0"
+    },
+    {
+      "path": "scripts/npm-install.mjs",
+      "sha256": "9715c6a32d1d4a0289ef6376a0e819c3b6a6416b8a9877733d9fb4339ce626b6"
+    },
+    {
+      "path": "scripts/pnpm-install.mjs",
+      "sha256": "a83164e344c1947053def83b546be8115deaa827314bbaead7afe6b6451c5cdf"
+    },
+    {
+      "path": "scripts/run-framework.mjs",
+      "sha256": "9bf9f41a29314cabe0238b8e9c540ec3f7b5a6adafc7c8fb6c3940722d061dca"
+    },
+    {
+      "path": "scripts/sites-env.mjs",
+      "sha256": "21d7bde6acb9f716287e652c1b0e43ae4803d79be367ca2192fcba14740b5338"
+    },
+    {
+      "path": "scripts/sites-env.sh",
+      "sha256": "d18af7b222db748c9de257d5955b9d7f77ec350dab6321f114f0bc44c20388ac"
+    },
+    {
+      "path": "scripts/tool-environment.mjs",
+      "sha256": "6da99286e0eb7905595ca851e68983bedf94a0f93814819d61f2b1f3a0342ba2"
+    },
+    {
+      "path": "scripts/vite/connector-preview-plugin.mjs",
+      "sha256": "a6a9fe2086e302f94a3f91e3c1a68a45bb3aa07d4a79faf01b14732191eb4e80"
+    },
+    {
+      "path": "scripts/vite/sites-vite-plugin.LICENSE",
+      "sha256": "7de1e115d165f176e68f962acdb809b5ab8d8ae78d3981e0701392b2ac50c713"
+    },
+    {
+      "path": "scripts/vite/sites-vite-plugin.ts",
+      "sha256": "07af20e7097d9ed1d76f7c446d02997550b8fc5ca89668b249e25eabd62c6834"
+    },
+    {
+      "path": "site-pages/camera.html",
+      "sha256": "355420e98d6bb2f0167d272e0a1b1236210b644be703139c9c8007b830238274"
+    },
+    {
+      "path": "site-pages/explore.html",
+      "sha256": "8d9635d64af276abf24d968e1b213caa7f6dd633e92de80c37907526cbf516db"
+    },
+    {
+      "path": "site-pages/main.html",
+      "sha256": "3b9b03e53d5e1a88b590ee2eff55061e2e0c18c3f8ac7dc89055aae415c684f0"
+    },
+    {
+      "path": "site-pages/settings.html",
+      "sha256": "50453cbcb6ffdc5e24a050d85e46bf4a358f9c119948d3c6044610395b3e5959"
+    },
+    {
+      "path": "tests/camera-engine.test.mjs",
+      "sha256": "3a66665231ab9c70fa4e3f11ce04a762738e493ba1a6b26aa15a4c1ecf934853"
+    },
+    {
+      "path": "tests/camera-snapshots.test.mjs",
+      "sha256": "3ec15b64395afe17e0a840a1b056a6fa2c86330f9f0ec1aeb2910b33859018ce"
+    },
+    {
+      "path": "tests/catalog-evidence.test.mjs",
+      "sha256": "87a1682f8049c4d08d72a4a58497da55c1a1a3f8897ac0759ef0aac21e0af287"
+    },
+    {
+      "path": "tests/chat-images.test.mjs",
+      "sha256": "1c4baebb3c9e6d752f3848bb50b059e31a3abac9b2b106a9340e3508db879b89"
+    },
+    {
+      "path": "tests/cold-start.test.mjs",
+      "sha256": "9269ca5ba450f8e2d4b937c308574b5864217a66757eab823993718e51a915d4"
+    },
+    {
+      "path": "tests/coupang-search.test.mjs",
+      "sha256": "71938f3fbe573ad6f36d484c44373bbb1265b825232e92d39b6d396694ca01e4"
+    },
+    {
+      "path": "tests/demo-catalog.test.mjs",
+      "sha256": "bd1ba1c0d7e877cddecfd50044d52dff5a4b508dcec1a24620f4560e39a406f2"
+    },
+    {
+      "path": "tests/demo-checkout.test.mjs",
+      "sha256": "d54cdb3a7d845d8c8d058f96d0427c7c6439b4bcf3a02ae3897d612d7556d73a"
+    },
+    {
+      "path": "tests/explore-worlds.test.mjs",
+      "sha256": "cf146d4ff328621b16f8045cb724ad55aec224c34886b380d305f8d381785788"
+    },
+    {
+      "path": "tests/home-logic.test.mjs",
+      "sha256": "13bb15c7b52289b1294fca29228035e6476ca3be5456e3ce5a32c5f77b3b9f69"
+    },
+    {
+      "path": "tests/mobile-call-integration.test.mjs",
+      "sha256": "5f784517ff03a33c6683531917e4920e33efc619dd8bef19b7d4a14d61b5a797"
+    },
+    {
+      "path": "tests/mobile-call-state.test.mjs",
+      "sha256": "5536753df462a579e663b842408511a889e63074c1c75aea599af372a0147cd5"
+    },
+    {
+      "path": "tests/product-discovery.test.mjs",
+      "sha256": "7a016dbe884b1f208034f669b013ea7f1687801dbcda8dc58b6862669f5e9d93"
+    },
+    {
+      "path": "tests/product-evidence.test.mjs",
+      "sha256": "15d8d528482c008f0cd9dddf641daf5ce44154ae87047a61c4aa0dce019fe4e1"
+    },
+    {
+      "path": "tests/product-preview.test.mjs",
+      "sha256": "5bc3c9d6f0b09b46ccd5a170f149f5c4ffa858552458d8ea3d83ee76ef010292"
+    },
+    {
+      "path": "tests/purchase-pairings.test.mjs",
+      "sha256": "43041ebe9908538dffa6d465f808ba75fc5e387d214692fa5d6ef0ff06475df5"
+    },
+    {
+      "path": "tests/voice-client.test.mjs",
+      "sha256": "4c97f27948b94fb12f6de97b0611e0b28e9571f4ace3c0d426f340937bc0d6c4"
+    },
+    {
+      "path": "tests/voice-server.test.mjs",
+      "sha256": "7ce49b557fd7f2415910850f7ec78215edeb1bdf0e6475d5b09f8ad07a05ed23"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "a4c1cc83b63ef9d39641d3babaefffa063dccbbc93338e18017b5013d713163e"
+    },
+    {
+      "path": "vendor/shadcn-tailwind-4.13.0.css",
+      "sha256": "bc7d83425702955b4cb67cb14ede9d603f9d912376d57a2d81d661094d2a782a"
+    },
+    {
+      "path": "vendor/shadcn-tailwind-4.13.0.LICENSE.md",
+      "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f"
+    },
+    {
+      "path": "vite.config.ts",
+      "sha256": "22ff558b1636d251e076f74c1697c7166079861667af10922d6bc505cb8f8290"
+    },
+    {
+      "path": "VOICE-CATALOG-SOURCES.txt",
+      "sha256": "2578d25590b4aef38b01e9bde3facc1a7366133c6acb62cb931fef5fcffd2cb8"
+    },
+    {
+      "path": "VOICE-README.txt",
+      "sha256": "372dadc35c8a97dce6b9efc7a06e5219af6e062767674818d4df4ae4e1305863"
+    },
+    {
+      "path": "worker/index.ts",
+      "sha256": "ee62175160502e8ca0a106bab04d4abc746c76c1ba85f358e4b22a17d2c9c739"
+    }
+  ],
+  "appFiles": [
+    {
+      "path": ".env.example",
+      "sha256": "1aabb88fe0cd58ae49ea91067fd1bd23e5d5d8c0db625268ed3b6e440ca42728"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "7fae0867a26e9896fbc22ae32f490120dd4d330ead50192fc5518b849ec310c4"
+    },
+    {
+      "path": "app/about/page.tsx",
+      "sha256": "3349a5cbcddada1bdb5d79e894a796ec8cc9a18137fd62c6926a1e20a411ab98"
+    },
+    {
+      "path": "app/account/page.tsx",
+      "sha256": "c939b373b057bc95e21615e9c96d3efa62cd2d3691baeda2d5d98221566a6832"
+    },
+    {
+      "path": "app/api/account/route.ts",
+      "sha256": "d1f9147934cba4a3945bd2a23a09e7a82ee60229325b031cee2cf2b27fbd8ba4"
+    },
+    {
+      "path": "app/api/ask/route.ts",
+      "sha256": "e50dfe53001d75cc38585433d4aa3945e1417c6dfb9f33fed0c2f7529f95cba0"
+    },
+    {
+      "path": "app/api/call/route.ts",
+      "sha256": "49bb57544bfefc6c5448f8fba33ed76202121b178d667bfcd42307af3420dc45"
+    },
+    {
+      "path": "app/api/commerce/route.ts",
+      "sha256": "dd3bbd963cf907ea721f5e4c120434a156d945bed8af8dc6d3497ccd66cee48d"
+    },
+    {
+      "path": "app/api/compare/route.ts",
+      "sha256": "7b58ccbb714b88af348239d623a9da8e9927b42379519794467c89e2284a3481"
+    },
+    {
+      "path": "app/api/decisions/route.ts",
+      "sha256": "c05e4ea4c8c911c3839ce379f2b31e3d1bfefebfafe2fb1aa5add4fe641befe8"
+    },
+    {
+      "path": "app/api/delegate/route.ts",
+      "sha256": "c3c0e64da69a7fd18c81b5c24d5fe8fd3e88e81f03ece4db7324378b33e0fdd9"
+    },
+    {
+      "path": "app/api/personalization/route.ts",
+      "sha256": "18b9e5391c6bd80f3a277f4ae3764a44e30edc41b861fd86f3d70c41acdb66df"
+    },
+    {
+      "path": "app/api/products/search/route.ts",
+      "sha256": "b38b83905b1596853833abf346007f2a7e4f037c2accd359fb292d386f8d079b"
+    },
+    {
+      "path": "app/api/products/world/route.ts",
+      "sha256": "46296c7121568045b9be81879a63a89aa3e5d03496ba39e15a34323051c2be9a"
+    },
+    {
+      "path": "app/api/profile/route.ts",
+      "sha256": "3cabad96816ece4b179d54d2f72d3843c7e211e3eeb5fd4f2d43066f37b10f56"
+    },
+    {
+      "path": "app/api/scan/route.ts",
+      "sha256": "27c2aa0e74c0dd3490502ce74b1f3ad7be6381b9a1724b0442d91ba67d993df7"
+    },
+    {
+      "path": "app/api/scene/route.ts",
+      "sha256": "2c9417d37c9206909d43ef54e90ab5579481a6f75d0afa2acb888214af4aa77e"
+    },
+    {
+      "path": "app/api/status/route.ts",
+      "sha256": "3cfb1dae9a3db26a018b5bf20f040020d64095160825a96d93f21cdd2251ee14"
+    },
+    {
+      "path": "app/api/voice/session/route.ts",
+      "sha256": "b38b83905b1596853833abf346007f2a7e4f037c2accd359fb292d386f8d079b"
+    },
+    {
+      "path": "app/api/voice/status/route.ts",
+      "sha256": "079e5668ae708ed65758bc6146540bdcf1fa7531e3d26c5665da4982c205bbef"
+    },
+    {
+      "path": "app/api/world/activity/route.ts",
+      "sha256": "6ed2309bda471239975613b82507abcf3ccf8cea77f70c851757f3c8aa0df1f5"
+    },
+    {
+      "path": "app/api/world/journal/route.ts",
+      "sha256": "f5e9ef3b1335889738bd2c04f779ccb5265abc3e80f782a57236265614866424"
+    },
+    {
+      "path": "app/api/world/route.ts",
+      "sha256": "ab8f1f3e3c1f895016d157b691176285a347976070e5d337006a2de9bd487e5e"
+    },
+    {
+      "path": "app/call/page.tsx",
+      "sha256": "6d3240edcab2dafb619245ad9588d65af185325c290fe17ab9ff7766b33c6d3c"
+    },
+    {
+      "path": "app/checkout/page.tsx",
+      "sha256": "8631442ab8ccb613496d70f6ded06d2f289c8a46485df822083ed5fcab25dd99"
+    },
+    {
+      "path": "app/decisions/page.tsx",
+      "sha256": "28aa96d43f5baace367df695b1dabf6a8886dd4bc3158cd7a0e85ca2a95dc7ec"
+    },
+    {
+      "path": "app/demo/page.tsx",
+      "sha256": "6872b821d5c73a16363dbf946d777cf3b576186e7579300c0a433befd4c80019"
+    },
+    {
+      "path": "app/error.tsx",
+      "sha256": "71d077477070c4beae95d58e2fb5f69cf2e379972b65ea060fc443d1865d11ce"
+    },
+    {
+      "path": "app/experience/page.tsx",
+      "sha256": "428275e3f13ce97a164cbe131406b3ff7364e217622148085e9fdb8304bd93ad"
+    },
+    {
+      "path": "app/explore/page.tsx",
+      "sha256": "8b4b0f47c57e8084130bc8989d6c228d7a649cc263ace1dfb5aabd55799d7e6a"
+    },
+    {
+      "path": "app/globals.css",
+      "sha256": "bce17592ae6acfc327ac365c732e8e2a34078c59f4e0e8a480d3c6c5ab3bdcc8"
+    },
+    {
+      "path": "app/guided/page.tsx",
+      "sha256": "9e55679eb91ed4985edf2d353336b86f7820eda4c8d5bdf742fef816ae65f0e6"
+    },
+    {
+      "path": "app/hatch/page.tsx",
+      "sha256": "b3277adefdecd1c855d77f072ccde12e25db1ec72899ae37f3437826736bd91d"
+    },
+    {
+      "path": "app/help/page.tsx",
+      "sha256": "e74d4149ee4b56c4ab2ce188d22e09e4fd2084a4bb0274bf6ef61bc05acead9e"
+    },
+    {
+      "path": "app/home/page.tsx",
+      "sha256": "f67ba9c7dff8ecadbddc1e5e247295cda2aeada82dc9da51449596cdd30eecb6"
+    },
+    {
+      "path": "app/how-coopy-works/page.tsx",
+      "sha256": "8278da08b49cbc4a916e79cb07aca4122e21fb0559aa7b3f829adbd9b4857b44"
+    },
+    {
+      "path": "app/layout.tsx",
+      "sha256": "0e6ae8f570b584d4b2ad9187a12dd71b66ea95b4bdcd3ee02851c2bc9be6b05f"
+    },
+    {
+      "path": "app/not-found.tsx",
+      "sha256": "e7f8ffea82805e2b53ecf1e307d111f971c99d171b3c10c07438c067a006fcd8"
+    },
+    {
+      "path": "app/notifications/page.tsx",
+      "sha256": "1b17867017a964b09fef7e5ad15e9b4ce0ea8ea2a496fb619dc900a7850f3c5a"
+    },
+    {
+      "path": "app/offline/page.tsx",
+      "sha256": "c44e886a302556dcedc82ac839b8bc3acac7677693994083cdb6e36d142547dc"
+    },
+    {
+      "path": "app/orders/[id]/page.tsx",
+      "sha256": "9365e88acfa2bac93442dc20a1571780e759be4106f9d7d2397a8865669265e6"
+    },
+    {
+      "path": "app/orders/[id]/tracking/page.tsx",
+      "sha256": "4362fd0b6df0406af096d4292aa403e08df9f2ac8eb82e8579c9268cf1684dc6"
+    },
+    {
+      "path": "app/orders/page.tsx",
+      "sha256": "b96a951df1cc35d04228461179ba1688e0b3365c3d1a88dad6e3a2f058a7177a"
+    },
+    {
+      "path": "app/page.tsx",
+      "sha256": "62d3c7327c7a52157fe31a847f9ada4c93d777c8d0ce4d20ab610f7b53e5307c"
+    },
+    {
+      "path": "app/permissions/page.tsx",
+      "sha256": "54ca6eb493243cfb75eb0641781a27de053976aada55bc6a2a829f4e67cf4676"
+    },
+    {
+      "path": "app/privacy/page.tsx",
+      "sha256": "29633f43512f5b9dda26c9c4fe3d50bb4848af30309614f4681f67c3b4e21dae"
+    },
+    {
+      "path": "app/products/[skuId]/questions/page.tsx",
+      "sha256": "de7ca21893b7be829c3361fae58fb8271f0124257c08037ef5a8eb513c3695c7"
+    },
+    {
+      "path": "app/returns/page.tsx",
+      "sha256": "075998146d2194a138b518862acc7a6f3838f24931c64690e352396e49e9074e"
+    },
+    {
+      "path": "app/search/page.tsx",
+      "sha256": "dab94435a318ad54092a66a2e516a1570624ee0ceae242eb526a6913ea6e793e"
+    },
+    {
+      "path": "app/terms/page.tsx",
+      "sha256": "71a75b125480b4dd75895f833eedef4d229890fb9d5b76a53d31b53b1f6f698a"
+    },
+    {
+      "path": "components/AccountDetails.tsx",
+      "sha256": "9e086c921f71c00b616c9e601df6139257caad938c42d3b97b93beda9e60f87d"
+    },
+    {
+      "path": "components/AccountPanel.tsx",
+      "sha256": "39479fa28fd5f8fe5f9e39903122b2bfb92767f1333eebafa0b51e956b3fd3ce"
+    },
+    {
+      "path": "components/art.js",
+      "sha256": "a8e6a11b25c8999735831c8224ec5a0e89e5672791ab792a751970ab3c19f294"
+    },
+    {
+      "path": "components/commerce.css",
+      "sha256": "586b579e20e4295979a80bf94d36c1a3612e934c0c2d860afd8eb620d756d9a5"
+    },
+    {
+      "path": "components/CommercePages.tsx",
+      "sha256": "91e1407bfa209fd3979732c096772964655673306330272b597069ec7f6d5567"
+    },
+    {
+      "path": "components/companion-call.css",
+      "sha256": "75b2cfeb87af138f18bc65249a479effd7754a8cae32b25c0f3581c7a38ae11c"
+    },
+    {
+      "path": "components/companion-home-visual.css",
+      "sha256": "6e021b22278d2f849613c127490ba41afb52f6f662268185328f312ac006e0f9"
+    },
+    {
+      "path": "components/companion-home.css",
+      "sha256": "4203993787d26a606596665cb862c4357b8d5e592487f9bd93e0405f9cdc8b56"
+    },
+    {
+      "path": "components/CompanionCall.tsx",
+      "sha256": "e0364b9756688a2e6cfc62b4e9c2cfcbef32616f85a63ed3fcbee503a4e29889"
+    },
+    {
+      "path": "components/CompanionHome.tsx",
+      "sha256": "f769cd1fd43612e45f6eb409409335cee2a8ef9c00cdcf9348c4ad8b8e71eaf0"
+    },
+    {
+      "path": "components/CoupiApp.tsx",
+      "sha256": "86819c80061248a00db7085147945fd4ff860fbf42583bf1f1c9c21502d040ba"
+    },
+    {
+      "path": "components/diorama/atlas-companion.ts",
+      "sha256": "29eb2380f0a95efd66a595d2c638e8123ed57061d821523fa6b60f7698310351"
+    },
+    {
+      "path": "components/diorama/atlas-engine.ts",
+      "sha256": "c7cd7b2c53fe02c6b1ed38fc8c2256ab0ea3ca2ac0f6a41b5d8bf6ae93d53e5d"
+    },
+    {
+      "path": "components/diorama/atlas-focus.ts",
+      "sha256": "638f212fe675df1939abd452103cb2c062eb487c46fabd512ecdbd4cf27223e2"
+    },
+    {
+      "path": "components/diorama/atlas-layout.ts",
+      "sha256": "b06f32e157ea5f99175f6c6faf28fb1a344622f4597bf588827b99cb6d585e92"
+    },
+    {
+      "path": "components/diorama/blueprint.ts",
+      "sha256": "eadecdcd7548988bc66a01c57abb3a1d369ec7bd7b53e0f82fa5c8707c2966d8"
+    },
+    {
+      "path": "components/diorama/composition.ts",
+      "sha256": "23d316c65e44918883294936fde79cde5afeafcf39c59dc3e312620acaa37f4b"
+    },
+    {
+      "path": "components/diorama/engine.ts",
+      "sha256": "7a9bc21b484b737d2f09ec7b185849068e5dead74213442145ac1fe26a97da90"
+    },
+    {
+      "path": "components/diorama/hatch-engine.ts",
+      "sha256": "7609b907fffa782fe215f67b8e53683054b6be3712ed9820fdd1e5108ab6396d"
+    },
+    {
+      "path": "components/diorama/math.ts",
+      "sha256": "1e639a21c1defd3e62113aa390d6fcbb7e5249c583e3d39c52896403689cfff0"
+    },
+    {
+      "path": "components/diorama/product-meshes.ts",
+      "sha256": "026688af5318a6f2951b38b124fca77a17b1a0198ea12f590e348c53d2563932"
+    },
+    {
+      "path": "components/diorama/rooms.ts",
+      "sha256": "be20419ba80835eb89b801863753f83be0012a835410d67406c54a5cd41e578f"
+    },
+    {
+      "path": "components/diorama/scene-camera.ts",
+      "sha256": "5e6ca3006cfc82001b3b4daa59df8f79441300530c4fdf9f22ffb856130c55a1"
+    },
+    {
+      "path": "components/diorama/surfaces.ts",
+      "sha256": "1fb0fb8677c0491782dc5af09789dc790d744cc912a1277308d4e2c49b467ca6"
+    },
+    {
+      "path": "components/diorama/touchpoints.ts",
+      "sha256": "4a442894963b48ad410871250fd8750e947a234e31b823e674d4a602b1a339fb"
+    },
+    {
+      "path": "components/first-call-review.css",
+      "sha256": "06cf06bd9c2cbca5ce431b9f3a2d0c32ad23a22bb507ea56b2f893a20c174d73"
+    },
+    {
+      "path": "components/FirstCallReview.tsx",
+      "sha256": "7b0568da351b1a584ad22e627ba7604fdee94597d1de49bb9a133b921a2918b2"
+    },
+    {
+      "path": "components/Glyph.tsx",
+      "sha256": "e6072cf58ff20b5b422b8632a57d3c2bb171e08e5e22ed7eacf9542d248d5c39"
+    },
+    {
+      "path": "components/HatchDiorama.tsx",
+      "sha256": "f0713dc47553750bef882bd8fdce44ba37e80e8d972bf2e45487744e6cbc837f"
+    },
+    {
+      "path": "components/journey.css",
+      "sha256": "7058a179e94fe217461501dabfc81ef42abf99a2ef761c6ab401fc51e940a0b5"
+    },
+    {
+      "path": "components/JourneyApp.tsx",
+      "sha256": "53a40a3ed707e089ff29981e4d8693d0aa679fcd4b8b8f733e40e318169df140"
+    },
+    {
+      "path": "components/KeptMoments.tsx",
+      "sha256": "ae6d969f98710e98536eed974231511654aa65cc24bc48feb51bacb16a751778"
+    },
+    {
+      "path": "components/live-call-experience.css",
+      "sha256": "257cacf6bc9bd3e8cbd918201fae421b7382eeb705fa75c4d7e14eafadef057d"
+    },
+    {
+      "path": "components/LiveCallExperience.tsx",
+      "sha256": "9c6ccef7d52f096042415dd2fb3f694ca56c10291f96a5a2a5dd71b2c039504c"
+    },
+    {
+      "path": "components/main-polish.css",
+      "sha256": "6b3e675aef12ce21c8395b160d16b2a541321aa422ec296369bca74434826989"
+    },
+    {
+      "path": "components/main-product-theme.css",
+      "sha256": "db52e126dc25fe87ca7a594ecb8698c839e743fccd436ab5a374ee17180b68e7"
+    },
+    {
+      "path": "components/main-shell-routes.ts",
+      "sha256": "686f121ee1b603aa9c036e5f8fee23097ca2206b394eaa8e6cc2d6ce11cd5a2e"
+    },
+    {
+      "path": "components/main-shell.css",
+      "sha256": "acd1697f001104f0e696f391bdb558ff5a08c009ec3a0ce3efe8573a0aaf8a38"
+    },
+    {
+      "path": "components/main-visual.css",
+      "sha256": "0b5b121bc9e308051ca56362b96a85613a7157fed6790f209863b2f18c42bde8"
+    },
+    {
+      "path": "components/NetworkNotice.tsx",
+      "sha256": "cdf50a093dd797f4b76a63a77075e41a7162daf7317081e523472a3e6dd3d59d"
+    },
+    {
+      "path": "components/phone-demo.css",
+      "sha256": "0d22eb2b81b1908ce61a4201f6804a9d8a291cdf66709c4f025b03a90cabd6d9"
+    },
+    {
+      "path": "components/PhoneDemo.tsx",
+      "sha256": "9aaa4c82db01c680f8e1ad5c706722bab7f55e0e679bc439ce3938ffe9ff41ca"
+    },
+    {
+      "path": "components/product-page-visual.css",
+      "sha256": "dc112baa04dbd84f53a14cece9be72faa5bfa3bfb3e28e71271ed119ba139125"
+    },
+    {
+      "path": "components/product-pages.css",
+      "sha256": "1a8b9f77caad14c13283888683ccdf1a4ea360a7cf5d3d81408f8ce25413372f"
+    },
+    {
+      "path": "components/ProductEvidence.tsx",
+      "sha256": "343128e0e1d9ef229f1e372a1d4db0dd54de297a04a8e6d45f8069e086bf8fcd"
+    },
+    {
+      "path": "components/ProductFooter.tsx",
+      "sha256": "9f2ecaddc2af1e393a08061bbaf3d285d7f2c60b4eda348e4b1ddf01d406cedd"
+    },
+    {
+      "path": "components/ProductPageShell.tsx",
+      "sha256": "e1f0877e4a0bfdfa57cd65ad78b03145276ccbacb1414a203ff4f3345fb9c5dd"
+    },
+    {
+      "path": "components/scene-experience.css",
+      "sha256": "ca670289d6233e7bc22ceda78afc7a689d15d60d6075b1e490a6b69b7d10a8fb"
+    },
+    {
+      "path": "components/scene-fallback.css",
+      "sha256": "d5d383fab1838b47594534c5c21c6792da21dfceb93eb10f19bf1a885d45cf6f"
+    },
+    {
+      "path": "components/SceneDiorama.tsx",
+      "sha256": "6c03425b172fa11c16b81a7ea513dd4f70fa0b42062fbc55747b0bdbe278bf3b"
+    },
+    {
+      "path": "components/SceneFallback.tsx",
+      "sha256": "ab193b117fa7e2adc3079714dd7017f8caeb06a8ae35340a8ea137a352f64300"
+    },
+    {
+      "path": "components/search-view.css",
+      "sha256": "29f712746c330570630e564a72d115535f7073e9cbcfd7be6aa5bf342331388f"
+    },
+    {
+      "path": "components/SearchView.tsx",
+      "sha256": "3efeb042f90ef43b28e067456085d3e2518fbd3c49a36461bda72a2c8eca11ae"
+    },
+    {
+      "path": "components/SellerQA.tsx",
+      "sha256": "aa877363f50e4f05401085dae1a2a0d6529cbfac7f79791dbb6af21e318d762c"
+    },
+    {
+      "path": "components/trust-account.css",
+      "sha256": "66841f0391c72f59671a1bf0093ba540da484fc66e24c72165fcaf0afa575578"
+    },
+    {
+      "path": "components/TrustContent.tsx",
+      "sha256": "af8b8caa6cda7114858b439683a3500fcbfc16734f7ffcc43bcd3063420a2e8a"
+    },
+    {
+      "path": "components/verdict-comparison.css",
+      "sha256": "7de8909d8cf2c2e2178fde0051467b1e58b059ed029a454fd4958276d55d2958"
+    },
+    {
+      "path": "components/VerdictComparison.tsx",
+      "sha256": "0c1c82bbb5f6f760a9e4f660a564f3283560a4e2d6e456a86e3c643131d99092"
+    },
+    {
+      "path": "components/world-atlas.css",
+      "sha256": "727dbfa0aac68bef00de19d7d198c02019cc9d91ecfb66d1f501d562dfca1cb4"
+    },
+    {
+      "path": "components/world-community.css",
+      "sha256": "03146b3580c90753ea77bd440e062afd07618c997a8b49b1d2ade1bf022cf182"
+    },
+    {
+      "path": "components/world-home.css",
+      "sha256": "9dd2883cacdab207e17c925f3d462ac39ae1b16f6b2a9c4c3a931050479c5d28"
+    },
+    {
+      "path": "components/world-journal.css",
+      "sha256": "afc452086ecb761c877f533689db5b9713ce6f384697d9deef474e343dbab7e5"
+    },
+    {
+      "path": "components/WorldAtlas.tsx",
+      "sha256": "da9e443b2b2eb6be2f047f452eb821ecd4674c2393eea4e03f2cb2454d36d610"
+    },
+    {
+      "path": "components/WorldCommunity.tsx",
+      "sha256": "260106c24941059f51fb71295bf4785825cbfd5873c07dd768b15ac637f8d1a8"
+    },
+    {
+      "path": "components/WorldHome.tsx",
+      "sha256": "6943fe41cf76489d43fd641ee113d4cd1c2f6528dbad130c79083030c89fc6e1"
+    },
+    {
+      "path": "components/WorldJournal.tsx",
+      "sha256": "ba663ee33f7221420e79e0629f65801d0fd2ebdaf25df5cd6b83b876f229c074"
+    },
+    {
+      "path": "components/WorldObjects.tsx",
+      "sha256": "16bc8f38d4c353b8e074afa4a0ba9fbd744f9db7ea3787251a5f861d12a6ee4f"
+    },
+    {
+      "path": "components/WorldVignette.tsx",
+      "sha256": "5cb9644c0fb2f61e5984954823a3e60049bbf49ef8eedd9cad23a893fa15ef63"
+    },
+    {
+      "path": "data/catalog.json",
+      "sha256": "a4d3e2808ab4e6785fd800d051e5d948d08f2cbf85ef91e1cc8451157105a74c"
+    },
+    {
+      "path": "data/comparison-catalog.json",
+      "sha256": "c9c0298525fbbc2774b90f0a2e6a4a906b4e3dd4e1efd3f0f3933fb7341a2233"
+    },
+    {
+      "path": "data/comparison-reviews.json",
+      "sha256": "9a1afdb21a932f83ee9540cebd1ba2662923349dcb7461044a8cf2b3ded04354"
+    },
+    {
+      "path": "data/home-reference-catalog.json",
+      "sha256": "ef269cad3d51fde82c96ab8265186ab3e0aa3c9ad598eeca2f1469899c1d1853"
+    },
+    {
+      "path": "data/product-images.json",
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "path": "data/reviews.json",
+      "sha256": "2614497f86655eed4ae11cace050687f492878472692ea43eccbc925dd41f00a"
+    },
+    {
+      "path": "data/scene-reference-catalog.json",
+      "sha256": "7a7274f651a75aecd9396971dde3fdb14f05c5281fd6ee2a1de7200a64a0eee9"
+    },
+    {
+      "path": "data/teammate-catalog.json",
+      "sha256": "58993d9664e2f93f38e4753e871c6f7bf9d9573cd598743c504017f78a2e5ac0"
+    },
+    {
+      "path": "data/verified-catalog-source.json",
+      "sha256": "8f3989d4af84b0e6df0b7e1edcb4eda509c09d566518792260a76630f6878b4f"
+    },
+    {
+      "path": "data/verified-catalog.json",
+      "sha256": "b5e555bb8fe2c2d6c8ee83541b42496f93de9af03623c8dbff7ddba140c2315b"
+    },
+    {
+      "path": "data/world-templates.ts",
+      "sha256": "ac7f405bc97886171af0d4f50dd333f6b1b6543240f4463f27e839cdfcc1dc38"
+    },
+    {
+      "path": "docs/asset-provenance.md",
+      "sha256": "97af3f47d3c01a69294f30e2ef0b366bc0c179045a815d9773db1ed9575b6c00"
+    },
+    {
+      "path": "docs/commerce.md",
+      "sha256": "0df4c92b7b30f130b996ac71028aeb018ff74a0b7b7816861944b7a0b07cad1a"
+    },
+    {
+      "path": "docs/generated-worlds.md",
+      "sha256": "1471102ec0fcf70191aa5ab74546994506208970e84e2b9436083ada44909ec2"
+    },
+    {
+      "path": "docs/JOURNEY.md",
+      "sha256": "8e52973ae04795c4d118819a263ab1bda2c104e1349fb0615736833765f3ca3a"
+    },
+    {
+      "path": "docs/main-integration.md",
+      "sha256": "7e36bd4ef9c07682a42d2c390bf9853edf09be11f58f9470ca708004369ae84d"
+    },
+    {
+      "path": "docs/teammate-voice.md",
+      "sha256": "aa8c5c63a26a3a29867f66aa29b188eed3327465b2dff5cb11bea90289f25bed"
+    },
+    {
+      "path": "lib/account-guidance.ts",
+      "sha256": "3bca994aa3cbe4a01041009088b03c20530dd0bba3b9672a3f20db0ff466defb"
+    },
+    {
+      "path": "lib/account-types.ts",
+      "sha256": "b4c5f567392690debd744a440edfff89e95869f6ccf284969d792ad418ab2d6b"
+    },
+    {
+      "path": "lib/account.ts",
+      "sha256": "1da07ae2e7afa033f4a99e7317cdade09508d3989a5969b2324110888b1aaeb9"
+    },
+    {
+      "path": "lib/blueprint-projection.ts",
+      "sha256": "34308e95ff739f3bd3c1bc4d41cb20738d7a5d5edf9743565b12fdc928e1c53b"
+    },
+    {
+      "path": "lib/call-bridge.ts",
+      "sha256": "835b2d18111163c542b882d22d353f48f4eae8ad9414380b02ffb7a0be242af2"
+    },
+    {
+      "path": "lib/call-questions.ts",
+      "sha256": "a68ac3bcd6a7b40f71533d97a986b1202364729e156134c5b9bf319233f2c90a"
+    },
+    {
+      "path": "lib/catalog.ts",
+      "sha256": "8a86ce55325bc00d05efcc371149945498acfbad23b19a8091998341bfe72585"
+    },
+    {
+      "path": "lib/commerce-types.ts",
+      "sha256": "29faa06e490d578068bcb9bfb8bad045a06da4a8da23d3124c7e4a914daf1bde"
+    },
+    {
+      "path": "lib/comparison-groups.ts",
+      "sha256": "85221f13b244f5e22614edffb1874d28b9db23102525df16306b2500c9b45cf3"
+    },
+    {
+      "path": "lib/comparison.ts",
+      "sha256": "30b11407d0132858aa85f6d561c3c44a2b796c0e71d521b917ce687553913788"
+    },
+    {
+      "path": "lib/delegation-policy.ts",
+      "sha256": "6a15f01983b9c461fe234a7f96ff8ea8b72f1f6b44e59a76264f50dc8a4a6f18"
+    },
+    {
+      "path": "lib/delegation.ts",
+      "sha256": "e6d8463a3bff12b651f5bdc326d3e5edd9f946e294550603a710fc305667a247"
+    },
+    {
+      "path": "lib/guardrails.ts",
+      "sha256": "1c28cc4513a3bee285c31e731ae4bcde3df74e235a69bd757f9177f4c0ec33d5"
+    },
+    {
+      "path": "lib/home-feed.ts",
+      "sha256": "2ff730254e2158981c59e2492e9a05e3585d3d01a110616b2d47a111c1c3b524"
+    },
+    {
+      "path": "lib/journey-types.ts",
+      "sha256": "bdebe917ffa17267e48b242a8624aafa2db0dda413e871da3af78863086e500e"
+    },
+    {
+      "path": "lib/live-call-session.ts",
+      "sha256": "a6abbe015d71064a50c8934538c67ab0055f9280b08dfb8e8b7860a5618d5342"
+    },
+    {
+      "path": "lib/memory.ts",
+      "sha256": "23ce84b2150cc576dfe95dabae7d28ebcf7d96e3b5601b4bbe229adf06db7cef"
+    },
+    {
+      "path": "lib/observe-element-size.ts",
+      "sha256": "b198c18fc95523beb224157b946dfb4770cb5cf2ddbf43ac66e43a54003c362e"
+    },
+    {
+      "path": "lib/personalization.ts",
+      "sha256": "9114695b048281ad66446da805111554631164a527c56a9fff1988f33393a2e7"
+    },
+    {
+      "path": "lib/profile.ts",
+      "sha256": "803abe4897f54a4216628eab13d28bd7c1afbc2827688f4aa1d6d81e58b61c07"
+    },
+    {
+      "path": "lib/ranking.ts",
+      "sha256": "9dab2e3c8d050f1366e1616eba68300d4bc9f618294689b747860e41f8d6ddb2"
+    },
+    {
+      "path": "lib/reference-catalog.ts",
+      "sha256": "32e2715622cfa47423d2fb8db4a55ea7fe2ea4d1be7a3d11bd45f360d3b31dd3"
+    },
+    {
+      "path": "lib/scene-blueprint.ts",
+      "sha256": "77dc8331c20e70803b6ea3f35abe7f05aedb15d0c84f9bdafe3a12fb4b86cf94"
+    },
+    {
+      "path": "lib/scene-moods.ts",
+      "sha256": "22826cfc8dc84c8908aa5a07ca9abac2637c04e4134b6d3828e9bd05cc9b6cf6"
+    },
+    {
+      "path": "lib/scenes.ts",
+      "sha256": "000f0c1f773644a03f0a559e9bfeb734aa2c8174e4852bd4da8b6c7c982c1b94"
+    },
+    {
+      "path": "lib/server/account-store.ts",
+      "sha256": "a84b7510dcbaa79b9750f009ec120f007a2c6252e238187eb515e0863915239c"
+    },
+    {
+      "path": "lib/server/cache.ts",
+      "sha256": "aaaeff4b7090e031ab1111ffe75f001190105a3b723c855a483fb52b37060f70"
+    },
+    {
+      "path": "lib/server/call.ts",
+      "sha256": "40a8ce4fa7db91a8b7ff8872842edb5c36a70e1e19be612d293fe0f34e6ba74a"
+    },
+    {
+      "path": "lib/server/commerce.ts",
+      "sha256": "dcd5ca2e7eb4e4cd536f10e9f750bf539bf13e3f2c04caa224a480396ac56a30"
+    },
+    {
+      "path": "lib/server/errors.ts",
+      "sha256": "5ce874fd30f90bf870fb82e8a45d888614d4e17658490e2ea892573ce3754093"
+    },
+    {
+      "path": "lib/server/http.ts",
+      "sha256": "c4d11f9d50fcc36eb34e6834a5b8aab62e42ff3d3f8e50d4a5845d629cd2caae"
+    },
+    {
+      "path": "lib/server/llm.ts",
+      "sha256": "2fdf2d1f93d5b38d7dc03706792c9881cf114a4874a765e893ff5bce465793c1"
+    },
+    {
+      "path": "lib/server/personalization.ts",
+      "sha256": "7c9442f2184b19b366e1b08f5e199df34a14ed3419a9e460b930a7cb2ef9403f"
+    },
+    {
+      "path": "lib/server/services.ts",
+      "sha256": "1e8d1fe668678bf22b8cba1a36b4b35c5e9cb5258065004731e73d4bc5b3c613"
+    },
+    {
+      "path": "lib/server/store.ts",
+      "sha256": "cb8a0eef571fdbe8351d39947f09e39be83dcd22d65dd08a9e1e200f8d1e59af"
+    },
+    {
+      "path": "lib/server/teammate-voice.ts",
+      "sha256": "0371f15ba4f62d0b696534ccb898b99994167a0736469d459c576041e71d4720"
+    },
+    {
+      "path": "lib/server/voice-world-products.ts",
+      "sha256": "a329c38b0fb88150e216845994827395ed91fea2a6429c7224313c9d5d6e3f2f"
+    },
+    {
+      "path": "lib/server/world-activity.ts",
+      "sha256": "0665a6f20dc54e5d84ec4a3a2f110f3e40c777153651d7db9fea374ade793198"
+    },
+    {
+      "path": "lib/server/world-journal.ts",
+      "sha256": "94b454412fbbf2342ae371e468195fd3afc708ecd2792471113e303dffff538e"
+    },
+    {
+      "path": "lib/server/world.ts",
+      "sha256": "2c486b40af4315b7e042366138a748881d772437c080657149ab8de53bf95e18"
+    },
+    {
+      "path": "lib/teammate/nook-voice.d.mts",
+      "sha256": "fffc4d8093530f948bfd6ae92c255197d8e8e449ecd5cee82c25ef4f719e0c2d"
+    },
+    {
+      "path": "lib/teammate/nook-voice.mjs",
+      "sha256": "2dfefa17830cd837de471a8ea2d1c72a059c784f3e72af5cf4cfe76b9b703bda"
+    },
+    {
+      "path": "lib/types.ts",
+      "sha256": "d4ab089856e143b49db8e67d74428a33960592953a49d37ac2c994c0a10c5ddb"
+    },
+    {
+      "path": "lib/world-activity.ts",
+      "sha256": "3ce5cbcb216ced1c5af3057ae7e4bdcffe45d0bf01759f942b393e78dccd6a1c"
+    },
+    {
+      "path": "lib/world-context.ts",
+      "sha256": "e92d42b627df9ee072bf11c9125697e435e328ea8ae4146d639b2e49ed02efe5"
+    },
+    {
+      "path": "lib/world-navigation.ts",
+      "sha256": "318f01de3da5cb64767d328d6aa14b5f7634cb3cce1aa16778d1a0c7a50ca71b"
+    },
+    {
+      "path": "next-env.d.ts",
+      "sha256": "7ad303e40d4fddf44f156129e397511953a71481c5cfd86b1862649aaaf240cc"
+    },
+    {
+      "path": "next.config.ts",
+      "sha256": "5716c91658e96f7e50175f060dfdbfe2ec23883ff28285b2e9478687e198471e"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "6e053a4677a825162dd4b9c7eb7ae5b6c70ac1448677ad05005479d7b2ac1a26"
+    },
+    {
+      "path": "package.json",
+      "sha256": "1b82bf27864ac8a92197cbb6c92031a381acca8f1fd42581de844ea28368eab0"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "sha256": "9c827c5d4abe7b7ddb4e9a66f3b815ee90799a605ea01086795eddcd8bae0688"
+    },
+    {
+      "path": "public/commerce/damaged-item.svg",
+      "sha256": "10e4b5cfb213417fcec108ac0ce27733e34973649e7107a4e6d3b3e70f2cbe23"
+    },
+    {
+      "path": "public/commerce/doorstep.png",
+      "sha256": "d73f1d0c615087c5a075d7731565e1fbe96d9dd23c04d0e49a16bd44fbe075c2"
+    },
+    {
+      "path": "public/commerce/doorstep.svg",
+      "sha256": "a005e8828959a919b5e52d8fc90216142bde7d34ab71da0f846723152c21d260"
+    },
+    {
+      "path": "public/commerce/intact-item.svg",
+      "sha256": "96fe118068c359ad87fe6b4d280d72c5daccbd062e48dfd43e40d84c4acecb17"
+    },
+    {
+      "path": "public/fonts/fonts.css",
+      "sha256": "eb9aca05dbe2260211975df387a0f28e21855e95f622b3d93ba11abe64ff68ad"
+    },
+    {
+      "path": "public/fonts/OFL.txt",
+      "sha256": "d6cb2f9de23e11ac885d2a871739a23d27f5e38e6524b9f6a637093dd3d89bcd"
+    },
+    {
+      "path": "public/guided-scenes.html",
+      "sha256": "7f15b7efb145e48850dba4262d1dd1bfec7e23285995aa657694d4c578cc7853"
+    },
+    {
+      "path": "public/home-reference/products/7330605115.jpg",
+      "sha256": "52180648f8f7e2764b8b0805208dd37530d7849d089919ee59715ee5a1870b3a"
+    },
+    {
+      "path": "public/home-reference/products/7395651009.jpg",
+      "sha256": "30ae67e631db50b282ba66aa3b6d879fa517b345ac8da0dce235260f148b5b0c"
+    },
+    {
+      "path": "public/live-call/assets/chair.svg",
+      "sha256": "9072646f776ae8901d0f8c9e4578f3a1ac7ae86df9007f83068cde7a1791bd53"
+    },
+    {
+      "path": "public/live-call/assets/coupi.png",
+      "sha256": "7b8b3506e3d30ede5d3c3141186477c0676c614e66241922f5891d46ce032b9a"
+    },
+    {
+      "path": "public/live-call/assets/cushion.svg",
+      "sha256": "7a004faa9de89c50e70fd38d95fb510a790366432c295f55ce8159d3b1091836"
+    },
+    {
+      "path": "public/live-call/assets/lamp.svg",
+      "sha256": "1917d32c2b04e1857156f23b87579a70225457bbcbf8df6dea1e4b7bef64e415"
+    },
+    {
+      "path": "public/live-call/assets/plant.svg",
+      "sha256": "48d52e8d8769c03f992b3b2450d7034295337cc2394f132dd7c8b5345d418427"
+    },
+    {
+      "path": "public/live-call/assets/room-after.svg",
+      "sha256": "aaa1792de8b17be5c6553e83f1d2094a66a8956a50612823871c8537ef20419f"
+    },
+    {
+      "path": "public/live-call/assets/room-before.svg",
+      "sha256": "b9d3806fc51b881d4cdc54ce05b4c7823f7d0cf0e3a632631ab92f16ba1c90dc"
+    },
+    {
+      "path": "public/live-call/assets/rug.svg",
+      "sha256": "ce4e1a9a4b42c5ed7a3265f90a9576850387538c711da10c720e370e3f4c3f36"
+    },
+    {
+      "path": "public/live-call/assets/side-table.svg",
+      "sha256": "9b45e23b85b1d871114b87ee6cab502eb929afb498886b7f91d669abe527d0ee"
+    },
+    {
+      "path": "public/live-call/call-bridge.js",
+      "sha256": "80ed840f2ac642f0c574ef4fe329a632d7a774d3b43d3999ac15689975c7a329"
+    },
+    {
+      "path": "public/live-call/camera-engine.js",
+      "sha256": "48c2050fe064ef9dd3676e88b446bf6b5da079ecbdd30235976303c601cc754a"
+    },
+    {
+      "path": "public/live-call/camera-snapshots.js",
+      "sha256": "7980ee4fa9c0708047d6f4701dcafaaa891400b9b14b8ff5530e536244be323f"
+    },
+    {
+      "path": "public/live-call/coupang-products.js",
+      "sha256": "5d530bdf4a100f7202b0d3e2656fac9fbf85769db49ce00cdf7878c9711e8916"
+    },
+    {
+      "path": "public/live-call/hand-gestures.js",
+      "sha256": "38c51d7d7e760a7cd32a14b272ebaf36cb6f94122e4682fe2e0a5286f606e57d"
+    },
+    {
+      "path": "public/live-call/index.html",
+      "sha256": "95a31ec5cb056a2350e4804de8371877f819d13154a5fd9c00ae21bb2b480003"
+    },
+    {
+      "path": "public/live-call/main-call.css",
+      "sha256": "ee4906c8211c8ae1f4145ea379c6d0f53173d95e66e012328776659c2af7c1a8"
+    },
+    {
+      "path": "public/live-call/mobile-call-state.js",
+      "sha256": "d65e9b56b826a88eb3dad550f7ae031c49718f815067dde88244874ec9a9349a"
+    },
+    {
+      "path": "public/live-call/mobile-call.css",
+      "sha256": "ccc467655851456449a7f44013ab81d9d8e69445717922195999d83d32c4f6dd"
+    },
+    {
+      "path": "public/live-call/mobile-call.js",
+      "sha256": "a6e715789b7f92811ae2633e13c62b5ce50f6d668ca5b001ab0d55dd2e30b456"
+    },
+    {
+      "path": "public/live-call/product-catalog.csv",
+      "sha256": "c9d57a4c98deb03eb107e6be799559b5587369f1fa1191da0e529bc3dcbf960f"
+    },
+    {
+      "path": "public/live-call/product-preview.js",
+      "sha256": "94d2a8e5b1b8a191eec80bba8308004540fca69a0cd5b361b0727df0c0141fbd"
+    },
+    {
+      "path": "public/live-call/products/1814412512.jpg",
+      "sha256": "d621ac13a506560760a9690d32b5ab5cd9859de18ba461ae108686b914b195a3"
+    },
+    {
+      "path": "public/live-call/products/20145368.jpg",
+      "sha256": "a4c7cb7ae2d2ab26e02ae8b5fd2957299c1715ff28278132675b301a6ef3e47a"
+    },
+    {
+      "path": "public/live-call/products/331802095.jpg",
+      "sha256": "cae493010c41eb77736707d20dc26bb988ece1d3cf07c38be4276ba35e7e9bba"
+    },
+    {
+      "path": "public/live-call/products/5186051654.jpg",
+      "sha256": "e9f16596283daacab26b0a1a0efbe71449e14dc04fff51808a2455d34e1877a2"
+    },
+    {
+      "path": "public/live-call/products/55518713.jpg",
+      "sha256": "ec939a8fb952c2d62d9903c8bbc76f81c5ca05baaeecc0852fbfba09c09475db"
+    },
+    {
+      "path": "public/live-call/products/6274724147.jpg",
+      "sha256": "500eb7621c71f2935fbe2a00bedcd4850e9a3dfc4a2896240edb9b680eb11efc"
+    },
+    {
+      "path": "public/live-call/products/6285676894.jpg",
+      "sha256": "ddd62c81fa7b1f83c990e0e0ac13e1ec35c41691918cdb6555c8adc895285f65"
+    },
+    {
+      "path": "public/live-call/products/6431292464.jpg",
+      "sha256": "29329808acf90d987ca63e040fff5c517b5affb026fc23dca0298d56d0e7746f"
+    },
+    {
+      "path": "public/live-call/products/7143578845.jpg",
+      "sha256": "04e53eea8c812effb3ed0e4846511d95ff3acecfd280a4eb61e44f5ca131d220"
+    },
+    {
+      "path": "public/live-call/products/7185725748.jpg",
+      "sha256": "084e8313062fbb4f2d8162bb54a87f47c717ad1fd6a158cb66e642a28644f373"
+    },
+    {
+      "path": "public/live-call/products/7322824636.png",
+      "sha256": "f15b15bc49511b96f1977163d898dff252c21bd7ca1fe7a3228358717dd4a4d3"
+    },
+    {
+      "path": "public/live-call/products/7612276799.jpg",
+      "sha256": "6df90fbb2d08cef997208771bb4c2574e9532e375c1f5302c905f57b91b1f87c"
+    },
+    {
+      "path": "public/live-call/products/7950092244.jpg",
+      "sha256": "c4ba967c7585cc8888ffe82f4e2c4d45e1433f9834482e5e338e866d2195779d"
+    },
+    {
+      "path": "public/live-call/products/7950092256.jpg",
+      "sha256": "127e66397f0500043b8630de994556b6c82975347ec102d9353e07d9e5bc52e6"
+    },
+    {
+      "path": "public/live-call/products/8533828112.jpg",
+      "sha256": "b7e0644be8bbce43f69bca21c52f7728d6d33d5b4752c18e2645430d447efbd7"
+    },
+    {
+      "path": "public/live-call/products/8561267958.jpg",
+      "sha256": "01d27d94e36aac636399e4d43928d2343ba4c251cff935706a7230e543fb51d4"
+    },
+    {
+      "path": "public/live-call/products/9026994633.jpg",
+      "sha256": "0e65f012e45c8f832e9917755489288453e3abbb9244a84c4208ee7c981c076e"
+    },
+    {
+      "path": "public/live-call/products/9474375760.jpg",
+      "sha256": "b2f9bee6267738f5b768c87ff9da1592699a1f8952f10bde581fa2afd992c8d7"
+    },
+    {
+      "path": "public/live-call/reference-comparison.js",
+      "sha256": "0a023ed985e9d82342bbfd015e294345b993c37ccced4c7c85d613de58f731d2"
+    },
+    {
+      "path": "public/live-call/voice-call.js",
+      "sha256": "e00c7fd88bd368f2b4cabb5c03b09e0d0a7c1289d18f972ac3b53708cb320cff"
+    },
+    {
+      "path": "public/live-call/warm-call.css",
+      "sha256": "341f5b3c7fd44024085b99533a90cfd09eb59bab05148629dde5b0840ee05f4a"
+    },
+    {
+      "path": "public/main-shell/coupi.png",
+      "sha256": "7b8b3506e3d30ede5d3c3141186477c0676c614e66241922f5891d46ce032b9a"
+    },
+    {
+      "path": "public/main-shell/home-attentive.svg",
+      "sha256": "f7de1604f6db322a156324e4d2077b73fc7b763db531495f5d92a9c948fd17a6"
+    },
+    {
+      "path": "public/main-shell/home-calm.svg",
+      "sha256": "4d453f0b768d1ac82bbb302146fcb0e9dc6c31ab3e5da982c9df09452e4a12e3"
+    },
+    {
+      "path": "public/main-shell/home-excited.svg",
+      "sha256": "33526fda8b5965e992c0ef37990296f162d4f5fb840c2f127ca616c29d7ed3a1"
+    },
+    {
+      "path": "public/main-shell/home-relaxed.svg",
+      "sha256": "054c665a41d9dca476d5ca58dedf0830e9e98ba02363a54998b5397e810bb62f"
+    },
+    {
+      "path": "public/main-shell/home-sleepy.svg",
+      "sha256": "40f995f857ba5f296c20ce297cf604b4adbc887e4de7568e71f5f3ff4799b285"
+    },
+    {
+      "path": "public/scene-reference/products/1539744911.jpg",
+      "sha256": "17e84eaf8188c917b9ae208a5b979d796d54d498e9ea6fdbd40fafbe3980ed1b"
+    },
+    {
+      "path": "public/scene-reference/products/7434051500.jpg",
+      "sha256": "a7f3e1ba153e28f91fddcb907763e6542d337d5d98d7390fbcaf619967a163c7"
+    },
+    {
+      "path": "public/scene-reference/products/8059518763.jpg",
+      "sha256": "8e972d30866490ae97d25fc6e7bdb8b302455ffea922fd00676530b47d3af4d1"
+    },
+    {
+      "path": "public/verified-products/120680-original.png",
+      "sha256": "87d42bcb3eb7f7cf7300760a3e2c2862dbb8004f6c57c8183b1e0606ac83d4d1"
+    },
+    {
+      "path": "public/verified-products/1463552408-kinda-pink.jpg",
+      "sha256": "641be234b32d73dfe0c61e50212eb4febfdb6e35ab42373a94f72b5300ec7fcc"
+    },
+    {
+      "path": "public/verified-products/15089160.jpg",
+      "sha256": "8ac59c08a72b944be66c300504a2a1c60b83532d34e328efffa3eb2aab4d248f"
+    },
+    {
+      "path": "public/verified-products/1547725003-bitten-pink.jpg",
+      "sha256": "8e53cfc144bba236a9388a0d63f1c5ce9253444997b10d5ddc37b0d6b1ebae34"
+    },
+    {
+      "path": "public/verified-products/1547725003-maple-red.jpg",
+      "sha256": "6c08ab19cbb34ce24136e8182640175adb15b1422b208aad26de64a60ecd0195"
+    },
+    {
+      "path": "public/verified-products/1547904141-purple.jpg",
+      "sha256": "d1f6ad64ba545e9b3f87a3026c6129df8311868372e1286d3db3219cb8bcaf72"
+    },
+    {
+      "path": "public/verified-products/166915136-grapefruit.jpg",
+      "sha256": "8807aa18066f6577f5393ec087918c8c20cf804c0625fe16ba0e909653fec8a4"
+    },
+    {
+      "path": "public/verified-products/1814412512-pink-sand.jpg",
+      "sha256": "56e9f1fa24c0a2ac3810f4449d457d5ccd51c6eb101fadf2c5093160afdd4a70"
+    },
+    {
+      "path": "public/verified-products/1814412512.jpg",
+      "sha256": "d621ac13a506560760a9690d32b5ab5cd9859de18ba461ae108686b914b195a3"
+    },
+    {
+      "path": "public/verified-products/2082223437.jpg",
+      "sha256": "dd36600bb21c09a099fa5ea4cde320b30115b60fc1cb78917c657aca643f91a7"
+    },
+    {
+      "path": "public/verified-products/2371639363.jpg",
+      "sha256": "79cdd9691c578c26ed19cef7778f2e6fa4ab3a194f82515f978157f2f8fd761e"
+    },
+    {
+      "path": "public/verified-products/341621790-cherry-shine.png",
+      "sha256": "1db74aaf4a4b13b4103b7c0407f05e14f39228e6235f4130ce049a292f2836c4"
+    },
+    {
+      "path": "public/verified-products/345674940.jpg",
+      "sha256": "6688275480627c1fd47a4c0f90fac39f6418b49e8c9cbf1566889cc02afd2709"
+    },
+    {
+      "path": "public/verified-products/4322127769-lemon-grapefruit.jpg",
+      "sha256": "ce282c470956b6e8001d1d35fa97f94887cc8290dc1286a7dc4edf12a6e77d4d"
+    },
+    {
+      "path": "public/verified-products/5376120420-relentlessly-red.jpg",
+      "sha256": "bd60131861829682d07f5493cc716ecaed9dfa3c7b35b8d2b81f2e92a8a88f9c"
+    },
+    {
+      "path": "public/verified-products/55518713.jpg",
+      "sha256": "ec939a8fb952c2d62d9903c8bbc76f81c5ca05baaeecc0852fbfba09c09475db"
+    },
+    {
+      "path": "public/verified-products/5976056.jpg",
+      "sha256": "5fbc9c1da77911e20401ffe805229ac50e20df6d9ba9e34308026be3f8b64be7"
+    },
+    {
+      "path": "public/verified-products/6015571890.png",
+      "sha256": "a5a667349e5d13e150c993b89dd6e942bd7023350654a3e5eec70ce239f36099"
+    },
+    {
+      "path": "public/verified-products/6058070834.jpg",
+      "sha256": "8f5cdae5f6a4ae23fff76268c364a0d2f00a626fa89c7dbd3eab2064cb848190"
+    },
+    {
+      "path": "public/verified-products/6193917913-essential.jpg",
+      "sha256": "245f0cb5ca1f2e3bf04181ef1830963a5c7e13b2b0bd7e89f5c443a865ab45e3"
+    },
+    {
+      "path": "public/verified-products/6274724147.jpg",
+      "sha256": "500eb7621c71f2935fbe2a00bedcd4850e9a3dfc4a2896240edb9b680eb11efc"
+    },
+    {
+      "path": "public/verified-products/6285676894.jpg",
+      "sha256": "ddd62c81fa7b1f83c990e0e0ac13e1ec35c41691918cdb6555c8adc895285f65"
+    },
+    {
+      "path": "public/verified-products/6431292464.jpg",
+      "sha256": "29329808acf90d987ca63e040fff5c517b5affb026fc23dca0298d56d0e7746f"
+    },
+    {
+      "path": "public/verified-products/6511312982.jpg",
+      "sha256": "fe62587fe4ab7d4d0b412248c6ddc0aaa52d94d8d67eea8ca066c8788f430fe5"
+    },
+    {
+      "path": "public/verified-products/6520241489.jpg",
+      "sha256": "636ae7e2b79125aa1d1eb3edcfc920a413c6e9296bbfe949e17f55cb73842b06"
+    },
+    {
+      "path": "public/verified-products/6774150396.jpg",
+      "sha256": "2e5b74d3c825e86004410ed1578dce402fedf14bcf6e337df5014a4e1b6c95bf"
+    },
+    {
+      "path": "public/verified-products/6775922884-gray.jpg",
+      "sha256": "0f521bc4e2cc1a92333cc5ee291d7b857e4f8ff0037abc298bb90518190ab8aa"
+    },
+    {
+      "path": "public/verified-products/6775922884.jpg",
+      "sha256": "996fd6ddd78f375169507b4808198f7f24e17edc571c2e6e0789316d95bbe3f1"
+    },
+    {
+      "path": "public/verified-products/6908241889.jpg",
+      "sha256": "09d5a7d5fa2e2a2cc4999ff1ab5b855bd86e616143e4df5f09d3c1127d34d711"
+    },
+    {
+      "path": "public/verified-products/6994027284.jpg",
+      "sha256": "5980af3f05b75962f798bb5c74da1f3da04c0bbf8916b68aebfe84ddbc11b586"
+    },
+    {
+      "path": "public/verified-products/7116023545.jpg",
+      "sha256": "9f787216cccf3228f3971dabc30dd7c48c315831421d989882b28e83962b80ef"
+    },
+    {
+      "path": "public/verified-products/7185725748-last-boss.jpg",
+      "sha256": "86eef15336ec72120aaac40963921d20a04dd20d8c1d4a1bc5e29368076a6e27"
+    },
+    {
+      "path": "public/verified-products/7185725748-ruby-bow.jpg",
+      "sha256": "3433fb59a06b3d6ffb3dae0ac5ca35c2bf6254abfe0ca192a9bcd1225198a231"
+    },
+    {
+      "path": "public/verified-products/7185725748.jpg",
+      "sha256": "084e8313062fbb4f2d8162bb54a87f47c717ad1fd6a158cb66e642a28644f373"
+    },
+    {
+      "path": "public/verified-products/7187298300.jpg",
+      "sha256": "d44c6efd78850088b51fbb2796bce33a3e8a17f32570a1f39a5c226a00cf9feb"
+    },
+    {
+      "path": "public/verified-products/7235424403-round.jpg",
+      "sha256": "b6468fd40fda8b2e623c39aa8d7d334db8049ebca230ec6eabf5703a180bf329"
+    },
+    {
+      "path": "public/verified-products/7235424403-square.jpg",
+      "sha256": "d76c42f44f359ac9621f27111c64eab55defc4e82218863bd7ea6897f56d4b19"
+    },
+    {
+      "path": "public/verified-products/72621661-pink.jpg",
+      "sha256": "d4b909d5c3681892ec3a1542e62d8c3dba1c368698d55db19fcff0d9c4418650"
+    },
+    {
+      "path": "public/verified-products/7322824636.png",
+      "sha256": "f15b15bc49511b96f1977163d898dff252c21bd7ca1fe7a3228358717dd4a4d3"
+    },
+    {
+      "path": "public/verified-products/7330605115.jpg",
+      "sha256": "52180648f8f7e2764b8b0805208dd37530d7849d089919ee59715ee5a1870b3a"
+    },
+    {
+      "path": "public/verified-products/7395651009.jpg",
+      "sha256": "30ae67e631db50b282ba66aa3b6d879fa517b345ac8da0dce235260f148b5b0c"
+    },
+    {
+      "path": "public/verified-products/7411084109.jpg",
+      "sha256": "f20d43b373bd0e69747d9a1967aa229a558db311a6b258dedf786f250237e600"
+    },
+    {
+      "path": "public/verified-products/7480503353-love-pink.jpg",
+      "sha256": "8e18b7d330dcb2be11d0ec926a0a4210079d78944dafdabc580ba6b8f607f434"
+    },
+    {
+      "path": "public/verified-products/7480503353-pink-afternoon.jpg",
+      "sha256": "c3c9835f8e5a6e9d1d6c1f06214cf4245b8780c552fa7c2c6d3faac79909a65e"
+    },
+    {
+      "path": "public/verified-products/7480503353-pink-velvet.jpg",
+      "sha256": "f978cd908ee93f1f22da93836683d30e6f455023d29a443f93881aad58eb628b"
+    },
+    {
+      "path": "public/verified-products/7480865203-herbal.jpg",
+      "sha256": "d06c129346fb7c50298658f551e234b27d2494e81fd59f4972ce20203f48cb52"
+    },
+    {
+      "path": "public/verified-products/7505441634-derma-sos.jpg",
+      "sha256": "05a97ef6d79eebd8f3244769e0421e88b4e17c4397437a63afd01d14a16b7e39"
+    },
+    {
+      "path": "public/verified-products/7612276799-black.png",
+      "sha256": "72d6f766fc2641fd857fc329b525a6d17809caf33afada893d933e8c95ea4f66"
+    },
+    {
+      "path": "public/verified-products/7612276799-silver.jpg",
+      "sha256": "50d1c0a76a661a2780dcedea411bf0594838ee39c3f8c9dc8e2ee8f53aa1d5b8"
+    },
+    {
+      "path": "public/verified-products/7612276799.jpg",
+      "sha256": "6df90fbb2d08cef997208771bb4c2574e9532e375c1f5302c905f57b91b1f87c"
+    },
+    {
+      "path": "public/verified-products/7616878459.jpg",
+      "sha256": "59017f6ac8733bf15531fb57a4d0b92ba50d3c66ffb275025673591a159d1061"
+    },
+    {
+      "path": "public/verified-products/7656224848-grapefruit-care.png",
+      "sha256": "54909d798ebc52b4fc2f274b8491028ae6e8465036304757cdb2bd19f0fca13c"
+    },
+    {
+      "path": "public/verified-products/7702523687-juicy-trio.png",
+      "sha256": "dca7515636c19314d09d3e9a8bcd909bdfd30613198164ecd08500c149e78618"
+    },
+    {
+      "path": "public/verified-products/7835573890.png",
+      "sha256": "50c7bd068918f35f2ab04ca339c77dd7370516744f8230e7ee97c3eef90109af"
+    },
+    {
+      "path": "public/verified-products/7856352896.jpg",
+      "sha256": "463a1ea5e3923993cc62bf2a738bb120c9f2f67c3ef428cffd54e88402d5294d"
+    },
+    {
+      "path": "public/verified-products/7909385138.jpg",
+      "sha256": "824b2a98b63ac9de6d980fee7101adde3210271ccac9b057d579468de87502bf"
+    },
+    {
+      "path": "public/verified-products/7915055185.jpg",
+      "sha256": "7ccdec16ef5c855816084278d072179ccb319ade4ad4786ced2015ece0a0897e"
+    },
+    {
+      "path": "public/verified-products/7925244997-red-rock.jpg",
+      "sha256": "d9050ea08f60d5f01cf1500213b338bdb0fccbe95240747b6ab00c42a90c7520"
+    },
+    {
+      "path": "public/verified-products/7925244997-russian-red.jpg",
+      "sha256": "6f52dbb7474d30a9d188e247b15a0a33a15fb46d45ccf5458251ff16941fd43a"
+    },
+    {
+      "path": "public/verified-products/7944769320.jpg",
+      "sha256": "08e05ec0c73b8396f528573ee11fbbc3f93414b8cda57780bec67deb89c5dc7f"
+    },
+    {
+      "path": "public/verified-products/8063356643-strawberry.png",
+      "sha256": "7d8992591e57e938fa4d327ad0debb01cedd880b75aede974eef83f06a63bd82"
+    },
+    {
+      "path": "public/verified-products/8197877328.png",
+      "sha256": "0c391617c988c06a1026b56edc911a4c6526222806a9c06e5b2b86bc5ee826c8"
+    },
+    {
+      "path": "public/verified-products/8248027642-pink-chuchu.jpg",
+      "sha256": "ba142392c3961483afed51c0713ed58153682b4490dfe866b5c8d7afc970ed9f"
+    },
+    {
+      "path": "public/verified-products/8248027642-pink-rise.jpg",
+      "sha256": "fa3233d1ae69c15df2c2e92e782c174666e78a4feb192fb3673c59a0156bf77f"
+    },
+    {
+      "path": "public/verified-products/8308780384-pink-wish.jpg",
+      "sha256": "e2057e3526413cdc735ae0d8a80d2b63d9f2886e943f5aea503c7d0675bdc028"
+    },
+    {
+      "path": "public/verified-products/8310483629-blue.png",
+      "sha256": "1d50977fe346e46d8afba2934a7c0f38138aca4c2d6663c6dc824a50ed9e4025"
+    },
+    {
+      "path": "public/verified-products/8310483629-brown.png",
+      "sha256": "3bcdb9cb6acb498a87b54ecc91b1aa99472fa651eb367da6e50e592a3462d837"
+    },
+    {
+      "path": "public/verified-products/8310483629-olive.png",
+      "sha256": "5206ba02cbe860ea1b36a6779c570bdf2c29909ab09328998590ae92d291c102"
+    },
+    {
+      "path": "public/verified-products/8314847166-left-on-red.png",
+      "sha256": "67a89fc665d7c7c6df8c41dcba76180f21e97aed7a47973494d09561d745dc5c"
+    },
+    {
+      "path": "public/verified-products/8321792986-redbrity.jpg",
+      "sha256": "9f3ed069145de459a21a08821c348a974179258e496260019af3dd36681ca72f"
+    },
+    {
+      "path": "public/verified-products/8391704299.jpg",
+      "sha256": "feb57304d8377c22a7e1c93c4f4bed23c53502384e4da6ec5f590a3bad98edad"
+    },
+    {
+      "path": "public/verified-products/8391704457.jpg",
+      "sha256": "d45b955116dd428918297580aa1c19bf81a5094ad22fbab47af52efd62374cac"
+    },
+    {
+      "path": "public/verified-products/8491783776.jpg",
+      "sha256": "2f4a1bede5fdbe3d4c0028e8fd876a91fb38a6b39cfe44fffc2b1530586f5ff7"
+    },
+    {
+      "path": "public/verified-products/8533828112.jpg",
+      "sha256": "b7e0644be8bbce43f69bca21c52f7728d6d33d5b4752c18e2645430d447efbd7"
+    },
+    {
+      "path": "public/verified-products/8539057200.jpg",
+      "sha256": "0616dc644b7728d7318fab8581bfd3fae25cbe8e27679b5a575e5808c1e2c253"
+    },
+    {
+      "path": "public/verified-products/8561267958.jpg",
+      "sha256": "01d27d94e36aac636399e4d43928d2343ba4c251cff935706a7230e543fb51d4"
+    },
+    {
+      "path": "public/verified-products/8715669911.jpg",
+      "sha256": "a61c0f19b2b501f707f72707244ed8667a46770c8e33eca116d324968088defa"
+    },
+    {
+      "path": "public/verified-products/9026994633.jpg",
+      "sha256": "0e65f012e45c8f832e9917755489288453e3abbb9244a84c4208ee7c981c076e"
+    },
+    {
+      "path": "public/verified-products/9461808186.jpg",
+      "sha256": "c27068a71c5a3b38815e48745c9560195afd0b00c856720eaaa6b6b9434a74ce"
+    },
+    {
+      "path": "public/verified-products/9474375760.jpg",
+      "sha256": "b2f9bee6267738f5b768c87ff9da1592699a1f8952f10bde581fa2afd992c8d7"
+    },
+    {
+      "path": "public/verified-products/9514031816.jpg",
+      "sha256": "2772134af74e122d24515d4d0241f039737fdc6d162e9f0f54628b6c441b404a"
+    },
+    {
+      "path": "public/verified-products/9604052548.jpg",
+      "sha256": "4331ac01987e0bff082ad956d40e2c6ad119818ca419c02d8eb2ab1d93c27cae"
+    },
+    {
+      "path": "README.md",
+      "sha256": "bae76b3f64dfef088a8ee06e2bdcd9d486b014d7306f03f00a3e513d3616b61e"
+    },
+    {
+      "path": "scripts/embed-fonts.mjs",
+      "sha256": "61b4cd21e5646a22dbb2435f631604b4a31c602bb7c01d675f2b93171ea34f6b"
+    },
+    {
+      "path": "scripts/publish-reviewed-main.mjs",
+      "sha256": "2529dd50a15d3b6db4eccee95f50300f4c043712568639f568e7b915f5a38806"
+    },
+    {
+      "path": "scripts/rehearse-journey.ts",
+      "sha256": "9efe3a6eddeace7ff3e83381dc67b54fd9fe0b4e75674b4272fc059fbd15810f"
+    },
+    {
+      "path": "scripts/rehearse.ts",
+      "sha256": "82f80c0c06e3d3915481f9a98847e6d89bc5546a78e84d8bb9e88406a733f71d"
+    },
+    {
+      "path": "scripts/seed-comparisons.py",
+      "sha256": "63fba3d9b866dc3fd49b628a4389407829a8e307076b1b8c32d2d9319b5940d5"
+    },
+    {
+      "path": "tests/account.test.ts",
+      "sha256": "6ebbea32ebcd7b97a475fc19ea8815642442d21740337190c7752104d9406407"
+    },
+    {
+      "path": "tests/atlas-companion.test.ts",
+      "sha256": "16859e4c40a5aac499899a1bbecde861f0d778a440b6bc8c7ab329a2fdae93aa"
+    },
+    {
+      "path": "tests/atlas-focus.test.ts",
+      "sha256": "d0331295c21dd00462c26efae87c394987d7045f6ea799ba1ed0af6107c4b709"
+    },
+    {
+      "path": "tests/atlas.test.ts",
+      "sha256": "0a73107ce58daa5cdef7986977262887257c75b3b8fadba774e9f5aad5051473"
+    },
+    {
+      "path": "tests/blueprint-fallback.test.ts",
+      "sha256": "12671d6e8d4ab930e2daf03915d7085a7ca93cae687e1f6d010a5db592423041"
+    },
+    {
+      "path": "tests/blueprint-renderer.test.ts",
+      "sha256": "068f0b72139ae3bb054917d2a34d85aa60ab3a115da6804b8e674a902fd941b0"
+    },
+    {
+      "path": "tests/call-bridge.test.ts",
+      "sha256": "f5aaf6f015a51dc90636d5e114713e355ce84adcd69b9b88f2f9bcd66220cf00"
+    },
+    {
+      "path": "tests/call.test.ts",
+      "sha256": "c156105f2e7c08479fc8c8c7fc3e802b56df9e585cb2fd57b8b29ade1ce55abc"
+    },
+    {
+      "path": "tests/commerce.test.ts",
+      "sha256": "fecb87431b9a08986d44fe336159b8e3ded75e34ce8c465af2332b4449a528e3"
+    },
+    {
+      "path": "tests/comparison-audit.test.ts",
+      "sha256": "4e49634eaa2c0a81a6c59d8c817aa51e40a3a1d31699b0861dae81effbb32f4c"
+    },
+    {
+      "path": "tests/comparison-catalog.test.ts",
+      "sha256": "1fc6cf7a91d5274fa674f9daa17f34d053c66ddd66947cc1bcc1d2b9dce8a724"
+    },
+    {
+      "path": "tests/comparison.test.ts",
+      "sha256": "90803d653d16a668d5f398089a86c6e092313f74bd9e85f80ad33bfc60413e0e"
+    },
+    {
+      "path": "tests/date-products.test.ts",
+      "sha256": "95ca3194d62e79c60ba0eb97a6e12e1fa002dadbb187a352b9d49b5e3f9b910d"
+    },
+    {
+      "path": "tests/delegation.test.ts",
+      "sha256": "f2e1c55e5fb57ba8a593b7103a9bd2509d2a3be45b2d88f4181fff5fd13d195c"
+    },
+    {
+      "path": "tests/diorama.test.ts",
+      "sha256": "71c800a8a81b19b028e87bfda62c0697025c0062cd77449d0ec6361eb60ec8f7"
+    },
+    {
+      "path": "tests/domain.test.ts",
+      "sha256": "a8a7ed7263d2438666b0b51d33a2084d84b3afb385bf597a75e492752adada21"
+    },
+    {
+      "path": "tests/element-size.test.ts",
+      "sha256": "52f959e0497544ebc8fa181c033f7dcb22acd87650d70e629ca98323db20a6aa"
+    },
+    {
+      "path": "tests/first-call-review.test.ts",
+      "sha256": "3e2e0d97c67616debdeaba132b5a3cc3c509094202387a92889b155a79cfb98e"
+    },
+    {
+      "path": "tests/fixtures/blueprint.ts",
+      "sha256": "73a8c17f2d888e51129e9f0f6feec8c5be27c7eff187d5da438638a403d5a2dc"
+    },
+    {
+      "path": "tests/fixtures/teammate-voice-client.mjs",
+      "sha256": "aa7546992d29f52f425ebc1d53141158cfabccea7edde6b479b4cf0a41bb32e4"
+    },
+    {
+      "path": "tests/fixtures/teammate-voice-contract.mjs",
+      "sha256": "48ed5841f184ac151447db9ab9ef2c03b0f8e367b508e478a747233bd27f48b1"
+    },
+    {
+      "path": "tests/home-feed.test.ts",
+      "sha256": "2ff645dd8df54c877013ffd6be3a721cd4e8b1dd98aebfa28d1e4f3c42c0f8ff"
+    },
+    {
+      "path": "tests/home-parity.test.ts",
+      "sha256": "0abc1a06f2f4c3aa01c47c022f5f4fa0dd4577db4a0645d9090621a651fbfb85"
+    },
+    {
+      "path": "tests/http.test.ts",
+      "sha256": "eaefc895192836e69b77e51d04d56eded2fd3282bb796e8dfc3a7161fceaa102"
+    },
+    {
+      "path": "tests/journey-integration.test.ts",
+      "sha256": "9ef0dd970a6002ccfbd84cbc7f2d811d5a517409a8c1b8bd5fe6adda3dfb09c2"
+    },
+    {
+      "path": "tests/live-call-session.test.ts",
+      "sha256": "e74ae89395b498956f61f319c524fcdf07fea6d472a02855c7395c4e93543dda"
+    },
+    {
+      "path": "tests/llm.test.ts",
+      "sha256": "593dd5a4230fc2bde9591d4ae27e974aea9654dbf1eb623f80bf2bfc5201b455"
+    },
+    {
+      "path": "tests/main-shell-routes.test.ts",
+      "sha256": "e29754ca83ff39a1b9e728e166a1217b7f45f3e2f56842612716aa736069c5a2"
+    },
+    {
+      "path": "tests/memory.test.ts",
+      "sha256": "c267bfb70d4da52c488e940788c2f41ff6293e4d341eab1e32fd5bf54759d07b"
+    },
+    {
+      "path": "tests/personalization-voice.test.ts",
+      "sha256": "10d511b3e302f8739c04e009263c6b4cef15b46bfd3b5efcfb4b97ad0cc0f986"
+    },
+    {
+      "path": "tests/personalization.test.ts",
+      "sha256": "b5653c5a52b6ae3a39865e95f95bcdbe0db0b8275de3c118baa93ad219e33e7b"
+    },
+    {
+      "path": "tests/phone-demo.test.ts",
+      "sha256": "438a0c2d387b548ae371856a0e45252d0dd6145949d3fe6b43515112cf44c8f5"
+    },
+    {
+      "path": "tests/reference-catalog.test.ts",
+      "sha256": "3e01cd90c0989c8574efe20323c3e58bb4b75619526b1ea16f979bf03d57c37d"
+    },
+    {
+      "path": "tests/reference-ui.test.ts",
+      "sha256": "235b8d53193f793fe065b38907b44110c8ae6b5f91e1b1a55e9e1769ba8a05ff"
+    },
+    {
+      "path": "tests/routes.test.ts",
+      "sha256": "475acce63f6143c12d0ab185c741b02a5fa72dd2d6ad365fa98fc05b0426f069"
+    },
+    {
+      "path": "tests/scene-blueprint.test.ts",
+      "sha256": "3ed016f1989815332e5d8b9ce77baea962b6f16e529a2f43be60fafb63f83355"
+    },
+    {
+      "path": "tests/scene-camera.test.ts",
+      "sha256": "d1f939f0a4f15550aaf8e85aae6e326774636fb8828bb1ab0fb763ec5b106c0d"
+    },
+    {
+      "path": "tests/scene-composition.test.ts",
+      "sha256": "48778d30b2a3b858ad35171c6f4f39b0cc192438cae19fc05143b4c838252e49"
+    },
+    {
+      "path": "tests/scene-context.test.ts",
+      "sha256": "66902bb069ab071d9e834685d20951bb1976f38d6c22a08407c74ee32ba08f06"
+    },
+    {
+      "path": "tests/scene-rooms.test.ts",
+      "sha256": "6b4e7aa7498be815e2d1d7a09f9ecc7f0abb177764e3d59ed99529bf85b4e560"
+    },
+    {
+      "path": "tests/scene-surfaces.test.ts",
+      "sha256": "88209d7461cd85513ce881c191080a4d8ac97166c70ce85659209e0ebd3c852d"
+    },
+    {
+      "path": "tests/search-view.test.ts",
+      "sha256": "2e6cc3aabee799f8316db8d7c13425bb23bdff0f6ed3aafedb83973788ce90d8"
+    },
+    {
+      "path": "tests/teammate-ui.test.ts",
+      "sha256": "3c8e05ce821100e48d7d7b6ae57e3a7d75e10209f304aee5a155d1231f981f89"
+    },
+    {
+      "path": "tests/teammate-voice.test.ts",
+      "sha256": "88933cacbcd980cbc3cd1886d51a60af76dfb2a23baeedc3343b0a934e31fd7f"
+    },
+    {
+      "path": "tests/touchpoints.test.ts",
+      "sha256": "c671f785ace9c46095e637f3cf8dd101e7ade910124329e6c2349d6de23911cf"
+    },
+    {
+      "path": "tests/voice-world-bridge.test.ts",
+      "sha256": "9767dd0b106c3e8af03a13e4e197f83c4bdbbedc3e7f0b3d0026e00289aad5a6"
+    },
+    {
+      "path": "tests/world-activity.test.ts",
+      "sha256": "87127e4538120c3ae7a46db7a7b861664163ed962eef621a627cc3d1772f7970"
+    },
+    {
+      "path": "tests/world-context.test.ts",
+      "sha256": "45813081ed4fa85711158d4254e0715f75c5c4f78f570667e784e0279d4191b3"
+    },
+    {
+      "path": "tests/world-journal.test.ts",
+      "sha256": "2d061547a7f9798175e33cd544b2418db94f97d10fec569ce4e600d3f093ba2b"
+    },
+    {
+      "path": "tests/world-navigation.test.ts",
+      "sha256": "15235ecf1112946fd7e65bf67554a2db20d984af6688da487c84d94f54f078b9"
+    },
+    {
+      "path": "tests/world-routes.test.ts",
+      "sha256": "a2a6f31f8a2ef7927df45b1d51bbbeb724fba94ba8b7f40e576dc989dfbaaa62"
+    },
+    {
+      "path": "tests/world-templates.test.ts",
+      "sha256": "ae12f5785b38191f51ee956daf60513c2e3de0f181cb8f70c681a5a728be3c35"
+    },
+    {
+      "path": "tests/world.test.ts",
+      "sha256": "d89a33da06a2438cca06cc3e1e2cc8af8e04351cfdefe90fb624c1e9981fa6cd"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "1f82ad54fc4e19734280551fe7684404b3580f5691f28b1ce382b6b83ce6dfc6"
+    }
+  ]
+}

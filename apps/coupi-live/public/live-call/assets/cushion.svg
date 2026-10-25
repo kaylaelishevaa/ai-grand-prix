@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Illustration of a cushion"><defs>
+ <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#eee9df"/><stop offset="1" stop-color="#d7d4c7"/></linearGradient>
+ <linearGradient id="cloth" x2="1" y2="1"><stop stop-color="#f3f0e5"/><stop offset=".5" stop-color="#e7e1d4"/><stop offset="1" stop-color="#c9c4b7"/></linearGradient>
+ <linearGradient id="wood" x2="1" y2=".2"><stop stop-color="#a57243"/><stop offset=".25" stop-color="#d1a472"/><stop offset=".7" stop-color="#b78351"/><stop offset="1" stop-color="#845831"/></linearGradient>
+ <linearGradient id="sage" x2=".5" y2="1"><stop stop-color="#a9b49b"/><stop offset=".4" stop-color="#82977e"/><stop offset="1" stop-color="#526b56"/></linearGradient>
+ <linearGradient id="pot" x2="1" y2=".2"><stop stop-color="#b89975"/><stop offset=".5" stop-color="#d1b795"/><stop offset="1" stop-color="#9c7b58"/></linearGradient>
+ <linearGradient id="leaf" x2="1" y2="1"><stop stop-color="#8b9d68"/><stop offset="1" stop-color="#3d604a"/></linearGradient>
+ <radialGradient id="light"><stop stop-color="#fff6d2" stop-opacity=".6"/><stop offset="1" stop-color="#fff6d2" stop-opacity="0"/></radialGradient>
+ <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+ <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#514535" flood-opacity=".13"/></filter>
+ <pattern id="weave" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 1h7M1 0v7" stroke="#8b8068" stroke-opacity=".09" stroke-width=".7"/></pattern>
+ </defs><rect width="600" height="600" fill="#f1eee6"/><g>
+ <ellipse cx="305" cy="461" rx="155" ry="22" fill="#655b48" opacity=".11" filter="url(#shadow)"/>
+ <path d="M163 156q39 24 133 20 93 5 140-16-17 57-14 136 2 91 20 147-76-18-141-14-84-4-142 18 21-71 19-146 3-84-15-145z" fill="url(#sage)" filter="url(#soft)"/>
+ <path d="M178 172q57 18 118 16 71 2 124-14-13 65-10 124-2 80 16 128-61-12-124-9-72-3-125 14 14-67 13-131 2-77-12-128z" fill="url(#weave)" stroke="#7c8e75" stroke-width="2"/>
+ <path d="M175 171q22 24 29 46m215-43q-22 26-24 48M177 430q17-31 26-38m222 32q-22-28-28-38" stroke="#657a60" opacity=".4" stroke-width="3" fill="none"/>
+ </g></svg>

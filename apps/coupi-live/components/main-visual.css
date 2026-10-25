@@ -1,0 +1,76 @@
+/* An atlas of everyday life. Shared material, deliberately different compositions. */
+.coupi-main-page{background:radial-gradient(ellipse at 20% 12%,#f6f3e8 0,transparent 42%),radial-gradient(ellipse at 85% 85%,#cde5e2 0,transparent 55%),#e8f2f1}
+.coupi-main-page .coupi-main-frame{--ui:'Schibsted Grotesk',sans-serif;--display:'Fraunces',Georgia,serif;--mono:'Space Mono',monospace;border:1px solid #fff;border-radius:37px;box-shadow:0 30px 100px -45px #30575d54,0 2px 5px #fff8 inset}
+.coupi-main-page .main-shell-brand{font-family:var(--ui);letter-spacing:-1.3px;font-size:25px}
+.coupi-main-page .main-shell-header{background:#f1f9f8;border-bottom:1px solid #dceae8;padding-bottom:15px}
+.coupi-main-page .main-shell-actions>a{border-color:#d4e6e4;background:#fafffb;width:36px;height:36px}
+.coupi-main-page .main-shell-actions>a[aria-current=page]{background:#2d7375;color:#f8f9eb;border-color:#2d7375}
+.coupi-main-page .coupi-main-frame:is([data-view=world],[data-view=preview],[data-view=district],[data-view=archive],[data-view=search]) .main-shell-header>h1{display:none}
+.coupi-main-page .main-shell-nav{background:#fbfefa;box-shadow:0 -6px 30px #edf4f169;padding-inline:23px;min-height:75px}
+.coupi-main-page .main-shell-nav>a{border-radius:19px;font-size:10px;letter-spacing:.1px}
+.coupi-main-page .main-shell-nav>a[aria-current=page]{background:#dceee7;color:#286e6d}
+.coupi-main-page .main-shell-nav>a[aria-current=page] .glyph{transform:translateY(-1px)}
+.coupi-main-page .coupi-main-frame .world-home{padding-top:5px}
+.coupi-main-page .coupi-main-frame .world-home .world-heading{display:block;margin:0 0 22px}
+.coupi-main-page .coupi-main-frame .world-heading .eyebrow{display:flex;gap:8px;align-items:center;font:9px/1.5 var(--mono);letter-spacing:.55px;color:#688f8b;margin:5px 0 15px}
+.world-heading .eyebrow>span{width:6px;height:6px;border-radius:50%;background:#c59672;box-shadow:0 0 0 4px #efdfcb65}
+.coupi-main-page .coupi-main-frame .world-home .world-heading h1{display:block;font:550 37px/1.03 var(--ui);letter-spacing:-1.6px;margin:0;color:#264e53}
+.coupi-main-page .coupi-main-frame .world-home .world-heading h1 em{font:italic 450 42px/1.06 var(--display);letter-spacing:-1.7px;color:#448582}
+.coupi-main-page .coupi-main-frame .world-home .world-overview-invitation{display:block;font:12px/1.65 var(--ui);max-width:295px;color:#66868b;margin:13px 0 0}
+.coupi-main-page .world-atlas-navigation>[role=tablist]{border:0;background:#eaf3f0;border-radius:16px;padding:4px}
+.coupi-main-page .world-atlas-navigation [role=tab][aria-selected=true]{background:#fbfdf6;color:#315f62;box-shadow:0 3px 8px #52766d0d}
+.coupi-main-page .world-atlas-navigation [role=tab]{font-size:11px;min-height:39px}
+.coupi-main-page .explore-week-note{font:9px/1.6 var(--mono);letter-spacing:-.1px;margin:10px 1px 17px;color:#81928b}
+.coupi-main-page .explore-companion{display:flex;align-items:center;gap:10px;padding:0 1px;margin:15px 0 10px}
+.coupi-main-page .explore-companion p{margin:0;flex:1}.coupi-main-page .explore-companion strong{font-size:12px;font-weight:500;letter-spacing:-.1px;color:#427572}.coupi-main-page .explore-companion small{display:block;font-size:10px;margin-top:2px;color:#829a98}.coupi-main-page .explore-companion>.glyph{width:16px;height:16px;color:#9ab3a6}
+.companion-presence-dot{width:7px;height:7px;border-radius:50%;background:#74a18d;box-shadow:0 0 0 5px #dfede4;animation:companion-presence 4s cubic-bezier(.22,.8,.3,1) infinite}
+.coupi-main-page .coupi-main-frame .world-atlas{width:calc(100% + 22px);margin:0 -11px;border:0;background:transparent}
+.coupi-main-page .coupi-main-frame .world-atlas .atlas-stage{height:355px;border-radius:28px 28px 95px 28px;background:radial-gradient(ellipse at 55% 45%,#f6f7e9 0,#dfede7 58%,#cfe4e0 100%);border:1px solid #dfebe3;isolation:isolate}
+.coupi-main-page .atlas-stage::after{content:'';position:absolute;inset:9px;border:1px solid #fffffa70;border-radius:21px 21px 87px 21px;pointer-events:none;z-index:3}
+.coupi-main-page .atlas-beacon{background:#fffff0e8;border:1px solid #d3d9b7;color:#54796f;box-shadow:0 4px 13px #426c7130}
+.coupi-main-page .atlas-overview .atlas-beacon[data-highlighted=true]{background:#2b6969;color:#fff9e6;border-color:#c2dbcc;box-shadow:0 0 0 4px #fbffef82,0 5px 16px #2a5f5f3d}
+.coupi-main-page .coupi-main-frame .atlas-wayfinding{margin:0 11px;padding:18px 0 16px;border-bottom:1px solid #dce7df}
+.coupi-main-page .waypoint-number{font:italic 450 30px/1 var(--display);color:#a4baaa;width:30px}
+.coupi-main-page .destination-weather{font:8px/1.5 var(--mono);letter-spacing:.4px;color:#83958a}
+.coupi-main-page .destination-name{font:500 24px/1.2 var(--display);letter-spacing:-.65px;color:#315d60;margin-top:5px}
+.coupi-main-page .destination-name>.glyph{width:22px;height:22px;border-radius:50%;background:#e5eee0;padding:4px;color:#608f80}
+.coupi-main-page .destination-story{font-size:11px;color:#7b918b;margin-top:4px}
+.coupi-main-page .coupi-main-frame .atlas-place-index{margin:14px 11px 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
+.coupi-main-page .coupi-main-frame .atlas-place-index>button{display:grid;grid-template-columns:56px 1fr;grid-template-rows:auto;align-items:center;gap:5px;position:relative;padding:3px 2px;min-height:72px;border-radius:16px;background:transparent;color:#3a6869;text-align:left;transition:background 200ms,transform 250ms cubic-bezier(.18,.85,.28,1.2)}
+.coupi-main-page .coupi-main-frame .atlas-place-index>button:hover,.coupi-main-page .coupi-main-frame .atlas-place-index>button:focus-visible{background:#eaf3ed;transform:translateY(-2px)}
+.coupi-main-page .atlas-place-index .world-vignette{width:65px;height:62px;max-width:none;transform:translateX(-6px)}
+.coupi-main-page .coupi-main-frame .atlas-place-index>button>.atlas-index-copy{background:none;padding:0;border-radius:0;font-size:inherit;min-width:0}
+.atlas-index-copy small{display:block;font:7px/1.5 var(--mono);letter-spacing:.3px;color:#96a49a;text-transform:uppercase;margin-bottom:4px}
+.atlas-index-copy strong{display:block;font:550 11px/1.35 var(--ui);letter-spacing:-.2px;color:#416e6d}
+.atlas-place-index>button>.glyph{display:none}
+.coupi-main-page .world-journal-invitation{position:relative;background:linear-gradient(120deg,#eaf0e3,#f8f5e8);border:0!important;border-radius:23px 23px 50px 23px;padding:20px!important;overflow:hidden}
+.coupi-main-page .world-journal-invitation::after{content:'';position:absolute;width:100px;height:100px;border:1px solid #bfceb16e;border-radius:50%;right:-35px;top:-30px;box-shadow:0 0 0 14px #d9e2c922,0 0 0 29px #d9e2c918;pointer-events:none}
+.coupi-main-page .world-journal-invitation>.glyph{width:20px;height:20px;color:#7b9379;flex:0 0 auto}.coupi-main-page .world-journal-invitation p{margin:0;font-size:11px;color:#7c8d7a;line-height:1.7}.coupi-main-page .world-journal-invitation strong{display:block;font:500 18px/1.3 var(--display);margin-bottom:7px;color:#4b6f61}
+.coupi-main-page .coupi-main-frame .new-district{background:#e7f1ee;border:1px solid #d9e6df;padding:19px;border-radius:25px;margin-top:24px}
+.coupi-main-page .new-district strong{font:500 23px/1.2 var(--display);letter-spacing:-.6px;color:#3d6e67}.coupi-main-page .new-district label>span{font-size:11px;margin-top:8px;display:block;color:#7c958e}
+.coupi-main-page .new-district>div{border:0;border-radius:14px;margin-top:17px}.coupi-main-page .new-district input{width:100%;font-size:12px}
+.coupi-main-page .world-building{position:relative;background:radial-gradient(ellipse at 50% 0,#dbead7,transparent 80%),#f6f8ef;border-color:#dce6d5;border-radius:28px}.coupi-main-page .world-building .world-seed{width:69px;height:69px;border-radius:45% 55% 50% 40%;background:#ccdfca;color:#497b66;box-shadow:0 0 0 10px #e5eddb}.coupi-main-page .world-building h2{font:500 27px/1.15 var(--display);max-width:240px;letter-spacing:-.6px;color:#3c6c60}
+/* A destination opens like a small travel journal; the scene stays the main image. */
+.coupi-main-page .coupi-main-frame.journey-shell[data-scene-kind] :is(.world-preview-heading,.district-heading){margin:8px 0 17px}
+.coupi-main-page .coupi-main-frame.journey-shell[data-scene-kind] :is(.world-preview-heading,.district-heading) h1{font:500 39px/1.04 var(--display);letter-spacing:-1.2px;color:#315c5b}
+.coupi-main-page :is(.world-preview-heading,.district-heading) .eyebrow{font:8px/1.6 var(--mono);letter-spacing:.35px;color:#72968c}
+.coupi-main-page .world-preview-heading>p,.coupi-main-page .district-heading>div>p:last-child{font-size:12px!important;color:#6e8884;max-width:355px;line-height:1.7}
+.coupi-main-page .coupi-main-frame.journey-shell[data-scene-kind] .full-district{border-radius:25px;border-color:#d5e4dd;box-shadow:0 12px 28px -20px #5572664d}
+.coupi-main-page .coupi-main-frame.journey-shell[data-scene-kind] .full-district .scene-diorama{height:370px;min-height:370px}
+.coupi-main-page .coupi-main-frame.journey-shell[data-scene-kind] :is(.district-scene-note,.world-preview-note){background:#f2f5e9;color:#6c8378;font-size:10px;padding:13px 15px}
+.coupi-main-page .world-preview-note>span+span,.coupi-main-page .district-scene-note>span+span{font:7px/1.6 var(--mono);margin-top:5px;color:#8da091}
+.coupi-main-page .world-objects{background:transparent;border:0;border-radius:0;margin:20px 0}.coupi-main-page .world-objects>summary{padding:5px 0 13px}.coupi-main-page .world-objects-symbol{background:#e3eee3;color:#6a8b74;border-radius:40% 60% 50% 45%}.coupi-main-page .world-objects>summary strong{font:500 20px/1.25 var(--display);letter-spacing:-.35px;color:#3e6f65}.coupi-main-page .world-objects>summary small{font-size:10px;color:#8aa096}
+.coupi-main-page .world-object-strip{padding:2px 0 13px;gap:12px}.coupi-main-page .world-object-strip>button{flex-basis:125px;background:transparent;border:0;border-radius:0;padding:0}.coupi-main-page .world-object-strip .product-art{border-radius:19px;background:#eef1e7;height:112px;width:125px;overflow:hidden}.coupi-main-page .world-object-strip>button>strong{font:500 11px/1.4 var(--ui);color:#436b66;margin-top:9px}.coupi-main-page .world-object-strip>button>span{font:500 18px/1.3 var(--display);color:#49756b;margin-top:5px}.coupi-main-page .world-objects>p{padding:0;font-size:9px;color:#98a79d}
+.coupi-main-page .world-personalize{padding:20px!important;background:linear-gradient(125deg,#f4ecdd,#f5f6ed);border-radius:27px 27px 53px 27px;border:0}.coupi-main-page .world-personalize h2{font:500 28px/1.1 var(--display);letter-spacing:-.7px;color:#746b55}.coupi-main-page .world-personalize p{font-size:11px;color:#938a78}.coupi-main-page .world-personalize textarea{background:#fffef8;border-color:#e8e1d1}
+.coupi-main-page .world-personalize label{font:8px/1.7 var(--mono);color:#a09278;letter-spacing:0}.coupi-main-page .world-personalize .button{background:#5d8277}
+.coupi-main-page .scene-journey-links{padding-top:16px}.coupi-main-page .scene-journey-links>span{font:8px/1.7 var(--mono);color:#8fa197}.coupi-main-page .scene-journey-links>button{font:500 22px/1.3 var(--display);color:#527b6e}
+/* Preserve one visual language at the entry and in evidence. */
+.coupi-main-page .hatch-chapter{background:radial-gradient(ellipse at 50% 30%,#e6efdb,transparent 68%);border-radius:26px;padding-top:10px!important}.coupi-main-page .hatch-copy h1{font:500 39px/1.04 var(--display);letter-spacing:-1.2px;color:#3b6a61}.coupi-main-page .hatch-copy h1 em{font-family:var(--display);font-style:italic;font-weight:450;color:#6b947e}
+.coupi-main-page .coupi-main-frame .modal .sheet-product-heading h2{font:500 27px/1.12 var(--display);letter-spacing:-.65px}.coupi-main-page .coupi-main-frame .modal .sheet-product-heading>strong{font:500 28px/1.2 var(--display);letter-spacing:-.65px}
+.coupi-main-page .coupi-main-frame .modal .sheet-art{background:radial-gradient(ellipse at 50% 30%,#f2eee1,#eaf3ee);border-radius:22px}.coupi-main-page .coupi-main-frame .modal .delivery-pill{font-size:9px;border-radius:9px;background:#e5eee1;color:#627e59}
+.coupi-main-page .main-shell-footer{border-top-color:#e0e9df}.coupi-main-page .main-shell-footer .product-footer p{font-size:8px;color:#a2afa5}
+@keyframes companion-presence{0%,100%{transform:scale(1)}50%{transform:scale(.8)}}
+@media(max-width:520px){.coupi-main-page .coupi-main-frame{border:0;border-radius:0;box-shadow:none}.coupi-main-page .main-shell-header{padding-top:calc(16px + env(safe-area-inset-top))}}
+@media(max-width:380px){.coupi-main-page .coupi-main-frame .world-home .world-heading h1{font-size:34px}.coupi-main-page .coupi-main-frame .world-home .world-heading h1 em{font-size:38px}.coupi-main-page .coupi-main-frame .atlas-place-index{gap:7px}.coupi-main-page .coupi-main-frame .atlas-place-index>button{grid-template-columns:45px 1fr}.coupi-main-page .atlas-place-index .world-vignette{width:53px}.atlas-index-copy strong{font-size:10px}}
+@media(max-height:740px){.coupi-main-page .coupi-main-frame .world-atlas .atlas-stage{height:315px}.coupi-main-page .coupi-main-frame.journey-shell[data-scene-kind] .full-district .scene-diorama{height:330px;min-height:330px}}
+@media(prefers-reduced-motion:reduce){.companion-presence-dot{animation:none}.coupi-main-page .atlas-place-index>button{transition:none}}

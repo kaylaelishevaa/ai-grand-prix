@@ -1,0 +1,34 @@
+{
+  "sourceRepository": "https://github.com/kaylaelishevaa/ai-grand-prix",
+  "sourceCommit": "b3ed680",
+  "sourceFile": "public/coupang-products.js",
+  "sourceFileSha256": "5e2005bef598f2018dcfe5d9d8c1a80caf749a8010caef74d79b95a110100176",
+  "importedAt": "2026-10-25",
+  "recordCount": 82,
+  "newIdsComparedWithOriginal18": 70,
+  "categoryCounts": {
+    "makeup": 32,
+    "desk": 12,
+    "clothes": 24,
+    "glasses": 14
+  },
+  "productTypeCounts": {
+    "lipstick": 22,
+    "chair": 6,
+    "lamp": 6,
+    "tshirt": 12,
+    "hoodie": 6,
+    "glasses": 14,
+    "lipbalm": 10,
+    "sweater": 6
+  },
+  "reviewEvidenceStatusCounts": {
+    "partial": 19,
+    "unavailable": 63
+  },
+  "assetBytes": 4573825,
+  "transformation": "Only image and preview.image local paths changed from /products/ to /verified-products/. Original image bytes and all source metadata are preserved.",
+  "priceScope": "Every price is a historical reference, not a live offer. Stock, seller selection, exact option IDs and delivery remain unverified unless the original record explicitly provides evidence.",
+  "reviewScope": "Partial reviewEvidence is translated/paraphrased third-party product-family evidence. It is not our seeded synthetic review corpus, a complete review set, or necessarily evidence for the exact pictured variant. Preserve each original scopeNote.",
+  "syntheticIsolation": "No synthetic product has been assigned a real brand, image or review in this import."
+}

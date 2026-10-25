@@ -1,0 +1,27 @@
+/* Small editorial illustrations give each utility its own place without obscuring the task. */
+.product-page.app-shell[data-page-art]{--ui:'Schibsted Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--display:'Fraunces',Georgia,serif;--mono:'Space Mono',monospace;--page-art-soft:#d9ecee;--page-art-ground:#b3d5d8;--page-art-light:#f7fcf8;--page-art-strong:#4a8187;--page-art-leaf:#8aafa0;--page-art-shadow:#4b7e7d12;--page-wash:#e9f5f6}
+.product-page.app-shell[data-page-art=account]{--page-art-soft:#e0eee6;--page-art-ground:#b9d3bf;--page-art-light:#fff6dc;--page-art-strong:#5c897a;--page-art-leaf:#7eaa8c;--page-wash:#edf6f0}
+.product-page.app-shell[data-page-art=delivery]{--page-art-soft:#f4e9dd;--page-art-ground:#d7bda0;--page-art-light:#fff9ec;--page-art-strong:#9b785b;--page-art-leaf:#91aa91;--page-wash:#f8f3eb}
+.product-page.app-shell[data-page-art=trust]{--page-art-soft:#e7edde;--page-art-ground:#c7d6b9;--page-art-light:#fbfcf4;--page-art-strong:#718b6c;--page-art-leaf:#9bb38c;--page-wash:#f0f5e9}
+.product-page.app-shell[data-page-art=quiet]{--page-art-soft:#e3e8f0;--page-art-ground:#b8c4d8;--page-art-light:#fff4d8;--page-art-strong:#74869f;--page-art-leaf:#91abae;--page-wash:#f0f3f8}
+.product-page.app-shell[data-page-art=help]{--page-art-soft:#e0ecf4;--page-art-ground:#b9d1e2;--page-art-light:#fbfcf9;--page-art-strong:#62859d;--page-art-leaf:#a9c5b7;--page-wash:#edf5f9}
+.product-page.app-shell[data-page-art] .product-page-top{background:linear-gradient(120deg,#f2faf9,var(--page-wash));border-bottom-color:#d9e8e9}
+.product-page.app-shell[data-page-art] .product-page-main{padding-top:20px;background:radial-gradient(ellipse at 100% 0,var(--page-wash),transparent 250px)}
+.product-page.app-shell[data-page-art] .product-page-heading{display:grid;grid-template-columns:minmax(0,1fr) 100px;align-items:center;gap:10px 7px;min-height:112px;margin:0 0 24px;padding:2px 0 13px;border-bottom:1px solid #d6e7e74d;position:relative;isolation:isolate}
+.product-page.app-shell[data-page-art] .product-heading-copy{min-width:0;padding-top:3px}
+.product-page.app-shell[data-page-art] .product-heading-copy>.eyebrow{font:500 8px/1.7 var(--mono);letter-spacing:.45px;color:#6c8b8d;margin:0 0 11px;text-wrap:pretty}
+.product-page.app-shell[data-page-art] .product-heading-copy>h1{font:500 32px/1.1 var(--display);font-optical-sizing:auto;font-variation-settings:'SOFT' 25,'WONK' 1;letter-spacing:-1px;margin:0;max-width:none;white-space:normal;text-wrap:balance;color:#31575d}
+.product-page.app-shell[data-page-art] .product-header-art{display:block;width:112px;height:96px;max-width:none;justify-self:end;pointer-events:none;overflow:visible;transform:translateX(5px);filter:drop-shadow(0 6px 4px #335b5705)}
+.product-page.app-shell[data-page-art] .product-page-heading>.product-heading-subtitle{grid-column:1/-1;margin:0;padding-right:5px;max-width:33em;font:13px/1.6 var(--ui);color:#648389}
+.product-page.app-shell[data-page-art] .product-page-brand{font-family:var(--ui);font-weight:700}
+.product-page.app-shell[data-page-art] .product-page-main :is(.commerce-section>h2,.commerce-delivery>h2,.trust-section>h2,.trust-copy h2){font-family:var(--display);font-size:22px;line-height:1.2;font-weight:500;letter-spacing:-.5px;color:#385f63}
+.product-page.app-shell[data-page-art] .product-page-main .commerce-empty h2{font-family:var(--display);font-size:27px;font-weight:500;line-height:1.15;letter-spacing:-.6px}
+.product-page.app-shell[data-page-art] .commerce-empty{background:linear-gradient(130deg,#f2faf8,var(--page-wash))}
+.product-page.app-shell[data-page-art] .trust-kicker{font:500 8px/1.7 var(--mono)!important;letter-spacing:.35px;color:#6b8b8a}
+.product-page.app-shell[data-page-art] .trust-range>strong,.product-page.app-shell[data-page-art] .commerce-total>strong,.product-page.app-shell[data-page-art] .commerce-breakdown .total dd{font-family:var(--display);font-weight:500;letter-spacing:-.8px}
+.product-page.app-shell[data-page-art] .commerce-section .commerce-order-bottom strong,.product-page.app-shell[data-page-art] .commerce-item-copy>strong{font-family:var(--display);font-weight:500;letter-spacing:-.45px}
+.product-page.app-shell[data-page-art] .screen-caption{font:9px/1.6 var(--mono);letter-spacing:0;color:#739291}
+.product-page.app-shell[data-page-art] .trust-license h2{font-family:var(--display);font-weight:500;font-size:21px;line-height:1.25}
+.product-page.app-shell[data-page-art] .trust-memories small,.product-page.app-shell[data-page-art] .commerce-order-number{font-family:var(--mono);font-size:9px;line-height:1.7}
+@media(max-width:390px){.product-page.app-shell[data-page-art] .product-page-heading{grid-template-columns:minmax(0,1fr) 90px;min-height:107px;gap:11px 6px}.product-page.app-shell[data-page-art] .product-header-art{width:101px;height:90px}.product-page.app-shell[data-page-art] .product-heading-copy>h1{font-size:30px;letter-spacing:-.9px}.product-page.app-shell[data-page-art] .product-heading-copy>.eyebrow{font-size:8px;letter-spacing:.2px}}
+@media(max-width:350px){.product-page.app-shell[data-page-art] .product-page-heading{grid-template-columns:minmax(0,1fr) 76px}.product-page.app-shell[data-page-art] .product-header-art{width:88px;height:79px}.product-page.app-shell[data-page-art] .product-heading-copy>h1{font-size:28px}}

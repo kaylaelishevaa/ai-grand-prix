@@ -1,0 +1,827 @@
+/* Sourced Coupang catalog. Historical references; separate from the synthetic world catalog. */
+window.COUPANG_PRODUCTS = [
+  {
+    "id": "1814412512",
+    "name": "롬앤 제로 매트 립스틱, 1개, 09 쉘 누드",
+    "category": "makeup",
+    "productType": "lipstick",
+    "url": "https://www.coupang.com/vp/products/1814412512?itemId=3063152900&vendorItemId=71051109229",
+    "price": 7470,
+    "priceStatus": "reference",
+    "image": "/live-call/products/1814412512.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/115888118402598-8a8953f0-6cba-4258-8d11-46cf3e1afec0.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A6%BD%EC%8A%A4%ED%8B%B1",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified. The shade name is sourced; preview color is an estimate sampled from visible pigment in the listing photo, not a calibrated shade match.",
+    "checkedAt": "2026-10-25",
+    "brand": "Rom&nd / 롬앤",
+    "aliases": [
+      "Romand Zero Matte lipstick Shell Nude"
+    ],
+    "tags": [
+      "lipstick",
+      "nude",
+      "peach",
+      "matte",
+      "립스틱",
+      "쉘 누드"
+    ],
+    "verifiedAttributes": [
+      "Romand Zero Matte lipstick Shell Nude",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "lip",
+      "image": "/live-call/products/1814412512.jpg",
+      "background": "white",
+      "color": "#e98c7c",
+      "shadeLabel": "09 Shell Nude / 09 쉘 누드",
+      "shadeVerified": false,
+      "colorSource": "Median of visible listing-photo pigment/swatch pixels; approximate, not color calibrated.",
+      "sampleRegionPixels": [
+        40,
+        140,
+        120,
+        220
+      ]
+    },
+    "imageSha256": "d621ac13a506560760a9690d32b5ab5cd9859de18ba461ae108686b914b195a3"
+  },
+  {
+    "id": "7322824636",
+    "name": "맥 파우더 키스 헤이지 매트 립스틱, 1개, 멀 잇 오버",
+    "category": "makeup",
+    "productType": "lipstick",
+    "url": "https://www.coupang.com/vp/products/7322824636?itemId=8021226340&vendorItemId=94286012682",
+    "price": 35700,
+    "priceStatus": "reference",
+    "image": "/live-call/products/7322824636.png",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2025/12/12/17/6/3456e8d9-c134-45fb-aa09-44accd5cb38c.png",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A6%BD%EC%8A%A4%ED%8B%B1",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified. The shade name is sourced; preview color is an estimate sampled from visible pigment in the listing photo, not a calibrated shade match.",
+    "checkedAt": "2026-10-25",
+    "brand": "MAC / 맥",
+    "aliases": [
+      "MAC Powder Kiss Hazy Matte lipstick Mull It Over"
+    ],
+    "tags": [
+      "lipstick",
+      "peach",
+      "matte",
+      "립스틱",
+      "멀 잇 오버"
+    ],
+    "verifiedAttributes": [
+      "MAC Powder Kiss Hazy Matte lipstick Mull It Over",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "lip",
+      "image": "/live-call/products/7322824636.png",
+      "background": "white",
+      "color": "#f07f72",
+      "shadeLabel": "Mull It Over / 멀 잇 오버",
+      "shadeVerified": false,
+      "colorSource": "Median of visible lipstick pigment pixels; approximate, not color calibrated.",
+      "sampleRegionPixels": [
+        225,
+        70,
+        240,
+        160
+      ]
+    },
+    "imageSha256": "f15b15bc49511b96f1977163d898dff252c21bd7ca1fe7a3228358717dd4a4d3"
+  },
+  {
+    "id": "7185725748",
+    "name": "케이트 립스틱 몬스터, 1개, 03호히트헤이즈",
+    "category": "makeup",
+    "productType": "lipstick",
+    "url": "https://www.coupang.com/vp/products/7185725748?itemId=18131895632&vendorItemId=86741104970",
+    "price": 19920,
+    "priceStatus": "reference",
+    "image": "/live-call/products/7185725748.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/799896421051310-50ff098e-2fa6-42e8-aa86-d45f9760329a.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A6%BD%EC%8A%A4%ED%8B%B1",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified. The shade name is sourced; preview color is an estimate sampled from visible pigment in the listing photo, not a calibrated shade match.",
+    "checkedAt": "2026-10-25",
+    "brand": "Kate / 케이트",
+    "aliases": [
+      "Kate Lip Monster 03 Heat Haze lipstick"
+    ],
+    "tags": [
+      "lipstick",
+      "brown",
+      "warm",
+      "립스틱",
+      "립몬스터",
+      "히트헤이즈"
+    ],
+    "verifiedAttributes": [
+      "Kate Lip Monster 03 Heat Haze lipstick",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "lip",
+      "image": "/live-call/products/7185725748.jpg",
+      "background": "white",
+      "color": "#ba5e4e",
+      "shadeLabel": "03 Heat Haze / 03 히트헤이즈",
+      "shadeVerified": false,
+      "colorSource": "Median of lipstick tip pigment pixels, excluding the red box; approximate, not color calibrated.",
+      "sampleRegionPixels": [
+        405,
+        20,
+        435,
+        40
+      ]
+    },
+    "imageSha256": "084e8313062fbb4f2d8162bb54a87f47c717ad1fd6a158cb66e642a28644f373"
+  },
+  {
+    "id": "7950092256",
+    "name": "체어클럽 서울대의자 팔걸이형 화이트바디, 다크그레이",
+    "category": "desk",
+    "productType": "chair",
+    "url": "https://www.coupang.com/vp/products/7950092256",
+    "price": 87430,
+    "priceStatus": "reference",
+    "image": "/live-call/products/7950092256.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/rs_quotation_api/kvv1vlho/974d7482e680400d892a5e2b995cbdf4.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "ChairClub / 체어클럽",
+    "aliases": [
+      "ChairClub Seoul armrest chair white frame dark gray"
+    ],
+    "tags": [
+      "chair",
+      "white",
+      "gray",
+      "office chair",
+      "desk chair",
+      "armrest",
+      "의자",
+      "책상의자"
+    ],
+    "verifiedAttributes": [
+      "ChairClub Seoul armrest chair white frame dark gray",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/live-call/products/7950092256.jpg",
+      "background": "white"
+    },
+    "imageSha256": "127e66397f0500043b8630de994556b6c82975347ec102d9353e07d9e5bc52e6"
+  },
+  {
+    "id": "7950092244",
+    "name": "체어클럽 서울대의자 팔걸이형 블랙바디, 다크그레이",
+    "category": "desk",
+    "productType": "chair",
+    "url": "https://www.coupang.com/vp/products/7950092244",
+    "price": 87430,
+    "priceStatus": "reference",
+    "image": "/live-call/products/7950092244.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/rs_quotation_api/e1olgdcb/a7c0ef43bd3540a28bb3ae0301429799.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "ChairClub / 체어클럽",
+    "aliases": [
+      "ChairClub Seoul armrest chair black frame dark gray"
+    ],
+    "tags": [
+      "chair",
+      "black",
+      "gray",
+      "office chair",
+      "desk chair",
+      "armrest",
+      "의자",
+      "책상의자"
+    ],
+    "verifiedAttributes": [
+      "ChairClub Seoul armrest chair black frame dark gray",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/live-call/products/7950092244.jpg",
+      "background": "white"
+    },
+    "imageSha256": "c4ba967c7585cc8888ffe82f4e2c4d45e1433f9834482e5e338e866d2195779d"
+  },
+  {
+    "id": "20145368",
+    "name": "체어클럽 오피스팝 의자 MT20, 블랙",
+    "category": "desk",
+    "productType": "chair",
+    "url": "https://www.coupang.com/vp/products/20145368",
+    "price": 79900,
+    "priceStatus": "reference",
+    "image": "/live-call/products/20145368.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/54011254577332-fabdaa82-c5aa-406f-9792-10d1c661d379.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%B2%B4%EC%96%B4%ED%81%B4%EB%9F%BD%20%EC%9D%98%EC%9E%90",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "ChairClub / 체어클럽",
+    "aliases": [
+      "ChairClub OfficePop MT20 black office chair"
+    ],
+    "tags": [
+      "chair",
+      "black",
+      "mesh",
+      "office chair",
+      "desk chair",
+      "의자",
+      "메쉬"
+    ],
+    "verifiedAttributes": [
+      "ChairClub OfficePop MT20 black office chair",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/live-call/products/20145368.jpg",
+      "background": "white"
+    },
+    "imageSha256": "a4c7cb7ae2d2ab26e02ae8b5fd2957299c1715ff28278132675b301a6ef3e47a"
+  },
+  {
+    "id": "55518713",
+    "name": "듀플렉스 LED 데스크스탠드 DP-310LS, 단일색상",
+    "category": "desk",
+    "productType": "lamp",
+    "url": "https://www.coupang.com/vp/products/55518713?itemId=193122958&vendorItemId=3457057654",
+    "price": 23800,
+    "priceStatus": "reference",
+    "image": "/live-call/products/55518713.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/1077727712377396-82d21f78-6216-4d46-b864-96909606afa9.jpeg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%93%80%ED%94%8C%EB%A0%89%EC%8A%A4%20LED%20%EC%8A%A4%ED%83%A0%EB%93%9C",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "Duplex / 듀플렉스",
+    "aliases": [
+      "Duplex DP-310LS LED desk lamp white"
+    ],
+    "tags": [
+      "lamp",
+      "white",
+      "desk lamp",
+      "table lamp",
+      "LED",
+      "스탠드",
+      "책상조명"
+    ],
+    "verifiedAttributes": [
+      "Duplex DP-310LS LED desk lamp white",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/live-call/products/55518713.jpg",
+      "background": "white",
+      "backgroundTolerance": 0
+    },
+    "imageSha256": "ec939a8fb952c2d62d9903c8bbc76f81c5ca05baaeecc0852fbfba09c09475db"
+  },
+  {
+    "id": "9026994633",
+    "name": "이케아 단스탠드 독서등 작업등 테르티알 (LED전구증정), 대체품 600 주백색(아이보리빛), 라이트블루",
+    "category": "desk",
+    "productType": "lamp",
+    "url": "https://www.coupang.com/vp/products/9026994633",
+    "price": 38500,
+    "priceStatus": "reference",
+    "image": "/live-call/products/9026994633.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/d311/7c0ff3d1b0ea4b2be45a628bdb935361d3efffae8faecab8bf301b9a5c3d.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%9D%B4%EC%BC%80%EC%95%84%20%ED%85%8C%EB%A5%B4%ED%8B%B0%EC%95%8C",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "IKEA / 이케아",
+    "aliases": [
+      "IKEA Tertial task lamp light blue"
+    ],
+    "tags": [
+      "lamp",
+      "blue",
+      "light blue",
+      "desk lamp",
+      "task lamp",
+      "clamp",
+      "스탠드",
+      "테르티알"
+    ],
+    "verifiedAttributes": [
+      "IKEA Tertial task lamp light blue",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/live-call/products/9026994633.jpg",
+      "background": "white",
+      "crop": {
+        "x": 0,
+        "y": 0.16,
+        "width": 1,
+        "height": 0.84
+      }
+    },
+    "imageSha256": "0e65f012e45c8f832e9917755489288453e3abbb9244a84c4208ee7c981c076e"
+  },
+  {
+    "id": "7143578845",
+    "name": "이케아 TARNABY 테르나뷔 탁상스탠드, 실버 105.150.65",
+    "category": "desk",
+    "productType": "lamp",
+    "url": "https://www.coupang.com/vp/products/7143578845?itemId=17944161156&vendorItemId=85102013349",
+    "price": null,
+    "priceStatus": "unverified",
+    "image": "/live-call/products/7143578845.jpg",
+    "sourceImageUrl": "https://thumbnail7.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/257f/35c7a30bd8aa99fb9f3809461bf8fcd77dd7131fa5135aef5c5c15697f6a.jpg",
+    "imageSourcePage": "https://www.coupang.com/vp/products/7143578845?itemId=17944161156&vendorItemId=85102013349",
+    "sourceNote": "Exact public indexed Coupang listing named option Silver 105.150.65 and marked it not currently sold/out of stock in that historical snapshot. No price was available, so price is null. Original listing photo shows three color variants; preview crop selects the rightmost silver lamp without altering the source photo. Current availability is unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "IKEA / 이케아",
+    "aliases": [
+      "IKEA Tarnaby silver table lamp 105.150.65",
+      "IKEA TARNABY silver desk lamp"
+    ],
+    "tags": [
+      "lamp",
+      "silver",
+      "glass",
+      "table lamp",
+      "desk lamp",
+      "스탠드",
+      "탁상스탠드",
+      "테르나뷔",
+      "실버"
+    ],
+    "verifiedAttributes": [
+      "Single silver lamp (105.150.65). The listing photo includes other color references; this is not a three-lamp bundle.",
+      "Indexed listing option: Silver 105.150.65",
+      "Listing title describes a 25 cm table lamp; preview is not rendered at a verified physical scale."
+    ],
+    "preview": {
+      "kind": "object",
+      "image": "/live-call/products/7143578845.jpg",
+      "background": "white",
+      "crop": {
+        "x": 0.67,
+        "y": 0.18,
+        "width": 0.33,
+        "height": 0.62
+      }
+    },
+    "imageSha256": "04e53eea8c812effb3ed0e4846511d95ff3acecfd280a4eb61e44f5ca131d220"
+  },
+  {
+    "id": "9474375760",
+    "name": "뉴에라 반팔티 남녀공용 커플티 워드마크 로고 베이직 오버핏 티셔츠 올리브 그린, L",
+    "category": "clothes",
+    "productType": "tshirt",
+    "url": "https://www.coupang.com/vp/products/9474375760",
+    "price": 48000,
+    "priceStatus": "reference",
+    "image": "/live-call/products/9474375760.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/13f6/f68bf98bdbcfd8114f90e8a537233e5facd425d8438d96389bd13dffafc1.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%89%B4%EC%97%90%EB%9D%BC%20%EB%B0%98%ED%8C%94%20%ED%8B%B0%EC%85%94%EC%B8%A0",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "New Era / 뉴에라",
+    "aliases": [
+      "New Era Wordmark Logo Basic olive green T-shirt 15147491"
+    ],
+    "tags": [
+      "tshirt",
+      "olive",
+      "green",
+      "t-shirt",
+      "tee",
+      "short sleeve",
+      "반팔",
+      "티셔츠"
+    ],
+    "verifiedAttributes": [
+      "New Era Wordmark Logo Basic olive green T-shirt 15147491",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "garment",
+      "image": "/live-call/products/9474375760.jpg",
+      "background": "white",
+      "shoulderWidth": 0.58,
+      "shoulderY": 0.1
+    },
+    "imageSha256": "b2f9bee6267738f5b768c87ff9da1592699a1f8952f10bde581fa2afd992c8d7"
+  },
+  {
+    "id": "6431292464",
+    "name": "라파클럽 남녀공용 브이넥 반팔 티셔츠, L",
+    "category": "clothes",
+    "productType": "tshirt",
+    "url": "https://www.coupang.com/vp/products/6431292464",
+    "price": 24800,
+    "priceStatus": "reference",
+    "image": "/live-call/products/6431292464.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/vendor_inventory/bfc0/331ac09611754464bbb6f92e68cc1bc4ad602b30534aae940b978548dcf0.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%B0%98%ED%8C%94%ED%8B%B0",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "Lafa Club / 라파클럽",
+    "aliases": [
+      "Lafa Club unisex V-neck short sleeve T-shirt black"
+    ],
+    "tags": [
+      "tshirt",
+      "black",
+      "v-neck",
+      "t-shirt",
+      "tee",
+      "반팔",
+      "브이넥"
+    ],
+    "verifiedAttributes": [
+      "Lafa Club unisex V-neck short sleeve T-shirt black",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "garment",
+      "image": "/live-call/products/6431292464.jpg",
+      "background": "white",
+      "shoulderWidth": 0.57,
+      "shoulderY": 0.17
+    },
+    "imageSha256": "29329808acf90d987ca63e040fff5c517b5affb026fc23dca0298d56d0e7746f"
+  },
+  {
+    "id": "5186051654",
+    "name": "라파클럽 20수 남여공용 라운드 반팔티, M",
+    "category": "clothes",
+    "productType": "tshirt",
+    "url": "https://www.coupang.com/vp/products/5186051654",
+    "price": 22800,
+    "priceStatus": "reference",
+    "image": "/live-call/products/5186051654.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/0dcb/3ee5c1dae78da505be5f491a8d776e2e630b29727748bee7708caef09097.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%9D%BC%ED%8C%8C%ED%81%B4%EB%9F%BD%20%EB%9D%BC%EC%9A%B4%EB%93%9C%20%EB%B0%98%ED%8C%94%ED%8B%B0",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "Lafa Club / 라파클럽",
+    "aliases": [
+      "Lafa Club 20-count unisex crew neck T-shirt white"
+    ],
+    "tags": [
+      "tshirt",
+      "white",
+      "crew neck",
+      "round neck",
+      "t-shirt",
+      "tee",
+      "반팔",
+      "라운드"
+    ],
+    "verifiedAttributes": [
+      "Lafa Club 20-count unisex crew neck T-shirt white",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "garment",
+      "image": "/live-call/products/5186051654.jpg",
+      "background": "white",
+      "shoulderWidth": 0.55,
+      "shoulderY": 0.18
+    },
+    "imageSha256": "e9f16596283daacab26b0a1a0efbe71449e14dc04fff51808a2455d34e1877a2"
+  },
+  {
+    "id": "8533828112",
+    "name": "엠씨티 문컬렉션 시그니처 쭈리면 피그먼트 워싱 오버핏 후드티, XL",
+    "category": "clothes",
+    "productType": "hoodie",
+    "url": "https://www.coupang.com/vp/products/8533828112",
+    "price": 34820,
+    "priceStatus": "reference",
+    "image": "/live-call/products/8533828112.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/2025/01/02/17/0/2883ded8-b98b-4deb-97b3-9904343f6519.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%ED%9B%84%EB%93%9C%ED%8B%B0",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified. The source index marked this option out of stock.",
+    "checkedAt": "2026-10-25",
+    "brand": "MCT Moon Collection / 엠씨티 문컬렉션",
+    "aliases": [
+      "MCT Moon Collection signature pigment washed oversized hoodie charcoal"
+    ],
+    "tags": [
+      "hoodie",
+      "charcoal",
+      "gray",
+      "zip hoodie",
+      "oversized",
+      "후드티",
+      "후드집업"
+    ],
+    "verifiedAttributes": [
+      "MCT Moon Collection signature pigment washed oversized hoodie charcoal",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "garment",
+      "image": "/live-call/products/8533828112.jpg",
+      "background": "white",
+      "shoulderWidth": 0.54,
+      "shoulderY": 0.27
+    },
+    "imageSha256": "b7e0644be8bbce43f69bca21c52f7728d6d33d5b4752c18e2645430d447efbd7"
+  },
+  {
+    "id": "6285676894",
+    "name": "일루소 소프트 특양면 후드티, L",
+    "category": "clothes",
+    "productType": "hoodie",
+    "url": "https://www.coupang.com/vp/products/6285676894",
+    "price": 21800,
+    "priceStatus": "reference",
+    "image": "/live-call/products/6285676894.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/retail/images/2031772142088-0697754e-3175-4d4f-a999-2656ce4273ab.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%9D%BC%EB%A3%A8%EC%86%8C%20%ED%9B%84%EB%93%9C%ED%8B%B0",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "Illuso / 일루소",
+    "aliases": [
+      "Illuso soft double knit pullover hoodie black"
+    ],
+    "tags": [
+      "hoodie",
+      "black",
+      "pullover",
+      "hoodie",
+      "후드티",
+      "후디"
+    ],
+    "verifiedAttributes": [
+      "Illuso soft double knit pullover hoodie black",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "garment",
+      "image": "/live-call/products/6285676894.jpg",
+      "background": "white",
+      "shoulderWidth": 0.54,
+      "shoulderY": 0.27
+    },
+    "imageSha256": "ddd62c81fa7b1f83c990e0e0ac13e1ec35c41691918cdb6555c8adc895285f65"
+  },
+  {
+    "id": "331802095",
+    "name": "앨빈클로 남녀공용 무지 오버핏 기모 후드티 AVH855, L",
+    "category": "clothes",
+    "productType": "hoodie",
+    "url": "https://www.coupang.com/vp/products/331802095",
+    "price": 29990,
+    "priceStatus": "reference",
+    "image": "/live-call/products/331802095.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/1025_amir_coupang_oct_80k/db35/c8cf46ff91443defd39629f3a45babc7c91ecea9d9e28d8e82648068c3db.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EC%95%A8%EB%B9%88%ED%81%B4%EB%A1%9C%20%ED%9B%84%EB%93%9C%ED%8B%B0",
+    "sourceNote": "Real Coupang listing identified in public indexed pages; original Coupang CDN photo and reference price recovered from the named matching product on Fallcent. Price is an indexed reference, not live; current stock, seller options, and price are unverified.",
+    "checkedAt": "2026-10-25",
+    "brand": "Alvinclo / 앨빈클로",
+    "aliases": [
+      "Alvinclo AVH855 plain oversized fleece hoodie black"
+    ],
+    "tags": [
+      "hoodie",
+      "black",
+      "fleece",
+      "oversized",
+      "hoodie",
+      "후드티",
+      "기모"
+    ],
+    "verifiedAttributes": [
+      "Alvinclo AVH855 plain oversized fleece hoodie black",
+      "Preview depicts the variant shown in the sourced listing image; choose/check the matching variant on Coupang."
+    ],
+    "preview": {
+      "kind": "garment",
+      "image": "/live-call/products/331802095.jpg",
+      "background": "white",
+      "shoulderWidth": 0.54,
+      "shoulderY": 0.27
+    },
+    "imageSha256": "cae493010c41eb77736707d20dc26bb988ece1d3cf07c38be4276ba35e7e9bba"
+  },
+  {
+    "id": "7612276799",
+    "name": "EYELAB 블루라이트 UV 차단 안경, 로즈골드",
+    "category": "glasses",
+    "productType": "glasses",
+    "url": "https://www.coupang.com/vp/products/7612276799?itemId=20163776919",
+    "price": 19900,
+    "priceStatus": "reference",
+    "image": "/live-call/products/7612276799.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/vendor_inventory/a212/6385363c762951bf66745ed9f07572c882971e34e02171c5aa1f8534e087.jpeg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=EYELAB%20%EC%95%88%EA%B2%BD",
+    "sourceNote": "Real Coupang listing ID/title verified from publicly indexed official Coupang pages. Original Coupang CDN photo and reference price were recovered from the matching named public Fallcent listing. Direct retrieval may be blocked; no access-control bypass was attempted. Price is a historical/indexed reference, not a live offer. Current stock, seller options and price are unverified. Live glasses preview uses the visible frame variant in this photo and is an approximate visual fit only; lens performance, prescription and physical fit are not verified.",
+    "checkedAt": "2026-10-25",
+    "brand": "EYELAB",
+    "aliases": [
+      "EYELAB rose gold metal eyeglasses"
+    ],
+    "tags": [
+      "glasses",
+      "eyeglasses",
+      "metal",
+      "rose gold",
+      "clear lenses",
+      "안경",
+      "로즈골드"
+    ],
+    "verifiedAttributes": [
+      "EYELAB rose gold metal eyeglasses",
+      "Preview depicts the frame variant shown in the sourced listing image; check the matching variant and sizing on Coupang."
+    ],
+    "preview": {
+      "kind": "glasses",
+      "image": "/live-call/products/7612276799.jpg",
+      "background": "white",
+      "crop": {
+        "x": 0.09,
+        "y": 0.21,
+        "width": 0.79,
+        "height": 0.3
+      },
+      "bridgeX": 0.509,
+      "bridgeY": 0.316,
+      "frameWidth": 0.9,
+      "lensClear": true,
+      "lensTransparent": true,
+      "lensCenters": [
+        {
+          "x": 0.269,
+          "y": 0.486
+        },
+        {
+          "x": 0.73,
+          "y": 0.48
+        }
+      ],
+      "lensMasks": [
+        {
+          "x": 0.269,
+          "y": 0.486,
+          "rx": 0.15,
+          "ry": 0.35
+        },
+        {
+          "x": 0.73,
+          "y": 0.48,
+          "rx": 0.151,
+          "ry": 0.35
+        }
+      ]
+    },
+    "imageSha256": "6df90fbb2d08cef997208771bb4c2574e9532e375c1f5302c905f57b91b1f87c"
+  },
+  {
+    "id": "6274724147",
+    "name": "리끌로우 안경 E374, 143 x 40mm",
+    "category": "glasses",
+    "productType": "glasses",
+    "url": "https://www.coupang.com/vp/products/6274724147?itemId=12851741042",
+    "price": 21780,
+    "priceStatus": "reference",
+    "image": "/live-call/products/6274724147.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/492x492ex/image/rs_quotation_api/pesh3nmn/0db6a9fde36b4e63a1408a138bc3b1f1.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A6%AC%EB%81%8C%EB%A1%9C%EC%9A%B0%20E374",
+    "sourceNote": "Real Coupang listing ID/title verified from publicly indexed official Coupang pages. Original Coupang CDN photo and reference price were recovered from the matching named public Fallcent listing. Direct retrieval may be blocked; no access-control bypass was attempted. Price is a historical/indexed reference, not a live offer. Current stock, seller options and price are unverified. Live glasses preview uses the visible frame variant in this photo and is an approximate visual fit only; lens performance, prescription and physical fit are not verified.",
+    "checkedAt": "2026-10-25",
+    "brand": "RECLOW / 리끌로우",
+    "aliases": [
+      "RECLOW E374 black eyeglasses"
+    ],
+    "tags": [
+      "glasses",
+      "eyeglasses",
+      "black",
+      "round square",
+      "clear lenses",
+      "안경",
+      "검정",
+      "뿔테"
+    ],
+    "verifiedAttributes": [
+      "RECLOW E374 black eyeglasses",
+      "Preview depicts the frame variant shown in the sourced listing image; check the matching variant and sizing on Coupang."
+    ],
+    "preview": {
+      "kind": "glasses",
+      "image": "/live-call/products/6274724147.jpg",
+      "background": "white",
+      "crop": {
+        "x": 0.025,
+        "y": 0.36,
+        "width": 0.67,
+        "height": 0.3
+      },
+      "bridgeX": 0.49356,
+      "bridgeY": 0.25664,
+      "frameWidth": 0.96,
+      "lensClear": true,
+      "lensTransparent": true,
+      "lensCenters": [
+        {
+          "x": 0.266,
+          "y": 0.494
+        },
+        {
+          "x": 0.751,
+          "y": 0.548
+        }
+      ],
+      "lensMasks": [
+        {
+          "x": 0.263,
+          "y": 0.487,
+          "rx": 0.137,
+          "ry": 0.325
+        },
+        {
+          "x": 0.742,
+          "y": 0.528,
+          "rx": 0.143,
+          "ry": 0.345
+        }
+      ]
+    },
+    "imageSha256": "500eb7621c71f2935fbe2a00bedcd4850e9a3dfc4a2896240edb9b680eb11efc"
+  },
+  {
+    "id": "8561267958",
+    "name": "리끌로우 남녀공용 선글라스 BB557, 단일사이즈",
+    "category": "glasses",
+    "productType": "glasses",
+    "url": "https://www.coupang.com/vp/products/8561267958?itemId=13956548149",
+    "price": 18130,
+    "priceStatus": "reference",
+    "image": "/live-call/products/8561267958.jpg",
+    "sourceImageUrl": "https://thumbnail.coupangcdn.com/thumbnails/remote/640x640ex/image/retail/images/177004391381863-f3cc58cf-7ac1-4593-8d3e-2ff690fd5a7f.jpg",
+    "imageSourcePage": "https://fallcent.com/product/search/?keyword=%EB%A6%AC%EB%81%8C%EB%A1%9C%EC%9A%B0%20B019",
+    "sourceNote": "Real Coupang listing ID/title verified from publicly indexed official Coupang pages. Original Coupang CDN photo and reference price were recovered from the matching named public Fallcent listing. Direct retrieval may be blocked; no access-control bypass was attempted. Price is a historical/indexed reference, not a live offer. Current stock, seller options and price are unverified. Live glasses preview uses the visible frame variant in this photo and is an approximate visual fit only; lens performance, prescription and physical fit are not verified. Folded temple pixels inside the preview lenses are cleared and replaced with approximate translucent green tint sampled from the source photo; this does not calibrate lens colour or transmission.",
+    "checkedAt": "2026-10-25",
+    "brand": "RECLOW / 리끌로우",
+    "aliases": [
+      "RECLOW BB557 green lens sunglasses"
+    ],
+    "tags": [
+      "glasses",
+      "sunglasses",
+      "black frame",
+      "green lenses",
+      "선글라스",
+      "그린"
+    ],
+    "verifiedAttributes": [
+      "RECLOW BB557 green lens sunglasses",
+      "Preview depicts the frame variant shown in the sourced listing image; check the matching variant and sizing on Coupang."
+    ],
+    "preview": {
+      "kind": "glasses",
+      "image": "/live-call/products/8561267958.jpg",
+      "background": "white",
+      "crop": {
+        "x": 0.055,
+        "y": 0.345,
+        "width": 0.9,
+        "height": 0.405
+      },
+      "bridgeX": 0.517,
+      "bridgeY": 0.363,
+      "frameWidth": 0.94,
+      "lensClear": true,
+      "lensTransparent": true,
+      "frameRoll": -10,
+      "lensTint": "#afbb83",
+      "lensMasks": [
+        {
+          "x": 0.286,
+          "y": 0.595,
+          "rx": 0.16,
+          "ry": 0.27,
+          "rotation": -10
+        },
+        {
+          "x": 0.746,
+          "y": 0.425,
+          "rx": 0.153,
+          "ry": 0.278,
+          "rotation": -10
+        }
+      ]
+    },
+    "imageSha256": "01d27d94e36aac636399e4d43928d2343ba4c251cff935706a7230e543fb51d4"
+  }
+];
