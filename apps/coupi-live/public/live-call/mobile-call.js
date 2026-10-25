@@ -100,7 +100,8 @@
     show('focus-product',focused);show('focus-toggle',active);
     $('focus-toggle').setAttribute('aria-expanded',String(controlsExpanded));
     $('focus-toggle').setAttribute('aria-label',controlsExpanded?'Hide call controls':'Show call controls');
-    text('focus-toggle-label',controlsExpanded?'Hide':'Controls');
+    $('focus-toggle').title=controlsExpanded?'Hide call controls':'Show call controls';
+    $('focus-toggle-icon').setAttribute('href',controlsExpanded?'#i-close':'#i-more');
     text('focus-product-label','Products');
     if(trying){$('focus-product-image').src=trying.image;$('focus-product-image').alt='';}
   }

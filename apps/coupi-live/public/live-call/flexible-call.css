@@ -243,3 +243,9 @@
 
 .phone-app .call-stage .flip-control { padding:0;border-radius:50%; }
 .phone-app .call-stage .flip-control svg { width:19px;height:19px; }
+
+/* Keep every essential call button reachable on narrow phones. */
+@media (max-width: 340px) {
+  .phone-app .call-stage .call-controls { gap: 4px; }
+  .phone-app .call-stage .call-controls .end-control { flex-basis: 44px; width: 44px !important; }
+}

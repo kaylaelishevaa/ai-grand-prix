@@ -49,12 +49,9 @@
 .inline-bottom-actions button{flex:1;min-height:30px;border-radius:9px;background:#ffffff96;color:#3e7278;font-size:10px}
 .inline-bottom-actions button:disabled{opacity:.45;cursor:default}
 .inline-items>.empty-state{font-size:11px;padding:12px 4px}
-.focus-toggle{width:auto!important;min-width:58px!important;padding:0 9px!important;gap:1px!important;flex-shrink:0;border-radius:14px!important}
-.focus-toggle>span:first-child{font-size:14px;line-height:12px;letter-spacing:2px}
-.focus-toggle #focus-toggle-label{font-size:8px;line-height:12px;white-space:nowrap}
 .focus-product{max-width:165px!important}.focus-product span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .phone-app[data-phase=browse] .call-stage .product-zone{top:98px}
 @media(max-height:700px){.call-stage .conversation-area{bottom:calc(83px + env(safe-area-inset-bottom))}.call-stage .transcript{height:55px;max-height:55px}.call-stage .product-zone{top:calc(max(18px,env(safe-area-inset-top)) + 88px)}}
 @media(max-height:570px){.inline-collection-heading{padding-top:6px;padding-bottom:6px}.inline-scroll-hint{display:none}.inline-bottom-actions{padding-top:4px;padding-bottom:4px}}
-@media(max-width:370px){.inline-collection-body{padding-left:7px;padding-right:7px}.inline-item{padding:7px}.inline-item-select{column-gap:6px}.inline-item-price{font-size:10px}.inline-item-actions>button{font-size:8px}.call-stage .call-controls{gap:6px}.focus-toggle{min-width:52px!important}}
-@media(max-width:380px){.phone-app[data-focused=false] .call-controls{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:5px}.phone-app[data-focused=false] .call-controls .call-control{width:100%!important;min-width:0!important;padding:0 2px!important;margin-left:0}.phone-app[data-focused=false] .flip-control span{display:none}.phone-app[data-focused=false] .focus-toggle #focus-toggle-label{font-size:7px}}
+@media(max-width:370px){.inline-collection-body{padding-left:7px;padding-right:7px}.inline-item{padding:7px}.inline-item-select{column-gap:6px}.inline-item-price{font-size:10px}.inline-item-actions>button{font-size:8px}.call-stage .call-controls{gap:6px}}
+@media(max-width:380px){.phone-app[data-focused=false] .call-controls{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:5px}.phone-app[data-focused=false] .call-controls .call-control{width:100%!important;min-width:0!important;padding:0 2px!important;margin-left:0}.phone-app[data-focused=false] .flip-control span{display:none}}

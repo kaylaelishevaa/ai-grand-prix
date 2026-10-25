@@ -24,6 +24,7 @@
     <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/></symbol>
     <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3Z"/></symbol>
     <symbol id="i-compare" viewBox="0 0 24 24"><rect x="2" y="4" width="8" height="16" rx="2"/><rect x="14" y="4" width="8" height="16" rx="2"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></symbol>
     <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="5" width="12" height="14" rx="3"/><path d="m15 9 6-3v12l-6-3"/></symbol>
     <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8"/></symbol>
     <symbol id="i-flip" viewBox="0 0 24 24"><path d="M8 5 9.5 3h5L16 5h4v15H4V5h4Z"/><path d="M8 12a4 4 0 0 1 7-2l1 1m0-3v3h-3M16 14a4 4 0 0 1-7 2l-1-1m0 3v-3h3"/></symbol>
@@ -129,7 +130,7 @@
           <button id="toggle-camera" class="call-control" aria-label="Turn camera off" aria-pressed="false" title="Camera"><svg><use href="#i-video"/></svg></button>
           <button id="flip-camera" class="call-control flip-control" aria-label="Flip to back camera" title="Flip to back camera"><svg><use href="#i-flip"/></svg></button>
           <button id="text-toggle" class="call-control" aria-label="Type a message" aria-expanded="false" title="Message"><svg><use href="#i-chat"/></svg></button>
-          <button id="focus-toggle" class="call-control focus-toggle" aria-label="Show call controls" aria-expanded="false" hidden><span aria-hidden="true">•••</span><span id="focus-toggle-label">Controls</span></button>
+          <button id="focus-toggle" class="call-control focus-toggle" aria-label="Show call controls" aria-expanded="false" hidden><svg aria-hidden="true"><use id="focus-toggle-icon" href="#i-more"/></svg></button>
           <button id="end-call" class="call-control end-control" aria-label="End call" title="End call"><svg><use href="#i-hangup"/></svg></button>
         </div>
       </footer>
