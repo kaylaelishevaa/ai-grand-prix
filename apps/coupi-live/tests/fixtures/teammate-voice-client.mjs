@@ -107,7 +107,7 @@ function fixture(t, options = {}) {
     onWorldRecommendations: (products, message) => worldRecommendations.push({products, message}),
     onWorldProduct: async skuId => {worldActions.push(skuId);return options.onWorldProduct?.(skuId) || {ok:true,skuId,purchased:false};},
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
-    onProductAction: async (action, product_id) => {actions.push({action,product_id});return {ok:true,action,product_id:product_id || "324548922",purchased:false};},
+    onProductAction: async (action, product_id) => {actions.push({action,product_id});return options.onProductAction?options.onProductAction(action,product_id):{ok:true,action,product_id:product_id || "324548922",purchased:false};},
   });
   t.after(() => voice.end());
   return {
@@ -334,6 +334,7 @@ test('long context remains valid bounded JSON and preserves live glasses and sha
     vision:{enabled:true,state:'received',last_image_at:'2026-10-25T01:00:00Z'},
     tried_product:{id:'900001',productType:'glasses',title:'Long catalog name '.repeat(1000)},
     visible_product:{id:'900001',title:'Another long catalog name '.repeat(1000)},
+    visible_product_ids:['900002','900001','900003'],
     unused:'x'.repeat(6000)};
   const f=fixture(t,{getContext:()=>context});await connect(f);
   const greeting=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context,'));
@@ -341,6 +342,7 @@ test('long context remains valid bounded JSON and preserves live glasses and sha
   assert(initial.length<=1600);
   assert.equal(JSON.parse(initial).mode,'glasses');
   assert.deepEqual(JSON.parse(initial).vision,context.vision);
+  assert.deepEqual(JSON.parse(initial).visible_product_ids,context.visible_product_ids,'Ordinal order survives context compaction independently of the current selection');
   f.voice.updateContext({...context,vision:{enabled:false,state:'paused'}});
   await tick(380);
   const update=f.channel.sent.find(event=>event.item?.content?.[0]?.text?.startsWith('App context changed'));
@@ -351,6 +353,7 @@ test('long context remains valid bounded JSON and preserves live glasses and sha
   assert.equal(decoded.vision.state,'paused');
   assert.equal(decoded.tried_product.id,'900001');
   assert.equal(decoded.tried_product.productType,'glasses');
+  assert.deepEqual(decoded.visible_product_ids,context.visible_product_ids);
 });
 
 test('failed peer connection releases microphone immediately', async t => {
@@ -667,6 +670,56 @@ test('embedded voice waits for the same checked turn and strips private fields b
   wait.resolve({status:'ok',message:'One red pair.',conversationMode:'request',profile:{secret:'PRIVATE_PROFILE'},diary:'PRIVATE_DIARY',verdict:{pickSkuId:'socks',reason:'Under your budget',dissent:'Some pilling reported.',citations:['socks-r-15'],runnerUpSkuId:null,whyRunnerUpLost:'',clarifyingQuestion:null},products:[{skuId:'socks',name:'Red socks',price:6900,delivery:'Demo tomorrow'}],proposedSkuIds:['socks']});
   await tick();await tick();assert.equal(countReplies(f.channel),2);
   const context=f.channel.sent.find(event=>JSON.stringify(event).includes('Validated app result'));assert(context);assert(JSON.stringify(context).includes('socks-r-15'));assert(!JSON.stringify(context).includes('PRIVATE_'));assert.match(JSON.stringify(context),/name up to two recommended listings and their exact returned prices/);assert.match(JSON.stringify(context),/Use result.message as the complete reply/);assert.doesNotMatch(JSON.stringify(context),/Preserve its uncertainty, dissent/);assert.equal(f.calls.filter(([url])=>url==='/api/call').length,0);
+});
+
+const ordinalContext=()=>({mode:'glasses',cameraRunning:true,visible_product:{id:'6274724147',title:'Second glasses'},visible_product_ids:['7612276799','6274724147','8561267958']});
+
+test('first, second, numeric and current try-on requests act on the displayed order without shopping again',async t=>{
+  const cases=[['Let me try the first product','7612276799'],['Let me try the second product','6274724147'],['Try on product 2','6274724147'],['Try the 1st one','7612276799'],['Try the last product','8561267958'],['Try this one','6274724147']];
+  for(const [words,id] of cases)await t.test(words,async t=>{
+    let resolutions=0;
+    const f=fixture(t,{getContext:ordinalContext,onResolveCall:async()=>{resolutions++;return{status:'ok',message:'Unexpected shopping response'};}});
+    await connect(f);done(f,'greeting');assert.equal(f.voice.sendText(words),true);await tick();await tick();
+    assert.deepEqual(f.actions,[{action:'try_on',product_id:id}]);assert.equal(resolutions,0);
+    const transcript=f.transcripts.find(row=>row.role==='user'&&row.final&&row.text===words);assert.equal(transcript?.localAction,true,'The visible transcript is excluded from backend shopping forwarding');
+    assert(f.channel.sent.some(event=>JSON.stringify(event).includes('Validated app result')));
+    assert.equal(f.calls.filter(([url])=>url.endsWith('/search')).length,0);
+  });
+});
+
+test('a duplicate spoken ordinal executes its exact try-on once',async t=>{
+  let resolutions=0;const pending=deferred();
+  const f=fixture(t,{getContext:ordinalContext,onResolveCall:async()=>{resolutions++;return{status:'ok',message:'Unexpected'};},onProductAction:()=>pending.promise});
+  await connect(f);done(f,'greeting');
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'spoken-ordinal'});f.emit({type:'input_audio_buffer.speech_stopped'});
+  const completed={type:'conversation.item.input_audio_transcription.completed',item_id:'spoken-ordinal',transcript:'Let me try the second product'};
+  f.emit(completed);f.emit(completed);await tick();
+  assert.deepEqual(f.actions,[{action:'try_on',product_id:'6274724147'}]);assert.equal(resolutions,0);
+  assert.equal(f.transcripts.filter(row=>row.role==='user'&&row.final).at(-1).localAction,true);
+  pending.resolve({ok:true,action:'try_on',product_id:'6274724147',purchased:false});await tick();await tick();
+  assert.equal(countReplies(f.channel),2);
+});
+
+test('an unavailable ordinal does not choose a substitute or ask the shopping backend',async t=>{
+  let resolutions=0;const f=fixture(t,{getContext:ordinalContext,onResolveCall:async()=>{resolutions++;return{status:'ok',message:'Unexpected'};}});
+  await connect(f);done(f,'greeting');f.voice.sendText('Try the tenth product');await tick();await tick();
+  assert.deepEqual(f.actions,[]);assert.equal(resolutions,0);assert.equal(f.transcripts.find(row=>row.role==='user'&&row.final)?.localAction,true);
+  const reply=f.channel.sent.find(event=>JSON.stringify(event).includes('Validated app result'));assert(reply);assert.match(JSON.stringify(reply),/3|three/i);
+});
+
+test('a local try-on failure reports the camera problem without another product search',async t=>{
+  let resolutions=0;const f=fixture(t,{getContext:()=>({...ordinalContext(),cameraRunning:false}),onResolveCall:async()=>{resolutions++;return{status:'ok',message:'Unexpected'};},onProductAction:()=>{throw Error('Camera is off. Tap Camera to preview.');}});
+  await connect(f);done(f,'greeting');f.voice.sendText('Try the first product');await tick();await tick();
+  assert.equal(resolutions,0);assert.deepEqual(f.actions,[{action:'try_on',product_id:'7612276799'}]);
+  const reply=f.channel.sent.find(event=>JSON.stringify(event).includes('Validated app result'));assert(reply);assert.match(JSON.stringify(reply),/Camera is off/);
+});
+
+test('negated, plural and compound requests never trigger a guessed local try-on',async t=>{
+  for(const words of ["Don't try the first product",'Do not try on the second product','Try the first and second products','Try the first product and buy it','Show me glasses'])await t.test(words,async t=>{
+    let resolutions=0;const f=fixture(t,{getContext:ordinalContext,onResolveCall:async()=>{resolutions++;return{status:'ok',message:'Your request was received.'};}});
+    await connect(f);done(f,'greeting');f.voice.sendText(words);await tick();await tick();
+    assert.deepEqual(f.actions,[]);assert.equal(resolutions,1);assert.notEqual(f.transcripts.find(row=>row.role==='user'&&row.final)?.localAction,true);
+  });
 });
 
 test('actual audio transcriptions deduplicate checked resolution and an ended call never speaks late results',async t=>{

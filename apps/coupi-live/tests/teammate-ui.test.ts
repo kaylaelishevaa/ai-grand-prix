@@ -1186,3 +1186,40 @@ test('pending and clarification replies keep the visible product window and neve
   f.voice.opts.onTranscript({role:'assistant',key:'short-reply',text:'Do you prefer pink or red?',final:true});assert.equal(f.store.messages.filter(message=>message.text==='Do you prefer pink or red?').length,1);
   assert.doesNotMatch(source,/CHECKED FOR YOU|CHECKING YOUR WORDS|Coupi’s checked pick/);
 });
+
+test('local try-on transcript stays in chat without becoming a new parent shopping request',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(product=>product.productType==='lipstick'));
+  const before=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,selected=f.store.current;
+  f.voice.opts.onUserTurnStart();f.voice.opts.onTranscript({role:'user',key:'local-preview',text:'Try the first one',final:false});
+  f.voice.opts.onTranscript({role:'user',key:'local-preview',text:'Try the first one',final:true,localAction:true});
+  f.voice.opts.onTranscript({role:'user',key:'local-preview',text:'Try the first one',final:true,localAction:true});
+  assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,before);
+  assert.equal(f.store.messages.filter(message=>message.key==='local-preview').length,1);assert.equal(f.store.messages.find(message=>message.key==='local-preview').text,'Try the first one');
+  assert.equal(f.store.current,selected);assert.equal(f.nodes.get('bridge-panel').hidden,true);
+  const result=await f.voice.opts.onProductAction('try_on',String(selected.id));assert.equal(result.ok,true);assert.equal(f.camera.product.id,selected.id);
+  f.voice.opts.onUserTurnStart();f.voice.opts.onTranscript({role:'user',key:'new-search',text:'Find a desk lamp',final:true});
+  const forwarded=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript');assert.equal(forwarded.length,before+1);assert.equal(forwarded.at(-1).data.text,'Find a desk lamp');
+});
+
+test('ordinal product context follows the displayed collection order after selecting and trying another card',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(product=>product.productType==='lipstick'));
+  const order=inlineRows(f).map(row=>row.dataset.id);assert.equal(order.length,6);assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),order);
+  inlineRows(f)[1].children[0].onclick();assert.equal(String(f.store.current.id),order[1]);assert.equal(String(f.store.queue[0].id),order[1]);
+  assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),order);assert.equal(String(f.voice.opts.getContext().visible_product.id),order[1]);
+  const result=await f.voice.opts.onProductAction('try_on',f.voice.opts.getContext().visible_product_ids[0]);assert.equal(result.ok,true);assert.equal(String(f.camera.product.id),order[0]);
+  assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),order);
+  f.nodes.get('group-open').onclick();f.nodes.get('inline-more').onclick();const expanded=inlineRows(f).map(row=>row.dataset.id);assert.equal(expanded.length,10);
+  inlineRows(f)[1].children[0].onclick();assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),expanded);assert.equal(String(f.voice.opts.getContext().visible_product.id),expanded[1]);
+});
+
+test('search-modal ordinal context and try-on follow its displayed mixed-category cards instead of the previous collection',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(product=>product.productType==='lipstick'));
+  const previous=f.discovery.productType;f.nodes.get('catalog-search-open').onclick();assert.equal(f.nodes.get('catalog-dialog').dataset.view,'search');
+  const rows=f.nodes.get('catalog-items').children,shown=rows.map(row=>[...f.store.catalog.values()].find(product=>product.name===row.children[1].children[1].textContent));
+  assert.equal(shown.length,10);assert.notEqual(shown[1].productType,previous);assert(!f.discovery.products.some(product=>String(product.id)===String(shown[1].id)));
+  const order=shown.map(product=>String(product.id));assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),order);assert.deepEqual(Array.from(f.voice.contexts.at(-1).visible_product_ids),order);
+  const result=await f.voice.opts.onProductAction('try_on',f.voice.opts.getContext().visible_product_ids[1]);
+  assert.equal(result.ok,true);assert.equal(String(result.product.id),order[1]);assert.equal(String(f.camera.product.id),order[1]);assert.equal(f.nodes.get('catalog-dialog').open,false);
+  assert.equal(f.discovery.productType,shown[1].productType);assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,1);
+  assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),Array.from(f.discovery.visible,product=>String(product.id)));
+});
