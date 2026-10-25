@@ -4,6 +4,7 @@ const config:NextConfig={
   devIndicators:false,
   async redirects(){return [
     {source:'/settings',destination:'/account',permanent:false},
+    {source:'/setting',destination:'/account',permanent:false},
     {source:'/camera',destination:'/call',permanent:false},
     {source:'/camera.html',destination:'/call',permanent:false},
     {source:'/index.html',destination:'/',permanent:false},

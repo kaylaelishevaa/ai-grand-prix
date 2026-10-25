@@ -6,7 +6,7 @@ import {openVoiceWorldProduct,searchVoiceWorldProducts} from '@/lib/server/voice
 export const runtime='nodejs';export const dynamic='force-dynamic';
 const schema=z.discriminatedUnion('action',[
   z.object({action:z.literal('search'),query:z.string().trim().min(1).max(300),max_price:z.number().finite().min(0).max(100000000).nullable().optional()}).strict(),
-  z.object({action:z.literal('open'),skuId:z.string().regex(/^[A-Za-z][A-Za-z0-9-]{0,99}$/)}).strict(),
+  z.object({action:z.literal('open'),skuId:z.string().regex(/^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$/)}).strict(),
 ]);
 export async function POST(request:Request){try{
   if(!request.headers.get('origin')||request.headers.get('sec-fetch-site')==='cross-site')throw new AppError('ORIGIN_MISMATCH','Open this feature from the app’s own address.',403);

@@ -40,7 +40,7 @@ function fixture(t, options = {}) {
     window: {isSecureContext: true, fetch: () => {throw Error('Unexpected real network');}},
     navigator: {}, document: {readyState: 'loading', addEventListener() {}},
     setTimeout: (fn,ms)=>{timerDelays.push(ms);return setTimeout(fn,ms);}, clearTimeout, setInterval, clearInterval, AbortController,
-    MediaStream: class {}, Audio: class {}, console,
+    MediaStream: class {}, Audio: class {}, TextEncoder, console,
   };
   vm.createContext(context);
   vm.runInContext(source, context, {filename: 'public/voice-call.js'});
@@ -59,7 +59,8 @@ function fixture(t, options = {}) {
       this.addedTracks = [];
       peers.push(this);
     }
-    addTrack(track, stream) {this.addedTracks.push([track, stream]);}
+    addTrack(track, stream) {this.addedTracks.push([track, stream]);return {replaceTrack:async next=>{this.currentTrack=next;}};}
+    addTransceiver(kind,options) {assert.equal(kind,'audio');return{sender:{replaceTrack:async next=>{this.currentTrack=next;}}};}
     createDataChannel(name) {assert.equal(name, 'oai-events'); return this.channel;}
     async createOffer() {return {sdp: 'v=0\no=offer'};}
     async setLocalDescription(description) {this.localDescription = description;}
@@ -279,7 +280,7 @@ test('GA transcript events pass literal text, and typed input works after muting
   f.emit({type: 'response.output_audio_transcript.delta', item_id: 'assistant-1', delta: 'A rose '});
   f.emit({type: 'response.output_audio_transcript.done', item_id: 'assistant-1', transcript: 'A rose lipstick.'});
   assert.equal(f.transcripts[0].text, '<img src=x onerror=alert(1)>');
-  assert.equal(f.transcripts[1].delta, 'A rose ');
+  assert.equal(f.transcripts[1].text, 'A rose ');
   assert.equal(f.transcripts[2].text, 'A rose lipstick.');
   f.emit({type: 'input_audio_buffer.speech_started'});
   f.voice.mute();
@@ -713,4 +714,47 @@ test('personalization tools enforce opt-in, strict draft fields and no hidden sk
 test('a personalization draft cannot report success after skip or call end',async t=>{
   let active=true;const pending=deferred();const f=fixture(t,{getContext:()=>({personalization:{active}}),onPreferences:()=>pending.promise});await connect(f);tool(f,'late-draft','draft_preferences',personalDraft());await tick();active=false;pending.resolve({ok:true,draft_ready:true,saved:false});await tick();assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);
   const wait=deferred();const ended=fixture(t,{getContext:personalizingContext,onPreferences:()=>wait.promise});await connect(ended);const channel=ended.channel;tool(ended,'ended-draft','draft_preferences',personalDraft());await tick();ended.voice.end();wait.resolve({ok:true,draft_ready:true,saved:false});await tick();assert.equal(toolOutputs(channel).length,0);
+});
+
+test('Chat starts without media permission and mode switches never reenable unchecked voice responses',async t=>{
+  const f=fixture(t,{onResolveCall:async()=>({status:'ok',message:'Checked.'})});
+  assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();
+  assert.equal(f.permissions,0);assert.equal(f.voice.call.inputMode,'text');
+  assert.equal(f.channel.sent.find(event=>event.type==='response.create').response.output_modalities[0],'text');
+  assert.equal(await f.voice.setInputMode('voice'),true);assert.equal(f.permissions,1);
+  let update=f.channel.sent.filter(event=>event.type==='session.update').at(-1);
+  assert.equal(update.session.audio.input.turn_detection.create_response,false);
+  f.emit({type:'session.updated',session:{audio:{input:{turn_detection:{type:'server_vad',create_response:true}}}}});
+  assert.equal(await f.voice.setInputMode('text'),true);assert(f.mic.track.stops>0);
+  assert.equal(await f.voice.setInputMode('voice'),true);
+  update=f.channel.sent.filter(event=>event.type==='session.update').at(-1);
+  assert.equal(update.session.audio.input.turn_detection.create_response,false);
+});
+
+test('an uploaded photo is finalized once on acknowledgement and waits for the checked image result',async t=>{
+  const wait=deferred();let resolutions=0,starts=0;
+  const f=fixture(t,{onUserTurnStart:()=>starts++,onResolveCall:()=>{resolutions++;return wait.promise;}});
+  assert.equal(await f.voice.start({inputMode:'text'}),true);await tick();done(f,'greeting');
+  const dataUrl='data:image/jpeg;base64,AAAA',upload=f.voice.sendImage({dataUrl,name:'desk.jpg',text:'Find a lamp for this desk'});
+  assert.equal(starts,1);assert.equal(resolutions,0);
+  const sent=f.channel.sent.find(event=>event.item?.id?.startsWith('coupi_upload_'));
+  f.emit({type:'conversation.item.created',item:sent.item});await upload;
+  f.emit({type:'conversation.item.done',item:sent.item});await tick();
+  assert.equal(resolutions,1);assert.equal(countReplies(f.channel),1);
+  const final=f.transcripts.filter(row=>row.key===sent.item.id&&row.final).at(-1);
+  assert.equal(final.image.dataUrl,dataUrl);assert.equal(final.text,'Find a lamp for this desk');assert.equal(final.delivery,'sent');
+  wait.resolve({status:'ok',message:'A checked desk suggestion.',conversationMode:'request'});await tick();await tick();
+  assert.equal(countReplies(f.channel),2);assert.equal(f.permissions,0);
+});
+
+test('skipping discovery invalidates a pending checked interview result without a fake shopper turn',async t=>{
+  const wait=deferred();const f=fixture(t,{getContext:personalizingContext,onResolveCall:()=>wait.promise});
+  await connect(f);done(f,'greeting');f.voice.sendText('I like quiet evenings');await tick();
+  const captions=f.transcripts.length;assert.equal(f.voice.skipPersonalization(),true);
+  const transition=f.channel.sent.find(event=>event.item?.id?.startsWith('coupi_skip_')&&event.item.role==='system');
+  assert(transition);f.emit({type:'conversation.item.created',item:transition.item});await tick();
+  assert.equal(f.transcripts.length,captions);
+  wait.resolve({status:'ok',message:'OLD INTERVIEW RESULT',question:'Another old question?'});await tick();
+  assert(!f.channel.sent.some(event=>JSON.stringify(event).includes('OLD INTERVIEW RESULT')));
+  assert.equal(f.voice.call.validating,false);
 });

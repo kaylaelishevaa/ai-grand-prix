@@ -18,6 +18,7 @@ import {POST as sessionRoute} from '../app/api/voice/session/route';
 import {POST as searchRoute} from '../app/api/products/search/route';
 import {POST as profileRoute} from '../app/api/profile/route';
 import type {Profile} from '../lib/types';
+import {withRuntimeEnv,type D1Database} from '../lib/server/runtime';
 
 const origin='http://127.0.0.1:3007';
 const offer='v=0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\na=sendrecv\r\n';
@@ -25,7 +26,7 @@ const answer='v=0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\na=recvonly\r\n';
 const post=(pathname:string,body:string,type='application/sdp',extra:Record<string,string>={})=>new Request(origin+pathname,{method:'POST',headers:{origin,'content-type':type,...extra},body});
 
 test('teammate sourced records retain their own provenance and never become synthetic-review SKUs',()=>{
-  assert.equal(teammateCatalog.length,18);
+  assert.equal(teammateCatalog.length,68);
   for(const product of teammateCatalog){
     assert.match(product.url,/^https:\/\/www\.coupang\.com\/vp\/products\/\d+/);
     assert.match(product.image,/^\/live-call\/products\//);
@@ -42,7 +43,7 @@ test('the embedded product catalog matches server references without rewriting r
   const context={window:{COUPANG_PRODUCTS:[]}};
   vm.runInNewContext(source,context,{filename:'coupang-products.js',timeout:1000});
   assert.deepEqual(JSON.parse(JSON.stringify(context.window.COUPANG_PRODUCTS)),teammateCatalog);
-  for(const product of teammateCatalog)assert.equal(new URL(product.url).pathname,'/vp/products/'+product.id);
+  for(const product of teammateCatalog)assert.equal(new URL(product.url).pathname,'/vp/products/'+(product.sourceProductId||product.id.match(/^\d+/)![0]));
 });
 
 test('realtime context contains only surviving allowed memories and quarantine also filters sourced retrieval',()=>{
@@ -114,6 +115,20 @@ test('voice accepts the actual Host authority but never trusts forwarded authori
   assert.equal(calls,1);
 });
 
+test('readiness ignores profile-storage conflicts and never creates or replaces a visitor cookie',async()=>{
+  let queries=0;
+  const db:D1Database={prepare(){queries++;throw new Error('Profile write in progress');},async batch(){queries++;throw new Error('Profile write in progress');}};
+  await withRuntimeEnv({DB:db,OPENAI_API_KEY:'TEST_READINESS_ONLY',OPENAI_REALTIME_MODEL:'readiness-test',DEMO_OFFLINE:'0'},async()=>{
+    const responses=await Promise.all(['','coupi_profile=8c8b2da4-d69e-4594-b372-890f67488248'].map(cookie=>statusRoute(new Request(origin+'/api/voice/status',{headers:cookie?{cookie}:{}}))));
+    for(const response of responses){
+      assert.equal(response.status,200);assert.equal(response.headers.get('set-cookie'),null);
+      const body=await response.json();assert.equal(body.ready,true);assert.equal(body.catalogCount,68);
+      assert(!JSON.stringify(body).includes('TEST_READINESS_ONLY'));
+    }
+  });
+  assert.equal(queries,0,'Readiness must remain available while profile storage is busy');
+});
+
 test('Next voice routes use server-only credentials, persist cookies, refresh deleted context, and block offline', {concurrency:false},async()=>{
   const root=await mkdtemp(path.join(tmpdir(),'coupi-teammate-voice-'));
   const names=['COUPI_DATA_DIR','OPENAI_API_KEY','OPENAI_REALTIME_MODEL','DEMO_OFFLINE'] as const;
@@ -137,10 +152,11 @@ test('Next voice routes use server-only credentials, persist cookies, refresh de
   }
   try{
     const ready=await send(statusRoute,'/api/voice/status');const status=await ready.json();
-    assert.equal(status.ready,true);assert.equal(status.offline,false);assert.equal(status.catalogCount,18);
-    assert.equal(captured.length,0);assert.match(cookie,/coupi_profile=/);
+    assert.equal(status.ready,true);assert.equal(status.offline,false);assert.equal(status.catalogCount,68);
+    assert.equal(captured.length,0);assert.equal(cookie,'');assert.equal(ready.headers.get('set-cookie'),null);
     assert(!JSON.stringify(status).includes('fake-voice-server-only'));
     const learned=await (await send(profileRoute,'/api/profile',JSON.stringify({action:'callStatement',id:'voice-memory',text:'I prefer warm neutrals.'}))).json() as {profile:Profile};
+    assert.match(cookie,/coupi_profile=/);
     const session=await send(sessionRoute,'/api/voice/session',offer,'application/sdp');
     assert.equal(session.status,200);assert.equal(session.headers.get('content-type'),'application/sdp');assert.equal(await session.text(),answer);
     assert.equal(captured.length,1);assert.equal(captured[0].model,'realtime-test-model');

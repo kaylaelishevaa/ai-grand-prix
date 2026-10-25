@@ -4,12 +4,13 @@ import {ResponseCache,requestHash} from './cache';
 import {AppError} from './errors';
 import {mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
+import {isWorkerRuntime,runtimeEnv} from './runtime';
 const RESPONSE_URL='https://api.openai.com/v1/responses';
 export interface StructuredRequest<T>{operation:string;instructions:string;input:unknown;schema:Record<string,unknown>;validate:(value:unknown)=>T;image?:{dataUrl:string;sha256:string};maxAttempts?:number;maxOutputTokens?:number;retryInstructions?:string;timeoutMs?:number;validationFeedback?:(error:unknown)=>string;}
 interface Dependencies{fetch?:typeof fetch;cache?:ResponseCache;env?:NodeJS.ProcessEnv;}
 export async function structuredCall<T>(request:StructuredRequest<T>,deps:Dependencies={}):Promise<{data:T;meta:CallMeta}>{
  if(typeof window!=='undefined')throw new Error('Server only');
- const env=deps.env||process.env,model=env.OPENAI_MODEL?.trim();
+ const env=deps.env||runtimeEnv(),model=env.OPENAI_MODEL?.trim();
  if(!model)throw new AppError('MODEL_NOT_CONFIGURED','Set OPENAI_MODEL in .env.local and restart the app.',503);
  const offline=env.DEMO_OFFLINE==='1',cache=deps.cache||new ResponseCache();
  const cacheKey=requestHash({version:2,operation:request.operation,model,instructions:request.instructions,input:request.input,schema:request.schema,imageHash:request.image?.sha256});
@@ -39,7 +40,7 @@ export async function structuredCall<T>(request:StructuredRequest<T>,deps:Depend
   catch(error){
     let feedback='';try{feedback=request.validationFeedback?.(error).slice(0,5000)||'';}catch{/* A diagnostic callback must never expose the original exception. */}
     console.info('[coupi:model]',JSON.stringify({operation:request.operation,model,attempt:attempt+1,inputTokens,outputTokens,latencyMs:Math.round(performance.now()-start),status:'invalid-output',...(feedback?{validationReason:feedback}:{})}));
-    if(feedback&&['world_districts','scene'].includes(request.operation)&&env.NODE_ENV!=='production'&&env.NODE_ENV!=='test'){
+    if(feedback&&['world_districts','scene'].includes(request.operation)&&!isWorkerRuntime()&&env.NODE_ENV!=='production'&&env.NODE_ENV!=='test'){
       try{const directory=path.join(process.cwd(),'.cache');await mkdir(directory,{recursive:true});await writeFile(path.join(directory,'geometry-validation.json'),JSON.stringify({operation:request.operation,time:new Date().toISOString(),reason:feedback},null,2),{mode:0o600});}catch{/* Diagnostics must not replace the actual generation error. */}
     }
     if(attempt+1<attempts){correction='\nYour previous output failed validation. '+(feedback?'Validation feedback: '+feedback:'Return only valid catalog IDs and review IDs from the provided data. All citations must belong to compared products. Do not invent missing facts. If uncertain, ask one clarifying question.')+(request.retryInstructions?'\n'+request.retryInstructions:'');if(!request.validationFeedback)previousOutput='';continue;}

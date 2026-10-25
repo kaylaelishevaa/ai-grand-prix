@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import homeReferenceData from '../data/home-reference-catalog.json';
+import approvedReferenceData from '../data/teammate-catalog.json';
 import {applyHomeDemoAction,buildDemoHome,buildLiveHome,createHomeDemo,HOME_SCENARIOS,homeReferences,referenceById} from '../lib/home-feed';
 import {createProfile} from '../lib/profile';
 import {getSku} from '../lib/catalog';
@@ -120,9 +121,11 @@ test('all prepared states keep briefs brief, use real local reference images and
 
 test('newest Main chair references preserve their sourced photos and match newly integrated exact catalog IDs',()=>{
   assert.deepEqual(homeReferenceData.map(product=>product.id),['7395651009','7330605115']);
+  assert.equal(new Set(homeReferences.map(product=>product.id)).size,homeReferences.length);
   for(const product of homeReferenceData){
     assert.equal(getSku(product.id)?.sourceUrl,product.url);assert.equal(getSku(product.id)?.origin,'coupang-reference');assert.deepEqual(getSku(product.id)?.reviewIds,[]);
     assert.equal(homeReferences.filter(reference=>reference.id===product.id).length,1);
+    assert.deepEqual(referenceById(product.id),approvedReferenceData.find(reference=>reference.id===product.id)||product);
     assert.equal(product.priceStatus,'reference');
     assert.equal(product.reviewEvidence.status,'unavailable');
     assert.deepEqual(product.reviewEvidence.reviews,[]);

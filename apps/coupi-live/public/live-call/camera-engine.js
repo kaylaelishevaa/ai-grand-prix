@@ -32,6 +32,7 @@
       this.onStatus = onStatus;
       this.running = false;
       this.mode = 'none';
+      this.modeSequence = 0;
       this.product = null;
       this.productPreview = null;
       this.productLoader = null;
@@ -140,7 +141,9 @@
 
     async setMode(mode) {
       if (!['none','makeup','glasses','clothes','desk'].includes(mode)) throw new Error('Unknown camera mode.');
+      const sequence = ++this.modeSequence;
       if(mode==='none'||(this.product&&this.product.category!==mode))await this.setProduct(null);
+      if(sequence!==this.modeSequence)return false;
       this.mode = mode;
       if(mode==='makeup'&&this.productPreview?.shadeColor)this.setOptions({color:this.productPreview.shadeColor});
       this.lastLandmarks = null;
@@ -238,7 +241,7 @@
           const result=model.detectForVideo(video,now);
           const detected=(['makeup','glasses'].includes(this.mode)?result.faceLandmarks:result.landmarks)?.[0]||null;
           this.lastLandmarks=this._smooth(detected);
-          if(this.lastLandmarks) this._status(this.mode==='makeup'?'Product lip colour preview active. Colour from the listing photo is approximate.':this.mode==='glasses'?'Glasses follow your face. Turn gently; fit is approximate.':'Garment follows your shoulders and torso. Fit remains approximate.', 'success');
+          if(this.lastLandmarks) this._status(this.mode==='makeup'?(this.productPreview?.finish==='clear-balm'?'Clear balm finish preview active. Your natural lip colour is preserved.':'Product lip colour preview active. Colour and finish are approximate.'):this.mode==='glasses'?'Glasses follow your face. Turn gently; fit is approximate.':'Garment follows your shoulders and torso. Fit remains approximate.', 'success');
           else this._status(['makeup','glasses'].includes(this.mode)?'Looking for your face. Face the camera and improve the lighting.':'Looking for your body. Step back so your shoulders and hips are visible.', 'info');
         } catch(error) {
           this.lastLandmarks=null;
@@ -265,13 +268,25 @@
       const ctx=this.ctx, o=this.options;
       const path = indices => {indices.forEach((index,i)=>{const p=points[index];if(i)ctx.lineTo(p.x*w,p.y*h);else ctx.moveTo(p.x*w,p.y*h);});ctx.closePath();};
       if(!points[425]) return;
-      ctx.save();
-      ctx.globalAlpha=o.opacity;
-      ctx.globalCompositeOperation='multiply';
-      ctx.fillStyle=o.color;
-      ctx.beginPath();path(OUTER_LIP);path(INNER_LIP);ctx.fill('evenodd');
-      ctx.globalCompositeOperation='source-over';
-      ctx.restore();
+      const preview=this.productPreview,balm=preview?.finish==='clear-balm'||preview?.finish==='tinted-balm';
+      if(preview?.finish!=='clear-balm'){
+        ctx.save();ctx.globalAlpha=balm?clamp(preview.lipOpacity*o.opacity/.55,0,.65):o.opacity;
+        ctx.globalCompositeOperation='multiply';ctx.fillStyle=o.color;
+        ctx.beginPath();path(OUTER_LIP);path(INNER_LIP);ctx.fill('evenodd');ctx.restore();
+      }
+      if(balm&&typeof ctx.clip==='function'&&typeof ctx.ellipse==='function'){
+        // A clear balm adds sheen, not the colour of its packaging. Clip both the
+        // highlights and the mouth opening to preserve teeth and natural lip pixels.
+        const left=points[61],right=points[291],lower=points[17],inner=points[14];
+        const span=Math.hypot((right.x-left.x)*w,(right.y-left.y)*h);
+        if(span>4){
+          ctx.save();ctx.beginPath();path(OUTER_LIP);path(INNER_LIP);ctx.clip('evenodd');
+          ctx.globalCompositeOperation='screen';ctx.globalAlpha=clamp(preview.glossStrength*o.opacity/.55,0,.3);ctx.fillStyle='#ffffff';
+          const angle=Math.atan2((right.y-left.y)*h,(right.x-left.x)*w),cx=(left.x+right.x)*w/2,cy=(lower.y+inner.y)*h/2;
+          ctx.beginPath();ctx.ellipse(cx-span*.08,cy,span*.24,Math.max(1,span*.035),angle,0,Math.PI*2);ctx.fill();
+          ctx.globalAlpha*=.5;ctx.beginPath();ctx.ellipse(cx+span*.22,cy-span*.025,span*.065,Math.max(1,span*.018),angle,0,Math.PI*2);ctx.fill();ctx.restore();
+        }
+      }
       if(o.showGuides) this._guides([...OUTER_LIP,...INNER_LIP].map(index=>points[index]),w,h);
     }
 

@@ -1,35 +1,27 @@
-.live-call-experience{max-width:1180px;margin:0 auto}.live-call-wayfinding{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 25px}.live-call-wayfinding>span{display:flex;align-items:center;gap:9px;font:8px/1.5 var(--mono);letter-spacing:.08em;color:var(--muted)}.live-call-wayfinding>span>i{width:5px;height:5px;background:#adbba9;border-radius:50%}.live-call-wayfinding>span>i.active{background:var(--orange);box-shadow:0 0 0 5px #e8681a12}.live-call-frame{display:block;width:100%;height:min(850px,calc(100svh - 190px));min-height:690px;border:1px solid var(--line);border-radius:32px;background:#fff8f0;box-shadow:0 35px 100px -65px #16424a55}.live-call-provenance{font:8px/1.7 var(--mono);color:var(--muted);text-align:center;margin:18px 0 0}.live-call-memory-error{font:11px/1.6 var(--ui);color:#9a6245;padding:13px 18px;background:#fff1df;border-radius:18px;margin-bottom:18px}@media(max-width:640px){.live-call-wayfinding{gap:12px}.live-call-wayfinding>span{display:none}.live-call-frame{width:100vw;margin-left:calc(50% - 50vw);border-radius:0;border:0;min-height:650px;height:calc(100svh - 90px)}.live-call-provenance{font-size:7px}}
-.journey-shell[data-view=call][data-navigation=main]>.journey-header,.journey-shell[data-view=call][data-navigation=main]>.journey-system{display:none}
-.journey-shell[data-view=call][data-navigation=main] .journey-main{padding-top:16px}
-@media(max-width:640px){.journey-shell[data-view=call][data-navigation=main] .live-call-wayfinding{margin-bottom:12px;min-height:32px}.journey-shell[data-view=call][data-navigation=main] .live-call-frame{min-height:400px;height:calc(100svh - 132px)}.journey-shell[data-view=call][data-navigation=main] .live-call-provenance{font-size:6px;margin-top:9px}.journey-shell[data-view=call][data-navigation=main] .journey-main>.screen-caption{margin-top:18px}}
-
-.live-call-interview-progress{font:8px/1.8 var(--mono);color:var(--muted);margin:12px 0}.live-call-memories{margin:20px 0}.live-call-memories>p{font:10px/1.9 var(--mono);padding:12px 0;border-bottom:1px solid var(--line)}.live-call-memories small{display:block;color:var(--muted);font-size:8px}
-
-.journey-shell[data-view=call][data-call-interface=video]>.journey-header,.journey-shell[data-view=call][data-call-interface=video]>.journey-system,.journey-shell[data-view=call][data-call-interface=video]>.journey-trail{display:none}.journey-shell[data-view=call][data-call-interface=video] .journey-main{padding-top:16px}@media(max-width:640px){.journey-shell[data-view=call][data-call-interface=video] .live-call-frame{min-height:400px;height:calc(100svh - 150px)}.journey-shell[data-view=call][data-call-interface=video] .live-call-wayfinding{margin-bottom:10px;min-height:32px}}
-
-.live-call-shortcuts{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}.live-call-shortcuts button{font:10px/1.5 var(--ui)}
-
-/* Match the canonical Main shell, including the compact 460px phone viewport. */
-.live-call-experience{--paper:#f8fdfe;--ink:#234b52;--orange:#347d7e;--muted:#789397;--line:#dcedef;--ui:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:var(--ui);--display:var(--ui)}
-.live-call-wayfinding{gap:8px;margin:0 0 10px}.live-call-wayfinding .text-button{font-size:12px;min-height:40px}.live-call-wayfinding>span{display:none}
-.live-call-interview-progress{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px;font:500 10px/1.4 var(--ui);color:#59787d}.live-call-shortcuts{margin:0}.live-call-shortcuts button{font-size:12px;color:#347d7e}
-.live-call-frame{width:100%;margin:0;border:1px solid #dcedef;border-radius:24px;min-height:540px;height:640px;max-height:none;box-shadow:none;background:#edf8fa}
-.live-call-provenance{font:11px/1.5 var(--ui);margin:12px 0;color:#59787d}.live-call-provenance .text-button{font-size:11px;color:#347d7e}
-.live-call-connecting{padding:60px 24px;text-align:center;background:#edf8fa;border-radius:24px}.live-call-connecting h2{font:600 30px/1.2 var(--ui);letter-spacing:-1px;margin:15px 0}.live-call-connecting p{font:13px/1.5 var(--ui);color:#59787d}
-.live-call-memory-error{background:#fff7ed;color:#6e493f;font:12px/1.5 var(--ui)}
-@media(max-width:640px){.journey-shell[data-view=call][data-call-interface=video] .live-call-frame{width:100%;margin:0;min-height:540px;height:calc(100svh - 170px)}.live-call-wayfinding{margin-bottom:4px}}
-.coupi-main-frame.journey-shell[data-view=call][data-call-interface=video] .live-call-frame{height:clamp(400px,calc(100dvh - 310px),560px);min-height:400px}
-
-/* Readable phone-sized controls; the stable iframe stays in its original slot. */
-.coupi-main-frame .live-call-experience{min-width:0;width:100%}
-.coupi-main-frame .live-call-wayfinding{gap:12px;margin:0 0 7px}
-.coupi-main-frame .live-call-wayfinding .text-button{min-height:36px;padding:5px 1px;font:500 12px/1.4 var(--ui);color:#496970}
-.coupi-main-frame .live-call-wayfinding .text-button:last-child{color:#347d7e}
-.coupi-main-frame .live-call-interview-progress{flex-wrap:wrap;align-items:center;gap:5px 12px;margin:0 0 10px;padding:0 1px;font:500 10px/1.5 var(--ui);color:#59787d}
-.coupi-main-frame .live-call-shortcuts{margin-left:auto}.coupi-main-frame .live-call-shortcuts .text-button{min-height:32px;padding:4px 0;font:600 11px/1.4 var(--ui)}
-.coupi-main-frame.journey-shell[data-view=call][data-call-interface=video] .live-call-frame{height:clamp(400px,calc(100dvh - 290px),500px);border-radius:22px;background:#edf8fa}
-.coupi-main-frame .live-call-provenance{margin:10px 6px 12px;font:11px/1.55 var(--ui);color:#59787d;text-wrap:pretty}
-.coupi-main-frame .live-call-provenance .text-button{min-height:32px;padding:5px 3px;font:500 11px/1.4 var(--ui);white-space:nowrap}
-.coupi-main-frame .live-call-connecting{min-height:300px;padding:60px 24px;border:1px solid #dcedef;background:#edf8fa}
-.coupi-main-frame .live-call-connecting h2{font-size:25px;letter-spacing:-.6px}.coupi-main-frame .live-call-connecting p{max-width:260px;margin-inline:auto}
-.coupi-main-frame .live-call-memories{margin:14px 0}.coupi-main-frame .live-call-memories>p{font:12px/1.55 var(--ui);padding:11px 13px;border:1px solid #dcedef;border-radius:14px;background:#edf8fa;overflow-wrap:anywhere}.coupi-main-frame .live-call-memories small{font-size:10px;margin-top:5px;color:#59787d}
+/* One call viewport. The iframe owns call controls; the parent owns confirmed worlds. */
+.live-call-experience{--paper:#f8fdfe;--ink:#234b52;--orange:#347d7e;--muted:#789397;--line:#dcedef;--ui:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:var(--ui);--display:var(--ui);display:flex;flex:1 1 0;flex-direction:column;min-width:0;min-height:0;width:100%;max-width:1180px;margin:0 auto;overflow:hidden}
+.live-call-experience[hidden]{display:none!important}
+.live-call-before,.live-call-after{flex:0 0 auto;min-width:0;max-height:32%;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.live-call-before:empty,.live-call-after:empty{display:none}
+.live-call-frame{display:block;flex:1 1 0;width:100%;height:0;min-width:0;min-height:0;margin:0;border:1px solid #dcedef;border-radius:22px;box-shadow:none;background:#edf8fa}
+.live-call-experience[data-ready=false]>.live-call-before{display:flex;flex:1 1 0;flex-direction:column;max-height:none}
+.live-call-connecting{display:flex;flex:1;flex-direction:column;justify-content:center;align-items:center;min-height:0;padding:24px;text-align:center;background:#edf8fa;border:1px solid #dcedef;border-radius:22px}
+.live-call-connecting h2{font:600 25px/1.2 var(--ui);letter-spacing:-.6px;margin:12px 0}
+.live-call-connecting p{font:13px/1.5 var(--ui);color:#59787d;margin:0;max-width:260px}
+.live-call-memory-error{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:0 0 6px;border-radius:13px;background:#fff7ed;color:#6e493f;font:12px/1.45 var(--ui)}
+.live-call-memory-error p{flex:1;margin:0;overflow-wrap:anywhere}
+.live-call-experience .live-call-memory-error .text-button{flex:none;min-height:40px;font:600 11px/1.4 var(--ui);color:#805f43}
+.live-call-interview-progress{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 4px;margin:0 0 4px;font:500 11px/1.4 var(--ui);color:#59787d}
+.live-call-interview-progress>span{min-width:0}
+.live-call-shortcuts{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-shrink:0}
+.live-call-experience .live-call-shortcuts .text-button{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:4px 0;font:600 11px/1.4 var(--ui);color:#347d7e}
+.live-call-shortcuts .glyph{width:13px;height:13px}
+.live-call-after .call-account-guidance{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0 0;border:1px solid #dcedef;border-radius:14px;background:#edf8fa;color:#347d7e;font:600 12px/1.4 var(--ui)}
+.live-call-after .call-account-guidance>span{flex:1}
+.live-call-after .call-account-guidance small{display:block;font:11px/1.4 var(--ui);color:#59787d;margin-top:2px}
+/* Fill the space already allocated between Main's header and bottom navigation. */
+.coupi-main-page:has(>.coupi-main-frame[data-view=call][data-call-interface=video]){height:100dvh;min-height:0;overflow:hidden}
+.coupi-main-page .coupi-main-frame.journey-shell[data-view=call][data-call-interface=video]{min-height:0}
+.coupi-main-page .coupi-main-frame.journey-shell[data-view=call][data-call-interface=video]>.journey-main.main-shell-content{display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:6px 8px 8px}
+.coupi-main-frame[data-view=call][data-call-interface=video] .journey-main>.busy-banner,.coupi-main-frame[data-view=call][data-call-interface=video] .journey-main>.error-banner,.coupi-main-frame[data-view=call][data-call-interface=video] .journey-main>.network-notice{flex:0 0 auto;max-height:25%;overflow:auto;margin-bottom:6px}
+@media(max-width:360px){.live-call-interview-progress>span{display:none}.live-call-shortcuts{width:100%}.live-call-frame{border-radius:16px}}

@@ -3,7 +3,8 @@ import latestRecords from '../data/verified-catalog.json';
 import sceneRecords from '../data/scene-reference-catalog.json';
 import type {PriceBand,SKU} from './types';
 
-/** Keep legacy IDs and order, refresh exact overlaps, then append newly sourced options. */
+/** Approved camera records own their exact IDs; world-only sources remain available
+ * for their real listing details without implying a reviewed camera preview. */
 export interface ReferenceProduct {
   id:string; name:string; category:string; productType:string; url:string;
   price:number|null; priceStatus:string; image:string; sourceNote:string; checkedAt:string;
@@ -12,11 +13,10 @@ export interface ReferenceProduct {
   preview:Record<string,unknown>; reviewEvidence?:Record<string,unknown>;
 }
 const currentRecords:ReferenceProduct[]=[...latestRecords,...sceneRecords];
-const latestById=new Map<string,ReferenceProduct>(currentRecords.map(product=>[product.id,product]));
-const legacyIds=new Set(records.map(product=>product.id));
+const approvedIds=new Set(records.map(product=>product.id));
 export const referenceProducts:ReferenceProduct[]=[
-  ...records.map(product=>latestById.get(product.id)||product),
-  ...currentRecords.filter(product=>!legacyIds.has(product.id)),
+  ...records,
+  ...currentRecords.filter(product=>!approvedIds.has(product.id)).map(product=>({...product,preview:{...product.preview,available:false,unavailableReason:'This sourced listing has not been reviewed for camera try-on.'}})),
 ];
 const references=new Map(referenceProducts.map(product=>[product.id,product]));
 export const getReferenceProduct=(id:string):ReferenceProduct|undefined=>references.get(id);
@@ -39,7 +39,7 @@ export function adaptReferenceProduct(product:ReferenceProduct):SKU|null {
       brand:product.brand,sourceTitle:product.name,sourceCategory:product.category,
       comparisonGroup:'reference:'+sourceType,
       priceStatus:'Historical reference, not a live quote',deliveryStatus:'unknown',
-      reviewStatus:'Not available for this reference',stockStatus:'unverified',
+      reviewStatus:product.reviewEvidence?.status==='partial'?'Partial sourced product-family feedback; see the original record for its source and scope':'No sourced review evidence available',stockStatus:'unverified',
       ...Object.fromEntries(product.verifiedAttributes.map((attribute,index)=>['listingAttribute'+(index+1),attribute])),
     },
   };

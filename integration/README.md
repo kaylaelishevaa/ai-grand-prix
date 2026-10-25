@@ -1,51 +1,56 @@
-# Main + live worlds integration
+# Integrated Home, Call and Explore
 
-This is an explicit **Node / Next.js runtime integration**, preserving the inspected latest main source at `7e5b085e28ee598ddb3afb9edc69a50ae8d51bc5`. The first-call discovery and editable preference review remain a selective port from `12079efb0b9359314232ff2bcfb71efe511d321f`. It runs one server: main-styled Home, Call and the formerly empty Explore surface now share the live profile, generated worlds, evidence and approval flow. It does not run a second frontend, proxy the world app, or require a Cloudflare worker for the live journey.
+The public Site builds the app in `apps/coupi-live` with Vinext and runs it on Cloudflare Workers. Home, the embedded call and Explore share one profile, confirmed preferences, generated worlds and product evidence. The current call controls and reviewed preview catalog are preserved. The original root HTML implementation remains as source history; the Worker no longer intercepts routes to serve those old pages.
 
-The integrated call also carries the caption, camera and manual hang-up improvements from main `b3ed680`: the latest spoken text stays readable in the caption panel, camera controls remain explicit, and the shopper's hang-up action ends the call. These are selective updates to the embedded call, alongside the existing checked transcript bridge and server-backed draft review. They do not replace the canonical profile with main's separate local preference store, bypass the review confirmation, or enable camera/microphone automatically.
+## Run the public-site runtime locally
 
-The newer camera-ready call controls from main `7e5b085` remain intact in the preserved root source. The integrated Next.js call currently uses the selective port described above; this package does not claim every later call change has been ported.
-
-The complete app is under `apps/coupi-live/`. Its explicit, empty `postcss.config.mjs` keeps plain-CSS builds isolated from main’s Tailwind/PostCSS plugins. Main's original source files, worker, HTML pages, product assets, connector scaffolding and dependency lock remain in place. The two intentional root changes are `package.json` scripts and appended `.gitignore` entries. Exact originals are preserved under `integration/`; its manifest records SHA-256 hashes of original main and copied application source files. Existing main and app catalogs are separate files; no synthetic reviews are silently assigned to sourced products.
-
-## Run the integrated app
-
-Use Node 22.13 or newer. From the integration root:
+From the repository root, use Node 22.13 or newer:
 
 ```sh
+npm ci
 npm run setup:worlds
-cp apps/coupi-live/.env.example .env.local
-# Edit .env.local locally: OPENAI_API_KEY and OPENAI_MODEL are server-only.
+cp .env.example .env.local
+# Fill in your own OPENAI_API_KEY; keep OPENAI_MODEL and OPENAI_REALTIME_MODEL server-side.
+npm run build
+# Once per fresh local database, apply the initial schema:
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_coupi_storage.sql
 npm run dev
 ```
 
-Open `http://127.0.0.1:3007/`. Home, `/call`, and `/explore` use the main shell; `/demo` provides the separate phone presentation. A fresh profile starts with the hatch and optional first conversation. Preference proposals remain drafts until the editable review is explicitly confirmed. User stories and saved state are local to this Node app.
+Open `http://127.0.0.1:5173/`. Keep an existing `.env.local` when updating. Root and nested dependencies have separate lockfiles, so both installation commands are needed. Local database state lives in ignored `.wrangler/state`; API keys and runtime data are never committed or packaged.
 
-The launcher loads root `.env.local` without logging its contents, then invokes the app with its working directory under `apps/coupi-live`. Ambient environment variables take precedence. The child's `.data/` and `.cache/` remain local and ignored. All checkout, delivery, return and negotiation actions are clearly labelled simulations; no merchant order or payment is placed.
+`npm run build` creates `dist/server/index.js` and the associated client assets. `npm start` runs that built Worker locally. `dev:sites`, `build:sites` and `start:sites` are explicit aliases. Do not package an old `dist` directory after a failed build.
+
+## Persistence and request isolation
+
+`.openai/hosting.json` declares the `DB` D1 binding. Sites provisions the database and applies the committed schema-only Drizzle migration at publication. Local and hosted databases are separate; local test records are not uploaded.
+
+The server stores profiles, households, household membership indexes and model-response cache entries in D1. Worker bindings and secrets are carried by request-scoped AsyncLocalStorage. They never mutate global `process.env` or reach browser code. An absent Worker database binding fails explicitly instead of falling back to ephemeral files.
+
+Profile and household updates compare independent storage versions and commit in one D1 batch. A stale version aborts the entire batch with HTTP 409. Expensive model calls are not automatically repeated after conflicts. Unchanged reads do not write or increment versions. HTTPS session cookies are HttpOnly, SameSite=Strict and Secure.
+
+## Optional Node runtime
+
+The same app still supports a conventional Node server with local file storage:
 
 ```sh
+npm run dev:node
+# Or:
+npm run build:node
+npm run start:node
+```
+
+This uses `http://127.0.0.1:3007/`. The launcher loads root `.env.local` without logging it. Profiles and response caches stay under the nested app's ignored `.data` and `.cache` directories. This is a separate local store; it is not synchronized with D1.
+
+## Validation
+
+```sh
+npm run check
 npm run test:worlds
 npm run typecheck:worlds
 npm run build
-npm run start
 ```
 
-`setup:worlds` installs the nested app from its own lockfile. Root `npm ci` alone installs main's legacy dependencies, not the new app. The launcher fails with the setup instruction if the child dependencies are missing. API keys and rehearsal caches are never bundled. `DEMO_OFFLINE=1` requires rehearsing the exact path into that app's cache first; a cache miss fails visibly.
+The storage tests use real local D1 through Miniflare and cover isolation, version conflicts and rollback of multi-document household writes. The call tests retain the parent bridge's checked-response, preference-review and world-navigation contracts.
 
-## Original Sites runtime
-
-The original commands are retained as `dev:sites`, `build:sites` and `start:sites`. Their original dependencies and deployment scripts remain available. That legacy worker still serves its original static Explore page and does **not** gain the Node filesystem profile/cache APIs. Do not present the legacy deployment as the integrated live app.
-
-The runtime switch is deliberate because the live app requires server-side API keys and persistent local `.data` / `.cache` files. Deploying it requires a Node host with writable durable storage. A future Cloudflare deployment would need an explicit storage adapter and worker route integration; this package does not imply that work has happened.
-
-## Prepare and review without changing main
-
-From the live app workspace, using a trusted extracted main archive:
-
-```sh
-node scripts/prepare-main-integration.mjs --main /path/to/extracted-main --out /private/tmp/coupi-main-integration
-```
-
-The output must be new or empty and separate from both inputs. The packager uses an allowlist for application source and excludes secrets, runtime state/cache, dependencies, builds, symlinks and artifact bundles. It does not copy an active `.env.local`, install packages, make provider requests, deploy, or publish to GitHub.
-
-Publish only from a branch created from the actual current main commit. Copy the reviewed integration tree onto that branch, verify main has not advanced, inspect the manifest/diff, run the app checks, then create a pull request explaining the default Node runtime switch. The old independent feature history must not be force-merged into main. Archive commit labels in the manifest are provenance, not a fabricated parent commit or proof that Git ancestry was fetched.
+`source-manifest.json` records the original integration archives and their hashes. It is provenance for that import, not a claim that later edited files are unchanged. The Git history records subsequent call updates and the Worker/storage port.

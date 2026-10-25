@@ -9,7 +9,8 @@ export type HomeScenario='normal'|'problem'|'first'|'quiet'|'night';
 export const HOME_SCENARIOS:{id:HomeScenario;label:string}[]=[{id:'normal',label:'Everyday'},{id:'problem',label:'Delivery issue'},{id:'first',label:'First call'},{id:'quiet',label:'Quiet day'},{id:'night',label:'Night'}];
 export interface HomeReference {id:string;name:string;productType:string;price:number|null;image:string;url:string;sourceNote:string;verifiedAttributes:string[];aliases:string[];}
 // Home-only reference updates do not enter the AI shopping or live-call catalogs.
-export const homeReferences=[...referenceData,...homeReferenceData] as HomeReference[];
+const approvedReferenceIds=new Set(referenceData.map(product=>product.id));
+export const homeReferences=[...referenceData,...homeReferenceData.filter(product=>!approvedReferenceIds.has(product.id))] as HomeReference[];
 export const referenceById=(id:string)=>homeReferences.find(product=>product.id===id);
 const shortNames:Record<string,string>={'1814412512':'Romand Zero Matte 09','55518713':'Desk lamp','7612276799':'Blue-light glasses','7395651009':'Office chair','7185725748':'Lip Monster 03','7322824636':'MAC Powder Kiss','7330605115':'Study chair'};
 export const referenceName=(product:HomeReference)=>shortNames[product.id]||product.aliases[0]||product.name;

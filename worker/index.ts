@@ -1,28 +1,10 @@
-import cameraPage from "../site-pages/camera.html?raw";
-import mainPage from "../site-pages/main.html?raw";
-import explorePage from "../site-pages/explore.html?raw";
-import settingsPage from "../site-pages/settings.html?raw";
-import { handleVoiceRequest } from "../lib/nook-voice.mjs";
 import handler from "vinext/server/fetch-handler";
+import { withRuntimeEnv } from "../apps/coupi-live/lib/server/runtime";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
 const worker = {
   async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
-    const path = new URL(request.url).pathname;
-    if(path.startsWith('/api/')) {
-      const result = await handleVoiceRequest(request, env);
-      if(result) return result;
-    }
-    const pagePath = path.length > 1 ? path.replace(/\/$/, '') : path;
-    const page = ['/', '/index.html'].includes(pagePath) ? mainPage
-      : ['/call', '/camera', '/camera.html'].includes(pagePath) ? cameraPage
-      : pagePath === '/explore' ? explorePage
-      : ['/setting', '/settings'].includes(pagePath) ? settingsPage : null;
-    if(page !== null) {
-      if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405});
-      return new Response(request.method==='HEAD'?null:page,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin'}});
-    }
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.
@@ -42,7 +24,7 @@ const worker = {
         },
       };
     }
-    return runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
+    return withRuntimeEnv(env, () => runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx)));
   },
 };
 

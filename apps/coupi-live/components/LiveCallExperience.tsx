@@ -21,16 +21,16 @@ export default function LiveCallExperience({profile,visible=true,...callbacks}:C
   const [ports,setPorts]=useState<{before:HTMLDivElement;after:HTMLDivElement}|null>(null),[frameReady,setFrameReady]=useState(false);
   useEffect(()=>{if(before.current&&after.current)setPorts({before:before.current,after:after.current});},[]);
   useEffect(()=>{if(!visible)setFrameReady(false);},[visible]);
-  return <section className="live-call-experience" data-discovery={!!profile?.journey?.personalizationDraft} hidden={!visible} style={{display:visible?'block':'none'}}>
-    <div ref={before}/>
-    <iframe ref={frame} src="/live-call/index.html?embedded=1" title="Your conversation with Coopy" allow="camera; microphone; autoplay" className="live-call-frame" inert={!visible||!frameReady} style={{display:visible&&frameReady?'block':'none'}}/>
-    <div ref={after}/>
+  return <section className="live-call-experience" data-discovery={!!profile?.journey?.personalizationDraft} data-ready={frameReady} hidden={!visible} style={{display:visible?'flex':'none'}}>
+    <div ref={before} className="live-call-before"/>
+    <iframe ref={frame} src="/live-call/index.html?embedded=1" title="Your conversation with Coupi" allow="camera; microphone; autoplay" className="live-call-frame" inert={!visible||!frameReady} style={{display:visible&&frameReady?'block':'none'}}/>
+    <div ref={after} className="live-call-after"/>
     {visible&&profile&&ports&&<LiveCallController key={profile.id} {...callbacks} profile={profile} frame={frame} before={ports.before} after={ports.after} onReady={setFrameReady}/>}
   </section>;
 }
 
 /** Voice, camera and text share one checked call. Only the shopper confirms discovery. */
-export function LiveCallController({profile,frame,before,after,onReady,onProfile,onClose,onType,onOpenProduct,onComplete}:CallCallbacks&{profile:Profile;frame:RefObject<HTMLIFrameElement|null>;before:HTMLElement;after:HTMLElement;onReady:(ready:boolean)=>void}) {
+export function LiveCallController({profile,frame,before,after,onReady,onProfile,onClose,onOpenProduct,onComplete}:CallCallbacks&{profile:Profile;frame:RefObject<HTMLIFrameElement|null>;before:HTMLElement;after:HTMLElement;onReady:(ready:boolean)=>void}) {
   const childWindow=useRef<Window|null>(null),lifecycle=useRef(new LiveCallLifecycle());
   const latest=useRef({profile,onProfile,onClose,onOpenProduct,onComplete});latest.current={profile:profile.id!==latest.current.profile.id||profile.revision>=latest.current.profile.revision?profile:latest.current.profile,onProfile,onClose,onOpenProduct,onComplete};
   const initialInterview=useRef(!profile.journey?.interviewComplete),startId=useRef<string>('');
@@ -40,7 +40,7 @@ export function LiveCallController({profile,frame,before,after,onReady,onProfile
   const requestReviewRef=useRef<(id?:string)=>void>(()=>{}),skipRef=useRef<(id?:string)=>void>(()=>{});
   const confirmAttempt=useRef<{key:string;requestId:string}|null>(null);
   const [navigation,setNavigation]=useState<CallResponse['navigation']>(undefined);
-  const [error,setError]=useState(''),[active,setActive]=useState(false),[pending,setPending]=useState(0),[controlBusy,setControlBusy]=useState(false),[worldReady,setWorldReady]=useState(false);
+  const [error,setError]=useState(''),[,setActive]=useState(false),[pending,setPending]=useState(0),[controlBusy,setControlBusy]=useState(false),[worldReady,setWorldReady]=useState(false);
   const [ready,setReady]=useState(!initialInterview.current),[bootAttempt,setBootAttempt]=useState(0),[review,setReview]=useState<PersonalizationReview|null>(null);
   const draft=profile.journey?.personalizationDraft;
   const interviewing=!profile.journey?.interviewComplete;
@@ -194,14 +194,13 @@ export function LiveCallController({profile,frame,before,after,onReady,onProfile
   }
   function leave(action:()=>void){acceptingTurns.current=false;lifecycle.current.end();stop();action();}
   const controls=<>
-    <div className="live-call-wayfinding"><button className="text-button" onClick={()=>leave(onClose)}><Glyph name="arrow-left"/> Back</button><span><i className={active?'active':''}/>{pending?'MAKING SENSE OF YOUR WORDS':active?'IN YOUR COMPANY':'YOUR VOICE. YOUR PACE.'}</span><button className="text-button" disabled={pending>0||controlBusy} onClick={()=>leave(onType)}>Type instead <Glyph name="arrow-right"/></button></div>
     {error&&<div className="live-call-memory-error" role="status"><p>{error}</p>{!ready?<button className="text-button" onClick={()=>setBootAttempt(value=>value+1)}>Reconnect</button>:retry.current&&<button className="text-button" disabled={pending>0} onClick={()=>retry.current&&submitTurn.current(retry.current)}>Try that turn again <Glyph name="arrow-right"/></button>}</div>}
-    {interviewing&&<div className="live-call-interview-progress"><span>{profile.journey?.interviewPaused?'YOUR REQUEST COMES FIRST':`OUR FIRST CALL / ${draft?.answerCount??profile.journey?.interviewCount??0} OF UP TO 5 STORIES`}</span><div className="live-call-shortcuts">{profile.journey?.interviewPaused&&<button className="text-button" disabled={controlBusy||pending>0} onClick={()=>interviewAction('resumeInterview')}>Back to my story</button>}{draft&&staged.length>0?<button className="text-button" disabled={controlBusy||pending>0} onClick={()=>requestReview()}>Review my story <Glyph name="arrow-right"/></button>:worldReady&&<button className="text-button" disabled={controlBusy||pending>0} onClick={()=>interviewAction('finishInterview')}>Start my world <Glyph name="arrow-right"/></button>}</div></div>}
-    {!ready&&<div className="live-call-connecting" role="status"><span className="eyebrow">A LITTLE SPACE FOR YOU</span><h2>let’s get to know you.</h2><p>Getting your conversation ready…</p></div>}
+    {ready&&interviewing&&!review&&(staged.length>0||profile.journey?.interviewPaused||worldReady)&&<div className="live-call-interview-progress"><span>{staged.length>0?'A little of your story is ready.':'Your story can wait.'}</span><div className="live-call-shortcuts">{profile.journey?.interviewPaused&&<button className="text-button" disabled={controlBusy||pending>0} onClick={()=>interviewAction('resumeInterview')}>Keep sharing</button>}{draft&&staged.length>0?<button className="text-button" disabled={controlBusy||pending>0} onClick={()=>requestReview()}>Review story <Glyph name="arrow-right"/></button>:worldReady&&<button className="text-button" disabled={controlBusy||pending>0} onClick={()=>interviewAction('finishInterview')}>Open my world <Glyph name="arrow-right"/></button>}</div></div>}
+    {!ready&&<div className="live-call-connecting" role="status"><span className="eyebrow">COUPI</span><h2>One moment…</h2><p>Getting your conversation ready.</p></div>}
   </>;
   const ending=<>
     {navigation&&<a className="call-account-guidance" href={navigation.href} onClick={()=>leave(()=>{})}><Glyph name={navigation.section==='addresses'?'home':'lock'}/><span>{navigation.label}<small>You review and save the changes.</small></span><Glyph name="arrow-right"/></a>}
-    {draft?<p className="live-call-provenance">A draft until you review it. Camera is optional. <button className="text-button" disabled={controlBusy||pending>0} onClick={()=>skipDiscovery()}>Skip for now</button></p>:<p className="live-call-provenance">Your own story, grounded recommendations. Purchases always need your approval.</p>}
+
     {review&&<FirstCallReview review={review} busy={controlBusy||pending>0} error={error} onContinue={()=>{reviewRef.current=null;setReview(null);setError('');syncContext(latest.current.profile,false);}} onConfirm={confirmReview}/>}
   </>;
   return <>{createPortal(controls,before)}{createPortal(ending,after)}</>;

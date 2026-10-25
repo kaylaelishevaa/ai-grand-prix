@@ -119,7 +119,6 @@ export default function JourneyApp({initialView='auto'}:{initialView?:InitialMai
       const presenting=query.get('presenter')==='1'||!!scenario;
       setPresenter(presenting);setHomeScenario(scenario||(presenting?'normal':undefined));
       const route=mainLocation(location.pathname,location.search,initialView),next=initialMainView(route,p.journey,presenting);
-      if(next==='hatch')setHatched(false);
       setDistrictId(route.districtId||'');setTemplateId(route.templateId||'');setArchiveId(route.archiveId||'');setMomentId(route.momentId||'');setArchivedMomentId(route.momentId||'');
       setView(next==='preview'&&!worldTemplates.some(t=>t.id===route.templateId)?'world':next);
       if(route.view==='auto'&&next!=='home')history.replaceState(null,'',mainHref(next));

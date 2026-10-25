@@ -6,6 +6,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {getSku} from '../lib/catalog';
 import {createProfile} from '../lib/profile';
 import {addDecision} from '../lib/guardrails';
+import {buildComparison} from '../lib/comparison';
 import type {MemoryLine} from '../lib/types';
 import type {OrderLine} from '../lib/commerce-types';
 
@@ -36,7 +37,7 @@ test('order receipt renders its saved price basis and source URL instead of reco
   const html=renderToStaticMarkup(createElement(commerce.OrderLines,{order:{lines:[line]}}));
   assert.match(html,/HISTORICAL REFERENCE PRICE/);assert.match(html,/₩12,345/);assert.match(html,/₩12,000/);
   assert.match(html,/savedSnapshot=1/);assert.match(html,/Current price, stock and delivery are unverified/);
-  assert.match(html,/simulated saving/);assert.match(html,/src="\/verified-products\/1814412512\.jpg"/);
+  assert.match(html,/simulated saving/);assert(html.includes(`src="${sku.image}"`));
   assert.doesNotMatch(html,/Rocket|tomorrow by 7|₩7,470/);
 });
 
@@ -44,7 +45,8 @@ test('reference contender markup uses actual photos and provenance with no fabri
   const profile=createProfile('reference-comparison-ui',now);
   const html=renderToStaticMarkup(createElement(comparison.default,{profile,pickSkuId:'1814412512',onChange:()=>{}}));
   assert.match(html,/COUPANG REFERENCE/);assert.match(html,/HISTORICAL PRICE/);assert.match(html,/Original listing/);
-  assert.match(html,/src="\/verified-products\/[a-zA-Z0-9_-]+\.(?:png|jpg)"/);
+  const expectedPhotos=buildComparison(profile,'1814412512').contenders.map(option=>getSku(option.skuId)!.image);
+  assert(expectedPhotos.length>0);assert.deepEqual([...html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map(match=>match[1]),expectedPhotos);
   assert.match(html,/HISTORICAL REFERENCE PRICE/);assert.match(html,/reference option/);
   assert.doesNotMatch(html,/data-award="fastest"|data-award="most-loved"|Original seeded reviews|All reviews ·|% confidence/);
 });

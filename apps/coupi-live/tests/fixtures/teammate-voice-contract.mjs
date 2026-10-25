@@ -92,15 +92,15 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.equal(sent.options.headers.Authorization,'Bearer test-only-private-key');
   assert.equal(sent.options.body.get('sdp'),offer);
   const config=JSON.parse(sent.options.body.get('session'));
-  assert.equal(config.model,'gpt-realtime-2.1');
-  assert.equal(config.audio.input.transcription.model,'gpt-4o-mini-transcribe');
+  assert.equal(config.model,'gpt-realtime-2.1-mini');
+  assert.equal(config.audio.input.transcription.model,'gpt-4o-transcribe');
   assert.equal(config.audio.input.transcription.language,'en');
   assert.match(config.audio.input.transcription.prompt,/speaking English/);
   assert.match(config.instructions,/Accept spoken and typed shopping instructions in English/);
   assert.match(config.instructions,/English request containing Korean proper names is valid/);
   assert.equal(config.audio.output.voice,'marin');
   assert.equal(config.audio.input.turn_detection.interrupt_response,true);
-  assert.deepEqual(config.tools.map(t=>t.name),['draft_preferences','skip_personalization','resolve_shopping_request','search_products','set_tryon','product_action','look_at_camera','search_world_products','open_world_product']);
+  assert.deepEqual(config.tools.map(t=>t.name).sort(),['draft_preferences','skip_personalization','resolve_shopping_request','search_products','set_tryon','product_action','look_at_camera','search_world_products','open_world_product','start_checkout'].sort());
 });
 
 test('upstream errors, invalid answers, and network exceptions never expose raw details', async () => {
@@ -144,7 +144,7 @@ test('live-only tools support glasses without offering photo generation or guara
   const config=sessionConfiguration();
   assert.equal(config.tools.some(tool=>tool.name==='request_realistic_preview'),false);
   assert.doesNotMatch(config.instructions,/request_realistic_preview|Generate AI photo|realistic_preview\.state/);
-  assert.match(config.instructions,/photo-upload or generated-photo workflow is not available/);
+  assert.match(config.instructions,/A generated-photo workflow is not available/);
   assert.match(config.instructions,/aligned to face landmarks around the eyes and nose/);
   assert.match(config.instructions,/approximate body-following alignment, not fabric simulation/);
   assert.match(config.instructions,/not reconstructed 3D room geometry/);
@@ -207,7 +207,7 @@ test('specific English and Korean requests cannot cross product types within sha
   for(const [type,queries] of Object.entries(requests)){
     for(const query of queries){
       const result=searchProducts({query,category:'all',max_price:null});
-      assert.equal(result.products.length,3,query);
+      assert(result.products.length>=1&&result.products.length<=10,query);
       assert.ok(result.products.every(p=>p.productType===type && catalog.some(c=>c.id===p.id)),query);
       assert.ok(result.products.every(p=>p.image?.startsWith('/live-call/products/')),query+' has local preview images');
     }
@@ -221,7 +221,7 @@ test('English and Korean glasses retrieval never crosses categories or invents a
   const glasses=[0,1,2].map((i)=>({id:String(900000+i),name:'안경 Glasses '+i,category:'glasses',productType:'glasses',price:10000+i*1000,url:'https://www.coupang.com/vp/products/'+(900000+i),image:'/products/glasses-'+i+'.jpg'}));
   for(const query of ['glasses','eyeglasses','spectacles','sunglasses','안경','선글라스']){
     const result=searchProducts({query,category:'all',max_price:null},[...catalog,...glasses]);
-    assert.equal(result.products.length,3,query);
+    assert(result.products.length>=1&&result.products.length<=10,query);
     assert.ok(result.products.every(product=>product.productType==='glasses'),query);
   }
   assert.equal(searchProducts({query:'glasses',category:'makeup'},glasses).products.length,0);

@@ -8,6 +8,7 @@ import {sessionResponse,withSession} from './store';
 import {FIRST_CALL_QUESTIONS} from './call';
 import {permittedVoiceWorlds} from './voice-world-products';
 import {safePersonalizationCandidates} from './personalization';
+import {runtimeEnv} from './runtime';
 
 /** These are sourced historical references, kept separate from the synthetic review/catalog database. */
 export const teammateCatalog=sourceCatalog;
@@ -30,15 +31,20 @@ export async function teammateVoiceRoute(request:Request):Promise<Response>{
       if(!request.headers.get('origin')||request.headers.get('sec-fetch-site')==='cross-site')throw new AppError('ORIGIN_MISMATCH','Open this feature from the app’s own address.',403);
       requireLocalOrigin(request);
     }
-    const started=Date.now(),isSession=new URL(request.url).pathname==='/api/voice/session';
+    const env=runtimeEnv(),started=Date.now(),pathname=new URL(request.url).pathname,isSession=pathname==='/api/voice/session';
+    // Readiness is deployment-wide. It must not race initial profile writes or
+    // create/replace the visitor cookie before the parent page establishes it.
+    if(request.method==='GET'&&pathname==='/api/voice/status'){
+      return (await createVoiceHandler({products:teammateCatalog})(request,env))!;
+    }
     const result=await withSession(request,async session=>{
       const handler=createVoiceHandler({products:eligibleTeammateProducts(session.profile),profileContext:teammateProfileContext(session.profile)});
-      return handler(request,{OPENAI_API_KEY:process.env.OPENAI_API_KEY,OPENAI_REALTIME_MODEL:process.env.OPENAI_REALTIME_MODEL,DEMO_OFFLINE:process.env.DEMO_OFFLINE});
+      return handler(request,env);
     });
     const response=result.data||Response.json({error:'Unknown live-call route.'},{status:404});
     const headers=new Headers(response.headers);
     headers.set('Set-Cookie',sessionResponse({},result.session).headers.get('set-cookie')!);
-    if(isSession&&request.method==='POST')console.info('[coupi:voice]',JSON.stringify({operation:'realtime-handshake',model:process.env.OPENAI_REALTIME_MODEL||'gpt-realtime-2.1',offline:process.env.DEMO_OFFLINE==='1',latencyMs:Date.now()-started,status:response.status,inputTokens:null,outputTokens:null,usageNote:'Realtime token usage is not returned by the SDP handshake.'}));
+    if(isSession&&request.method==='POST')console.info('[coupi:voice]',JSON.stringify({operation:'realtime-handshake',model:env.OPENAI_REALTIME_MODEL||'gpt-realtime-2.1-mini',offline:env.DEMO_OFFLINE==='1',latencyMs:Date.now()-started,status:response.status,inputTokens:null,outputTokens:null,usageNote:'Realtime token usage is not returned by the SDP handshake.'}));
     return new Response(response.body,{status:response.status,headers});
   }catch(error){return errorResponse(error);}
 }

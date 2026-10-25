@@ -5,6 +5,8 @@ import { readExecutionProfile } from "./scripts/execution-profile.mjs";
 import { configureToolEnvironment } from "./scripts/tool-environment.mjs";
 import { sites } from "./scripts/vite/sites-vite-plugin";
 import { connectorPreview } from "./scripts/vite/connector-preview-plugin.mjs";
+import { fileURLToPath } from "node:url";
+import integratedNextConfig from "./apps/coupi-live/next.config";
 
 const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
   "00000000-0000-4000-8000-000000000000";
@@ -44,6 +46,11 @@ export default defineConfig(async ({ command }) => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    publicDir: "apps/coupi-live/public",
+    resolve: {
+      alias: { "@": fileURLToPath(new URL("./apps/coupi-live/", import.meta.url)) },
+      dedupe: ["react", "react-dom", "react-server-dom-webpack"],
+    },
     server: {
       ...(managedLinux
         ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] }
@@ -53,7 +60,7 @@ export default defineConfig(async ({ command }) => {
         : {}),
     },
     plugins: [
-      vinext(),
+      vinext({ appDir: "apps/coupi-live", nextConfig: { ...integratedNextConfig, typescript: { tsconfigPath: "apps/coupi-live/tsconfig.json" } } }),
       sites({ mockAuth: !managedLinux }),
       connectorPreview(),
       cloudflare({

@@ -20,7 +20,7 @@ export const originalComparisonGroups: Record<string, string> = {
 };
 
 const knownGroups = new Set(Object.values(originalComparisonGroups));
-const referenceGroups = new Set(['lipstick','chair','lamp','tshirt','hoodie','eyeglasses','sunglasses'].map(type=>'reference:'+type));
+const referenceGroups = new Set(['lipstick','lipbalm','chair','lamp','tshirt','hoodie','sweater','eyeglasses','sunglasses'].map(type=>'reference:'+type));
 
 export function comparisonGroupForSku(sku: SKU): string {
   if(sku.origin==='coupang-reference')return typeof sku.facts.comparisonGroup==='string'&&referenceGroups.has(sku.facts.comparisonGroup)?sku.facts.comparisonGroup:`unmatched:${sku.id}`;

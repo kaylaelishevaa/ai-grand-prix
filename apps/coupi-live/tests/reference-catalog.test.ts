@@ -52,8 +52,8 @@ test('missing and invalid prices cannot turn into a free product or guessed nume
   const raw=referenceProducts.find(product=>product.price!==null)!;
   for(const price of [null,0,-1,NaN,Infinity,10.5])assert.equal(adaptReferenceProduct({...raw,price}),null);
   assert.equal(adaptReferenceProduct({...raw,priceStatus:'unverified'}),null);
-  const missing=referenceProducts.find(product=>product.price===null)!;
-  assert(getReferenceProduct(missing.id));assert.equal(getSku(missing.id),undefined);
+  const missing={...raw,id:'unpriced-test-listing',price:null};
+  assert.equal(adaptReferenceProduct(missing),null);assert.equal(getSku(missing.id),undefined);
   assert(!eligibleCatalog(createProfile('unknown-price',now)).some(item=>item.id===missing.id));
   for(const skuId of [missing.id,'99999999999']){
     const {profile,account,input}=checkoutFixture(skuId);assert.equal(profile.decisions.length,0);
@@ -115,14 +115,30 @@ test('one exact sourced SKU survives proposal, quote, approval and receipt with 
 });
 
 
-test('latest sourced catalog refreshes exact overlaps, retains old IDs and original photos without review transfer',()=>{
+test('approved camera catalog owns overlaps while world-only sources retain evidence without preview promises',()=>{
   assert.deepEqual(referenceProducts.slice(0,legacyReferences.length).map(product=>product.id),legacyReferences.map(product=>product.id));
   assert.equal(new Set(referenceProducts.map(product=>product.id)).size,referenceProducts.length);
   for(const product of [...latestReferences,...sceneReferences]){
-    assert.deepEqual(getReferenceProduct(product.id),product);
-    const sku=getSku(product.id)!;assert(sku);assert.equal(sku.image,product.image);assert.equal(sku.price,product.price);
-    assert.equal(createHash('sha256').update(readFileSync('public'+product.image)).digest('hex'),product.imageSha256);
+    const approved=legacyReferences.find(row=>row.id===product.id),expected=approved||product,actual=getReferenceProduct(product.id)!;
+    if(approved)assert.deepEqual(actual,approved);
+    else{assert.deepEqual({...actual,preview:product.preview},product);assert.equal(actual.preview.available,false);}
+    const sku=getSku(product.id)!;assert(sku);assert.equal(sku.image,expected.image);assert.equal(sku.price,expected.price);
+    assert.equal(createHash('sha256').update(readFileSync('public'+expected.image)).digest('hex'),expected.imageSha256);
     assert.deepEqual(sku.reviewIds,[]);assert.deepEqual(reviewsForSku(product.id),[]);
     assert.equal(sku.facts.deliveryStatus,'unknown');assert.equal(sku.facts.stockStatus,'unverified');
+  }
+});
+
+test('all approved source variants adapt without changing IDs, product details or review evidence',()=>{
+  assert.equal(legacyReferences.length,68);
+  for(const source of legacyReferences){
+    const actual=getReferenceProduct(source.id)!,sku=getSku(source.id)!;
+    assert.deepEqual(actual,source);assert(sku);assert.equal(sku.id,source.id);assert.equal(sku.name,source.name);assert.equal(sku.type,source.productType);
+    assert.equal(sku.sourceUrl,source.url);assert.equal(sku.image,source.image);assert.deepEqual(actual.reviewEvidence,source.reviewEvidence);
+    assert.notEqual(actual.preview.available,false);assert.deepEqual(sku.reviewIds,[]);assert.deepEqual(reviewsForSku(source.id),[]);
+  }
+  for(const type of ['lipbalm','sweater']){
+    const selected=pricedReferenceSkus.find(sku=>sku.type===type)!;assert(selected);
+    const candidates=comparisonCandidatesForSku(selected.id);assert(candidates.length>0);assert(candidates.every(sku=>sku.type===type));
   }
 });

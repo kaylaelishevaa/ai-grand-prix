@@ -10,6 +10,7 @@ import {openVoiceWorldProduct,permittedVoiceWorlds,searchVoiceWorldProducts} fro
 import {teammateProfileContext} from '../lib/server/teammate-voice';
 import {POST as worldProductsRoute} from '../app/api/products/world/route';
 import {POST as profileRoute} from '../app/api/profile/route';
+import approvedReferences from '../data/teammate-catalog.json';
 
 test('live voice receives current world names and exact IDs, excluding diary and erased or quarantined evidence',()=>{
   let profile=remember(createProfile('voice-world'),{id:'story',text:'I like a slow cup of matcha.',source:'from our first call',confidence:.95,kind:'call'});
@@ -57,6 +58,12 @@ test('world tool route rechecks persisted profile, is origin-bound, and works of
   try{
     const search=await send(worldProductsRoute,'/api/products/world',{action:'search',query:'kettle',max_price:50000});assert.equal(search.status,200);assert((await search.json()).products.length);
     const open=await send(worldProductsRoute,'/api/products/world',{action:'open',skuId:'kettle'});assert.equal((await open.json()).ok,true);
+    for(const source of approvedReferences){
+      const response=await send(worldProductsRoute,'/api/products/world',{action:'open',skuId:source.id});assert.equal(response.status,200,source.id);
+      const result=await response.json();assert.equal(result.ok,true);assert.equal(result.product.skuId,source.id);assert.equal(result.product.name,source.name);assert.equal(result.product.sourceUrl,source.url);assert.equal(result.product.image,source.image);assert.deepEqual(result.product.preview,source.preview);assert.deepEqual(result.product.sourceReviewEvidence,source.reviewEvidence);assert.deepEqual(result.product.reviews,[]);
+    }
+    const worldOnly=await send(worldProductsRoute,'/api/products/world',{action:'open',skuId:'7434051500'});assert.equal(worldOnly.status,200);assert.equal((await worldOnly.json()).product.preview.available,false);
+    for(const skuId of ['../1814412512','1814412512/other','<script>'])assert.equal((await send(worldProductsRoute,'/api/products/world',{action:'open',skuId})).status,400);
     const changed=await send(profileRoute,'/api/profile',{action:'swipe',swipe:{id:'voice-owned',skuId:'kettle',action:'nah',reason:'have one',source:'call'}});assert.equal(changed.status,200);
     const blocked=await send(worldProductsRoute,'/api/products/world',{action:'open',skuId:'kettle'});assert.equal((await blocked.json()).ok,false);
     const foreign=await send(worldProductsRoute,'/api/products/world',{action:'open',skuId:'mugs'},'https://attacker.test');assert.equal(foreign.status,403);

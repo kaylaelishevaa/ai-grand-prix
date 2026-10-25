@@ -1,6 +1,7 @@
 import {getSku,reviewsForSku,reviewStats} from '../catalog';
 import {eligibleCatalog,sanitizeProfileForAI,scoreSku} from '../profile';
 import {memoryConfidence} from '../memory';
+import {getReferenceProduct} from '../reference-catalog';
 import type {Profile,SKU} from '../types';
 
 export const WORLD_CATALOG_NAMESPACE='world-simulation' as const;
@@ -16,7 +17,8 @@ export function permittedVoiceWorlds(profile:Profile){
 }
 function productFacts(sku:SKU){
   const evidence=reviewsForSku(sku.id).slice().sort((a,b)=>a.stars-b.stars||b.helpful-a.helpful).slice(0,3);
-  return{skuId:sku.id,name:sku.name,origin:sku.origin||'synthetic',sourceUrl:sku.sourceUrl||null,image:sku.image||null,priceBasis:sku.priceBasis||'synthetic',sourceNote:sku.sourceNote||null,category:sku.category,price:sku.price,description:sku.description,facts:sku.facts,vibeTags:sku.vibeTags,palette:sku.palette,delivery:sku.delivery,reviewStats:reviewStats(sku.id),reviewIds:sku.reviewIds,reviews:evidence.map(review=>({id:review.id,stars:review.stars,text:review.text,helpful:review.helpful})),catalog_namespace:WORLD_CATALOG_NAMESPACE};
+  const reference=getReferenceProduct(sku.id);
+  return{skuId:sku.id,name:sku.name,origin:sku.origin||'synthetic',sourceUrl:sku.sourceUrl||null,image:sku.image||null,priceBasis:sku.priceBasis||'synthetic',sourceNote:sku.sourceNote||null,category:sku.category,productType:sku.type,price:sku.price,description:sku.description,facts:sku.facts,vibeTags:sku.vibeTags,palette:sku.palette,delivery:sku.delivery,preview:reference?.preview||{available:false},sourceReviewEvidence:reference?.reviewEvidence||null,reviewStats:reviewStats(sku.id),reviewIds:sku.reviewIds,reviews:evidence.map(review=>({id:review.id,stars:review.stars,text:review.text,helpful:review.helpful})),catalog_namespace:WORLD_CATALOG_NAMESPACE};
 }
 export function searchVoiceWorldProducts(profile:Profile,input:{query:string;max_price?:number|null}){
   const query=normalize(input.query),tokens=[...new Set(query.split(' ').filter(token=>token.length>1&&!ignored.has(token)))];

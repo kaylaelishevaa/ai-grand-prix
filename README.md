@@ -11,7 +11,7 @@ Each developer runs their own local server and supplies **their own OpenAI API k
 - Internet access for OpenAI and the face/body tracking models downloaded on first use.
 - For the AI call: an OpenAI project with an API key, available API credits, and access to the configured Realtime model.
 
-Local development does not require a Cloudflare account, Sites account, database, or Coupang API key. Product names and reviewed preview images are bundled in the repository. Search defaults to this curated demo catalog, including when an OpenAI API key is configured, so every recommended demo product has a supported preview recipe. Each list can contain fewer products when preferences narrow the available matches.
+Local development uses a bundled local D1 database and does not require a Cloudflare account, Sites account, or Coupang API key. Product names and reviewed preview images are bundled in the repository. Search defaults to this curated demo catalog, including when an OpenAI API key is configured, so every recommended demo product has a supported preview recipe. Each list can contain fewer products when preferences narrow the available matches.
 
 ## 1. Clone and install
 
@@ -20,6 +20,7 @@ git clone https://github.com/kaylaelishevaa/ai-grand-prix.git
 cd ai-grand-prix
 git switch main
 npm ci
+npm run setup:worlds
 cp .env.example .env.local
 ```
 
@@ -34,11 +35,13 @@ Open `.env.local` in your editor and replace the placeholder:
 ```dotenv
 OPENAI_API_KEY=PASTE_YOUR_OWN_OPENAI_API_KEY_HERE
 OPENAI_REALTIME_MODEL=gpt-realtime-2.1-mini
+OPENAI_MODEL=gpt-5-mini
 ```
 
 | Variable | Purpose |
 | --- | --- |
 | `OPENAI_API_KEY` | Your server-side API key. Required for Coupi's live AI call. |
+| `OPENAI_MODEL` | Structured conversation, preference review and world generation; use `gpt-5-mini` or a supported model available to your project. |
 | `OPENAI_REALTIME_MODEL` | Optional model override; the application defaults to `gpt-realtime-2.1-mini`. Your project needs access to this Realtime model. |
 | `OPENAI_TRANSCRIPTION_MODEL` | Caption model; defaults to `gpt-4o-transcribe`. Supported overrides are `gpt-4o-mini-transcribe` and `gpt-4o-mini-transcribe-2025-12-15`. |
 | `COUPI_PRODUCT_SEARCH_MODE` | Leave unset for the preview-ready demo. `live` explicitly enables experimental indexed Coupang search; newly retrieved listings have no reviewed try-on support. |
@@ -50,13 +53,17 @@ Restart the server whenever you change environment variables. If an older `.dev.
 
 ## 3. Run locally
 
+For a fresh checkout, build once and initialize the local database. Run the SQL command only once per new local database; later schema migrations are applied separately.
+
 ```bash
+npm run build
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_coupi_storage.sql
 npm run dev
 ```
 
 Open **[http://127.0.0.1:5173](http://127.0.0.1:5173)**. Main (`/`) offers **Call** (`/call`) for shopping and its optional first-call interview, and **Explore worlds** (`/explore`) for worlds built from confirmed preferences. The bottom navigation connects all three pages. `/camera` remains an alias for the call page. Keep the terminal running; press **Ctrl+C** to stop the server.
 
-This uses Vinext/Vite and a locally emulated Cloudflare Worker. The API routes and browser UI run together; there is no separate backend command or cloud deployment step.
+This runs the integrated app in `apps/coupi-live` through Vinext/Vite and a locally emulated Cloudflare Worker. Home, Call and Explore share database-backed profiles and worlds. The API routes and browser UI run together. `npm run build` produces the public-site Worker; `npm start` previews that build. The optional original Node runner remains available as `dev:node`, `build:node` and `start:node`, using local filesystem storage. See [hosting details](integration/README.md).
 
 To check that the server loaded your configuration, open [the local voice status endpoint](http://127.0.0.1:5173/api/voice/status). With a nonempty key, it should report `ready: true`; `catalogCount` reports the current number of preview-ready demo products. This check makes no OpenAI request: it confirms that a key is present, not that the key, credits, or model access are valid. Starting an actual call exercises those checks and incurs API usage.
 
@@ -71,9 +78,9 @@ To check that the server loaded your configuration, open [the local voice status
 
 Camera, voice, and text with images share one shopping session. Use the round controls at the bottom; there are no separate format tabs or category chips over the camera. Ask Coupi for products, use product search, or move through related collections in the fixed product window. There is no separate Browse mode or onboarding questionnaire. All AI conversation and image understanding require your own working API key. The automated checks below run without a key.
 
-At **/setting** (also **/settings**), save a suggested preference or type a custom memory. Saved preferences guide call recommendations and, if explicitly enabled, experimental live product searches while memory is on; pause or forget them there. Preferences stay in this browser and are sent to the AI only when used for a call or search.
+Use **Account** (`/account`, also `/settings`) for settings and **Privacy & Memory** (`/privacy`) to review saved information. Confirmed preferences and worlds are stored in the server database for your browser session; unconfirmed interview answers remain drafts until you approve the review.
 
-During a call, tap **Message** to open the full conversation history and a textbox that stays open after sending. Text mode mutes the microphone and Coupi’s spoken replies. Tap it again to return to live captions and restore the previous microphone and speaker settings. History stays in memory for the current call and clears when a new call starts.
+During a call, tap **Message** to open the full conversation history and a textbox that stays open after sending. Text mode mutes the microphone and Coupi’s spoken replies. Tap the microphone icon to return to spoken conversation. History stays in memory for the current call and clears when a new call starts.
 
 Camera snapshots are shared with OpenAI during an active call when **Let Coupi see my camera** is enabled. Turn the camera off to stop capturing and sharing camera images; messages and explicit photo uploads remain available. Snapshot-status text does not occupy space over the call. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
 

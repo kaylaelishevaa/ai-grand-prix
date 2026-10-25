@@ -176,7 +176,11 @@ test('every page uses the team shell navigation and current routes', () => {
   assert.match(main, /<main class="shell-content"[^>]*>\s*<div id="coupi-home"/);
   assert.match(main, /<h1 class="home-sr-only">Home<\/h1>/);
   const routes = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
-  assert.match(routes, /\['\/setting', '\/settings'\]\.includes\(pagePath\) \? settingsPage/);
+  assert.match(routes, /withRuntimeEnv\(env/);
+  assert.match(routes, /handler\.fetch\(request, env, ctx\)/);
+  assert.doesNotMatch(routes, /settingsPage|cameraPage|mainPage/);
+  const nextConfig = readFileSync(new URL('../apps/coupi-live/next.config.ts', import.meta.url), 'utf8');
+  for (const route of ['/setting', '/settings']) assert(nextConfig.includes("source:'" + route + "',destination:'/account'"));
 });
 
 test('forgotten memories remain empty and settings survive reload without reseeding', () => {

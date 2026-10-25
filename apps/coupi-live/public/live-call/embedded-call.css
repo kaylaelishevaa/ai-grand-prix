@@ -1,0 +1,49 @@
+/* The iframe owns the call viewport; the parent owns worlds and profile review. */
+:root { --nav-height: 0px; }
+html,body { height:100%; min-height:0; overflow:hidden; }
+.phone-app { width:100%; height:100dvh; min-height:0; max-height:100dvh; margin:0 auto; }
+.world-return { border:0; background:transparent; padding:10px 0; min-height:44px; color:#346f76; font:600 12px/1.4 inherit; }
+.incoming-screen,.end-screen { padding-bottom:calc(20px + env(safe-area-inset-bottom)); }
+.bridge-panel { position:absolute; z-index:6; top:calc(var(--flex-call-top) + 57px); left:var(--flex-call-gutter); right:var(--flex-call-gutter); max-height:calc(100% - var(--flex-call-top) - 290px); overflow:auto; overscroll-behavior:contain; border:1px solid #d0e8eb; border-radius:18px; padding:12px; background:#f6fffff2; color:#254d53; scrollbar-width:thin; }
+.bridge-panel[hidden],.bridge-panel [hidden] { display:none!important; }
+#validated-call-status { margin:0 0 8px; font-size:10px; font-weight:650; letter-spacing:.5px; color:#598187; }
+.checked-product,.world-pick { padding:12px; margin:8px 0; border:1px solid #d9e9ec; border-radius:14px; background:white; }
+.checked-product-primary { border-color:#78bcc2; }
+.checked-name { font-size:15px; line-height:1.3; margin:0 0 8px; }
+.checked-price { font-weight:700; margin:0 0 8px; }
+.checked-reason,.checked-message,.checked-question,.checked-dissent,.checked-gap { font-size:12px; line-height:1.5; margin:8px 0; }
+.checked-note { font-size:10px; line-height:1.5; color:#5c7b81; }
+.checked-image { width:72px; height:76px; object-fit:contain; float:right; margin:0 0 8px 8px; }
+.checked-action,.world-pick button { min-height:40px; border:1px solid #cae3e6; border-radius:12px; background:#eaf8fa; color:#275f67; padding:8px 12px; font:inherit; font-size:12px; }
+.checked-citations { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
+.world-pick { display:flex; align-items:center; gap:10px; }
+.world-pick>div { flex:1; min-width:0; }
+.world-pick strong,.world-pick span { display:block; font-size:12px; line-height:1.5; }
+.checked-inventory { padding-left:18px; font-size:12px; }
+.phone-app[data-camera="off"] .bridge-panel { position:relative; top:auto; left:auto; right:auto; flex:0 1 34%; width:100%; max-height:34%; min-height:0; }
+@media(min-width:641px) { .phone-app { max-width:520px; } }
+
+/* The outer Main header and navigation already use part of a phone's height. */
+@media(max-height:590px){
+  .coupi-call-page .incoming-screen{overflow:hidden;padding:12px 20px max(12px,env(safe-area-inset-bottom))}
+  .coupi-call-page .incoming-top{flex:0 0 44px;min-height:44px}
+  .coupi-call-page .incoming-person{flex:1 1 0;min-height:104px;padding:4px 0 8px}
+  .coupi-call-page .incoming-person .nori-orbit{width:72px!important;height:72px!important;margin:0 0 6px!important;padding:5px}
+  .coupi-call-page .incoming-person h1{font-size:28px!important;line-height:1.1}
+  .coupi-call-page .incoming-wave,.coupi-call-page .incoming-subtitle,.coupi-call-page .incoming-kicker{display:none}
+  .coupi-call-page .incoming-bottom{flex:0 0 auto}
+  .coupi-call-page .incoming-promise{font-size:18px!important;line-height:1.25;margin-bottom:8px}
+  .coupi-call-page .answer-call{min-height:56px;padding-block:8px}
+  .coupi-call-page .entry-controls{margin:10px 0 4px}
+  .coupi-call-page .entry-controls .call-control{min-height:44px;height:44px}
+  .coupi-call-page .language-note{font-size:11px;line-height:1.35;margin:4px 0}
+  .coupi-call-page .vision-consent{min-height:44px;margin:0;font-size:11px;line-height:1.4}
+  .coupi-call-page .vision-consent input{width:17px;height:17px}
+  .coupi-call-page .privacy-note{font-size:10px;line-height:1.35;margin-top:2px}
+}
+@media(max-height:480px){
+  .coupi-call-page .incoming-person{min-height:86px;padding:2px 0 6px}
+  .coupi-call-page .incoming-person .nori-orbit{width:56px!important;height:56px!important;margin-bottom:4px!important}
+  .coupi-call-page .incoming-person h1{font-size:25px!important}
+  .coupi-call-page .incoming-promise{display:none}
+}

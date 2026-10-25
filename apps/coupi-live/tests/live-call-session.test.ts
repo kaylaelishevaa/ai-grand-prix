@@ -102,6 +102,7 @@ test('an initially ready controller never navigates its existing iframe across p
   const profile=fresh();profile.journey={hatched:true,interviewComplete:true,interviewCount:5,nextQuestion:'',districts:[],processedCallIds:[]};
   const h=componentHarness(profile,(async()=>{throw Error('An already completed call needs no bootstrap request');}) as typeof fetch);
   assert.deepEqual(h.navigations,[]);assert.equal(h.ready(),true);
+  assert(!h.button('Type instead'));assert(!h.button('Back'));assert(!h.button('Skip for now'));assert(!h.button('Review story'));assert(!textOf(h.tree()).includes('OF UP TO 5 STORIES'));
   h.props.profile={...profile,revision:profile.revision+1};h.render();h.strictReplay();await tick();
   assert.deepEqual(h.navigations,[],'A memory update or effect replay must not reload an active voice/camera document');h.unmount();
 });
@@ -109,7 +110,7 @@ test('an initially ready controller never navigates its existing iframe across p
 test('actual parent opens only a server review and replays a lost confirmation response without duplicate completion',{concurrency:false},async()=>{
   let server=draftProfile(),failConfirm=true;const bodies:any[]=[];
   const h=componentHarness(server,(async(_url,init)=>{const body=JSON.parse(String(init?.body));bodies.push(body);const result=handlePersonalization(server,body);server=result.profile;if(body.action==='confirm'&&failConfirm){failConfirm=false;throw Error('Simulated lost response');}return Response.json(result);}) as typeof fetch);
-  await tick();await tick();
+  await tick();await tick();assert(h.button('Review story'));assert(!h.button('Skip for now'));
   h.emit({type:'coupi-personalization-review',id:'personalization-tool1',review:{story:'TOOL_INVENTED_FACT'}});await tick();await tick();
   assert(h.review());assert(!h.review()!.props.review.story.includes('TOOL_INVENTED_FACT'));assert.equal(h.completed.length,0);assert.equal(server.memoryLines.length,0);
   h.review()!.props.onConfirm(review);await tick();await tick();assert.equal(h.completed.length,0);assert(h.review());
