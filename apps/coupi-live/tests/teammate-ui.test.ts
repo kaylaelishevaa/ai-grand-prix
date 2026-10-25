@@ -859,6 +859,34 @@ test('recommendations open six picks inside the fixed product panel, expand to t
   f.nodes.get('group-open').onclick();assert.equal(scroller.scrollTop,180);assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.call.ready,true);assert.equal(f.camera.running,true);
 });
 
+test('parallel product try-on and adjustment share one photo load and both report the same applied preview',async t=>{
+  const loaded=deferred();let loads=0;const f=fixture(t,{productLoad:()=>{loads++;return loaded.promise;}});await f.nodes.get('answer-call').onclick();
+  const lamp=catalog.find(product=>product.productType==='lamp');f.voice.opts.onRecommendations([lamp],'',{productType:'lamp',sourceOnly:true});
+  const product=f.voice.opts.onProductAction('try_on',lamp.id),adjustment=f.voice.opts.onTryon('desk',{scale:1.1});
+  assert.equal(loads,1);loaded.resolve();const [applied,adjusted]=await Promise.all([product,adjustment]);
+  assert.equal(applied.ok,true);assert.equal(applied.product.id,lamp.id);assert.equal(adjusted.product_id,lamp.id);assert.equal(f.camera.options.scale,1.1);assert.equal(f.camera.product.id,lamp.id);
+});
+
+test('fresh spoken recommendations replace an open details panel and acknowledge the exact visible cards',async t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
+  const lipsticks=[...f.store.catalog.values()].filter(p=>p.productType==='lipstick');
+  f.voice.opts.onRecommendations(lipsticks,'',{query:'pink lipstick',sourceOnly:true});
+  await f.voice.opts.onProductAction('details');assert.equal(f.nodes.get('details-dialog').open,true);
+  const glasses=[...f.store.catalog.values()].filter(p=>p.productType==='glasses'&&p.tags.includes('optical'));
+  const shown=f.voice.opts.onRecommendations(glasses,'',{query:'normal glasses',sourceOnly:true});
+  assert.equal(shown.ok,true);assert.deepEqual(Array.from(shown.product_ids),glasses.map(p=>p.id));assert.deepEqual(Array.from(shown.visible_product_ids),inlineRows(f).map(row=>row.dataset.id));
+  assert.equal(f.nodes.get('details-dialog').open,false);assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.nodes.get('product-zone').hidden,false);assert.equal(f.nodes.get('inline-products').hidden,false);
+  const failed=f.voice.opts.onRecommendations([{...glasses[0],id:'unknown-server-product'}],'',{query:'glasses',sourceOnly:true});assert.equal(failed.ok,false);assert.deepEqual(Array.from(failed.product_ids),[]);
+});
+
+test('spoken skip reports the new collection and does not claim success when no collection exists',async t=>{
+  const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
+  const lipsticks=[...f.store.catalog.values()].filter(p=>p.productType==='lipstick');f.voice.opts.onRecommendations(lipsticks,'',{query:'pink lipstick',sourceOnly:true});
+  const previous=f.store.current.id;const skipped=await f.voice.opts.onProductAction('skip');assert.equal(skipped.ok,true);assert.notEqual(skipped.product.id,previous);assert.equal(skipped.product.id,f.store.current.id);assert.equal(skipped.product.productType,'lipbalm');assert.deepEqual(Array.from(skipped.visible_product_ids),inlineRows(f).map(row=>row.dataset.id));
+  const single=fixture(t,{catalog:[catalog.find(p=>p.productType==='glasses')]});await single.nodes.get('answer-call').onclick();single.voice.opts.onRecommendations([...single.store.catalog.values()],'',{query:'normal glasses',productType:'glasses',sourceOnly:true});
+  const unchanged=single.store.current.id,failed=await single.voice.opts.onProductAction('skip');assert.equal(failed.ok,false);assert.equal(single.store.current.id,unchanged);assert.match(failed.error,/No different collection/);
+});
+
 test('internal product scrolling, selection and comparison preserve position without moving the call',async t=>{
   const f=fixture(t,{catalog:inlineCatalog()});await f.nodes.get('answer-call').onclick();
   f.voice.opts.onRecommendations([...f.store.catalog.values()].filter(p=>p.productType==='lipstick'));

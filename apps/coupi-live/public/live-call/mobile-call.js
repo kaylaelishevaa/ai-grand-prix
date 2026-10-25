@@ -26,7 +26,7 @@
   let toastTimer,initialGreeting=true,displayedTotal=0;
   let entryCameraWanted=true,entryInputMode='voice',inputMode='voice',formatBusy=false,composerWanted=false;
   let visionWanted=true,visionWasActive=false,visionState='paused',visionLastAt=null;
-  let previewEpoch=0,previewMeta=null,catalogType='recommended',loadingEpoch=0,loadingProductId=null;
+  let previewEpoch=0,previewMeta=null,catalogType='recommended',loadingEpoch=0,loadingProductId=null,pendingTryOn=null;
   let recommendationsReceived=false,recommendedProducts=[],searchController=null;
   let lastSearch=null,lastSearchMessage='',lastSearchStatus=null,excludedProductIds=[],visibleChoices=[],catalogTryButtons=[];
   const productLabel=p=>typeLabels[p.productType]||'Product';
@@ -163,13 +163,13 @@
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
     directShopping:!checkedShopping,...(checkedShopping?{onUserTurnStart:()=>{bridgeTurnEpoch++;pendingPhoto=Promise.resolve();checkedTurnId='';bridge.beginTurn();},onResolveCall:async()=>{await pendingPhoto;return bridge.resolveLatest();}}:{}),
     onWorldRecommendations:(list,message)=>worldRecommendations(list,message),onWorldProduct:skuId=>bridge.openWorldProduct(skuId),
-    onTranscript:transcript,onRecommendations:(list,message,options,status)=>{searchController?.abort();searchController=null;$('catalog-search-submit').disabled=false;$('catalog-refresh').disabled=false;if(list.some(isLiveListing))receiveRecommendations(list,message,options,[],status);else recommend(list,message,options);},
+    onTranscript:transcript,onRecommendations:(list,message,options,status)=>{searchController?.abort();searchController=null;$('catalog-search-submit').disabled=false;$('catalog-refresh').disabled=false;hideBridgePanel();closeDialogs();return list.some(isLiveListing)?receiveRecommendations(list,message,options,[],status):recommend(list,message,options);},
     onTryon:async(next,options)=>{
       const token=generation;let target=trying;
       if(next==='none'){await setMode('none');return {product_id:null,preview_kind:null};}
       if(!camera.running)throw Error('Tap Camera and I can show you the try-on.');
       if(next!=='makeup'&&options.color!==undefined)throw Error('The preview uses the real product photo. Choose another product for a different colour.');
-      if(!trying||trying.category!==next){const p=store.current;if(!p||p.category!==next)throw Error('Choose a matching product card and try it first.');target=p;if(p.preview?.available===false)return previewFailure(p);if(!(await tryOn(p))?.ok)throw Error('The product preview was cancelled.');}
+      if(!trying||trying.category!==next||loadingProductId===store.current?.id){const p=store.current;if(!p||p.category!==next)throw Error('Choose a matching product card and try it first.');target=p;if(p.preview?.available===false)return previewFailure(p);if(!(await tryOn(p))?.ok)throw Error('The product preview was cancelled.');}
       if(token!==generation||!trying||mode!==next||trying.id!==target?.id||camera.product?.id!==target?.id)throw Error('The product preview changed or the call ended.');
       if(previewMeta?.finish==='clear-balm'&&options.color!==undefined)throw Error('This balm is clear and preserves natural lip colour. Choose a tinted balm or lipstick for a colour preview.');
       camera.setOptions(options);cameraUI();return {product_id:trying.id,product_type:trying.productType,preview_kind:previewMeta?.kind,shade_estimated:previewMeta?.shadeEstimated,preview_is_approximate:true};
@@ -216,7 +216,14 @@
   async function setMode(next){const token=generation;if(!Object.hasOwn(defaults,next))throw Error('Choose makeup, glasses, clothes, desk, or none.');if(next==='none'){previewEpoch++;trying=null;previewMeta=null;loadingEpoch=0;loadingProductId=null;$('product-try').disabled=store.current?.preview?.available===false;}const changed=mode!==next;mode=next;if(changed||next==='none')camera.setOptions(defaults[next]);const modeEpoch=previewEpoch;await camera.setMode(next);if(token!==generation||modeEpoch!==previewEpoch)return false;if(camera.errors[next])throw Error('Tracking is unavailable. Try again in good light or check your connection.');show('tryon-chip',next!=='none'&&!!trying);text('tryon-label',previewLabel());updateFocusUI();updateVisionUI();sync();return true;}
   function previewUnavailable(p){return p.preview?.unavailableReason||'This listing does not have a supported try-on image. You can still view details or add it to your bag.';}
   function previewFailure(p){return {ok:false,error:previewUnavailable(p),unavailableReason:previewUnavailable(p),alternatives:[...store.catalog.values()].filter(x=>x.id!==p.id&&x.productType===p.productType&&x.preview?.available!==false).slice(0,3).map(x=>({id:x.id,name:x.name,preview_available:true}))};}
-  async function tryOn(p=store.current){
+  function tryOn(p=store.current){
+    p=trusted(p);
+    if(p&&pendingTryOn?.id===p.id&&pendingTryOn.generation===generation&&pendingTryOn.epoch===previewEpoch)return pendingTryOn.promise;
+    const task={id:p?.id,generation,epoch:0,promise:null};
+    const loading=loadTryOn(p);task.epoch=previewEpoch;
+    task.promise=loading.finally(()=>{if(pendingTryOn===task)pendingTryOn=null;});pendingTryOn=task;return task.promise;
+  }
+  async function loadTryOn(p){
     p=trusted(p);if(!p||!['active'].includes(phase))throw Error('Choose a product during the call first.');
     if(!p.image)throw Error('This product has no preview photo. Choose another product.');
     if(p.preview?.available===false)throw Error(previewUnavailable(p));
@@ -239,7 +246,7 @@
     finally{if(loadingEpoch===epoch){loadingEpoch=0;loadingProductId=null;$('product-try').disabled=store.current?.preview?.available===false;}}
   }
   function receiveRecommendations(list,message,search,excluded=[],status=null){
-    if(!['connecting','active'].includes(phase))return;
+    if(!['connecting','active'].includes(phase))return {ok:false,error:'The shopping call is no longer active.'};
     list=list.filter(p=>p&&typeof p==='object');
     const types=[...new Set(list.map(p=>p.productType).filter(type=>typeof type==='string'))];
     lastSearch=search || {query:types.join(' '),category:'all',max_price:null,product_types:types};
@@ -249,6 +256,7 @@
     const matches=list.filter(p=>(!allowed.length||allowed.includes(p.productType))&&(!lastSearch.category||lastSearch.category==='all'||p.category===lastSearch.category)&&!excluded.includes(String(p.id))).slice(0,15);
     store.addSearchProducts(matches);for(const product of store.catalog.values())discovery.catalog.set(String(product.id),product);recommendationsReceived=true;recommend(matches,message,{...lastSearch,sourceOnly:true});recommendedProducts=matches.map(p=>trusted(p)).filter(Boolean).slice(0,15);closeDialogs();openSearchCatalog('recommended');
     if(excluded.length&&!recommendedProducts.length&&status!=='listing_sources_unavailable')text('catalog-match-note',lastSearchMessage||'No new matching products found. Try changing your search.');
+    return recommendationResult(list,visibleChoices);
   }
   function catalogChoices(){
     const groups=[...new Set([...Object.keys(typeLabels),...[...store.catalog.values()].map(p=>p.productType)])].map(type=>[...store.catalog.values()].filter(p=>p.productType===type));
@@ -312,7 +320,8 @@
     text('product-selected-note','Selected · '+(checkedEvidence.get(String(p.id))?.callId===checkedTurnId&&checkedEvidence.get(String(p.id))?.primary?'Recommended':p.brand||typeLabels[p.productType]||'Coupang'));text('product-try',p.preview?.available===false?'No preview':'Try it');$('product-try').disabled=p.preview?.available===false;
     sync();
   }
-  function recommend(list,message,options={}){if(!['connecting','active'].includes(phase))return;discovery.recommend(list,options);catalogType=discovery.productType||catalogType;adoptDiscovery({resetScroll:true});scrollToCollection();if($('catalog-dialog').open)renderCatalog();if(!store.current)toast('No matching listing in this catalog. Try another colour or budget.');if(bridgePanelVisible)showBridgePanel();}
+  function recommendationResult(requested,products=discovery.products){const ids=products.map(product=>String(product.id));return {ok:!requested.length||!!ids.length,product_ids:ids,visible_product_ids:displayedProducts().map(product=>String(product.id)),...(!ids.length&&requested.length?{error:'These listings could not be shown. Please search again; do not claim their product cards are visible.'}:{})};}
+  function recommend(list,message,options={}){if(!['connecting','active'].includes(phase))return {ok:false,error:'The shopping call is no longer active.'};discovery.recommend(list,options);catalogType=discovery.productType||catalogType;adoptDiscovery({resetScroll:true});scrollToCollection();if($('catalog-dialog').open)renderCatalog();if(!store.current)toast('No matching listing in this catalog. Try another colour or budget.');if(bridgePanelVisible)showBridgePanel();return recommendationResult(list);}
   function updateBag(){text('cart-count',String(store.cart.size));$('cart-button').setAttribute('aria-label',`Open bag, ${store.cart.size} items`);sync();}
   function addToBag(p){p=trusted(p);if(!p)return;store.cart.set(String(p.id),p);updateBag();toast('Selected product added to your bag');}
   function nextStyle(){const previous=store.current;const next=discovery.nextCollection();if(!next.changed){toast('No related collection within these preferences. Ask Coupi for a new direction.');return false;}if(previous)store.skipped.push(String(previous.id));adoptDiscovery({resetScroll:true});if($('catalog-dialog').open)renderCatalog();toast(discovery.label);sync();return true;}
@@ -462,7 +471,7 @@
   $('checkout-confirm').onclick=()=>checkoutAction(()=>{const receipt=checkout.confirm();if(receipt.id!==completedReceipt){completedReceipt=receipt.id;lastPurchase=receipt;purchasePairings=window.CoupiPairings.select([...store.catalog.values()],receipt.item_ids,{maxPrice:discovery.maxPrice,excludedTypes:discovery.constraints.types.exclude});for(const id of receipt.item_ids)store.cart.delete(id);updateBag();try{voice.notifyCheckoutComplete(receipt,purchasePairings);}catch{toast('Purchase complete. Explore your matching picks below.');}}$('checkout-dialog').scrollTop=0;});
   $('close-checkout').onclick=()=>$('checkout-dialog').close();$('checkout-done').onclick=()=>$('checkout-dialog').close();
   $('checkout-dialog').addEventListener('close',()=>{if(!$('checkout-dialog').open)checkout.cancel();sync();});
-  async function productAction(action,productId){const p=productId?[...displayedProducts(),...store.queue,...discovery.comparison,...purchasePairings,...store.cart.values(),...(store.detailProduct?[store.detailProduct]:[])].find(p=>String(p.id)===String(productId)):store.current;if(!p)throw Error('That product is not in the current picks, comparison, details or bag. Search first.');if(action==='try_on'&&p.preview?.available===false)return previewFailure(p);if(productId&&store.current?.id!==p.id&&discovery.products.some(x=>x.id===p.id))selectProduct(p);if($('checkout-dialog').open&&checkout.snapshot().step==='complete')$('checkout-dialog').close();if(action==='save')addToBag(p);else if(action==='skip')nextStyle();else if(action==='try_on'){if(!discovery.products.some(item=>item.id===p.id))recommend([p],'',{productType:p.productType,category:p.category});selectProduct(p);closeDialogs();backToCamera();if(!(await tryOn(p))?.ok)throw Error('The product preview was cancelled.');}else if(action==='details'||action==='browse')productDetails(p);else throw Error('Unsupported product action.');return {ok:true,action,product:p,cart_count:store.cart.size,purchased:false,preview_is_approximate:true,...(action==='try_on'?{preview_kind:previewMeta?.kind,shade_estimated:previewMeta?.shadeEstimated}:{} )};}
+  async function productAction(action,productId){const p=productId?[...displayedProducts(),...store.queue,...discovery.comparison,...purchasePairings,...store.cart.values(),...(store.detailProduct?[store.detailProduct]:[])].find(p=>String(p.id)===String(productId)):store.current;if(!p)throw Error('That product is not in the current picks, comparison, details or bag. Search first.');if(action==='try_on'&&p.preview?.available===false)return previewFailure(p);if(productId&&store.current?.id!==p.id&&discovery.products.some(x=>x.id===p.id))selectProduct(p);if($('checkout-dialog').open&&checkout.snapshot().step==='complete')$('checkout-dialog').close();if(action==='save')addToBag(p);else if(action==='skip'){if(!nextStyle())return {ok:false,action,error:'No different collection matches these preferences. Ask for a new colour or product type.'};closeDialogs();hideBridgePanel();scrollToCollection();return {ok:true,action,product:store.current,products:discovery.visible,visible_product_ids:discovery.visible.map(product=>String(product.id)),cart_count:store.cart.size,purchased:false};}else if(action==='try_on'){if(!discovery.products.some(item=>item.id===p.id))recommend([p],'',{productType:p.productType,category:p.category});selectProduct(p);closeDialogs();backToCamera();if(!(await tryOn(p))?.ok)throw Error('The product preview was cancelled.');}else if(action==='details'||action==='browse')productDetails(p);else throw Error('Unsupported product action.');return {ok:true,action,product:p,cart_count:store.cart.size,purchased:false,preview_is_approximate:true,...(action==='try_on'?{preview_kind:previewMeta?.kind,shade_estimated:previewMeta?.shadeEstimated}:{} )};}
 
   $('personalization-skip').onclick=async()=>{const token=generation,button=$('personalization-skip');button.disabled=true;const pending=personalization.skip();sync();voice.skipPersonalization();try{const result=await pending;if(token===generation&&!result.ok)notice(result.error||'Could not skip. Please try again.');}finally{if(token===generation)button.disabled=false;}};
   $('entry-camera').onclick=()=>{entryCameraWanted=!entryCameraWanted;selectEntry();};

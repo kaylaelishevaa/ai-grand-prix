@@ -105,7 +105,7 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.equal(config.audio.input.turn_detection.create_response,true);
   assert.doesNotMatch(config.instructions,/CHECKED CALL BRIDGE OVERRIDE/);
   assert.match(config.instructions,/Hi Kayleen! What can I help you find today/);
-  assert.deepEqual(config.tools.map(t=>t.name).sort(),['draft_preferences','skip_personalization','search_products','set_tryon','product_action','look_at_camera','search_world_products','open_world_product','start_checkout'].sort());
+  assert.deepEqual(config.tools.map(t=>t.name).sort(),['draft_preferences','skip_personalization','search_products','set_tryon','product_action','look_at_camera','start_checkout'].sort());
 });
 
 test('upstream errors, invalid answers, and network exceptions never expose raw details', async () => {
@@ -232,4 +232,20 @@ test('English and Korean glasses retrieval never crosses categories or invents a
   assert.equal(searchProducts({query:'glasses',category:'makeup'},glasses).products.length,0);
   assert.equal(searchProducts({query:'안경',category:'glasses',max_price:9000},glasses).products.length,0);
   assert.equal(searchProducts({query:'lipstick',category:'glasses'},[...catalog,...glasses]).products.length,0);
+});
+
+
+test('recommendation ranges come only from matching listings and descriptions retain catalog grounding', () => {
+  const result=searchProducts({query:'black sunglasses',category:'glasses',max_price:24000});
+  assert.ok(result.products.length>=2);
+  assert.ok(result.products.every(product=>product.tags.includes('black')||product.tags.includes('black frame')));
+  assert.deepEqual(result.price_range,{min:18130,max:23210,currency:'KRW'});
+  assert.ok(result.products.every(product=>product.aliases.length&&product.tags.length));
+  assert.match(result.message,/short colour\/style description/);
+  const empty=searchProducts({query:'black sunglasses',category:'glasses',max_price:100});
+  assert.equal(empty.price_range,null);
+  const instructions=sessionConfiguration().instructions;
+  assert.match(instructions,/aliases, tags or verifiedAttributes/);
+  assert.match(instructions,/Wait for the search tool to return and display its cards/);
+  assert.match(instructions,/never invent a feature or price/);
 });

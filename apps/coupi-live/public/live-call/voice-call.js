@@ -674,7 +674,27 @@
             if(!response.ok)throw new Error('Product search is unavailable. Do not invent replacement products.');
             result=await response.json();
             if(!Array.isArray(result.products))throw new Error('The product search returned an invalid catalog result.');
-            if(this._current(c)&&!task.cancelled)this.options.onRecommendations?.(result.products,result.message || 'Products from Coupang.',{...(result.search || {query,category,max_price}),maxPrice:result.search?.max_price??max_price,constraints:result.constraints,sourceOnly:true},result.retrieval_status);
+            if(this._current(c)&&!task.cancelled){
+              if(typeof this.options.onRecommendations!=='function')throw Error('Product cards are unavailable. Please try the search again.');
+              const shown=await this.options.onRecommendations(result.products,result.message || 'Products from Coupang.',{...(result.search || {query,category,max_price}),maxPrice:result.search?.max_price??max_price,constraints:result.constraints,sourceOnly:true},result.retrieval_status);
+              if(shown===false||shown?.ok===false)throw Error(shown?.error||'Product cards could not be shown. Please search again.');
+              if(Array.isArray(shown?.product_ids)){
+                const ids=new Set(shown.product_ids.map(String));
+                result.products=result.products.filter(product=>ids.has(String(product.id)));
+                if(ids.size&&!result.products.length)throw Error('The displayed products do not match this search. Please search again.');
+                const prices=result.products.map(product=>product.price).filter(Number.isFinite);
+                result.price_range=prices.length?{min:Math.min(...prices),max:Math.max(...prices),currency:'KRW'}:null;
+                result.displayed_product_ids=(shown.visible_product_ids||shown.product_ids).filter(id=>ids.has(String(id)));
+                const picks=result.displayed_product_ids.slice(0,2).map(id=>result.products.find(product=>String(product.id)===String(id))).filter(Boolean);
+                const won=value=>'₩'+value.toLocaleString('en-US');
+                const describe=product=>{const alias=product.aliases?.[0];const name=typeof alias==='string'&&alias.trim()?alias.trim():product.name;return name+(Number.isFinite(product.price)?' at '+won(product.price):' (price on Coupang)');};
+                if(picks.length){
+                  result.recommendation_text='I’d suggest '+picks.map(describe).join(', or ')+'.';
+                  if(result.products.length>2&&result.price_range&&result.price_range.min!==result.price_range.max)result.recommendation_text+=' These options range from '+won(result.price_range.min)+' to '+won(result.price_range.max)+'.';
+                  result.message='Product cards are now displayed. Use recommendation_text as the complete brief reply, without adding product features or a follow-up question. It describes only the corresponding listing’s own name and price. The other returned products are available through View more.';
+                }
+              }
+            }
           } finally {clearTimeout(timer);c.toolControllers.delete(controller);}
         } else if(event.name==='search_world_products') {
           const query=typeof args.query==='string'?args.query.trim().slice(0,300):'';

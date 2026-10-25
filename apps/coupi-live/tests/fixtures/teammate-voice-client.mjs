@@ -105,7 +105,7 @@ function fixture(t, options = {}) {
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
     onResolveCall:options.onResolveCall,onUserTurnStart:options.onUserTurnStart,onPreferences:options.onPreferences,
-    onRecommendations: (products, message) => recommendations.push({products, message}),
+    onRecommendations: (products, message, search, status) => {recommendations.push({products, message});return options.onRecommendations?.(products,message,search,status);},
     onWorldRecommendations: (products, message) => worldRecommendations.push({products, message}),
     onWorldProduct: async skuId => {worldActions.push(skuId);return options.onWorldProduct?.(skuId) || {ok:true,skuId,purchased:false};},
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
@@ -217,6 +217,38 @@ test('multiple tools deduplicate across GA events and wait for response.done plu
   await tick();
   assert.equal(countReplies(channel), baseline + 2);
   assert.equal(f.calls.filter(([url]) => url.endsWith('/search')).length, 1);
+});
+
+test('product narration waits for rendered cards and only describes the displayed matches',async t=>{
+  const render=deferred(),products=[{id:'shown',name:'Pink tint',price:9000},{id:'filtered',name:'Other tint',price:15000}];
+  const f=fixture(t,{search:()=>response({products,price_range:{min:9000,max:15000,currency:'KRW'}}),onRecommendations:()=>render.promise});
+  await connect(f);const channel=f.channel,baseline=countReplies(channel);
+  f.emit({type:'response.created',response:{id:'r-render'}});const call=tool(f,'search-render','search_products',{query:'pink lipstick'},'r-render');done(f,'r-render',[call]);await tick();
+  assert.equal(f.recommendations.length,1);assert.equal(toolOutputs(channel).length,0);assert.equal(countReplies(channel),baseline);
+  render.resolve({ok:true,product_ids:['shown'],visible_product_ids:['shown']});await tick();await tick();
+  const output=JSON.parse(toolOutputs(channel)[0].item.output);
+  assert.deepEqual(output.products,[products[0]]);assert.deepEqual(output.displayed_product_ids,['shown']);assert.deepEqual(output.price_range,{min:9000,max:9000,currency:'KRW'});assert.equal(countReplies(channel),baseline+1);
+});
+
+test('a failed card render returns a search failure instead of narratable product success',async t=>{
+  for(const reject of [false,true]){
+    const f=fixture(t,{search:()=>response({products:[{id:'not-visible',name:'Hidden product'}]}),onRecommendations:async()=>{if(reject)throw Error('Card rendering failed');return {ok:false,error:'Cards could not be shown'};}});
+    await connect(f);tool(f,'failed-render','search_products',{query:'glasses'},'r-failed-render');await tick();await tick();
+    const result=JSON.parse(toolOutputs(f.channel)[0].item.output);assert.equal(result.ok,false);assert.deepEqual(result.products,[]);assert.match(result.error,/Card/i);
+  }
+});
+
+test('spoken recommendation text keeps each visible listing’s own description and exact price',async t=>{
+  const products=[
+    {id:'green',name:'Original green listing',aliases:['RECLOW BB557 green lens sunglasses'],tags:['black','green'],price:18130},
+    {id:'black',name:'Original black listing',aliases:['RECLOW YLeen black sunglasses'],tags:['black'],price:23210},
+    {id:'cream',name:'Cream sunglasses',aliases:[],tags:['cream'],price:14220},
+  ];
+  const f=fixture(t,{search:()=>response({products}),onRecommendations:()=>({ok:true,product_ids:products.map(p=>p.id),visible_product_ids:['black','green','cream']})});
+  await connect(f);tool(f,'grounded-reply','search_products',{query:'sunglasses'},'r-grounded');await tick();await tick();
+  const result=JSON.parse(toolOutputs(f.channel)[0].item.output);
+  assert.equal(result.recommendation_text,'I’d suggest RECLOW YLeen black sunglasses at ₩23,210, or RECLOW BB557 green lens sunglasses at ₩18,130. These options range from ₩14,220 to ₩23,210.');
+  assert.match(result.message,/recommendation_text as the complete brief reply/);assert.doesNotMatch(result.recommendation_text,/YLeen[^,]*green/);
 });
 
 test('world tools use a separate catalog namespace and exact SKU bridge instead of try-on actions',async t=>{
