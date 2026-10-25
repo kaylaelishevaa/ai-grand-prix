@@ -11,13 +11,18 @@
   // saves billing information, or mutates the caller's catalog/cart.
   class CoupiCheckout {
     constructor(catalog = []) {
+      this.updateCatalog(catalog);
+      this.reset();
+    }
+
+    // Refresh trusted listings without changing an order already under review.
+    updateCatalog(catalog) {
       this._catalog = new Map();
       for (const product of catalog) {
         if (product && typeof product.id === 'string' && product.id) {
           this._catalog.set(product.id, clone(product));
         }
       }
-      this.reset();
     }
 
     get current() { return this.snapshot(); }

@@ -11,19 +11,25 @@
   let phase='incoming',generation=0,facingMode='user',mode='none',trying=null,connectedAt=null,cameraBusy=false,ending=false,decisionBusy=false,handsWanted=true;
   let drag=null,toastTimer,gestureStarting=false,gestureStatusKind='off',initialGreeting=true,displayedTotal=0;
   let visionWanted=true,visionWasActive=false,visionState='paused',visionLastAt=null;
-  let previewEpoch=0,previewMeta=null,catalogType='lipstick',loadingEpoch=0,loadingProductId=null;
+  let previewEpoch=0,previewMeta=null,catalogType='recommended',loadingEpoch=0,loadingProductId=null;
+  let recommendationsReceived=false,recommendedProducts=[],searchController=null;
+  let lastSearch=null,lastSearchMessage='',lastSearchStatus=null,excludedProductIds=[],visibleChoices=[],catalogTryButtons=[];
+  const productLabel=p=>typeLabels[p.productType]||'Product';
+  const canPreview=p=>Object.hasOwn(defaults,p.category);
+  const isLiveListing=p=>p.source==='coupang_web';
+  let textMode=false;
   let controlsExpanded=false,viewingCollection=false;
   let voice=null,attachment=null,attachmentEpoch=0,sendingImage=false,choosingImage=false,pickerTimer;
-  const conversation=new window.CoupiConversation({store,root:$('transcript'),history:$('chat-history'),count:$('chat-count'),latest:$('chat-latest')});
+  const conversation=new window.CoupiConversation({store,root:$('conversation-history'),history:$('chat-history'),count:$('chat-count'),latest:$('chat-latest')});
   const trusted=p=>p&&store.catalog.get(String(p.id));
   const show=(id,visible)=>{$(id).hidden=!visible;};
   function text(id,value){$(id).textContent=value;}
   function toast(value){clearTimeout(toastTimer);text('toast',value);show('toast',true);toastTimer=setTimeout(()=>show('toast',false),2400);}
   function notice(message, retry=false){text('call-notice',message||'');show('call-notice',!!message);show('retry-call',retry);}
   function screen(next){phase=next;if(!['active','connecting'].includes(next)){setCollectionView(false,{resetScroll:true});}show('incoming-screen',next==='incoming');show('call-screen',['connecting','active'].includes(next));show('end-screen',next==='ended');$('phone-app').dataset.phase=next;updateVisionUI();updateFocusUI();}
-  function context(){const p=$('details-dialog').open?store.detailProduct:store.current,q=checkout.snapshot();return {mode,cameraRunning:camera.running,screen:phase,personalization:personalization?.context||{active:false,preferences:null,draft_pending:false},visible_panel:$('details-dialog').open?'product-details':$('checkout-dialog').open?'checkout':$('compare-dialog').open?'comparison':$('cart-dialog').open?'cart':($('catalog-dialog').open||viewingCollection)?'catalog':'call',checkout:{step:q.step,item_ids:q.selectedItems.map(i=>i.id),reference_total:q.referenceTotal,demo:true},last_purchase:lastPurchase?{receipt_id:lastPurchase.id,item_ids:lastPurchase.item_ids,pairing_ids:purchasePairings.map(p=>p.id),demo:true,payment_processed:false,order_placed:false}:null,facing_mode:facingMode,vision:{enabled:visionEnabled(),last_image_at:visionLastAt,state:visionState},tried_product:trying?{id:trying.id,title:trying.name,productType:trying.productType,preview_kind:previewMeta?.kind,shade_color:previewMeta?.shadeColor,shade_estimated:previewMeta?.shadeEstimated}:null,overlay:{...camera.options},visible_product:p?{id:p.id,title:p.name,category:p.category,productType:p.productType,price:p.price,price_is_historical:true,verifiedAttributes:(p.verifiedAttributes||[]).slice(0,2)}:null,cart_ids:[...store.cart.keys()],tried_product_id:trying?.id||null,recent_skipped:store.skipped.slice(-5),comparison_ids:discovery.comparison.map(p=>p.id),group_label:discovery.label};}
+  function context(){const p=$('details-dialog').open?store.detailProduct:store.current,q=checkout.snapshot();return {mode,cameraRunning:camera.running,screen:phase,personalization:personalization?.context||{active:false,preferences:null,draft_pending:false},visible_panel:$('details-dialog').open?'product-details':$('checkout-dialog').open?'checkout':$('compare-dialog').open?'comparison':$('cart-dialog').open?'cart':($('catalog-dialog').open||viewingCollection)?'catalog':'call',checkout:{step:q.step,item_ids:q.selectedItems.map(i=>i.id),reference_total:q.referenceTotal,demo:true},last_purchase:lastPurchase?{receipt_id:lastPurchase.id,item_ids:lastPurchase.item_ids,pairing_ids:purchasePairings.map(p=>p.id),demo:true,payment_processed:false,order_placed:false}:null,facing_mode:facingMode,vision:{enabled:visionEnabled(),last_image_at:visionLastAt,state:visionState},tried_product:trying?{id:trying.id,title:trying.name,productType:trying.productType,preview_kind:previewMeta?.kind,shade_color:previewMeta?.shadeColor,shade_estimated:previewMeta?.shadeEstimated}:null,overlay:{...camera.options},visible_product:p?{id:p.id,title:p.name,category:p.category,productType:p.productType,price:p.price,price_is_historical:!isLiveListing(p),verifiedAttributes:(p.verifiedAttributes||[]).slice(0,2)}:null,cart_ids:[...store.cart.keys()],tried_product_id:trying?.id||null,recent_skipped:store.skipped.slice(-5),comparison_ids:discovery.comparison.map(p=>p.id),group_label:discovery.label};}
   function sync(){voice?.updateContext(context());}
-  function cameraUI(){show('camera-fallback',!camera.running);$('toggle-camera').setAttribute('aria-pressed',String(!camera.running));$('toggle-camera').setAttribute('aria-label',camera.running?'Turn camera off':'Turn camera on');$('toggle-camera').classList.toggle('is-off',!camera.running);$('flip-camera').disabled=cameraBusy||!camera.running;$('flip-camera').setAttribute('aria-label',facingMode==='user'?'Flip to back camera':'Flip to front camera');$('flip-camera').title=facingMode==='user'?'Flip to back camera':'Flip to front camera';updateVisionUI();updateFocusUI();sync();}
+  function cameraUI(){updateCatalogTryButtons();show('camera-fallback',!camera.running);$('toggle-camera').setAttribute('aria-pressed',String(!camera.running));$('toggle-camera').setAttribute('aria-label',camera.running?'Turn camera off':'Turn camera on');$('toggle-camera').classList.toggle('is-off',!camera.running);$('flip-camera').disabled=cameraBusy||!camera.running;$('flip-camera').setAttribute('aria-label',facingMode==='user'?'Flip to back camera':'Flip to front camera');$('flip-camera').title=facingMode==='user'?'Flip to back camera':'Flip to front camera';updateVisionUI();updateFocusUI();sync();}
   const camera=new window.NookCamera({video:$('live-video'),canvas:$('live-canvas'),onStatus:(message,kind)=>{
     if(kind==='error'){notice(message,true);text('camera-fallback-text','Your camera is off');}
     else if(kind==='loading'&&cameraBusy)text('camera-fallback-text','Opening your camera…');
@@ -32,10 +38,10 @@
   camera.setOptions({opacity:0,mirror:true});
   const snapshots=new window.NookCameraSnapshots({video:$('live-video'),previewCanvas:$('live-canvas'),getContext:()=>({mode,mirror:camera.options.mirror,cameraRunning:camera.running}),isEnabled:visionEnabled});
   function updateFocusUI(){
-    const active=!!trying&&camera.running&&['active'].includes(phase),focused=active&&!controlsExpanded;
+    const active=!!trying&&camera.running&&['active'].includes(phase),focused=active&&!controlsExpanded&&!textMode;
     $('phone-app').dataset.focused=String(focused);
-    show('gesture-status',!!store.current&&!focused&&['connecting','active','browse'].includes(phase));
-    show('focus-product',focused);show('focus-toggle',active);
+    show('gesture-status',!!store.current&&!focused&&!textMode&&['connecting','active'].includes(phase));
+    show('focus-product',focused);show('focus-toggle',active&&!textMode);
     $('focus-toggle').setAttribute('aria-expanded',String(controlsExpanded));
     $('focus-toggle').setAttribute('aria-label',controlsExpanded?'Hide call controls':'Show call controls');
     text('focus-toggle-label',controlsExpanded?'Hide':'Controls');
@@ -60,7 +66,7 @@
   }
   function shareSnapshot(reason='interval'){if(!visionEnabled())return false;const frame=snapshots.capture(reason);return frame?voice.sendCameraSnapshot(frame):false;}
 
-  const hands=new window.NookHandGestures({video:$('live-video'),getMirror:()=>camera.options.mirror,isEnabled:()=>handsWanted&&camera.running&&['active'].includes(phase)&&!!store.current&&!decisionBusy&&!viewingCollection&&!$('details-dialog').open&&!$('cart-dialog').open&&!$('catalog-dialog').open&&!$('collections-dialog').open&&!$('compare-dialog').open&&!$('chat-history-dialog').open&&!$('checkout-dialog').open&&!$('personalization-dialog').open,
+  const hands=new window.NookHandGestures({video:$('live-video'),getMirror:()=>camera.options.mirror,isEnabled:()=>!textMode&&handsWanted&&camera.running&&['active'].includes(phase)&&!!store.current&&!decisionBusy&&!viewingCollection&&!$('details-dialog').open&&!$('cart-dialog').open&&!$('catalog-dialog').open&&!$('collections-dialog').open&&!$('compare-dialog').open&&!$('chat-history-dialog').open&&!$('checkout-dialog').open&&!$('personalization-dialog').open,
     onSwipe:direction=>decide(direction),onStatus:(message,kind)=>renderGestureStatus(kind)});
   function renderGestureStatus(kind){
     if(kind)gestureStatusKind=kind;
@@ -68,6 +74,16 @@
   }
   async function startHands(){if(!handsWanted||!camera.running||!store.current||!['active'].includes(phase)||hands.running||gestureStarting)return;gestureStarting=true;renderGestureStatus('loading');try{await hands.start();}finally{gestureStarting=false;renderGestureStatus();}}
   function stopHands(){gestureStarting=false;hands.stop();renderGestureStatus('off');}
+  function setTextMode(enabled){
+    textMode=enabled;$('phone-app').dataset.textMode=String(enabled);hands.reset();
+    voice.setTextMode(enabled);
+    $('text-toggle').disabled=!voice?.call?.ready&&!enabled;
+    show('text-form',enabled);show('conversation-history',enabled);show('transcript',!enabled&&!!store.messages.length);
+    $('text-toggle').setAttribute('aria-expanded',String(enabled));$('text-toggle').setAttribute('aria-pressed',String(enabled));
+    $('text-toggle').setAttribute('aria-label',enabled?'Close text conversation':'Open text conversation');
+    $('conversation-box').dataset.collapsed='false';$('chat-minimize').setAttribute('aria-expanded','true');updateFocusUI();conversation.render();
+    if(enabled)$('text-input').focus();
+  }
   function transcript(entry){
     if(initialGreeting&&entry.role==='assistant'){store.messages=store.messages.filter(m=>m.key!=='opening');initialGreeting=false;}
     store.message(entry);conversation.schedule();
@@ -75,16 +91,17 @@
     if(!current)return;
     const body=$('caption-text'),speaker=current.role==='user'?'You':'Coupi';
     if($('caption-speaker').textContent!==speaker)text('caption-speaker',speaker);
-    show('live-caption',true);
+    show('transcript',!textMode);
     if(body.textContent!==current.text){
       body.textContent=current.text;
       body.scrollTop=body.scrollHeight;
     }
+    conversation.schedule();
   }
-  personalization=new window.CoupiCallPersonalization({catalog:[...store.catalog.values()],onChange:()=>{if(voice&&personalization){voice.options.greeting=personalization.greeting;if(phase==='connecting'){store.message({role:'assistant',key:'opening',text:personalization.greeting});conversation.schedule();}}hands.reset();sync();},onSkip:()=>toast('Let’s find what you need.'),onSaved:()=>{toast('Preferences saved. Let’s keep going.');sync();if(voice?.call?.ready)voice.sendText('I confirmed and saved my preferences. Let’s continue shopping in this call. Ask what I would like to find, or offer a couple of ideas that suit what I shared.');}});
+  personalization=new window.CoupiCallPersonalization({catalog:[...store.catalog.values()],onChange:()=>{if(voice&&personalization){voice.options.greeting=personalization.greeting;if(phase==='connecting'){store.message({role:'assistant',key:'opening',text:personalization.greeting});text('caption-text',personalization.greeting);conversation.schedule();}}hands.reset();sync();},onSkip:()=>toast('Let’s find what you need.'),onSaved:()=>{toast('Preferences saved. Let’s keep going.');sync();if(voice?.call?.ready)voice.sendText('I confirmed and saved my preferences. Let’s continue shopping in this call. Ask what I would like to find, or offer a couple of ideas that suit what I shared.');}});
   voice=new window.NookVoiceSession({audio:$('voice-audio'),greeting:personalization.greeting,getContext:context,getVisionEnabled:visionEnabled,getCameraSnapshot:reason=>snapshots.capture(reason),
     onVisionState:event=>{visionState=event.state;if(event.state==='received')visionLastAt=event.capturedAt||new Date().toISOString();updateVisionUI();sync();},
-    onTranscript:transcript,onRecommendations:(list,message,options)=>recommend(list,message,options),
+    onTranscript:transcript,onRecommendations:(list,message,options,status)=>{searchController?.abort();searchController=null;$('catalog-search-submit').disabled=false;$('catalog-refresh').disabled=false;if(status!==undefined||list.some(isLiveListing))receiveRecommendations(list,message,options,[],status);else recommend(list,message,options);},
     onTryon:async(next,options)=>{
       const token=generation;let target=trying;
       if(next==='none'){await setMode('none');return {product_id:null,preview_kind:null};}
@@ -97,13 +114,15 @@
     onProductAction:async(action,productId)=>{if(action==='try_on'&&!camera.running)throw Error('Camera is off. Ask the shopper to tap Camera before previewing.');return productAction(action,productId);},
     onCheckout:request=>openCheckout(request),
     onPreferences:request=>{if(phase!=='active')throw Error('Start the call before shaping your worlds.');return personalization.handle(request);},
-    onPlaybackBlocked:blocked=>show('play-audio',blocked),
     onTranscriptionState:state=>{if(state.compatibilityMode)notice('Using compatible captions. Speak clearly or type if a word looks wrong.');},
+    onPlaybackBlocked:blocked=>show('play-audio',blocked&&!textMode),
     onState:({state,message,muted,connectedAt:at})=>{
       connectedAt=at;const ready=!!voice?.call?.ready;updateVisionUI();
-      $('inline-mute').disabled=!ready;$('inline-mute').setAttribute('aria-pressed',String(muted));$('inline-mute').setAttribute('aria-label',muted?'Unmute microphone':'Mute microphone');text('inline-call-status',ready?(muted?'Live call · mic muted':'Live call · keep talking'):'Browse with Coupi');$('mute-call').disabled=!ready;$('text-input').disabled=false;$('text-toggle').disabled=false;$('chat-send').disabled=!ready||sendingImage;$('mute-call').setAttribute('aria-pressed',String(muted));$('mute-call').setAttribute('aria-label',muted?'Unmute microphone':'Mute microphone');$('mute-call').classList.toggle('is-off',muted);
+      $('mute-call').disabled=!ready||textMode;$('text-input').disabled=!ready;$('text-toggle').disabled=!ready&&!textMode;$('mute-call').setAttribute('aria-pressed',String(muted));$('mute-call').setAttribute('aria-label',textMode?'Microphone off in text mode':muted?'Unmute microphone':'Mute microphone');$('mute-call').classList.toggle('is-off',muted);
+      $('mute-call').title=textMode?'Close text mode to use the microphone':muted?'Unmute microphone':'Mute microphone';
+      $('chat-send').disabled=!ready||sendingImage;$('inline-mute').disabled=!ready||textMode;$('inline-mute').setAttribute('aria-pressed',String(muted));$('inline-mute').setAttribute('aria-label',textMode?'Microphone off in text mode':muted?'Unmute microphone':'Mute microphone');text('inline-call-status',textMode?'Text mode':ready?(muted?'Live call · mic muted':'Live call · keep talking'):'Browse with Coupi');
       $('phone-app').dataset.voice=state;
-      text('call-status',({connecting:'Connecting…',listening:'Listening',thinking:'Thinking',searching:'Finding your picks',speaking:'Coupi is speaking',connected:muted?'Mic muted':'Live with Coupi',reconnecting:'Reconnecting…',error:'Connection paused',idle:'Coupi'})[state]||'Coupi');
+      text('call-status',({connecting:'Connecting…',listening:textMode?'Text mode':'Listening',thinking:'Thinking',searching:'Finding your picks',speaking:textMode?'Replying…':'Coupi is speaking',connected:textMode?'Text mode':muted?'Mic muted':'Live with Coupi',reconnecting:'Reconnecting…',error:'Connection paused',idle:'Coupi'})[state]||'Coupi');
       if(ready&&phase==='connecting'){screen('active');notice('');cameraUI();startHands();}
       if(state==='error'&&!ending&&['connecting','active'].includes(phase)){notice(message,true);stopHands();}
       else if(state==='idle'&&phase==='active'&&!ending){endCall(message);}
@@ -111,7 +130,7 @@
   });
   window.NookMobile={camera,voice,store,discovery,checkout,personalization};
   async function startCamera({strictFacing=false}={}){if(cameraBusy)return false;cameraBusy=true;cameraUI();const token=generation;try{const ok=await camera.start({facingMode,portrait:true,strictFacing});if(token!==generation)return false;if(ok){facingMode=camera.actualFacingMode||facingMode;camera.setOptions({mirror:facingMode==='user'});startHands();}else if(!strictFacing)notice(camera.lastCameraError?.message||'Allow Camera in browser settings, then tap Retry.',true);return ok;}finally{if(token===generation){cameraBusy=false;cameraUI();}}}
-  async function answer(){if(phase==='connecting'||voice.call)return;const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;lastPurchase=null;purchasePairings=[];screen('connecting');notice('');text('camera-fallback-text',visionWanted?'Opening your camera…':'Camera off. Tap Camera to turn it on.');$('answer-call').disabled=true;store.clearMessages();conversation.reset();initialGreeting=true;voice.options.greeting=personalization.greeting;transcript({role:'assistant',key:'opening',text:personalization.greeting});initialGreeting=true;if(personalization.world&&!store.current)recommend(personalization.world.products,'',{mixed:true,sourceOnly:true,groupLabel:personalization.world.title,maxPrice:personalization.profile?.budget});
+  async function answer(){if(phase==='connecting'||voice.call)return;const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;screen('connecting');notice('');text('camera-fallback-text',visionWanted?'Opening your camera…':'Camera off. Tap Camera to turn it on.');$('answer-call').disabled=true;lastPurchase=null;purchasePairings=[];store.clearMessages();conversation.reset();voice.options.greeting=personalization.greeting;initialGreeting=true;transcript({role:'assistant',key:'opening',text:personalization.greeting});initialGreeting=true;if(personalization.world&&!store.current)recommend(personalization.world.products,'',{mixed:true,sourceOnly:true,groupLabel:personalization.world.title,maxPrice:personalization.profile?.budget});
     try{
       if(visionWanted)await startCamera();
       else{stopHands();camera.stop(false);cameraBusy=false;cameraUI();}
@@ -121,9 +140,10 @@
     }catch{notice('Could not start the call. Check Camera and Microphone permissions.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
   }
   function endCall(message='Call ended',markCompleted=true){
+    searchController?.abort();searchController=null;$('catalog-search-submit').disabled=false;$('catalog-refresh').disabled=false;
     if(ending)return;
     const completed=markCompleted&&phase==='active'&&!document.hidden;
-    ending=true;generation++;previewEpoch++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;decisionBusy=false;
+    ending=true;generation++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';previewEpoch++;trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;decisionBusy=false;
     stopHands();snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});
     loadingEpoch=0;loadingProductId=null;$('product-try').disabled=false;$('answer-call').disabled=false;show('tryon-chip',false);connectedAt=null;
     screen(message==='Call ended'?'incoming':'ended');
@@ -136,7 +156,8 @@
   async function setMode(next){const token=generation;if(!Object.hasOwn(defaults,next))throw Error('Choose makeup, glasses, clothes, desk, or none.');if(next==='none'){previewEpoch++;trying=null;previewMeta=null;loadingEpoch=0;loadingProductId=null;$('product-try').disabled=store.current?.preview?.available===false;}const changed=mode!==next;mode=next;if(changed||next==='none')camera.setOptions(defaults[next]);const modeEpoch=previewEpoch;await camera.setMode(next);if(token!==generation||modeEpoch!==previewEpoch)return false;if(camera.errors[next])throw Error('Tracking is unavailable. Try again in good light or check your connection.');show('tryon-chip',next!=='none'&&!!trying);text('tryon-label',previewLabel());updateFocusUI();updateVisionUI();sync();return true;}
   async function tryOn(p=store.current){
     p=trusted(p);if(!p||!['active'].includes(phase))throw Error('Choose a product during the call first.');
-    if(p.preview?.available===false)throw Error(p.preview.reason||'Try-on is unavailable for this listing photo. Choose a product with a clean preview image.');
+    if(!p.image)throw Error('This product has no preview photo. Choose another product.');
+    if((!p.image||p.preview?.available===false))throw Error(p.preview?.reason||'Try-on is unavailable for this listing photo. Choose a product with a clean preview image.');
     backToCamera();
     const token=generation,epoch=++previewEpoch;loadingEpoch=epoch;loadingProductId=p.id;notice('');$('product-try').disabled=true;toast('Loading the product photo…');
     try{
@@ -155,15 +176,79 @@
     }catch(error){if(token===generation&&epoch===previewEpoch){trying=null;previewMeta=null;await setMode('none');}throw error;}
     finally{if(loadingEpoch===epoch){loadingEpoch=0;loadingProductId=null;$('product-try').disabled=store.current?.preview?.available===false;}}
   }
+  function receiveRecommendations(list,message,search,excluded=[],status=null){
+    if(!['connecting','active'].includes(phase))return;
+    list=list.filter(p=>p&&typeof p==='object');
+    const types=[...new Set(list.map(p=>p.productType).filter(type=>typeof type==='string'))];
+    lastSearch=search || {query:types.join(' '),category:'all',max_price:null,product_types:types};
+    lastSearchMessage=typeof message==='string'?message:'';lastSearchStatus=status;
+    excludedProductIds=excluded;
+    const allowed=(/\b(?:glasses|eyeglasses|eyewear|spectacles|sunglasses|frames)\b|안경|선글라스|眼镜|眼鏡|镜框|鏡框|墨镜|墨鏡/iu.test(lastSearch.query)?['glasses']:lastSearch.product_types||[]);
+    const matches=list.filter(p=>(!allowed.length||allowed.includes(p.productType))&&(!lastSearch.category||lastSearch.category==='all'||p.category===lastSearch.category)&&!excluded.includes(String(p.id))).slice(0,15);
+    store.addSearchProducts(matches);for(const product of store.catalog.values())discovery.catalog.set(String(product.id),product);recommendationsReceived=true;recommend(matches,message,{...lastSearch,sourceOnly:true});recommendedProducts=matches.map(p=>trusted(p)).filter(Boolean).slice(0,15);closeDialogs();openSearchCatalog('recommended');
+    if(excluded.length&&!recommendedProducts.length&&status!=='listing_sources_unavailable')text('catalog-match-note',lastSearchMessage||'No new matching products found. Try changing your search.');
+  }
+  function catalogChoices(){
+    const groups=[...new Set([...Object.keys(typeLabels),...[...store.catalog.values()].map(p=>p.productType)])].map(type=>[...store.catalog.values()].filter(p=>p.productType===type));
+    const assorted=[];
+    for(let index=0;groups.some(group=>index<group.length);index++)for(const group of groups)if(group[index])assorted.push(group[index]);
+    return recommendationsReceived?recommendedProducts:assorted.slice(0,10);
+  }
+  function updateCatalogTryButtons(){
+    for(const entry of catalogTryButtons){
+      const canTry=canPreview(entry.product)&&!!entry.product.image&&entry.product.preview?.available!==false&&!entry.imageUnavailable;
+      entry.button.textContent=!canPreview(entry.product)?'Details only':canTry?'Try it':'No preview';
+      entry.button.disabled=!canTry||cameraBusy;
+      entry.button.setAttribute('aria-label',canTry?'Try '+entry.product.name:!canPreview(entry.product)?'Try-on unavailable for '+entry.product.name:'Preview unavailable for '+entry.product.name);
+    }
+  }
+  function openSearchCatalog(type=catalogType){
+    $('catalog-dialog').dataset.view='search';show('catalog-collection-controls',false);
+    if(recommendationsReceived)type='recommended';
+    catalogType=type==='recommended'||Object.hasOwn(typeLabels,type)?type:'recommended';const root=$('catalog-items');root.replaceChildren();catalogTryButtons=[];
+    for(const key of ['recommended',...Object.keys(typeLabels)])$('type-'+key).setAttribute('aria-pressed',String(key===catalogType));
+    const choices=catalogType==='recommended'?catalogChoices():[...store.catalog.values()].filter(p=>p.productType===catalogType).slice(0,10);
+    visibleChoices=choices;show('catalog-tabs',!!choices.length&&!recommendationsReceived);
+    show('catalog-refresh',(!!lastSearch||!!choices.length)&&lastSearchStatus!=='unsupported_category');
+    text('catalog-refresh',lastSearchStatus==='listing_sources_unavailable'?'Retry search':'None of these? Show different products');
+    const detailsOnly=!!choices.length&&choices.every(p=>!canPreview(p));
+    text('catalog-title',lastSearchStatus==='listing_sources_unavailable'&&!choices.length?'Products unavailable':detailsOnly?'Choose a product':'Choose what to try');
+    show('catalog-photo-note',!!choices.length&&!detailsOnly);
+    const priceNote=choices.length&&choices.every(p=>!isLiveListing(p))?'Reference prices in KRW. Prices and options may change.':'Prices in KRW. Listed prices and options may change.';
+    text('catalog-summary',!recommendationsReceived&&!choices.length?'Search Coupang to find products to try.':`${choices.length} ${choices.length===1?'choice':'choices'} · ${priceNote}`);
+    show('catalog-match-note',catalogType==='recommended'&&recommendationsReceived);
+    text('catalog-match-note',recommendedProducts.length?(recommendedProducts.every(p=>!canPreview(p))?'Top results for your request. Confirm requested sizes and options in the details; try-on is unavailable for these products.':'Top results for your request. Try-on is available for supported products with photos.'):lastSearchMessage||'No listings could be verified for this search right now. Try again later.');
+    for(const [index,p] of choices.entries()){
+      const row=document.createElement('article');row.className='catalog-item';
+      const img=document.createElement('img');if(p.image)img.src=p.image;else img.hidden=true;img.alt=p.name;img.loading='lazy';img.onerror=()=>{img.hidden=true;};
+      const copy=document.createElement('div');const name=document.createElement('strong');name.textContent=p.name;const price=document.createElement('span');price.className='catalog-price';price.textContent=Number.isFinite(p.price)?'₩'+p.price.toLocaleString('en-US')+(isLiveListing(p)?' · listed':' · reference'):'Price unavailable';
+      const label=document.createElement('small');label.className='catalog-choice-label';label.textContent=`${index+1} · ${productLabel(p)}`;
+      const actions=document.createElement('div');actions.className='catalog-item-links';
+      const details=document.createElement('button');details.type='button';details.textContent='Show details';details.setAttribute('aria-label','Show details for '+p.name);details.onclick=()=>productDetails(p);
+      actions.append(details);copy.append(label,name,price,actions);
+      const feedback=document.createElement('p');feedback.className='catalog-preview-feedback';feedback.setAttribute('role','status');feedback.hidden=true;copy.append(feedback);
+      const button=document.createElement('button');button.type='button';
+      const entry={button,product:p,imageUnavailable:false};catalogTryButtons.push(entry);
+      button.onclick=async()=>{
+        if(!canPreview(p))return;
+        if(!['active'].includes(phase)){notice('Wait for the call to connect before trying a product.');return;}
+        if(!p.image||entry.imageUnavailable){feedback.textContent='Your camera is on, but this product’s photo is unavailable. Choose another item or show its details.';feedback.hidden=false;return;}
+        recommend([p,...choices.filter(item=>item.id!==p.id)],'',{sourceOnly:true,productType:p.productType});selectProduct(p);$('catalog-dialog').close();try{await tryOn(p);}catch(e){notice(e.message);}
+      };
+      img.onerror=()=>{img.hidden=true;entry.imageUnavailable=true;updateCatalogTryButtons();};row.append(img,copy,button);root.append(row);
+    }
+    updateCatalogTryButtons();
+    if(!$('catalog-dialog').open)$('catalog-dialog').showModal();hands.reset();
+  }
   const priceText=p=>Number.isFinite(p.price)?'₩'+p.price.toLocaleString('en-US'):'See price';
-  function adoptDiscovery({resetScroll=false}={}){const p=discovery.current;if((trying&&trying.id!==p?.id)||(loadingProductId&&loadingProductId!==p?.id))setMode('none').catch(e=>notice(e.message));store.recommend(p?[p,...discovery.products.slice(0,10).filter(x=>String(x.id)!==String(p.id))]:[]);displayedTotal=discovery.visible.length;renderCard();renderInline();if(resetScroll)$('product-panel-scroll').scrollTop=0;}
+  function adoptDiscovery({resetScroll=false}={}){const p=discovery.current;if((trying&&trying.id!==p?.id)||(loadingProductId&&loadingProductId!==p?.id))setMode('none').catch(e=>notice(e.message));store.recommend(p?[p,...discovery.products.slice(0,discovery.products.some(isLiveListing)?15:10).filter(x=>String(x.id)!==String(p.id))]:[]);displayedTotal=discovery.visible.length;renderCard();renderInline();if(resetScroll)$('product-panel-scroll').scrollTop=0;}
   function selectProduct(p){p=trusted(p);if(!p||!discovery.select(p.id))return false;adoptDiscovery();return true;}
   function renderCard(){const p=store.current;show('product-zone',!!p||viewingCollection);show('product-empty',!p&&!viewingCollection);updateFocusUI();if(!p){stopHands();sync();return;}
     const img=$('product-image');img.hidden=!p.image;img.removeAttribute('src');if(p.image){img.src=p.image;img.alt=p.name;img.onerror=()=>{img.hidden=true;};}
     text('product-title',p.name);text('product-category',discovery.label||typeLabels[p.productType]);
-    const price=$('product-price');price.replaceChildren();const amount=document.createElement('span');amount.textContent=priceText(p);const note=document.createElement('small');note.textContent='reference price';price.append(amount,note);
+    const price=$('product-price');price.replaceChildren();const amount=document.createElement('span');amount.textContent=priceText(p);const note=document.createElement('small');note.textContent=isLiveListing(p)?'listed price':'reference price';price.append(amount,note);
     const position=discovery.products.findIndex(x=>String(x.id)===String(p.id))+1;text('product-position',`${position} / ${Math.min(discovery.limit,discovery.total)}`);
-    text('product-selected-note','Selected · '+(p.brand||typeLabels[p.productType]||'Coupang'));text('product-try',p.preview?.available===false?'No preview':'Try it');$('product-try').disabled=p.preview?.available===false;
+    text('product-selected-note','Selected · '+(p.brand||typeLabels[p.productType]||'Coupang'));text('product-try',(!p.image||p.preview?.available===false)?'No preview':'Try it');$('product-try').disabled=(!p.image||p.preview?.available===false);
     $('product-card').style.transform='';$('product-card').style.opacity='';$('product-card').classList.remove('accept','reject');text('swipe-feedback','');show('swipe-feedback',false);sync();startHands();
   }
   function recommend(list,message,options={}){if(!['connecting','active'].includes(phase))return;discovery.recommend(list,options);catalogType=discovery.productType||catalogType;hands.reset();adoptDiscovery({resetScroll:true});scrollToCollection();if($('catalog-dialog').open)renderCatalog();if(!store.current)toast('No matching listing in this catalog. Try another colour or budget.');}
@@ -171,7 +256,7 @@
   function addToBag(p){p=trusted(p);if(!p)return;store.cart.set(String(p.id),p);updateBag();toast('Selected product added to your bag');}
   function nextStyle(){const previous=store.current;const next=discovery.nextCollection();if(!next.changed){toast('No related collection within these preferences. Ask Coupi for a new direction.');return false;}if(previous)store.skipped.push(String(previous.id));adoptDiscovery({resetScroll:true});if($('catalog-dialog').open)renderCatalog();toast(discovery.label);sync();return true;}
   async function decide(direction){if(decisionBusy||!store.current)return;decisionBusy=true;const token=generation,p=store.current,card=$('product-card');card.classList.add(direction==='right'?'accept':'reject');text('swipe-feedback',direction==='right'?'ADDED':'NEXT COLLECTION');show('swipe-feedback',true);card.style.transform=`translateX(${direction==='right'?80:-80}%) rotate(${direction==='right'?8:-8}deg)`;card.style.opacity='0';await new Promise(resolve=>setTimeout(resolve,220));if(token!==generation)return;if(store.current?.id===p.id){if(direction==='right')addToBag(p);else nextStyle();}decisionBusy=false;hands.reset();renderCard();}
-  function productDetails(p=store.current){p=trusted(p);if(!p)return;store.detailProduct=p;text('detail-title',p.name);const img=$('detail-image');img.hidden=!p.image;if(p.image){img.src=p.image;img.alt=p.name;}const attributes=(p.verifiedAttributes||[]).filter(x=>!/^Preview depicts/.test(x)).slice(0,4).join(' · ');text('detail-body',(attributes?attributes+'. ':'')+(p.price?'Reference price: '+priceText(p)+'. ':'')+'Check current price and options on Coupang.');text('detail-preview-note',p.category==='makeup'?'Approximate shade preview; lighting and finish vary.':'Placement and fit are approximate.');$('detail-link').href=p.url;$('detail-try').disabled=p.preview?.available===false;text('detail-try',p.preview?.available===false?'Preview unavailable':'Try this product');window.CoupiEvidence.renderReviews($('detail-reviews'),p);text('detail-review-shortcut',window.CoupiEvidence.reviewStats(p).label+' ↓');text('detail-compare',discovery.comparison.some(x=>x.id===p.id)?'Remove compare':'Compare');if(!$('details-dialog').open)$('details-dialog').showModal();$('details-dialog').scrollTop=0;hands.reset();sync();}
+  function productDetails(p=store.current){p=trusted(p);if(!p)return;store.detailProduct=p;text('detail-title',p.name);const img=$('detail-image');img.hidden=!p.image;if(p.image){img.src=p.image;img.alt=p.name;}const attributes=(p.verifiedAttributes||[]).filter(x=>!/^Preview depicts/.test(x)).slice(0,4).join(' · ');const introduction=p.description?.trim()||attributes;const price=Number.isFinite(p.price)?(isLiveListing(p)?'Listed price: ':'Reference price: ')+priceText(p)+'.':'Price unavailable.';text('detail-body',(introduction?introduction+(/[.!?。！？]$/u.test(introduction)?' ':'. '):'')+price);text('detail-preview-note',!p.image?'No preview photo is available for this product.':p.category==='makeup'?'Approximate shade preview; lighting and finish vary.':'Placement and fit are approximate.');$('detail-link').href=p.url;$('detail-try').disabled=(!p.image||p.preview?.available===false);text('detail-try',(!p.image||p.preview?.available===false)?'Preview unavailable':'Try this product');window.CoupiEvidence.renderReviews($('detail-reviews'),p);text('detail-review-shortcut',window.CoupiEvidence.reviewStats(p).label+' ↓');text('detail-compare',discovery.comparison.some(x=>x.id===p.id)?'Remove compare':'Compare');if(!$('details-dialog').open)$('details-dialog').showModal();$('details-dialog').scrollTop=0;hands.reset();sync();}
   function updateCompare(){text('inline-compare-count',String(discovery.comparison.length));$('inline-compare').disabled=discovery.comparison.length<2;text('compare-count',String(discovery.comparison.length));$('compare-open').disabled=discovery.comparison.length<2;sync();}
   function toggleCompare(p){const result=discovery.toggleCompare(p.id);if(!result.ok){toast(result.error);return;}updateCompare();renderInline();if($('catalog-dialog').open)renderCatalog();if($('compare-dialog').open)renderComparison();if(store.detailProduct)text('detail-compare',discovery.comparison.some(x=>x.id===store.detailProduct.id)?'Remove compare':'Compare');}
   function setCollectionView(visible,{resetScroll=false}={}){
@@ -196,13 +281,13 @@
       const img=document.createElement('img');img.className='inline-item-photo';img.src=p.image;img.alt=p.name;img.loading='lazy';img.onerror=()=>{img.hidden=true;};
       const brand=document.createElement('span');brand.className='inline-item-brand';brand.textContent=p.brand||'COUPANG PICK';
       const name=document.createElement('strong');name.className='inline-item-name';name.textContent=p.name;
-      const price=document.createElement('span');price.className='inline-item-price';price.textContent=priceText(p);const ref=document.createElement('small');ref.textContent='reference';price.append(ref);
+      const price=document.createElement('span');price.className='inline-item-price';price.textContent=priceText(p);const ref=document.createElement('small');ref.textContent=isLiveListing(p)?'listed':'reference';price.append(ref);
       const selected=document.createElement('span');selected.className='inline-item-selected';selected.textContent=row.dataset.selected==='true'?'● Selected for your camera':'Tap to select';
       select.append(img,brand,name,price,selected);select.onclick=()=>selectProduct(p);
       const actions=document.createElement('div');actions.className='inline-item-actions';
       for(const [label,action] of [['Details',()=>productDetails(p)],['Try on',async()=>{selectProduct(p);closeDialogs();backToCamera();try{await tryOn(p);}catch(error){notice(error.message);}}],['Add to bag',()=>addToBag(p)],['Compare',()=>toggleCompare(p)]]){
         const button=document.createElement('button');button.textContent=label;button.setAttribute('aria-label',label+' — '+p.name);button.onclick=action;
-        if(label==='Try on'){button.dataset.primary='true';if(p.preview?.available===false){button.disabled=true;button.textContent='No preview';button.title=p.preview.reason||'A clean product preview is not available';}}
+        if(label==='Try on'){button.dataset.primary='true';if((!p.image||p.preview?.available===false)){button.disabled=true;button.textContent='No preview';button.title=p.preview?.reason||'A clean product preview is not available';}}
         if(label==='Compare')button.setAttribute('aria-pressed',String(discovery.comparison.some(x=>x.id===p.id)));actions.append(button);
       }
       row.append(select,actions);root.append(row);
@@ -213,6 +298,8 @@
     updateCompare();scroller.scrollTop=position;
   }
   function renderCatalog(){
+    if($('catalog-dialog').dataset.view==='search')return openSearchCatalog();
+    show('catalog-collection-controls',true);
     const root=$('catalog-items'),position=$('catalog-dialog').scrollTop;root.replaceChildren();
     for(const key of Object.keys(typeLabels))$('type-'+key).setAttribute('aria-pressed',String(key===discovery.productType));
     text('catalog-group-label',`${discovery.label} · ${discovery.visible.length} of ${Math.min(10,discovery.total)}`);
@@ -223,7 +310,7 @@
       const name=document.createElement('strong');name.className='discovery-copy';name.textContent=p.name;const price=document.createElement('span');price.className='discovery-price';price.textContent=priceText(p);const ref=document.createElement('small');ref.textContent='ref.';price.append(ref);
       const badge=document.createElement('span');badge.className='selection-label';badge.textContent=row.dataset.selected==='true'?'● Selected for your camera':'Tap to select';select.append(img,name,price,badge);select.onclick=()=>{selectProduct(p);renderCatalog();};
       const actions=document.createElement('div');actions.className='discovery-actions';
-      for(const [label,action] of [['Details',()=>productDetails(p)],['Try it',async()=>{selectProduct(p);closeDialogs();backToCamera();try{await tryOn(p);}catch(e){notice(e.message);}}],['Add to bag',()=>addToBag(p)],['Compare',()=>toggleCompare(p)]]){const button=document.createElement('button');button.textContent=label;button.setAttribute('aria-label',label+' — '+p.name);button.onclick=action;if(label==='Try it'){button.dataset.primary='true';if(p.preview?.available===false){button.disabled=true;button.textContent='No preview';button.title='This listing photo is not suitable for try-on';}}if(label==='Compare')button.setAttribute('aria-pressed',String(discovery.comparison.some(x=>x.id===p.id)));actions.append(button);}
+      for(const [label,action] of [['Details',()=>productDetails(p)],['Try it',async()=>{selectProduct(p);closeDialogs();backToCamera();try{await tryOn(p);}catch(e){notice(e.message);}}],['Add to bag',()=>addToBag(p)],['Compare',()=>toggleCompare(p)]]){const button=document.createElement('button');button.textContent=label;button.setAttribute('aria-label',label+' — '+p.name);button.onclick=action;if(label==='Try it'){button.dataset.primary='true';if((!p.image||p.preview?.available===false)){button.disabled=true;button.textContent='No preview';button.title='This listing photo is not suitable for try-on';}}if(label==='Compare')button.setAttribute('aria-pressed',String(discovery.comparison.some(x=>x.id===p.id)));actions.append(button);}
       row.append(select,actions);root.append(row);
     }
     if(!discovery.visible.length){const empty=document.createElement('p');empty.className='empty-state';empty.textContent='No matching listings in this demo. Try another category or ask Coupi for a new direction.';root.append(empty);}
@@ -232,6 +319,7 @@
     updateCompare();$('catalog-dialog').scrollTop=position;
   }
   function openCatalog(type){
+    if($('catalog-dialog').open)$('catalog-dialog').close();$('catalog-dialog').dataset.view='collection';
     if(type&&Object.hasOwn(typeLabels,type)){catalogType=type;discovery.recommend([...store.catalog.values()].filter(p=>p.productType===type),{productType:type,theme:type==='glasses'?'optical':'',collectionStyle:type==='tshirt'?'basic':'',maxPrice:discovery.maxPrice});adoptDiscovery({resetScroll:true});}
     else if(!discovery.products.length&&!discovery.productType){discovery.recommend([...store.catalog.values()].filter(p=>p.productType===catalogType),{productType:catalogType,maxPrice:discovery.maxPrice});adoptDiscovery({resetScroll:true});}
     renderCatalog();renderInline();scrollToCollection();hands.reset();sync();
@@ -243,14 +331,14 @@
   function clearAttachment(){choosingImage=false;clearTimeout(pickerTimer);attachmentEpoch++;attachment=null;$('chat-image-file').value='';$('attachment-image').removeAttribute('src');show('attachment-preview',false);show('attachment-status',false);}
   async function prepareAttachment(){choosingImage=false;clearTimeout(pickerTimer);const file=$('chat-image-file').files?.[0];if(!file)return;const epoch=++attachmentEpoch;text('attachment-status','Preparing photo…');show('attachment-status',true);try{const result=await window.CoupiChatImages.prepare(file);if(epoch!==attachmentEpoch)return;attachment=result;$('attachment-image').src=result.dataUrl;text('attachment-name',result.name);show('attachment-preview',true);text('attachment-status','Photo ready. Send to share with Coupi.');}catch(e){if(epoch===attachmentEpoch){attachment=null;show('attachment-preview',false);text('attachment-status',e.message);}}}
   async function sendMessage(event){event.preventDefault();if(sendingImage)return;const value=$('text-input').value,selected=attachment,token=generation;if(!voice.call?.ready){text('attachment-status','Start the video call to send your message.');show('attachment-status',true);return;}try{if(selected){sendingImage=true;$('chat-send').disabled=true;text('attachment-status','Sending photo…');show('attachment-status',true);await voice.sendImage({...selected,text:value});if(token!==generation)return;if(attachment===selected)clearAttachment();}else if(!voice.sendText(value))return;if($('text-input').value===value)$('text-input').value='';}catch(e){if(token===generation){text('attachment-status',e.message);show('attachment-status',true);}}finally{sendingImage=false;$('chat-send').disabled=!voice.call?.ready;}}
-  function openBag(){const root=$('cart-items');root.replaceChildren();if(!store.cart.size){const p=document.createElement('p');p.textContent='Swipe right on a product to save it here.';root.append(p);}for(const p of store.cart.values()){const row=document.createElement('div');row.className='bag-item';const title=document.createElement('strong');title.textContent=p.name;const controls=document.createElement('div');const link=document.createElement('a');link.href=p.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Coupang ↗';const remove=document.createElement('button');remove.textContent='Remove';remove.onclick=()=>{store.cart.delete(String(p.id));updateBag();openBag();};controls.append(link,remove);row.append(title,controls);root.append(row);}$('cart-checkout').disabled=!store.cart.size;if(!$('cart-dialog').open)$('cart-dialog').showModal();hands.reset();sync();}
+  function openBag(){const root=$('cart-items');root.replaceChildren();if(!store.cart.size){const p=document.createElement('p');p.textContent='Swipe right on a product to save it here.';root.append(p);}for(const p of store.cart.values()){const row=document.createElement('div');row.className='bag-item';const title=document.createElement('strong');title.textContent=p.name;const controls=document.createElement('div');const link=document.createElement('button');link.textContent='Show details';link.onclick=()=>productDetails(p);const remove=document.createElement('button');remove.textContent='Remove';remove.onclick=()=>{store.cart.delete(String(p.id));updateBag();openBag();};controls.append(link,remove);row.append(title,controls);root.append(row);}$('cart-checkout').disabled=!store.cart.size;if(!$('cart-dialog').open)$('cart-dialog').showModal();hands.reset();sync();}
   function closeDialogs(){for(const id of ['cart-dialog','details-dialog','catalog-dialog','collections-dialog','compare-dialog','chat-history-dialog','checkout-dialog','personalization-dialog'])if($(id).open)$(id).close();}
   $('detail-review-shortcut').onclick=()=>$('detail-reviews').scrollIntoView({behavior:'smooth',block:'start'});
   const money=value=>Number.isFinite(value)?'₩'+value.toLocaleString('en-US'):'Unavailable';
   let completedReceipt=null,lastPurchase=null,purchasePairings=[];
   function checkoutAction(action){show('checkout-error',false);try{action();renderCheckout();}catch(error){text('checkout-error',error.message);show('checkout-error',true);}}
   function openCheckout({scope='selected',productIds=[]}={}){
-    if(!['active'].includes(phase))throw Error('Start a call or browse products before checkout.');
+    if(!['active'].includes(phase))throw Error('Start a call before checkout.');
     if($('checkout-dialog').open&&checkout.snapshot().step!=='complete')throw Error('A checkout is already open. Review it or close it before choosing new items.');
     let products;
     if(scope==='selected')products=[$('details-dialog').open?store.detailProduct:store.current].filter(Boolean);
@@ -264,7 +352,7 @@
       products=productIds.map(id=>{if(typeof id!=='string'||!visible.has(id))throw Error('That product is not in the current picks or bag. Ask which products to buy.');return visible.get(id);});
     }else throw Error('Choose the selected product, comparison, exact products, or cart.');
     if(!products.length)throw Error(scope==='cart'?'Your bag is empty. Add a product first.':'Choose a product first.');
-    closeDialogs();checkout.start(products,{source:scope});completedReceipt=null;hands.reset();renderCheckout();$('checkout-dialog').showModal();$('checkout-dialog').scrollTop=0;sync();
+    closeDialogs();checkout.updateCatalog([...store.catalog.values()]);checkout.start(products,{source:scope});completedReceipt=null;hands.reset();renderCheckout();$('checkout-dialog').showModal();$('checkout-dialog').scrollTop=0;sync();
     const q=checkout.snapshot();return {ok:true,review_opened:true,demo:true,payment_processed:false,order_placed:false,item_ids:q.selectedItems.map(i=>i.id),reference_total:q.referenceTotal};
   }
   function checkoutButton(request){try{openCheckout(request);}catch(error){toast(error.message);}}
@@ -320,7 +408,7 @@
 
   $('personalization-skip').onclick=()=>{personalization.skip();if(voice?.call?.ready)voice.sendText('Let’s skip personalization and go straight to shopping.');};
   $('answer-call').onclick=answer;$('call-again').onclick=()=>{screen('incoming');answer();};$('end-call').onclick=()=>endCall();
-  $('mute-call').onclick=()=>voice.mute();$('text-toggle').onclick=()=>{show('text-form',$('text-form').hidden);$('text-toggle').setAttribute('aria-expanded',String(!$('text-form').hidden));if(!$('text-form').hidden){$('conversation-box').dataset.collapsed='false';$('chat-minimize').setAttribute('aria-expanded','true');$('text-input').focus();}};$('text-form').onsubmit=sendMessage;
+  $('mute-call').onclick=()=>voice.mute();$('text-toggle').onclick=()=>setTextMode(!textMode);$('text-form').onsubmit=sendMessage;
   $('chat-attach').onclick=()=>{choosingImage=true;clearTimeout(pickerTimer);pickerTimer=setTimeout(()=>{choosingImage=false;if(document.hidden&&phase==='active')endCall('Call paused while you were away. Tap to call again.');},60000);$('chat-image-file').click();};$('chat-image-file').addEventListener('cancel',()=>{choosingImage=false;clearTimeout(pickerTimer);});$('chat-image-file').onchange=prepareAttachment;$('attachment-remove').onclick=clearAttachment;
   $('chat-minimize').onclick=()=>{const collapsed=$('conversation-box').dataset.collapsed!=='true';$('conversation-box').dataset.collapsed=String(collapsed);$('chat-minimize').setAttribute('aria-expanded',String(!collapsed));$('chat-minimize').setAttribute('aria-label',collapsed?'Show conversation':'Minimize conversation');text('chat-minimize',collapsed?'⌃':'⌄');if(collapsed){const body=$('caption-text');body.scrollTop=body.scrollHeight;}};
   $('chat-history-open').onclick=()=>{$('chat-history-dialog').showModal();conversation.openHistory();hands.reset();};$('close-chat-history').onclick=()=>$('chat-history-dialog').close();
@@ -342,7 +430,35 @@
   $('vision-consent').onchange=()=>{visionWanted=$('vision-consent').checked;updateVisionUI();updateFocusUI();};
   $('gesture-toggle').onclick=()=>{handsWanted=!handsWanted;$('gesture-toggle').setAttribute('aria-pressed',String(handsWanted));$('gesture-toggle').classList.toggle('is-off',!handsWanted);if(handsWanted)startHands();else stopHands();toast(handsWanted?'Hand swipes on':'Hand swipes off');};
   $('clear-tryon').onclick=()=>setMode('none');$('product-try').onclick=()=>tryOn().catch(e=>notice(e.message));$('product-details').onclick=()=>productDetails();$('product-skip').onclick=()=>decide('left');$('product-save').onclick=()=>decide('right');$('cart-button').onclick=openBag;$('close-cart').onclick=()=>$('cart-dialog').close();$('close-details').onclick=()=>$('details-dialog').close();
-  $('catalog-button').onclick=()=>openCatalog();$('close-catalog').onclick=()=>$('catalog-dialog').close();for(const key of Object.keys(typeLabels))$('type-'+key).onclick=()=>openCatalog(key);text('catalog-button','Products');updateCompare();
+  $('catalog-button').onclick=()=>openCatalog();$('close-catalog').onclick=()=>$('catalog-dialog').close();for(const key of Object.keys(typeLabels))$('type-'+key).onclick=()=>openSearchCatalog(key);text('catalog-button','Products');$('catalog-search-open').onclick=()=>openSearchCatalog('recommended');$('type-recommended').onclick=()=>openSearchCatalog('recommended');updateCompare();
+  async function searchProducts(search,excluded=[]){
+    searchController?.abort();const controller=new AbortController();searchController=controller;const token=generation;
+    lastSearch=search;lastSearchMessage='';lastSearchStatus=null;excludedProductIds=excluded;visibleChoices=[];recommendedProducts=[];recommendationsReceived=true;
+    const timeout=setTimeout(()=>controller.abort(),60000);
+    $('catalog-search-submit').disabled=true;$('catalog-refresh').disabled=true;show('catalog-refresh',true);show('catalog-match-note',false);show('catalog-tabs',false);
+    text('catalog-summary',excluded.length?'Finding different matching products…':'Searching Coupang for 10 matching choices…');$('catalog-items').replaceChildren();
+    try{
+      let memories=[];
+      try{const storage=window.localStorage;if(storage.getItem('coupi_memory_paused')!=='1'){const stored=JSON.parse(storage.getItem('coupi_memory')||'[]');if(Array.isArray(stored))memories=stored.filter(m=>m&&typeof m.text==='string').slice(-20).map(m=>m.text.slice(0,400));}}catch{/* No preferences when storage is unavailable. */}
+      const response=await window.fetch('/api/products/search',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:search.query,category:search.category||'all',max_price:search.max_price??null,memories,exclude_ids:excluded,limit:10}),signal:controller.signal});
+      const result=await response.json();
+      if(!response.ok)throw Error(typeof result.error==='string'?result.error:'Product search is unavailable. Try again.');
+      if(!Array.isArray(result.products))throw Error('Product search returned an invalid result.');
+      if(token===generation&&searchController===controller){receiveRecommendations(result.products,result.message,result.search||search,excluded,result.retrieval_status,result.search_url);if(excluded.length)$('catalog-refresh').focus();}
+    }catch(error){if(token===generation&&searchController===controller){text('catalog-summary',error.name==='AbortError'?'Search timed out. Try again.':error.message);show('catalog-refresh',true);text('catalog-refresh','Retry search');}}
+    finally{clearTimeout(timeout);if(searchController===controller){searchController=null;$('catalog-search-submit').disabled=false;$('catalog-refresh').disabled=false;}}
+  }
+  $('catalog-search-form').onsubmit=event=>{
+    event.preventDefault();const query=$('catalog-search-input').value.trim();if(!query)return;
+    return searchProducts({query,category:'all',max_price:null});
+  };
+  $('catalog-refresh').onclick=()=>{
+    if(searchController)return;
+    const excluded=[...new Set([...excludedProductIds,...visibleChoices.map(p=>String(p.id))])];
+    if(excluded.length>150){text('catalog-summary','You have explored many products. Change your search to start a new list.');return;}
+    const search=lastSearch || {query:catalogType==='recommended'?'lipstick chairs desk lamps T-shirts hoodies glasses':typeLabels[catalogType],category:catalogType==='glasses'?catalogType:'all',max_price:null};
+    return searchProducts(search,excluded);
+  };
   $('detail-ask').onclick=()=>{const p=store.detailProduct;$('details-dialog').close();if(voice.call?.ready&&p)voice.sendText('Tell me briefly about this Coupang product: '+p.name+' (ID '+p.id+'). Use its verified details and explain why it might suit me.');else toast('Start the call to ask Coupi.');};
   const card=$('product-card');card.addEventListener('pointerdown',e=>{if(e.target.closest('button,a')||decisionBusy)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,dx:0};card.setPointerCapture(e.pointerId);});
   card.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;drag.dx=e.clientX-drag.x;const dy=e.clientY-drag.y;if(Math.abs(dy)>90&&Math.abs(drag.dx)<40){drag=null;card.style.transform='';return;}card.style.transform=`translateX(${drag.dx}px) rotate(${drag.dx/22}deg)`;show('swipe-feedback',Math.abs(drag.dx)>35);text('swipe-feedback',drag.dx>0?'ADDED':'NEXT COLLECTION');});
@@ -350,7 +466,7 @@
   $('live-canvas').addEventListener('pointerdown',e=>{if(mode!=='desk'||!camera.running)return;const r=e.currentTarget.getBoundingClientRect(),ratio=camera.canvas.width/camera.canvas.height;let w=r.width,h=w/ratio;if(h<r.height){h=r.height;w=h*ratio;}camera.setOptions({x:Math.max(0,Math.min(1,(e.clientX-r.left+(w-r.width)/2)/w)),y:Math.max(0,Math.min(1,(e.clientY-r.top+(h-r.height)/2)/h))});sync();});
   const timer=setInterval(()=>{text('call-timer',connectedAt?`${Math.floor((Date.now()-connectedAt)/60000)}:${String(Math.floor((Date.now()-connectedAt)/1000)%60).padStart(2,'0')}`:'');},1000);
   const visionTimer=setInterval(()=>{updateVisionUI();shareSnapshot('interval');},3000);
-  window.addEventListener('pagehide',()=>{clearInterval(timer);clearInterval(visionTimer);endCall('Call ended',false);});document.addEventListener('visibilitychange',()=>{if(!document.hidden||choosingImage)return;if(phase==='active')endCall('Call paused while you were away. Tap to call again.');else if(phase==='browse'&&camera.running){stopHands();camera.stop(false);cameraUI();}});
+  window.addEventListener('pagehide',()=>{clearInterval(timer);clearInterval(visionTimer);endCall('Call ended',false);});document.addEventListener('visibilitychange',()=>{if(!document.hidden||choosingImage)return;if(phase==='active')endCall('Call paused while you were away. Tap to call again.');});
   for(const d of [$('cart-dialog'),$('details-dialog'),$('catalog-dialog'),$('collections-dialog'),$('compare-dialog'),$('chat-history-dialog')])d.addEventListener('close',()=>{hands.reset();sync();});
-  $('mute-call').disabled=true;$('text-input').disabled=false;$('text-toggle').disabled=false;$('chat-send').disabled=true;$('flip-camera').disabled=true;$('gesture-toggle').setAttribute('aria-pressed','true');text('gesture-status','← Next collection · selected item → bag');updateBag();updateVisionUI();updateFocusUI();renderInline();setCollectionView(false);
+  $('mute-call').disabled=true;$('text-input').disabled=true;$('text-toggle').disabled=true;$('chat-send').disabled=true;$('flip-camera').disabled=true;$('gesture-toggle').setAttribute('aria-pressed','true');text('gesture-status','← Next collection · selected item → bag');updateBag();updateVisionUI();updateFocusUI();renderInline();setCollectionView(false);
 })();

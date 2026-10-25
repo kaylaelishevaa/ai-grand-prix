@@ -206,3 +206,12 @@ test('cancel from review or payment resets all state without external cart mutat
     assert.throws(() => checkout.confirm(), /must be in payment/);
   }
 });
+
+
+test('refreshing trusted listings leaves an open quote intact and applies to the next review',()=>{
+  const checkout=setup();checkout.start(['pink']);
+  checkout.updateCatalog([{id:'pink',name:'Updated listing',price:9000},{id:'new',name:'New listing',price:14000}]);
+  assert.equal(checkout.snapshot().referenceTotal,8000);
+  checkout.start(['new']);assert.equal(checkout.snapshot().referenceTotal,14000);
+  checkout.start(['pink']);assert.equal(checkout.snapshot().referenceTotal,9000);
+});

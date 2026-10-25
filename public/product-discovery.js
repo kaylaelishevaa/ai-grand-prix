@@ -102,6 +102,8 @@
       if(this.productType && product.productType!==this.productType)return false;
       if(this.category && this.category!=='all' && product.category!==this.category)return false;
       if(this.maxPrice!==null && (!Number.isFinite(product.price)||product.price>this.maxPrice))return false;
+      // Live results have already been filtered by the search endpoint and may lack local facet tags.
+      if(this.sourceOnly&&product.source==='coupang_web')return true;
       const values=facets(product);
       if(theme && !values.includes(theme))return false;
       for(const [kind,rule] of Object.entries(this.constraints)){

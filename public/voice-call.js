@@ -108,6 +108,8 @@
       this.call = null;
       this.counter = 0;
       this.state = 'idle';
+      this.textMode = false;
+      this.audioMutedBeforeText = false;
       this.checkoutReceipts = new Set();
     }
     _state(state, message) {
@@ -217,6 +219,18 @@
         this._transcript(c,{key:item.id,role:'assistant'},event);
       }
     }
+    _syncMemories(c) {
+      let memories = [], paused = false;
+      try {
+        const storage = window.localStorage;
+        paused = storage?.getItem('coupi_memory_paused') === '1';
+        const stored = paused ? [] : JSON.parse(storage?.getItem('coupi_memory') || '[]');
+        if (Array.isArray(stored)) memories = stored.filter(memory => memory && typeof memory.text === 'string' && memory.text.trim()).slice(-20).map(memory => memory.text.trim().slice(0,400));
+      } catch { /* Unavailable or invalid storage supplies no preferences. */ }
+      const context = JSON.stringify({ memory_paused: paused, saved_memories: memories });
+      if (context !== c.lastMemories && this._text(c, 'Saved shopping preferences (not a spoken request): ' + context)) c.lastMemories = context;
+      return memories;
+    }
     _visionEnabled() {
       try {return this.options.getVisionEnabled?.() === true;} catch {return false;}
     }
@@ -318,7 +332,7 @@
       if(!window.isSecureContext || !this.mediaDevices?.getUserMedia || !this.PeerConnection) {
         this._state('error','Voice requires microphone support on HTTPS or localhost. Open this page in Chrome or Safari.');return false;
       }
-      const c = {number:++this.counter,abort:new AbortController(),toolControllers:new Set(),tools:new Map(),activeResponses:new Set(),completedResponses:new Set(),visionSnapshots:new Map(),visionDeleteQueue:new Set(),visionSequence:0,visionPaused:true,clientItemSequence:0,timeline:[],predecessors:new Map(),transcripts:new Map(),transcriptEvents:new Set(),uploads:new Map(),checkoutNotifications:new Map(),ended:false,ready:false,greeted:false,muted:false,speaking:false,awaitingVad:false,needsReply:false,replyRequested:false,connectedAt:null,callId:null};
+      const c = {number:++this.counter,abort:new AbortController(),toolControllers:new Set(),tools:new Map(),activeResponses:new Set(),completedResponses:new Set(),visionSnapshots:new Map(),visionDeleteQueue:new Set(),visionSequence:0,visionPaused:true,clientItemSequence:0,timeline:[],predecessors:new Map(),transcripts:new Map(),transcriptEvents:new Set(),uploads:new Map(),checkoutNotifications:new Map(),ended:false,ready:false,greeted:false,muted:this.textMode,mutedBeforeText:false,speaking:false,awaitingVad:false,needsReply:false,replyRequested:false,connectedAt:null,callId:null};
       this.call = c;
       c.setupTimer = setTimeout(()=>{if(this._current(c)){this._cleanup(c);this._state('error','Microphone permission timed out. Allow microphone access, then answer the call again.');}},PERMISSION_MS);
       this._state('connecting','Checking the voice connection…');
@@ -330,13 +344,14 @@
         const microphone = await this.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:{ideal:1}},video:false});
         if(!this._current(c)){microphone.getTracks().forEach(track=>track.stop());return false;}
         c.microphone = microphone;
+        microphone.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
         clearTimeout(c.setupTimer);
         c.setupTimer = setTimeout(()=>{if(this._current(c)){this._cleanup(c);this._state('error','The voice connection timed out. Check your connection, then try again.');}},SETUP_MS);
         const peer = new this.PeerConnection();c.peer = peer;
         peer.addEventListener('track',event=>{
           if(!this._current(c)) return;
           this.audio.srcObject = event.streams?.[0] || new MediaStream([event.track]);
-          this.audio.play().then(()=>{if(this._current(c))this.options.onPlaybackBlocked?.(false);}).catch(()=>{if(this._current(c))this.options.onPlaybackBlocked?.(true);});
+          this.audio.play().then(()=>{if(this._current(c)&&!this.textMode)this.options.onPlaybackBlocked?.(false);}).catch(()=>{if(this._current(c)&&!this.textMode)this.options.onPlaybackBlocked?.(true);});
         });
         peer.addEventListener('connectionstatechange',()=>{
           if(!this._current(c)) return;
@@ -397,6 +412,7 @@
       const greeting=typeof this.options.greeting==='string'?this.options.greeting.trim().slice(0,300):'What do you want to buy?';
       this._captureCamera(c,'call-start');
       this._text(c,`App context, not a spoken shopper request: ${c.lastContext}. The shopper answered the call. Begin with this brief greeting: ${JSON.stringify(greeting)}. Camera vision is available only when you have actually received camera images and sharing is not paused. Otherwise say you cannot see the current scene. These are periodic snapshots, not continuous video.`);
+      this._syncMemories(c);
       c.needsReply=true;this._reply(c);
     }
     _reply(c) {
@@ -425,9 +441,10 @@
           if(event.response?.id){c.activeResponses.add(event.response.id);this._positionItem(c,`response:${event.response.id}`);}
           c.replyRequested=false;c.awaitingVad=false;this._state('thinking','Coupi is thinking…');break;
         case 'input_audio_buffer.speech_started':
+          if(this.textMode)break;this._syncMemories(c);
           if(event.item_id)this._transcript(c,{role:'user',key:event.item_id,text:'',pending:true,final:false},event);
           c.speaking=true;c.awaitingVad=true;this._captureCamera(c,'speech-start');this._state('listening','Listening to you…');break;
-        case 'input_audio_buffer.speech_stopped':c.speaking=false;this._state('thinking','Coupi is considering your request…');break;
+        case 'input_audio_buffer.speech_stopped':if(this.textMode)break;c.speaking=false;this._state('thinking','Coupi is considering your request…');break;
         case 'input_audio_buffer.committed':
           if(event.item_id)this._transcript(c,{role:'user',key:event.item_id},event);break;
         case 'conversation.item.input_audio_transcription.delta':
@@ -493,19 +510,20 @@
           const snapshot=this._captureCamera(c,'tool');
           result=snapshot?{ok:true,captured_at:snapshot.metadata?.capturedAt || null,contains_tryon_preview:snapshot.images.some(image=>image.kind==='tryon_preview'),info:'Fresh camera images were sent immediately before this tool result. Use the raw camera for the real scene. A separate try-on preview uses the selected listing photo or an estimated lipstick shade; it is not a physical object or a fit/scale/colour guarantee.'}:{ok:false,captured_at:null,contains_tryon_preview:false,info:'No fresh camera image could be shared. Camera sharing may be paused, the camera may not be ready, or the connection is busy. Do not claim to see the current scene; ask the shopper to enable camera sharing or describe it.'};
         } else if(event.name==='search_products') {
+          const memories=this._syncMemories(c);
           this._state('searching','Finding matching Coupang listings…');
           const query=typeof args.query==='string'?args.query.slice(0,300):'';
           const category=['makeup','clothes','desk','glasses','all'].includes(args.category)?args.category:'all';
           const max_price=args.max_price===null || args.max_price===undefined?null:Number(args.max_price);
           if(max_price!==null && (!Number.isFinite(max_price)||max_price<0))throw new Error('Budget must be a non-negative amount in won.');
           const controller=new AbortController();c.toolControllers.add(controller);
-          const timer=setTimeout(()=>controller.abort(),12000);
+          const timer=setTimeout(()=>controller.abort(),60000);
           try {
-            const response=await this.fetch('/api/products/search',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({query,category,max_price}),signal:controller.signal});
+            const response=await this.fetch('/api/products/search',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({query,category,max_price,memories,limit:10}),signal:controller.signal});
             if(!response.ok)throw new Error('Product search is unavailable. Do not invent replacement products.');
             result=await response.json();
             if(!Array.isArray(result.products))throw new Error('The product search returned an invalid catalog result.');
-            if(this._current(c))this.options.onRecommendations?.(result.products,result.message || 'Products from the Coupang reference catalog.',{query,category,maxPrice:max_price,constraints:result.constraints,sourceOnly:true});
+            if(this._current(c))this.options.onRecommendations?.(result.products,result.message || 'Products from Coupang.',{...(result.search || {query,category,max_price}),maxPrice:result.search?.max_price??max_price,constraints:result.constraints,sourceOnly:true},result.retrieval_status);
           } finally {clearTimeout(timer);c.toolControllers.delete(controller);}
         } else if(event.name==='set_tryon') {
           if(!['makeup','clothes','desk','glasses','none'].includes(args.mode))throw new Error('Choose makeup, clothes, desk, glasses, or none.');
@@ -562,6 +580,7 @@
     sendText(text) {
       const c=this.call;const value=String(text||'').trim().slice(0,1000);
       if(!c?.ready || !value)return false;
+      this._syncMemories(c);
       this._captureCamera(c,'text');
       const id=`coupi_text_${c.number}_${++c.clientItemSequence}`;
       if(!this._send(c,{type:'conversation.item.create',item:{id,type:'message',role:'user',content:[{type:'input_text',text:value}]}}))return false;
@@ -610,6 +629,7 @@
     }
     updateContext(context) {
       const c=this.call;if(!c?.ready)return;
+      this._syncMemories(c);
       clearTimeout(c.contextTimer);
       c.contextTimer=setTimeout(()=>{
         if(!this._current(c))return;
@@ -619,14 +639,33 @@
         this._text(c,`App context changed (not a spoken shopper message): ${clean}. Keep this context for the next reply; no immediate reply is needed.`);
       },350);
     }
+    setTextMode(enabled) {
+      const next=enabled===true;
+      if(next===this.textMode)return next;
+      this.textMode=next;
+      const c=this.call;
+      if(next){
+        this.audioMutedBeforeText=!!this.audio.muted;this.audio.muted=true;
+        if(c){c.mutedBeforeText=c.muted;c.muted=true;c.speaking=false;c.awaitingVad=false;}
+        this.options.onPlaybackBlocked?.(false);
+      }else{
+        this.audio.muted=this.audioMutedBeforeText;
+        if(c)c.muted=!!c.mutedBeforeText;
+        if(c?.ready)this.audio.play().then(()=>{if(this._current(c))this.options.onPlaybackBlocked?.(false);}).catch(()=>{if(this._current(c))this.options.onPlaybackBlocked?.(!this.textMode);});
+      }
+      c?.microphone?.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
+      if(c?.ready)this._state(this.state,next?'Text mode. Microphone and speaker are off.':c.muted?'Microphone muted. You can still hear Coupi.':'Microphone on. You can speak to Coupi.');
+      return next;
+    }
     mute() {
       const c=this.call;if(!c?.ready)return false;
+      if(this.textMode)return true;
       c.muted=!c.muted;
       if(c.muted){c.speaking=false;c.awaitingVad=false;}
       c.microphone?.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
       this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Microphone on. You can speak to Coupi.');return c.muted;
     }
-    async resumeAudio() {const c=this.call;if(!c)return;await this.audio.play();if(this._current(c))this.options.onPlaybackBlocked?.(false);}
+    async resumeAudio() {const c=this.call;if(!c||this.textMode)return false;await this.audio.play();if(this._current(c)&&!this.textMode)this.options.onPlaybackBlocked?.(false);}
   }
   window.NookVoiceSession=NookVoiceSession;
 

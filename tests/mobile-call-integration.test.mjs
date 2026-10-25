@@ -41,10 +41,12 @@ function fixture(t,options={}){
     async setProduct(product){const token=++this.productGen;if(product&&options.productLoad)await options.productLoad(product);if(token!==this.productGen)return {ok:false,stale:true};this.product=product;return product?{ok:true,productId:product.id,kind:product.category==='makeup'?'lip':product.category==='clothes'?'garment':product.category==='glasses'?'glasses':'object',shadeColor:product.category==='makeup'?'#bc3c57':undefined,shadeEstimated:product.category==='makeup'}:{ok:true};}
   }
   class Voice {
-    constructor(opts){this.opts=opts;this.options=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;this.uploads=[];this.sentTexts=[];this.mutes=0;this.purchases=[];}
-    async start(){sequence.push('voice');voiceStarts++;this.call={ready:true};this.opts.onState({state:'connected',muted:false,connectedAt:Date.now()});return true;}
+    constructor(opts){this.opts=opts;this.options=opts;this.uploads=[];this.sentTexts=[];this.mutes=0;this.purchases=[];this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;this.textMode=false;}
+    async start(){sequence.push('voice');voiceStarts++;this.call={ready:true,muted:this.textMode,mutedBeforeText:false};this.opts.onState({state:'connected',muted:this.call.muted,connectedAt:Date.now()});return true;}
     end(){this.ends++;this.call=null;this.opts.onState({state:'idle',muted:false,connectedAt:null});}
-    updateContext(value){this.contexts.push(value);} mute(){this.mutes++;if(this.call){this.call.muted=!this.call.muted;this.opts.onState({state:'connected',muted:this.call.muted,connectedAt:Date.now()});}} sendText(value){this.sentTexts.push(value);return options.textSend?options.textSend(value):!!this.call;} async sendImage(value){this.uploads.push(value);return options.imageSend?await options.imageSend(value):!!this.call;} async resumeAudio(){}
+    updateContext(value){this.contexts.push(value);} mute(){this.mutes++;if(this.call&&!this.textMode){this.call.muted=!this.call.muted;this.opts.onState({state:'connected',muted:this.call.muted});}} sendText(value){this.sentTexts.push(value);if(options.textSend)return options.textSend(value);if(!this.call?.ready||!value.trim())return false;this.opts.onTranscript({role:'user',key:'typed-'+this.contexts.length,text:value.trim(),final:true});return true;} async resumeAudio(){}
+    setTextMode(enabled){if(enabled===this.textMode)return;this.textMode=enabled;if(this.call){if(enabled){this.call.mutedBeforeText=this.call.muted;this.call.muted=true;}else this.call.muted=this.call.mutedBeforeText;if(this.call.ready)this.opts.onState({state:'connected',muted:this.call.muted});}}
+    async sendImage(value){this.uploads.push(value);return options.imageSend?await options.imageSend(value):!!this.call;}
     sendCameraSnapshot(frame){if(!this.opts.getVisionEnabled())return false;this.images.push(frame);this.opts.onVisionState({state:'received',capturedAt:frame.metadata.capturedAt});return true;}
     notifyCheckoutComplete(receipt,suggestions){this.purchases.push({receipt,suggestions});return !!this.call?.ready;}
     clearCameraSnapshots(){this.imageClears++;this.opts.onVisionState({state:'paused'});return true;}
@@ -52,6 +54,7 @@ function fixture(t,options={}){
   class Snapshots {constructor(opts){this.opts=opts;}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
   class Hands {constructor(opts){gestureInstance=this;this.opts=opts;this.running=false;}async start(){this.running=true;}stop(){this.running=false;}reset(){}}
   const context={window:{location:{search:options.search||'',href:'/call'},COUPANG_PRODUCTS:options.catalog||catalog,localStorage,requestAnimationFrame:fn=>{fn();return 1;},CoupiChatImages:{prepare:async file=>options.imagePrepare?await options.imagePrepare(file):{dataUrl:'data:image/jpeg;base64,AQID',name:file.name,width:100,height:100}},NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{getElementById:id=>nodes.get(id)||null,createElement:tag=>new Element(tag),querySelector:selector=>selector==='dialog[open]'?[...nodes.values()].find(n=>n.tagName==='DIALOG'&&n.open)||null:null,addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,URLSearchParams,requestAnimationFrame:fn=>{fn();return 1;}};
+  context.URL=URL;context.AbortController=AbortController;context.window.fetch=options.fetch||(()=>{throw Error('Unexpected network request');});
   vm.createContext(context);vm.runInContext(stateSource,context);for(const moduleSource of moduleSources)vm.runInContext(moduleSource,context);vm.runInContext(source,context);
   const mobile=context.window.NookMobile;
   t.after(()=>nodes.get('end-call').onclick());
@@ -107,8 +110,8 @@ test('swipe hint appears only while a product card is available',async t=>{
   f.voice.opts.onRecommendations([catalog[0]]);
   assert.equal(f.nodes.get('gesture-status').hidden,false);
   await f.nodes.get('product-skip').onclick();
-  assert.equal(f.nodes.get('gesture-status').hidden,!f.store.current);
-  f.voice.opts.onRecommendations([]);
+  assert.equal(f.nodes.get('gesture-status').hidden,false);
+  f.voice.opts.onRecommendations([],'',{sourceOnly:true});
   assert.equal(f.nodes.get('gesture-status').hidden,true);
   f.voice.opts.onRecommendations([catalog[0]]);
   assert.equal(f.nodes.get('gesture-status').hidden,false);
@@ -155,24 +158,24 @@ test('fixed transcript keeps earlier turns available in stable order',async t=>{
   emit({role:'user',key:'early-user',text:'I want a shirt'});emit({role:'assistant',key:'reply',delta:'What colour?'});
   assert.equal(f.store.messages.length,2);assert.equal(f.store.messages[0].key,'early-user');
   emit({role:'user',key:'next-user',text:'Blue'});emit({role:'assistant',key:'next-reply',text:'Here are your picks'});
-  assert.equal(f.nodes.get('transcript').children.length,4);assert.deepEqual(Array.from(f.store.messages,m=>m.key),['early-user','reply','next-user','next-reply']);
+  assert.equal(f.nodes.get('conversation-history').children.length,4);assert.deepEqual(Array.from(f.store.messages,m=>m.key),['early-user','reply','next-user','next-reply']);
 });
 
 test('captions show the latest speaker while preserving conversation state',async t=>{
-  const f=fixture(t);assert.equal(f.nodes.get('live-caption').hidden,true);await f.nodes.get('answer-call').onclick();
+  const f=fixture(t);assert.equal(f.nodes.get('transcript').hidden,true);await f.nodes.get('answer-call').onclick();
   const emit=e=>f.voice.opts.onTranscript(e);
   emit({role:'user',key:'early-user',text:'I want a shirt'});
   assert.equal(f.nodes.get('caption-speaker').textContent,'You');assert.equal(f.nodes.get('caption-text').textContent,'I want a shirt');
   emit({role:'assistant',key:'reply',delta:'What colour?'});
   assert.equal(f.store.messages.length,2);assert.equal(f.store.messages[0].key,'early-user');
   assert.equal(f.nodes.get('caption-speaker').textContent,'Coupi');assert.equal(f.nodes.get('caption-text').textContent,'What colour?');
-  assert.equal(f.nodes.get('live-caption').hidden,false);
+  assert.equal(f.nodes.get('transcript').hidden,false);
   const body=f.nodes.get('caption-text');body.scrollHeight=220;body.scrollTop=0;
   f.nodes.get('chat-minimize').onclick();
   assert.equal(f.nodes.get('conversation-box').dataset.collapsed,'true');assert.equal(body.scrollTop,220);
   f.nodes.get('chat-minimize').onclick();
-  assert.equal(f.nodes.get('conversation-box').dataset.collapsed,'false');assert.equal(f.nodes.get('live-caption').hidden,false);
-  assert.equal(f.nodes.get('transcript').children.length,2);
+  assert.equal(f.nodes.get('conversation-box').dataset.collapsed,'false');assert.equal(f.nodes.get('transcript').hidden,false);
+  assert.equal(f.nodes.get('conversation-history').children.length,2);
 });
 
 test('streaming captions reuse the text box, follow new text and skip unchanged final writes',async t=>{
@@ -198,9 +201,85 @@ test('late transcripts cannot replace the current caption and a new call resets 
   assert.equal(body.textContent,'Another one');assert.equal(f.nodes.get('caption-speaker').textContent,'You');
   emit({role:'assistant',key:'next-reply',delta:'Another lamp'});
   assert.equal(body.textContent,'Another lamp');
-  f.nodes.get('end-call').onclick();await f.nodes.get('answer-call').onclick();
+  f.nodes.get('end-call').onclick();f.nodes.get('call-again').onclick();await tick();
   assert.equal(f.nodes.get('caption-text'),body);assert.equal(body.textContent,f.personalization.greeting);
   assert.equal(f.nodes.get('caption-speaker').textContent,'Coupi');
+});
+
+test('text mode retains the composer and full history through sends, replies, previews and toggling',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const emit=f.voice.opts.onTranscript;
+  emit({role:'assistant',key:'greeting',text:'Hi, I’m Coupi. How can I help you today?',final:true});
+  const toggle=f.nodes.get('text-toggle'),form=f.nodes.get('text-form'),input=f.nodes.get('text-input'),history=f.nodes.get('conversation-history');
+  toggle.onclick();assert.equal(form.hidden,false);assert.equal(history.hidden,false);assert.equal(f.nodes.get('transcript').hidden,true);
+  assert.equal(toggle.attributes['aria-expanded'],'true');assert.equal(toggle.attributes['aria-pressed'],'true');
+  assert.equal(history.children.length,1);
+  input.value='I want black glasses';form.onsubmit({preventDefault(){}});
+  assert.equal(input.value,'');assert.equal(form.hidden,false);assert.equal(history.children.length,2);
+  assert.equal(history.children[1].children[0].textContent,'You');assert.equal(history.children[1].children[2].textContent,'I want black glasses');
+  emit({role:'assistant',key:'reply',delta:'Here are some '});emit({role:'assistant',key:'reply',delta:'glasses.'});emit({role:'assistant',key:'reply',text:'Here are some glasses.',final:true});
+  assert.equal(history.children.length,3);assert.equal(history.children[2].children[2].textContent,'Here are some glasses.');
+  assert.equal(f.nodes.get('transcript').hidden,true);
+  f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='glasses'));await f.voice.opts.onProductAction('try_on');
+  assert.equal(f.nodes.get('phone-app').dataset.focused,'false');assert.equal(form.hidden,false);assert.equal(history.hidden,false);
+  assert.equal(f.nodes.get('focus-toggle').hidden,true);assert.equal(f.nodes.get('gesture-status').hidden,true);
+  await f.nodes.get('toggle-camera').onclick();assert.equal(form.hidden,false);assert.equal(history.hidden,false);
+  toggle.onclick();assert.equal(form.hidden,true);assert.equal(history.hidden,true);assert.equal(toggle.attributes['aria-expanded'],'false');assert.equal(f.nodes.get('transcript').hidden,false);
+  emit({role:'user',key:'next',text:'Another pair'});emit({role:'assistant',key:'reply-2',text:'Let’s find another pair.'});
+  toggle.onclick();assert.equal(history.children.length,5);assert.equal(history.children[0].children[2].textContent,'Hi, I’m Coupi. How can I help you today?');
+  assert.equal(form.hidden,false);assert.equal(f.store.messages.length,5);
+  assert.equal(f.nodes.get('transcript').hidden,true);
+});
+
+test('choosing text automatically disables voice and returning restores the previous microphone setting',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const toggle=f.nodes.get('text-toggle'),mic=f.nodes.get('mute-call');
+  toggle.onclick();assert.equal(f.voice.textMode,true);assert.equal(f.voice.call.muted,true);
+  assert.equal(mic.disabled,true);assert.equal(mic.attributes['aria-pressed'],'true');assert.equal(mic.attributes['aria-label'],'Microphone off in text mode');
+  assert.equal(f.nodes.get('call-status').textContent,'Text mode');assert.equal(f.camera.running,true);assert.equal(f.voice.ends,0);
+  f.voice.opts.onPlaybackBlocked(true);assert.equal(f.nodes.get('play-audio').hidden,true);
+  f.voice.opts.onState({state:'speaking',muted:true});assert.equal(f.nodes.get('call-status').textContent,'Replying…');
+  toggle.onclick();assert.equal(f.voice.textMode,false);assert.equal(f.voice.call.muted,false);assert.equal(mic.disabled,false);
+  assert.equal(f.nodes.get('call-status').textContent,'Live with Coupi');
+  mic.onclick();assert.equal(f.voice.call.muted,true);toggle.onclick();toggle.onclick();assert.equal(f.voice.call.muted,true);
+  assert.equal(f.nodes.get('call-status').textContent,'Mic muted');
+  toggle.onclick();f.nodes.get('end-call').onclick();f.nodes.get('call-again').onclick();await tick();
+  assert.equal(f.voice.textMode,true);assert.equal(f.voice.call.muted,true);assert.equal(f.nodes.get('call-status').textContent,'Text mode');
+});
+
+test('streaming history preserves rows and scroll position while reading older messages',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.nodes.get('text-toggle').onclick();
+  const emit=f.voice.opts.onTranscript,history=f.nodes.get('conversation-history');
+  emit({role:'assistant',key:'greeting',text:'Hello'});emit({role:'user',key:'question',text:'A lamp'});emit({role:'assistant',key:'reply',delta:'Here'});
+  const row=history.children[2],body=row.children[2];history.scrollHeight=1000;history.clientHeight=300;history.scrollTop=100;history.emit('scroll');
+  emit({role:'assistant',key:'reply',delta:' is one'});
+  assert.equal(history.children[2],row);assert.equal(body.textContent,'Here is one');assert.equal(history.scrollTop,100);
+  history.scrollTop=700;history.emit('scroll');emit({role:'assistant',key:'reply',delta:'.'});assert.equal(history.scrollTop,1000);
+  let writes=0,value=body.textContent;Object.defineProperty(body,'textContent',{get:()=>value,set:next=>{writes++;value=next;}});
+  emit({role:'assistant',key:'reply',text:'Here is one.',final:true});assert.equal(writes,0);
+  emit({role:'user',key:'next',text:'Another lamp'});emit({role:'assistant',key:'reply',text:'Here is the first lamp.',final:true});
+  assert.equal(history.children.length,4);assert.equal(history.children[2],row);assert.equal(body.textContent,'Here is the first lamp.');
+  assert.equal(f.nodes.get('caption-text').textContent,'Another lamp');
+});
+
+test('unsent drafts remain in text mode and a new call clears only the old history',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();f.nodes.get('text-toggle').onclick();
+  const input=f.nodes.get('text-input'),form=f.nodes.get('text-form'),history=f.nodes.get('conversation-history');
+  input.value='My draft';f.voice.call.ready=false;form.onsubmit({preventDefault(){}});
+  assert.equal(input.value,'My draft');assert.equal(form.hidden,false);
+  f.voice.opts.onState({state:'error',message:'Connection paused',muted:true});
+  assert.equal(f.nodes.get('text-toggle').disabled,false);
+  f.nodes.get('text-toggle').onclick();assert.equal(form.hidden,true);assert.equal(input.value,'My draft');
+  f.voice.call.ready=true;f.voice.opts.onState({state:'connected',muted:true});f.nodes.get('text-toggle').onclick();
+  f.voice.opts.onTranscript({role:'assistant',key:'old',text:'Previous call'});
+  f.nodes.get('end-call').onclick();f.nodes.get('call-again').onclick();await tick();
+  assert.equal(form.hidden,false);assert.equal(history.children.length,1);assert.equal(history.children[0].children[2].textContent,f.personalization.greeting);
+});
+
+test('conversation history keeps earlier turns available in stable order',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const emit=f.voice.opts.onTranscript;
+  emit({role:'user',key:'early-user',text:'Glasses'});emit({role:'assistant',key:'reply',text:'What colour?'});
+  emit({role:'user',key:'next-user',text:'Blue'});emit({role:'assistant',key:'next-reply',text:'Here are your picks'});
+  assert.equal(f.nodes.get('conversation-history').children.length,4);assert.deepEqual(Array.from(f.store.messages,m=>m.key),['early-user','reply','next-user','next-reply']);
 });
 
 test('spoken partial overlay updates preserve existing settings and none fully clears',async t=>{
@@ -235,6 +314,34 @@ test('inline catalog exposes all product groups and selecting a row tries its ex
   assert.equal(f.nodes.get('call-screen').scrollTop,0);assert.equal(f.voice.opts.getContext().visible_panel,'call');
 });
 
+test('each product offers an in-app introduction with a sourced retailer link',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('catalog-search-open').onclick();const rows=f.nodes.get('catalog-items').children;
+  for(const row of rows){
+    const actions=row.children[1].children[3];
+    assert.equal(actions.children.length,1);assert.equal(actions.children[0].textContent,'Show details');
+    assert.equal(actions.children[0].href,undefined);
+  }
+  const selected=[...f.store.catalog.values()].find(p=>p.name===rows[1].children[1].children[1].textContent),current=f.store.current;
+  rows[1].children[1].children[3].children[0].onclick();
+  assert.equal(f.nodes.get('detail-title').textContent,selected.name);
+  assert(f.nodes.get('detail-body').textContent.startsWith(selected.verifiedAttributes[0]));
+  assert.equal(f.nodes.get('detail-link').href,selected.url);
+  assert.equal(f.store.current,current);assert.equal(f.nodes.get('catalog-dialog').open,true);
+  assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,1);
+  f.nodes.get('close-details').onclick();assert.equal(f.nodes.get('catalog-dialog').open,true);
+});
+
+test('live product details use the sourced introduction and handle unavailable photos and prices',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await startShopping(f);
+  const product={id:'900123',name:'Black round frames',description:'Round black eyeglass frames. Size options are unverified.',url:'https://www.coupang.com/vp/products/900123?itemId=456',source:'coupang_web',category:'glasses',productType:'glasses',currency:'KRW',price:null,image:null};
+  f.voice.opts.onRecommendations([product],'',{query:'glasses',category:'glasses'});
+  f.nodes.get('catalog-items').children[0].children[1].children[3].children[0].onclick();
+  assert.equal(f.nodes.get('detail-body').textContent,product.description+' Price unavailable.');
+  assert.equal(f.nodes.get('detail-image').hidden,true);
+  assert.match(f.nodes.get('detail-preview-note').textContent,/No preview photo/);
+  assert.equal(f.nodes.get('detail-link').href,product.url);
+});
+
 test('ending while a product image loads cannot restore try-on UI',async t=>{
   const wait=deferred();const f=fixture(t,{productLoad:()=>wait.promise});await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));
   const loading=f.nodes.get('product-try').onclick();await tick();f.nodes.get('end-call').onclick();wait.resolve();await loading;
@@ -258,9 +365,12 @@ test('voice cannot reactivate a camera the shopper turned off',async t=>{
 test('browse card action opens grounded details; saving only adds to local bag',async t=>{
   const f=fixture(t);await startShopping(f);const p=f.store.current;const size=f.store.queue.length;
   const details=await f.voice.opts.onProductAction('browse',p.id);
-  assert.equal(f.nodes.get('details-dialog').open,true);assert.equal(f.nodes.get('detail-link').href,p.url);assert.equal(f.store.queue.length,size);assert.equal(details.purchased,false);
+  assert.equal(f.nodes.get('details-dialog').open,true);assert.equal(f.nodes.get('detail-title').textContent,p.name);assert.equal(f.store.queue.length,size);assert.equal(details.purchased,false);
   f.nodes.get('close-details').onclick();const result=await f.voice.opts.onProductAction('save',p.id);
   assert.equal(f.store.cart.size,1);assert.equal(result.purchased,false);assert.equal(f.voiceStarts,1);
+  f.nodes.get('cart-button').onclick();const actions=f.nodes.get('cart-items').children[0].children[1].children;
+  assert.equal(actions[0].textContent,'Show details');assert.equal(actions[0].href,undefined);
+  actions[0].onclick();assert.equal(f.nodes.get('detail-title').textContent,p.name);
 });
 
 test('ending during swipe animation prevents late bag mutation',async t=>{
@@ -386,6 +496,117 @@ test('ending returns to the start screen even if browser storage is blocked',asy
   assert.equal(f.context.window.location.href,'/call');assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.nodes.get('incoming-screen').hidden,false);assert.equal(f.nodes.get('end-screen').hidden,true);
 });
 
+const liveProducts=()=>Array.from({length:18},(_,i)=>({id:String(800000+i),name:'White frames '+i,category:'glasses',productType:'glasses',price:10000+i*1000,url:'https://www.coupang.com/vp/products/'+(800000+i),source:'coupang_web',currency:'KRW',image:'/api/products/image?url='+encodeURIComponent('https://thumbnail.coupangcdn.com/image/frames-'+i+'.jpg')}));
+
+test('voice recommendations open a priced list capped at fifteen and try the exact selected item',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations(liveProducts(),'Matching glasses',{query:'glasses',category:'glasses',max_price:null,product_types:['glasses']});
+  assert.equal(f.nodes.get('catalog-dialog').open,true);
+  const rows=f.nodes.get('catalog-items').children;
+  assert.equal(rows.length,15);assert.equal(f.store.queue.length,15);
+  assert.equal(rows[8].children[1].children[2].textContent,'₩18,000 · listed');
+  assert.equal(f.nodes.get('catalog-tabs').hidden,true);
+  assert.equal(f.camera.product,undefined);
+  await rows[8].children[2].onclick();
+  assert.equal(f.camera.product.id,'800008');assert.equal(f.store.current.id,'800008');
+  assert.equal(f.nodes.get('catalog-dialog').open,false);
+});
+
+test('a short glasses result never pads the list with defaults or exposes unrelated categories',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await startShopping(f);
+  f.voice.opts.onRecommendations([liveProducts()[0],catalog.find(p=>p.productType==='lipstick')],'Matches',{query:'glasses',category:'all',max_price:null,product_types:[]});
+  const rows=f.nodes.get('catalog-items').children;
+  assert.equal(rows.length,1);assert.match(rows[0].children[1].children[0].textContent,/Glasses/);
+  assert.equal(f.nodes.get('catalog-tabs').hidden,true);
+  f.nodes.get('type-lipstick').onclick();assert.equal(f.nodes.get('catalog-items').children.length,1);
+  assert.doesNotMatch(html,/catalog-download|download="coupi/);
+});
+
+test('typed search asks for ten choices and excludes paused memories',async t=>{
+  let body;
+  const storage=new Map([['coupi_memory',JSON.stringify([{text:'Rose gold'}])],['coupi_memory_paused','1']]);
+  const f=fixture(t,{storage,fetch:async(url,init)=>{body=JSON.parse(init.body);return {ok:true,json:async()=>({products:liveProducts().slice(0,10)})};}});
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('catalog-search-input').value='glasses';
+  await f.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
+  assert.equal(body.limit,10);assert.deepEqual(body.memories,[]);
+  assert.equal(f.nodes.get('catalog-items').children.length,10);
+});
+
+test('a listing without a photo stays in the choices but cannot start the camera',async t=>{
+  const f=fixture(t);f.nodes.get('vision-consent').checked=false;await startShopping(f);
+  f.voice.opts.onRecommendations([{...liveProducts()[0],image:null}]);
+  const button=f.nodes.get('catalog-items').children[0].children[2];
+  assert.equal(button.disabled,true);assert.equal(button.textContent,'No preview');
+  await button.onclick();assert.equal(f.cameraStarts,0);f.camera.running=true;
+  await assert.rejects(f.voice.opts.onProductAction('try_on','800000'),/no preview photo/);
+  assert.equal(f.cameraStarts,0);
+});
+test('typed Coupang search includes saved preferences and shows results without restarting the call or starting the camera',async t=>{
+  let body;
+  const storage=new Map([['coupi_memory',JSON.stringify([{text:'I like white frames',source:'you told me'}])]]);
+  const f=fixture(t,{storage,fetch:async(url,init)=>{assert.equal(url,'/api/products/search');body=JSON.parse(init.body);return {ok:true,json:async()=>({products:liveProducts()})};}});
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('catalog-search-input').value='white glasses';
+  await f.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
+  assert.deepEqual(body.memories,['I like white frames']);assert.equal(body.query,'white glasses');
+  assert.equal(f.nodes.get('catalog-items').children.length,15);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,1);
+});
+
+test('voice glasses results hide unrelated categories and refresh replaces the list with unseen glasses',async t=>{
+  let request;
+  const old=liveProducts()[0],fresh={...liveProducts()[1],id:'999001',url:'https://www.coupang.com/vp/products/999001'};
+  const f=fixture(t,{fetch:async(url,init)=>{request=JSON.parse(init.body);return {ok:true,json:async()=>({products:[old,fresh,catalog.find(p=>p.productType==='chair')]})};}});
+  await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onRecommendations([old,catalog.find(p=>p.productType==='chair')],'Found products',{query:'white glasses',category:'glasses',max_price:25000,product_types:['glasses']});
+  assert.equal(f.nodes.get('catalog-tabs').hidden,true);
+  assert.equal(f.nodes.get('catalog-items').children.length,1);
+  f.nodes.get('catalog-search-input').value='unsubmitted different query';
+  await f.nodes.get('catalog-refresh').onclick();
+  assert.equal(request.query,'white glasses');assert.equal(request.category,'glasses');assert.equal(request.max_price,25000);
+  assert.deepEqual(request.exclude_ids,[old.id]);
+  assert.equal(f.nodes.get('catalog-items').children.length,1);assert.equal(f.store.current.id,fresh.id);
+  await f.nodes.get('catalog-refresh').onclick();
+  assert.deepEqual(request.exclude_ids,[old.id,fresh.id]);
+  assert.equal(f.nodes.get('catalog-items').children.length,0);
+  assert.match(f.nodes.get('catalog-match-note').textContent,/No new matching products/);
+  assert.equal(f.nodes.get('catalog-refresh').disabled,false);
+  assert.doesNotMatch(html,/catalog-download|download="coupi/);
+});
+
+test('refresh cannot send duplicate in-flight requests and failure leaves retry available',async t=>{
+  const pending=deferred();let calls=0;
+  const f=fixture(t,{fetch:()=>{calls++;return pending.promise;}});
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('type-glasses').onclick();
+  const refresh=f.nodes.get('catalog-refresh').onclick();
+  assert.equal(f.nodes.get('catalog-refresh').disabled,true);
+  f.nodes.get('catalog-refresh').onclick();assert.equal(calls,1);
+  pending.resolve({ok:false,json:async()=>({error:'Search unavailable. Try again.'})});await refresh;
+  assert.equal(f.nodes.get('catalog-refresh').disabled,false);assert.match(f.nodes.get('catalog-summary').textContent,/Search unavailable/);
+});
+
+test('refresh retries the latest failed query instead of reverting to an older product category',async t=>{
+  const requests=[];
+  const f=fixture(t,{fetch:async(url,init)=>{requests.push(JSON.parse(init.body));return {ok:false,json:async()=>({error:'Try again'})};}});
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('type-chair').onclick();
+  f.nodes.get('catalog-search-input').value='white glasses';
+  await f.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
+  await f.nodes.get('catalog-refresh').onclick();
+  assert.equal(requests[1].query,'white glasses');assert.deepEqual(requests[1].exclude_ids,[]);
+  assert.equal(f.nodes.get('catalog-tabs').hidden,true);
+});
+
+test('search failure is visible and ending a call discards late search results',async t=>{
+  const pending=deferred();const f=fixture(t,{fetch:()=>pending.promise});
+  f.nodes.get('vision-consent').checked=false;await startShopping(f);f.nodes.get('catalog-search-input').value='white glasses';
+  const searching=f.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
+  f.nodes.get('end-call').onclick();pending.resolve({ok:true,json:async()=>({products:liveProducts()})});await searching;
+  assert.equal(f.nodes.get('catalog-dialog').open,false);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
+  const failure=fixture(t,{fetch:async()=>({ok:false,json:async()=>({error:'Search unavailable. Try again.'})})});
+  failure.nodes.get('vision-consent').checked=false;await startShopping(failure);failure.nodes.get('catalog-search-input').value='white glasses';
+  await failure.nodes.get('catalog-search-form').onsubmit({preventDefault(){}});
+  assert.equal(failure.nodes.get('catalog-items').children.length,0);assert.match(failure.nodes.get('catalog-summary').textContent,/Search unavailable/);
+  assert.equal(failure.nodes.get('catalog-search-submit').disabled,false);
+});
+
 
 test('selecting a non-first result adds only that product, retains selection, and never bulk-adds a group',async t=>{
   const f=fixture(t);await startShopping(f);f.nodes.get('catalog-button').onclick();
@@ -453,7 +674,7 @@ test('mobile photo picker preserves the call while hidden, while cancellation re
 test('new transcript turns do not drag a shopper away from an earlier scroll position',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();
   for(let i=0;i<8;i++)f.voice.opts.onTranscript({key:'turn-'+i,role:i%2?'assistant':'user',order:i,text:'Message '+i,final:true});
-  const transcript=f.nodes.get('transcript');transcript.scrollTop=20;transcript.emit('scroll');
+  const transcript=f.nodes.get('conversation-history');transcript.scrollTop=20;transcript.emit('scroll');
   f.voice.opts.onTranscript({key:'turn-8',role:'assistant',order:8,delta:'New message'});
   assert.equal(transcript.scrollTop,20);assert.equal(f.nodes.get('chat-latest').hidden,false);
   f.nodes.get('chat-latest').onclick();assert.equal(transcript.scrollTop,transcript.scrollHeight);assert.equal(f.nodes.get('chat-latest').hidden,true);
@@ -769,7 +990,7 @@ test('answering a world call preserves every listed product and category tabs le
   const storage=profileStorage();storage.setItem('coupi.preferences.v1',JSON.stringify({version:1,completed:true,...draftPrefs}));
   const f=fixture(t,{storage,search:'?world=desk-reset'});await f.nodes.get('answer-call').onclick();
   assert.deepEqual(Array.from(f.store.queue,p=>p.id),Array.from(f.personalization.world.products,p=>p.id));
-  f.nodes.get('type-lipstick').onclick();assert.equal(f.discovery.mixed,false);assert(f.discovery.products.every(p=>p.productType==='lipstick'));assert.equal(f.discovery.maxPrice,20000);
+  f.nodes.get('inline-type-lipstick').onclick();assert.equal(f.discovery.mixed,false);assert(f.discovery.products.every(p=>p.productType==='lipstick'));assert.equal(f.discovery.maxPrice,20000);
 });
 
 test('changing the selected card cancels an earlier photo load before it can preview the wrong item',async t=>{
@@ -802,4 +1023,33 @@ test('Coupi can explain a saved bag item after the shopper browses to another ca
   const f=fixture(t);await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.productType==='lipstick'));
   const saved=f.store.current;await f.voice.opts.onProductAction('save',saved.id);f.nodes.get('inline-type-chair').onclick();
   await f.voice.opts.onProductAction('details',saved.id);assert.equal(f.store.detailProduct.id,saved.id);assert.equal(f.nodes.get('details-dialog').open,true);
+});
+
+
+test('live search results remain selectable by color and enter checkout using trusted listing facts',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const products=liveProducts().slice(0,2);
+  f.voice.opts.onRecommendations(products,'Matching frames',{query:'white glasses',category:'glasses',max_price:25000,sourceOnly:true});
+  assert.equal(f.discovery.products.length,2);
+  await f.nodes.get('catalog-items').children[1].children[2].onclick();
+  assert.equal(f.store.current.id,products[1].id);
+  assert.equal(f.camera.product.id,products[1].id);
+  f.nodes.get('product-buy').onclick();
+  const quote=f.checkout.snapshot();
+  assert.equal(quote.step,'review');assert.equal(quote.selectedItems[0].product.id,products[1].id);
+  assert.equal(quote.referenceTotal,products[1].price);
+  assert.equal(f.nodes.get('checkout-dialog').open,true);
+});
+
+
+test('skipping personalization during camera setup updates the opening caption and greeting together',async t=>{
+  const permission=deferred(),f=fixture(t,{cameraPermission:()=>permission.promise});
+  const starting=f.nodes.get('answer-call').onclick();
+  assert.match(f.nodes.get('caption-text').textContent,/Welcome new user/);
+  f.nodes.get('personalization-skip').onclick();
+  assert.equal(f.nodes.get('caption-text').textContent,'What do you want to buy?');
+  assert.equal(f.store.messages[0].text,'What do you want to buy?');
+  permission.resolve();await starting;
+  assert.equal(f.voice.opts.greeting,'What do you want to buy?');
+  assert.equal(f.voiceStarts,1);
 });

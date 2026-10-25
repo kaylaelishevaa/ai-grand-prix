@@ -10,3 +10,10 @@
 @media(max-height:700px){.transcript{height:66px;max-height:66px}.conversation-area{bottom:calc(90px + env(safe-area-inset-bottom))}.product-main{min-height:60px}.product-picture{height:59px;width:49px}.product-card{padding:10px}.product-actions{margin-top:6px;padding-top:6px}.product-zone{top:calc(max(18px,env(safe-area-inset-top)) + 95px)}.phone-app[data-phase=browse] .product-zone{top:98px}.product-copy h2{font-size:11px}.phone-app[data-focused=true] .transcript{height:52px;max-height:52px}.phone-app[data-focused=true] .conversation-area{bottom:calc(72px + env(safe-area-inset-bottom))}}
 
 .conversation-box:not(:has(.bubble)):not(:has(#text-form:not([hidden]))){display:none}.review-scope{font-size:10px!important;color:#78959a}.comparison-caption{padding:9px;font-size:11px;text-align:left;color:#6b8a90}.compare-table .comparison-remove{font-size:9px;padding:4px 6px}.discovery-actions button:disabled{opacity:.45;cursor:default}
+
+/* Preserve silent text mode with the shared photo-aware conversation renderer. */
+.phone-app[data-text-mode=true] .conversation-box{display:flex;flex:1;min-height:0;flex-direction:column}
+.phone-app[data-text-mode=true] #conversation-history{flex:1;height:auto;max-height:none;min-height:0;background:transparent}
+.phone-app[data-text-mode=true] .conversation-area .text-form{flex-direction:column;position:static}
+.phone-app:not([data-text-mode=true]) .conversation-box{background:#f5ffffed}
+.catalog-dialog[data-view=search] .catalog-items{grid-template-columns:minmax(0,1fr)}

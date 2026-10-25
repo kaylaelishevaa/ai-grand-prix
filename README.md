@@ -1,6 +1,6 @@
 # Coupi — AI shopping companion
 
-Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 82 sourced Coupang listings/options.
+Talk to Coupi, explore real Coupang products, and try them on through your camera. This repository contains the current mobile-first web prototype: live AI voice, camera understanding, face/body tracking, and 82 sourced Coupang listings/options, plus live Coupang product search.
 
 Each developer runs their own local server and supplies **their own OpenAI API key**. No usable API key is included in this repository.
 
@@ -11,7 +11,7 @@ Each developer runs their own local server and supplies **their own OpenAI API k
 - Internet access for OpenAI and the face/body tracking models downloaded on first use.
 - For the AI call: an OpenAI project with an API key, available API credits, and access to the configured Realtime model.
 
-Local development does not require a Cloudflare account, Sites account, database, or Coupang API key. Product names and images are bundled in the repository.
+Local development does not require a Cloudflare account, Sites account, database, or Coupang API key. Default product names and preview images are bundled in the repository. Live search uses OpenAI web search restricted to Coupang, with KRW prices and photos when available. It requests 10 matching products by default and accepts at most 15. Fewer products may be returned when fewer matches can be verified.
 
 ## 1. Clone and install
 
@@ -69,6 +69,10 @@ To check that the server loaded your configuration, open [the local voice status
 6. Click **End call** when finished.
 
 The entry flow is a video call; there is no separate Browse mode or onboarding questionnaire. AI voice and AI camera understanding require your own working API key. The automated checks below run without a key.
+
+At **/setting** (also **/settings**), save a suggested preference or type a custom memory. Saved preferences guide call recommendations and live product searches while memory is on; pause or forget them there. Preferences stay in this browser and are sent to the AI only when used for a call or search.
+
+During a call, tap **Message** to open the full conversation history and a textbox that stays open after sending. Text mode mutes the microphone and Coupi’s spoken replies. Tap it again to return to live captions and restore the previous microphone and speaker settings. History stays in memory for the current call and clears when a new call starts.
 
 Camera snapshots are shared with OpenAI during an active call when **Let Coupi see my camera** is enabled. The eye/Pause control stops that sharing while local try-on continues. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
 

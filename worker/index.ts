@@ -18,7 +18,7 @@ const worker = {
     const page = ['/', '/index.html'].includes(pagePath) ? mainPage
       : ['/call', '/camera', '/camera.html'].includes(pagePath) ? cameraPage
       : pagePath === '/explore' ? explorePage
-      : pagePath === '/settings' ? settingsPage : null;
+      : ['/setting', '/settings'].includes(pagePath) ? settingsPage : null;
     if(page !== null) {
       if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405});
       return new Response(request.method==='HEAD'?null:page,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin'}});
