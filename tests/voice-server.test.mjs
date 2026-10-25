@@ -124,9 +124,9 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   const config=JSON.parse(sent.options.body.get('session'));
   assert.equal(config.model,'gpt-realtime-2.1-mini');
   assert.equal(config.audio.input.transcription.model,'gpt-4o-transcribe');
-  assert.match(config.audio.input.transcription.prompt,/English, Korean/);
+  assert.match(config.audio.input.transcription.prompt,/speaking English/);
   assert.match(config.audio.input.transcription.prompt,/Coupi, Coupang/);
-  assert.equal(config.audio.input.transcription.language,undefined);
+  assert.equal(config.audio.input.transcription.language,'en');
   assert.equal(config.audio.input.turn_detection.prefix_padding_ms,500);
   assert.equal(config.audio.input.turn_detection.silence_duration_ms,850);
   assert.equal(config.audio.output.voice,'marin');
@@ -145,13 +145,22 @@ test('an already-cancelled voice request never opens an upstream session', async
   assert.equal(response.status, 502);
 });
 
-test('caption configuration keeps automatic language detection unless explicitly configured',()=>{
-  const english=sessionConfiguration({OPENAI_TRANSCRIPTION_LANGUAGE:'en'}).audio.input.transcription;
-  assert.equal(english.language,'en');
-  assert.equal(english.model,'gpt-4o-transcribe');
+test('caption and instruction language stay English while Korean catalog names remain valid',()=>{
+  for(const language of [undefined,'','en','ko','fr','English']) {
+    const transcription=sessionConfiguration({OPENAI_TRANSCRIPTION_LANGUAGE:language}).audio.input.transcription;
+    assert.equal(transcription.language,'en');assert.equal(transcription.model,'gpt-4o-transcribe');
+    assert.match(transcription.prompt,/speaking English/);assert.doesNotMatch(transcription.prompt,/English, Korean|or both/);
+  }
   const invalid=sessionConfiguration({OPENAI_TRANSCRIPTION_LANGUAGE:'English',OPENAI_TRANSCRIPTION_MODEL:'invented-model'}).audio.input.transcription;
-  assert.equal(invalid.language,undefined);assert.equal(invalid.model,'gpt-4o-transcribe');
+  assert.equal(invalid.language,'en');assert.equal(invalid.model,'gpt-4o-transcribe');
   assert.equal(sessionConfiguration({OPENAI_TRANSCRIPTION_MODEL:'gpt-4o-mini-transcribe'}).audio.input.transcription.model,'gpt-4o-mini-transcribe');
+  const {instructions}=sessionConfiguration();
+  assert.match(instructions,/Accept spoken and typed shopping instructions in English/);
+  assert.match(instructions,/Please rephrase your request in English/);
+  assert.match(instructions,/English request containing Korean proper names is valid/);
+  assert.match(instructions,/Korean product titles, brand names, and text in product images are valid catalog data/);
+  assert.match(instructions,/Keep explanations and replies in English/);
+  assert.doesNotMatch(instructions,/shopper's language|English or Korean/);
 });
 
 test('only an explicit unsupported caption model rejection falls back once without ending the audio handshake',async()=>{
@@ -163,6 +172,7 @@ test('only an explicit unsupported caption model rejection falls back once witho
   const response=await handler(makeRequest('/api/voice/session',offer,'application/sdp'),{OPENAI_API_KEY:'test-only-private-key'});
   assert.equal(response.status,200);assert.equal(await response.text(),answer);
   assert.deepEqual(attempts.map(c=>c.model),['gpt-4o-transcribe','gpt-4o-mini-transcribe']);
+  assert.deepEqual(attempts.map(c=>c.language),['en','en']);
   assert.equal(attempts[0].prompt,attempts[1].prompt);
   assert.equal(response.headers.get('x-coupi-transcription-model'),'gpt-4o-mini-transcribe');
 });

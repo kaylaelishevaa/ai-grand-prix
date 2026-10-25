@@ -7,6 +7,7 @@
 .entry-controls { display:flex;justify-content:center;gap:14px;margin:14px 0 6px; }
 .entry-controls .call-control { width:44px;min-width:44px;height:44px;border:1px solid #cfe3e6;background:#fff;color:#47777b;border-radius:50%; }
 .entry-controls .call-control[aria-pressed="true"] { background:#2d7879;color:#fff;border-color:#2d7879; }
+.language-note { margin:8px 0 4px;text-align:center;color:#47777b;font-size:11px;line-height:1.4; }
 .entry-controls button:focus-visible,#update-preferences:focus-visible { outline:2px solid #246e73;outline-offset:3px; }
 #update-preferences {
   display: block;
