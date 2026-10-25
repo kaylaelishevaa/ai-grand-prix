@@ -105,7 +105,7 @@ test('session handshake sends a server-owned configuration and returns SDP witho
   assert.equal(config.audio.input.turn_detection.create_response,true);
   assert.doesNotMatch(config.instructions,/CHECKED CALL BRIDGE OVERRIDE/);
   assert.match(config.instructions,/Hi Kayleen! What can I help you find today/);
-  assert.deepEqual(config.tools.map(t=>t.name).sort(),['draft_preferences','skip_personalization','search_products','set_tryon','product_action','look_at_camera','start_checkout'].sort());
+  assert.deepEqual(config.tools.map(t=>t.name).sort(),['draft_preferences','skip_personalization','search_products','set_tryon','product_action','look_at_camera','compare_products','start_checkout'].sort());
 });
 
 test('upstream errors, invalid answers, and network exceptions never expose raw details', async () => {
@@ -248,4 +248,18 @@ test('recommendation ranges come only from matching listings and descriptions re
   assert.match(instructions,/aliases, tags or verifiedAttributes/);
   assert.match(instructions,/Wait for the search tool to return and display its cards/);
   assert.match(instructions,/never invent a feature or price/);
+});
+
+
+test('voice sessions use semantic completion and keep interruption enabled for natural spoken turns',()=>{
+  const direct=sessionConfiguration();
+  assert.deepEqual(direct.audio.input.turn_detection,{type:'semantic_vad',eagerness:'medium',create_response:true,interrupt_response:true});
+  const checked=sessionConfiguration({},{callMode:'checked'});
+  assert.equal(checked.audio.input.turn_detection.type,'semantic_vad');
+  assert.equal(checked.audio.input.turn_detection.interrupt_response,true);
+  assert.equal(checked.audio.input.turn_detection.create_response,false);
+  const compare=direct.tools.find(tool=>tool.name==='compare_products');
+  assert.equal(compare.parameters.properties.product_ids.minItems,2);
+  assert.equal(compare.parameters.properties.product_ids.maxItems,3);
+  assert.match(direct.instructions,/first and third/);
 });

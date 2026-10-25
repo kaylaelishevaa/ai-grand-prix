@@ -75,7 +75,7 @@ function fixture(t, options = {}) {
   }
   const mic = microphone();
   const audio = {srcObject: null, play: async () => {}, pause() {this.paused = true;}};
-  const calls = [], transcripts = [], states = [], recommendations = [], worldRecommendations = [], worldActions = [], tryons = [], actions = [], checkouts = [], visionStates = [], captures = [];
+  const calls = [], transcripts = [], states = [], recommendations = [], worldRecommendations = [], worldActions = [], tryons = [], actions = [], comparisons = [], checkouts = [], visionStates = [], captures = [];
   let permissions = 0;
   const voice = new context.window.NookVoiceSession({
     audio, PeerConnection: Peer, greeting: options.greeting, directShopping:options.directShopping,
@@ -111,10 +111,11 @@ function fixture(t, options = {}) {
     onTryon: async (mode, overlay) => {tryons.push({mode, overlay});return options.onTryon?.(mode,overlay);},
     onCheckout: async request => {checkouts.push(JSON.parse(JSON.stringify(request)));return options.onCheckout?options.onCheckout(request):{ok:true,review_opened:true,demo:true,payment_processed:false,order_placed:false};},
     onProductAction: async (action, product_id) => {actions.push({action,product_id});return options.onProductAction?options.onProductAction(action,product_id):{ok:true,action,product_id:product_id || "324548922",purchased:false};},
+    onCompareProducts: async productIds => {comparisons.push(Array.from(productIds));return options.onCompareProducts?options.onCompareProducts(productIds):{ok:true,product_ids:Array.from(productIds),comparison_opened:true,purchased:false};},
   });
   t.after(() => voice.end());
   return {
-    voice, mic, audio, calls, transcripts, states, recommendations, worldRecommendations, worldActions, tryons, peers, actions, checkouts, timerDelays, visionStates, captures,
+    voice, mic, audio, calls, transcripts, states, recommendations, worldRecommendations, worldActions, tryons, peers, actions, comparisons, checkouts, timerDelays, visionStates, captures,
     get permissions() {return permissions;},
     get channel() {return voice.call?.channel;},
     emit(event) {this.channel.emit('message', {data: JSON.stringify(event)});},
@@ -535,7 +536,7 @@ test('fresh frames are captured at speech start and before typed requests',async
   f.emit({type:'input_audio_buffer.speech_stopped'});
   assert.equal(f.voice.sendText('What is on my desk?'),true);
   assert.deepEqual(f.captures,['call-start','speech-start','text']);
-  const last=f.channel.sent.slice(-2);
+  const last=f.channel.sent.filter(event=>event.type==='conversation.item.create').slice(-2);
   assert(last[0].item.content.some(part=>part.type==='input_image'));
   assert.equal(last[1].item.content[0].text,'What is on my desk?');
 });
@@ -932,4 +933,54 @@ test('direct spoken cart checkout only opens order review and captions do not re
   assert.equal(f.checkouts.length,1);assert.equal(countReplies(f.channel),replies);
   const output=JSON.parse(toolOutputs(f.channel).find(event=>event.item.call_id==='direct-cart').item.output);
   assert.equal(output.review_opened,true);assert.equal(output.payment_processed,false);assert.equal(output.order_placed,false);
+});
+
+test('playback remains speaking after generation finishes and a new spoken turn discards the queued old follow-up',async t=>{
+  const search=deferred();const f=fixture(t,{directShopping:true,search:()=>search.promise});await connect(f);done(f,'greeting');
+  const channel=f.channel,baseline=countReplies(channel);f.emit({type:'response.created',response:{id:'old-search'}});
+  const call=tool(f,'old-search-tool','search_products',{query:'pink lipstick'},'old-search');
+  f.emit({type:'output_audio_buffer.started',response_id:'old-search'});done(f,'old-search',[call]);
+  search.resolve(response({products:[]}));await tick();await tick();assert.equal(f.voice.state,'speaking');assert.equal(f.voice.call.outputPlaying,true);assert.equal(countReplies(channel),baseline);
+  f.emit({type:'output_audio_buffer.stopped',response_id:'old-search'});await tick(20);assert.equal(countReplies(channel),baseline,'The shopper gets a brief listening gap before another audio reply');
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'new-request'});assert.equal(f.voice.state,'listening');
+  f.emit({type:'input_audio_buffer.speech_stopped'});await tick(370);assert.equal(countReplies(channel),baseline,'The earlier follow-up is not replayed after the shopper interrupts');
+  f.emit({type:'response.created',response:{id:'new-response'}});done(f,'new-response');
+  f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'new-request',transcript:'Actually show glasses'});await tick();assert.equal(countReplies(channel),baseline);
+});
+
+test('an interrupted pending search cannot replace current cards or speak after a newer request',async t=>{
+  const search=deferred();const f=fixture(t,{directShopping:true,search:()=>search.promise});await connect(f);done(f,'greeting');const baseline=countReplies(f.channel);
+  f.emit({type:'response.created',response:{id:'superseded-search'}});const call=tool(f,'superseded-tool','search_products',{query:'lipstick'},'superseded-search');done(f,'superseded-search',[call]);
+  f.emit({type:'input_audio_buffer.speech_started',item_id:'replacement'});f.emit({type:'input_audio_buffer.speech_stopped'});
+  search.resolve(response({products:[{id:'stale',name:'Old lipstick'}]}));await tick();await tick();
+  assert.equal(f.recommendations.length,0);assert.equal(countReplies(f.channel),baseline);
+  const result=JSON.parse(toolOutputs(f.channel).find(event=>event.item.call_id==='superseded-tool').item.output);assert.equal(result.superseded,true);
+  f.emit({type:'response.created',response:{id:'replacement-response'}});done(f,'replacement-response');await tick();assert.equal(countReplies(f.channel),baseline);
+});
+
+test('switching to Chat during playback cancels old audio and pending product results reply only as text',async t=>{
+  const search=deferred();const f=fixture(t,{directShopping:true,search:()=>search.promise});await connect(f);done(f,'greeting');const baseline=countReplies(f.channel);
+  f.emit({type:'response.created',response:{id:'audio-before-chat'}});const call=tool(f,'mode-search','search_products',{query:'glasses'},'audio-before-chat');f.emit({type:'output_audio_buffer.started',response_id:'audio-before-chat'});
+  assert.equal(await f.voice.setInputMode('text'),true);assert.equal(f.voice.call.outputPlaying,false);assert.equal(f.audio.muted,true);
+  assert(f.channel.sent.some(event=>event.type==='response.cancel'&&event.response_id==='audio-before-chat'));
+  done(f,'audio-before-chat',[call]);f.emit({type:'output_audio_buffer.started',response_id:'audio-before-chat'});assert.notEqual(f.voice.state,'speaking');
+  search.resolve(response({products:[]}));await tick();await tick();assert.equal(countReplies(f.channel),baseline+1);
+  const next=f.channel.sent.filter(event=>event.type==='response.create').at(-1);assert.deepEqual(next.response.output_modalities,['text']);
+  assert.equal(await f.voice.setInputMode('voice'),true);assert.equal(f.voice.call.voiceTurnDetection.type,'semantic_vad');assert.equal(f.voice.call.voiceTurnDetection.eagerness,'medium');assert.equal(f.voice.call.voiceTurnDetection.interrupt_response,true);
+});
+
+test('comparison tool opens only two or three exact distinct products and reports UI failure honestly',async t=>{
+  const f=fixture(t);await connect(f);tool(f,'compare-valid','compare_products',{product_ids:['first-id','third-id']});await tick();
+  assert.deepEqual(f.comparisons,[['first-id','third-id']]);const result=JSON.parse(toolOutputs(f.channel).find(event=>event.item.call_id==='compare-valid').item.output);assert.equal(result.comparison_opened,true);assert.equal(result.ok,true);
+  tool(f,'compare-duplicate','compare_products',{product_ids:['first-id','first-id']});tool(f,'compare-one','compare_products',{product_ids:['first-id']});await tick();assert.equal(f.comparisons.length,1);
+  for(const id of ['compare-duplicate','compare-one'])assert.equal(JSON.parse(toolOutputs(f.channel).find(event=>event.item.call_id===id).item.output).ok,false);
+  const failed=fixture(t,{onCompareProducts:()=>({ok:false,error:'Choose products of the same type.'})});await connect(failed);tool(failed,'compare-failed','compare_products',{product_ids:['lamp','lipstick']});await tick();const output=JSON.parse(toolOutputs(failed.channel)[0].item.output);assert.equal(output.ok,false);assert.match(output.error,/same type/);
+});
+
+test('typed first-and-third comparison opens exact cards immediately without waiting for the audio listening gap',async t=>{
+  const f=fixture(t,{directShopping:true,getContext:()=>({visible_product_ids:['first-id','second-id','third-id'],visible_product:{id:'second-id'}})});await connect(f);done(f,'greeting');const baseline=countReplies(f.channel);
+  f.emit({type:'output_audio_buffer.started',response_id:'old-audio'});f.emit({type:'output_audio_buffer.stopped',response_id:'old-audio'});
+  assert.equal(f.voice.sendText('Compare the first and third products'),true);await tick();await tick();
+  assert.deepEqual(f.comparisons,[['first-id','third-id']]);assert.equal(countReplies(f.channel),baseline+1);assert.deepEqual(f.actions,[]);
+  assert(f.channel.sent.some(event=>event.item?.content?.some(part=>part.text?.includes('Here they are side by side.'))));
 });

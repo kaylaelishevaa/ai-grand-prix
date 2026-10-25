@@ -93,7 +93,7 @@ test('explicit legacy checked sessions retain their gate without changing direct
   assert(checked.tools.some(tool=>tool.name==='resolve_shopping_request'));assert.match(checked.instructions,/CHECKED CALL BRIDGE OVERRIDE/);assert.doesNotMatch(checked.instructions,/DIRECT SHOPPING:/);
   assert.equal((direct.audio as {input:{turn_detection:{create_response:boolean}}}).input.turn_detection.create_response,true);
   assert(!direct.tools.some(tool=>tool.name==='resolve_shopping_request'));
-  for(const name of ['search_products','product_action','set_tryon','start_checkout','look_at_camera'])assert(direct.tools.some(tool=>tool.name===name),name+' remains immediately available');
+  for(const name of ['search_products','product_action','set_tryon','start_checkout','look_at_camera','compare_products'])assert(direct.tools.some(tool=>tool.name===name),name+' remains immediately available');
   for(const name of ['search_world_products','open_world_product']){assert(!direct.tools.some(tool=>tool.name===name),name+' must not divert direct call recommendations');assert(checked.tools.some(tool=>tool.name===name),name+' remains in the explicit checked flow');}
   assert.match(direct.instructions,/actions on already shown cards use product_action or start_checkout without searching again/);
 });

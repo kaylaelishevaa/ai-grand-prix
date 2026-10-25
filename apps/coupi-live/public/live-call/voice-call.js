@@ -5,6 +5,7 @@
   const SETUP_MS = 25000;
   const PERMISSION_MS = 60000;
   const IMAGE_ACK_MS = 12000;
+  const LISTENING_GAP_MS = 350;
   const MAX_IMAGE_DATA_LENGTH = 55000;
   const PRODUCT_ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,79}(?![\s\S])/;
   const RECEIPT_ID = /^DEMO-[A-Za-z0-9-]{1,75}(?![\s\S])/;
@@ -167,6 +168,23 @@
       const text=c.inputMode==='text';
       if(this.options.onResolveCall)c.voiceTurnDetection={...c.voiceTurnDetection,create_response:false};
       return this._send(c,{type:'session.update',session:{type:'realtime',output_modalities:[text?'text':'audio'],audio:{input:{turn_detection:text?null:c.voiceTurnDetection}}}});
+    }
+    _interruptOutput(c,{automatic=false,supersede=false}={}) {
+      clearTimeout(c.replyTimer);c.nextAudioReplyAt=0;
+      const active=[...c.activeResponses];
+      for(const id of active)c.cancelledResponses.add(id);
+      if(c.playingResponseId)c.cancelledResponses.add(c.playingResponseId);
+      if(!automatic){
+        for(const id of active)this._send(c,{type:'response.cancel',response_id:id});
+        if(!active.length&&c.replyRequested)this._send(c,{type:'response.cancel'});
+        this._send(c,{type:'output_audio_buffer.clear'});
+      }
+      c.outputPlaying=false;c.playingResponseId=null;c.replyRequested=false;
+      if(supersede){
+        c.userTurn++;c.needsReply=false;
+        for(const task of c.tools.values())if(!task.done){task.superseded=true;task.done=true;task.controller?.abort();}
+      }
+      for(const row of c.transcripts.values())if(row.role==='assistant'&&!row.final){row.final=true;row.pending=false;this.options.onTranscript?.({...row});}
     }
     _send(c, event) {
       if(!this._current(c) || c.channel?.readyState !== 'open') return false;
@@ -387,7 +405,7 @@
       if(!window.isSecureContext || !this.PeerConnection || (inputMode==='voice'&&!this.mediaDevices?.getUserMedia)) {
         this._state('error',inputMode==='text'?'Chat requires a secure connection. Open this page on HTTPS or localhost in Chrome or Safari.':'Voice requires microphone support on HTTPS or localhost. Open this page in Chrome or Safari.');return false;
       }
-      const c = {number:++this.counter,abort:new AbortController(),toolControllers:new Set(),tools:new Map(),activeResponses:new Set(),completedResponses:new Set(),visionSnapshots:new Map(),visionDeleteQueue:new Set(),visionSequence:0,visionPaused:true,clientItemSequence:0,timeline:[],predecessors:new Map(),transcripts:new Map(),transcriptEvents:new Set(),uploads:new Map(),checkoutNotifications:new Map(),ended:false,ready:false,greeted:false,muted:false,speaking:false,awaitingVad:false,needsReply:false,replyRequested:false,connectedAt:null,callId:null,inputMode,modeSequence:0,voiceTurnDetection:{type:'server_vad',create_response:true,interrupt_response:true,prefix_padding_ms:500,silence_duration_ms:850}};
+      const c = {number:++this.counter,abort:new AbortController(),toolControllers:new Set(),tools:new Map(),activeResponses:new Set(),completedResponses:new Set(),cancelledResponses:new Set(),cancelledItems:new Set(),visionSnapshots:new Map(),visionDeleteQueue:new Set(),visionSequence:0,visionPaused:true,clientItemSequence:0,timeline:[],predecessors:new Map(),transcripts:new Map(),transcriptEvents:new Set(),uploads:new Map(),checkoutNotifications:new Map(),ended:false,ready:false,greeted:false,muted:false,speaking:false,outputPlaying:false,playingResponseId:null,nextAudioReplyAt:0,userTurn:0,awaitingVad:false,needsReply:false,replyRequested:false,connectedAt:null,callId:null,inputMode,modeSequence:0,voiceTurnDetection:{type:'semantic_vad',eagerness:'medium',create_response:true,interrupt_response:true}};
       this.call = c;
       this.audio.muted=inputMode==='text';this.audio.autoplay=inputMode==='voice';
       c.setupTimer = setTimeout(()=>{if(this._current(c)){this._cleanup(c);this._state('error',inputMode==='text'?'The chat connection timed out. Check your connection, then try again.':'Microphone permission timed out. Allow microphone access, then answer the call again.');}},inputMode==='text'?SETUP_MS:PERMISSION_MS);
@@ -483,13 +501,13 @@
       if(!this._current(c))return;
       clearTimeout(c.replyTimer);
       c.replyTimer=setTimeout(()=>{
-        if(!this._current(c)||!c.ready||!c.needsReply||c.replyRequested||c.activeResponses.size||c.speaking||c.awaitingVad||c.validating||[...c.tools.values()].some(t=>!t.done))return;
+        if(!this._current(c)||!c.ready||!c.needsReply||c.replyRequested||c.activeResponses.size||c.speaking||c.outputPlaying||c.awaitingVad||c.validating||[...c.tools.values()].some(t=>!t.done))return;
         const shopping=c.shoppingTransition;
         if(shopping&&!shopping.complete&&!shopping.failed&&(!shopping.acked||shopping.waitingForResponse))return;
         c.needsReply=false;c.replyRequested=true;
         if(!this._send(c,{type:'response.create',response:{output_modalities:[c.inputMode==='text'?'text':'audio']}})){c.replyRequested=false;c.needsReply=true;}
         else if(shopping&&!shopping.complete&&!shopping.failed)shopping.requested=true;
-      },0);
+      },c.inputMode==='voice'?Math.max(0,(c.nextAudioReplyAt||0)-Date.now()):0);
     }
     async _directAction(c,command){
       const sequence=(c.validatedTurn||0)+1;c.validatedTurn=sequence;c.validating=true;c.awaitingVad=false;c.needsReply=false;
@@ -500,6 +518,10 @@
           const result=await this.options.onCheckout?.({scope:command.request.scope,...(command.request.product_ids?{productIds:command.request.product_ids}:{})});
           if(result?.ok!==true)throw Error(result?.error||'I could not open checkout. Please try again.');
           message='Your checkout is ready. Review your items and tap Pay when you’re ready.';
+        }else if(command.kind==='comparison'){
+          const result=await this.options.onCompareProducts?.(command.productIds);
+          if(result?.ok!==true)throw Error(result?.error||'I could not open that comparison. Please choose two or three products.');
+          message='Here they are side by side.';
         }else{
           const result=await this.options.onProductAction?.(command.action,command.productId);
           if(result?.ok!==true)throw Error(result?.error||'I could not update that product. Please try again.');
@@ -552,7 +574,8 @@
         case 'conversation.item.added':case 'conversation.item.done':case 'conversation.item.created':this._conversationItem(c,event);break;
         case 'response.output_item.added':case 'response.output_item.done':this._conversationItem(c,event);break;
         case 'response.created':
-          if(c.cancelledResponses?.has(event.response?.id)&&c.completedResponses.has(event.response.id))break;
+          if(c.cancelledResponses?.has(event.response?.id))break;
+          if(c.speaking){if(event.response?.id){c.cancelledResponses.add(event.response.id);this._send(c,{type:'response.cancel',response_id:event.response.id});}break;}
           if(c.shoppingTransition?.failed){
             c.suppressPlayback=false;this.audio.muted=c.inputMode==='text'||c.shoppingTransition.wasMuted;
             if(this.audio.srcObject)this._playAudio(c);
@@ -572,7 +595,7 @@
           if(event.response?.id){c.activeResponses.add(event.response.id);this._positionItem(c,`response:${event.response.id}`);}
           c.replyRequested=false;c.awaitingVad=false;this._state('thinking','Coupi is thinking…');break;
         case 'input_audio_buffer.speech_started':
-          if(c.inputMode==='text')break;this._syncMemories(c);this._beginCheckedTurn(c,event.item_id||null);
+          if(c.inputMode==='text')break;this._syncMemories(c);this._beginCheckedTurn(c,event.item_id||null,true);
           if(event.item_id)this._transcript(c,{role:'user',key:event.item_id,text:'',pending:true,final:false},event);
           c.speaking=true;c.awaitingVad=true;this._captureCamera(c,'speech-start');this._state('listening','Listening to you…');break;
         case 'input_audio_buffer.speech_stopped':if(c.inputMode==='text')break;c.speaking=false;this._state('thinking','Coupi is considering your request…');break;
@@ -590,9 +613,10 @@
           this._transcript(c,{role:'assistant',key:event.item_id || `response-text:${event.response_id || 'current'}`,delta:event.delta || '',final:false},event);break;
         case 'response.output_audio_transcript.done': case 'response.audio_transcript.done': case 'response.output_text.done':
           this._transcript(c,{role:'assistant',key:event.item_id || `response-text:${event.response_id || 'current'}`,text:event.transcript ?? event.text ?? '',final:true},event);break;
-        case 'output_audio_buffer.started':if(c.inputMode!=='text'&&!c.suppressPlayback)this._state('speaking','Coupi is speaking. You can interrupt naturally.');break;
+        case 'output_audio_buffer.started':if(c.inputMode!=='text'&&!c.suppressPlayback&&!c.speaking){c.outputPlaying=true;c.playingResponseId=event.response_id||null;this._state('speaking','Coupi is speaking. You can interrupt naturally.');}break;
         case 'output_audio_buffer.stopped':case 'output_audio_buffer.cleared':
-          if(!c.speaking)this._state('connected',this._connectedMessage(c));break;
+          c.outputPlaying=false;c.playingResponseId=null;c.nextAudioReplyAt=event.type==='output_audio_buffer.stopped'?Date.now()+LISTENING_GAP_MS:0;
+          if(!c.speaking&&!c.awaitingVad)this._state('connected',this._connectedMessage(c));this._reply(c);break;
         case 'response.function_call_arguments.done':
           if(event.response_id && !c.completedResponses.has(event.response_id))c.activeResponses.add(event.response_id);
           this._tool(c,event);break;
@@ -601,8 +625,7 @@
           if(response.status==='failed' && this._fatalApiError(c,response.status_details?.error))break;
           if(c.cancelledResponses?.has(response.id)||(c.shoppingTransition?.waitingForResponse&&!c.shoppingTransition.requested)){
             if(response.id){c.cancelledResponses.add(response.id);c.activeResponses.delete(response.id);c.completedResponses.add(response.id);}
-            c.shoppingTransition.waitingForResponse=false;
-            if(!c.shoppingTransition.requested)c.replyRequested=false;
+            if(c.shoppingTransition){c.shoppingTransition.waitingForResponse=false;if(!c.shoppingTransition.requested)c.replyRequested=false;}
             this._flushCameraDeletes(c);this._reply(c);break;
           }
           if(response.id){c.activeResponses.delete(response.id);c.completedResponses.add(response.id);}
@@ -612,7 +635,7 @@
           if(response.status==='failed') {
             const detail=response.status_details?.error?.message;
             this._state('connected',detail || 'Coupi could not complete that reply. Please try again.');
-          } else if(!c.speaking && !c.activeResponses.size)this._state('connected',this._connectedMessage(c));
+          } else if(!c.speaking && !c.outputPlaying && !c.activeResponses.size)this._state('connected',this._connectedMessage(c));
           this._reply(c);break;
         }
         case 'error': {
@@ -648,7 +671,7 @@
     async _tool(c,event) {
       const callId=event.call_id;
       if(!this._current(c) || !callId || c.tools.has(callId)||c.cancelledResponses?.has(event.response_id))return;
-      const task={done:false,name:event.name};c.tools.set(callId,task);
+      const task={done:false,name:event.name,userTurn:c.userTurn};c.tools.set(callId,task);
       let result;
       try {
         const args=JSON.parse(event.arguments || '{}');
@@ -667,14 +690,14 @@
           const category=['makeup','clothes','desk','glasses','all'].includes(args.category)?args.category:'all';
           const max_price=args.max_price===null || args.max_price===undefined?null:Number(args.max_price);
           if(max_price!==null && (!Number.isFinite(max_price)||max_price<0))throw new Error('Budget must be a non-negative amount in won.');
-          const controller=new AbortController();c.toolControllers.add(controller);
+          const controller=new AbortController();task.controller=controller;c.toolControllers.add(controller);
           const timer=setTimeout(()=>controller.abort(),60000);
           try {
             const response=await this.fetch('/api/products/search',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({query,category,max_price,memories,limit:10}),signal:controller.signal});
             if(!response.ok)throw new Error('Product search is unavailable. Do not invent replacement products.');
             result=await response.json();
             if(!Array.isArray(result.products))throw new Error('The product search returned an invalid catalog result.');
-            if(this._current(c)&&!task.cancelled){
+            if(this._current(c)&&!task.cancelled&&!task.superseded){
               if(typeof this.options.onRecommendations!=='function')throw Error('Product cards are unavailable. Please try the search again.');
               const shown=await this.options.onRecommendations(result.products,result.message || 'Products from Coupang.',{...(result.search || {query,category,max_price}),maxPrice:result.search?.max_price??max_price,constraints:result.constraints,sourceOnly:true},result.retrieval_status);
               if(shown===false||shown?.ok===false)throw Error(shown?.error||'Product cards could not be shown. Please search again.');
@@ -700,12 +723,12 @@
           const query=typeof args.query==='string'?args.query.trim().slice(0,300):'';
           const max_price=args.max_price==null?null:Number(args.max_price);
           if(!query||max_price!==null&&(!Number.isFinite(max_price)||max_price<0))throw new Error('Use the shopper’s words and a valid explicit budget.');
-          const controller=new AbortController();c.toolControllers.add(controller);const timer=setTimeout(()=>controller.abort(),12000);
+          const controller=new AbortController();task.controller=controller;c.toolControllers.add(controller);const timer=setTimeout(()=>controller.abort(),12000);
           try {
             const response=await this.fetch('/api/products/world',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'search',query,max_price}),signal:controller.signal});
             if(!response.ok)throw new Error('World product search is unavailable.');result=await response.json();
             if(result.catalog_namespace!=='world-simulation'||!Array.isArray(result.products))throw new Error('The world catalog result is invalid.');
-            if(this._current(c)&&!task.cancelled)this.options.onWorldRecommendations?.(result.products,result.message);
+            if(this._current(c)&&!task.cancelled&&!task.superseded)this.options.onWorldRecommendations?.(result.products,result.message);
           }finally{clearTimeout(timer);c.toolControllers.delete(controller);}
         } else if(event.name==='open_world_product') {
           if(typeof args.sku_id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$/.test(args.sku_id))throw new Error('Use an exact catalog SKU returned by the app.');
@@ -726,6 +749,12 @@
           const applied=await this.options.onTryon(args.mode,overlay);
           if(applied && typeof applied==='object' && applied.ok===false)result={...applied,ok:false,error:applied.error || applied.unavailableReason || 'That product preview could not be adjusted.',camera_started_by_agent:false,instruction:'Explain the returned reason briefly. Do not claim the preview was shown or adjusted. Offer only matching available alternatives returned by the application; if none were returned, search for another matching product.'};
           else result={ok:true,mode:args.mode,overlay,...(applied && typeof applied==='object'?{preview:applied}:{}),camera_started_by_agent:false,notice:args.mode==='none'?'The product preview was cleared.':args.mode==='makeup'?'The selected lipstick preview uses an approximate colour. A custom colour adjustment does not verify a matching product shade.':args.mode==='glasses'?'The selected glasses frame follows face landmarks. Fit, lens optics and product details remain approximate.':args.mode==='clothes'?'The selected product listing photo follows body landmarks. This is approximate alignment, not fabric simulation or verified sizing.':'The selected product listing photo was adjusted as a 2D room preview, not measured fit, physical scale or a 3D surface anchor.'};
+        } else if(event.name==='compare_products') {
+          if(Object.keys(args).some(key=>key!=='product_ids')||!Array.isArray(args.product_ids)||args.product_ids.length<2||args.product_ids.length>3||args.product_ids.some(id=>typeof id!=='string'||!PRODUCT_ID.test(id))||new Set(args.product_ids).size!==args.product_ids.length)throw Error('Choose two or three distinct exact product IDs from the displayed cards.');
+          if(!this.options.onCompareProducts)throw Error('Product comparison is unavailable on this page.');
+          result=await this.options.onCompareProducts(args.product_ids);
+          if(!result||typeof result!=='object'||result.ok!==true)throw Error(result?.error||'The comparison could not be opened.');
+          result={...result,instruction:'The selected products are shown side by side. Briefly describe only the returned differences; never claim a feature shared by every product unless each product confirms it.'};
         } else if(event.name==='product_action') {
           if(!['skip','save','try_on','details','browse'].includes(args.action))throw new Error('Choose skip, save, try_on, details, or browse.');
           if(args.product_id!==undefined && (typeof args.product_id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(args.product_id)))throw new Error('Use an exact catalog product ID.');
@@ -761,6 +790,7 @@
       } catch(error) {result={ok:false,error:error.name==='AbortError'?'The tool request timed out or the call ended.':error.message || 'Tool failed.',products:[],instruction:'Tell the shopper about the limitation. Do not invent products, prices, availability, or successful changes.'};}
       task.done=true;
       if(!this._current(c))return;
+      if(task.superseded||task.userTurn!==c.userTurn){this._send(c,{type:'conversation.item.create',item:{type:'function_call_output',call_id:callId,output:JSON.stringify({ok:false,superseded:true,instruction:'A newer shopper turn superseded this tool. Do not resume or narrate the earlier request; answer the current request only.'})}});return;}
       if(task.cancelled){this._send(c,{type:'conversation.item.create',item:{type:'function_call_output',call_id:callId,output:JSON.stringify({ok:false,error:'The shopper skipped the interview. Continue shopping; do not resume personalization.'})}});return;}
       this._send(c,{type:'conversation.item.create',item:{type:'function_call_output',call_id:callId,output:JSON.stringify(result)}});
       c.needsReply=true;this._reply(c);
@@ -811,7 +841,9 @@
       this._flushShoppingTransition(c);
       this._state(c.ready?'connected':'connecting',c.ready?'Switching to shopping…':'Connecting to shopping…');return true;
     }
-    _beginCheckedTurn(c,id) {
+    _beginCheckedTurn(c,id,automatic=false) {
+      this._interruptOutput(c,{automatic,supersede:true});
+      if(!automatic){c.speaking=false;c.awaitingVad=false;}
       if(!this.options.onResolveCall){if(this.options.directShopping){c.validatedTurn=(c.validatedTurn||0)+1;c.validating=false;}return;}
       c.speechSequence=(c.speechSequence||0)+1;c.speechTurns??=[];
       c.speechTurns.push({id,sequence:c.speechSequence,complete:false});
@@ -910,6 +942,7 @@
       c.switchingInputMode=null;
       if(inputMode===c.inputMode)return true;
       if(inputMode==='text') {
+        this._interruptOutput(c);
         c.inputMode='text';c.muted=false;c.speaking=false;c.awaitingVad=false;
         const stream=c.microphone;c.microphone=null;
         stream?.getTracks().forEach(track=>track.stop());
@@ -917,7 +950,6 @@
         this.options.onPlaybackBlocked?.(false);
         this._configureInputMode(c);
         this._send(c,{type:'input_audio_buffer.clear'});
-        this._send(c,{type:'output_audio_buffer.clear'});
         try {await c.audioSender?.replaceTrack(null);} catch {} // Stopped tracks cannot keep recording.
         if(!this._current(c)||sequence!==c.modeSequence)return false;
         this._state(c.ready?'connected':'connecting',c.ready?this._connectedMessage(c):'Connecting to Chat…');this._reply(c);return true;

@@ -50,3 +50,11 @@ test('the first fifteen rendered positions are resolvable without changing their
   assert.deepEqual(resolve('try product fourteen',context),{kind:'product',action:'try_on',productId:'product-14'});
   assert.equal((resolve('try product 16',context) as {kind:string}).kind,'error');
 });
+
+test('typed comparison resolves two or three displayed ordinals without changing selection',()=>{
+  for(const text of ['Compare the first and third products','Can you compare the first with the third?','compare product one and product three','compare 1st vs 3rd'])assert.deepEqual(resolve(text),{kind:'comparison',productIds:['first-11','third-33']},text);
+  assert.deepEqual(resolve('compare the first, second and third products'),{kind:'comparison',productIds:['first-11','second-22','third-33']});
+  assert.deepEqual(resolve('compare this with the first'),{kind:'comparison',productIds:['second-22','first-11']});
+  assert.equal((resolve('compare first and first') as {kind:string}).kind,'error');assert.equal((resolve('compare first and tenth') as {kind:string}).kind,'error');
+  for(const text of ['compare first','compare first and third and buy it','do not compare first and third','should I compare first and third','compare first or third','compare first, second, third and fourth'])assert.equal(resolve(text),null,text);
+});

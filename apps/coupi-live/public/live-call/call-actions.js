@@ -42,9 +42,22 @@
     if (typeof value !== 'string' || value.length > 500) return null;
     context = context && typeof context === 'object' ? context : {};
     let text = value.toLowerCase().replace(/[’]/g,"'").trim().replace(/[.!?,]+$/g,'').trim().replace(/\s+/g,' ');
-    if (!text || /\b(?:not|don't|dont|never|avoid|instead|if|whether|should|and|or|both)\b/.test(text)) return null;
+    if (!text || /\b(?:not|don't|dont|never|avoid|instead|if|whether|should|or)\b/.test(text)) return null;
     text = text.replace(/^(?:please\s+)?(?:(?:let me|let us|let's|i want to|i'd like to|i would like to|can i|could i|can you|could you|would you)\s+)?/,'')
       .replace(/^please\s+/,'').replace(/\s+please$/,'');
+
+    const comparison=text.match(/^compare\s+(.+)$/);
+    if(comparison){
+      const parts=comparison[1].replace(/\s+(?:from|in)\s+(?:the\s+)?(?:list|collection)$/,'').replace(/\s+(?:products|items|options|pairs)$/,'').split(/,\s*(?:and\s+)?|\s+(?:and|with|versus|vs\.?)\s+/).map(part=>part.trim()).filter(Boolean);
+      if(parts.length<2||parts.length>3)return null;
+      const targets=parts.map(part=>targetProduct(part,context));
+      if(targets.some(target=>!target))return null;
+      const failed=targets.find(target=>target.kind==='error');if(failed)return failed;
+      const productIds=targets.map(target=>target.productId);
+      if(new Set(productIds).size!==productIds.length)return error('Choose two or three different products to compare.');
+      return {kind:'comparison',productIds};
+    }
+    if(/\b(?:and|both)\b/.test(text))return null;
 
     if (/^(?:skip(?:\s+(?:this|the|current))?(?:\s+(?:collection|list|group))?|next collection|(?:show|give)(?:\s+me)?\s+(?:the\s+)?next\s+(?:collection|list|group)|(?:move|go)\s+to\s+(?:the\s+)?next\s+(?:collection|list|group))$/.test(text))
       return {kind:'product',action:'skip'};

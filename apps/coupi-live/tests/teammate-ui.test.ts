@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import catalog from '../data/teammate-catalog.json';
 const html=readFileSync(new URL('../public/live-call/index.html',import.meta.url),'utf8');
 const stateSource=readFileSync(new URL('../public/live-call/mobile-call-state.js',import.meta.url),'utf8');
-const moduleSources=['product-discovery.js','call-conversation.js','product-evidence.js','demo-checkout.js','purchase-pairings.js','call-personalization.js'].map(name=>readFileSync(new URL('../public/live-call/'+name,import.meta.url),'utf8'));
+const moduleSources=['call-actions.js','product-discovery.js','call-conversation.js','product-evidence.js','demo-checkout.js','purchase-pairings.js','call-personalization.js'].map(name=>readFileSync(new URL('../public/live-call/'+name,import.meta.url),'utf8'));
 const source=readFileSync(new URL('../public/live-call/mobile-call.js',import.meta.url),'utf8');
 const bridgeSource=readFileSync(new URL('../public/live-call/call-bridge.js',import.meta.url),'utf8');
 const tick=()=>new Promise(resolve=>setTimeout(resolve,0));
@@ -1264,4 +1264,42 @@ test('ordinary embedded calls use direct shopping with friendly greeting, local 
   f.voice.opts.onTranscript({role:'user',key:'direct-preview',text:'Try the second one',final:true,localAction:true});await f.voice.opts.onProductAction('save',String(selected.id));assert(f.store.cart.has(String(selected.id)));
   assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,0);assert.equal(f.nodes.get('bridge-panel').hidden,true);
   assert(f.store.messages.some(message=>message.text==='Find pink lipstick'));assert(f.store.messages.some(message=>message.text==='Match my outfit'));assert(f.store.messages.some(message=>message.text==='Try the second one'));
+});
+
+test('glasses demo keeps first/third ordinals through try-on, details, comparison, bag and image chat',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();const call=f.voice.call;
+  f.voice.opts.onRecommendations(catalog.filter(product=>product.productType==='glasses'),'',{query:'glasses',category:'all',sourceOnly:true});
+  const ids=Array.from(f.voice.opts.getContext().visible_product_ids);assert(ids.length>=3);const first=ids[0],third=ids[2];
+  const run=async words=>{const command=f.context.window.CoupiCallActions.resolve(words,f.voice.opts.getContext());assert(command,words);if(command.kind==='comparison')return f.voice.opts.onCompareProducts(command.productIds);assert.equal(command.kind,'product');return f.voice.opts.onProductAction(command.action,command.productId);};
+  assert.equal((await run('Try the third product')).ok,true);assert.equal(String(f.camera.product.id),third);
+  assert.equal((await run('Try the first product')).ok,true);assert.equal(String(f.camera.product.id),first);assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),ids);
+  const details=await run('Show details for the third product');assert.equal(String(details.product.id),third);assert.equal(f.nodes.get('details-dialog').open,true);
+  const compared=await run('Compare the first and third products');assert.equal(compared.ok,true);assert.equal(compared.comparison_opened,true);
+  assert.deepEqual(Array.from(compared.product_ids),[first,third]);assert.deepEqual(Array.from(compared.products,p=>String(p.id)),[first,third]);
+  for(const product of compared.products)assert.equal(product.price,f.store.catalog.get(String(product.id)).price);
+  assert.equal(f.nodes.get('details-dialog').open,false);assert.equal(f.nodes.get('compare-dialog').open,true);assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),ids);
+  assert.equal((await run('Add the third product to my cart')).ok,true);assert.deepEqual(Array.from(f.store.cart.keys()),[third]);
+  f.nodes.get('compare-dialog').close();await f.nodes.get('text-toggle').onclick();
+  f.nodes.get('chat-image-file').files=[{name:'outfit.jpg'}];await f.nodes.get('chat-image-file').onchange();f.nodes.get('text-input').value='Would these glasses suit this outfit?';await f.nodes.get('text-form').onsubmit({preventDefault(){}});
+  assert.equal(f.voice.uploads.length,1);assert.equal(f.voice.uploads[0].name,'outfit.jpg');assert.equal(f.voice.uploads[0].text,'Would these glasses suit this outfit?');
+  assert.equal(f.voice.call,call);assert.equal(f.camera.running,true);assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,1);assert.deepEqual(Array.from(f.voice.opts.getContext().visible_product_ids),ids);
+});
+
+test('comparison validates all exact IDs atomically and reuses an already open comparison',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();recommendType(f,'glasses');const ids=f.discovery.visible.slice(0,3).map(product=>String(product.id));
+  let opened=0;const dialog=f.nodes.get('compare-dialog'),show=dialog.showModal.bind(dialog);dialog.showModal=()=>{opened++;show();};
+  assert.equal(f.voice.opts.onCompareProducts([ids[0],ids[2]]).ok,true);assert.equal(f.voice.opts.onCompareProducts([ids[0],ids[2]]).ok,true);assert.equal(opened,1);
+  const before=Array.from(f.discovery.compareIds);
+  for(const request of [[ids[0],ids[0]],[ids[0],'unknown-product'],[ids[0]],ids.concat('extra'),null])assert.equal(f.voice.opts.onCompareProducts(request).ok,false);
+  assert.deepEqual(Array.from(f.discovery.compareIds),before);assert.equal(dialog.open,true);assert.equal(f.store.cart.size,0);
+});
+
+test('a replacement photo cannot send the previous image or text while it is preparing',async t=>{
+  const wait=deferred();const f=fixture(t,{imagePrepare:async file=>file.name==='new.jpg'?wait.promise:{dataUrl:'data:image/jpeg;base64,AQID',name:file.name}});await f.nodes.get('entry-chat').onclick();
+  f.nodes.get('chat-image-file').files=[{name:'old.jpg'}];await f.nodes.get('chat-image-file').onchange();
+  f.nodes.get('chat-image-file').files=[{name:'new.jpg'}];const preparing=f.nodes.get('chat-image-file').onchange();f.nodes.get('text-input').value='Use the new photo';
+  assert.equal(f.nodes.get('chat-send').disabled,true);assert.equal(f.nodes.get('attachment-preview').hidden,true);f.voice.opts.onState({state:'thinking'});assert.equal(f.nodes.get('chat-send').disabled,true);
+  await f.nodes.get('text-form').onsubmit({preventDefault(){}});assert.equal(f.voice.uploads.length,0);assert.equal(f.voice.sentTexts.length,0);assert.equal(f.nodes.get('text-input').value,'Use the new photo');
+  wait.resolve({dataUrl:'data:image/jpeg;base64,BAUG',name:'new.jpg'});await preparing;assert.equal(f.nodes.get('chat-send').disabled,false);
+  await f.nodes.get('text-form').onsubmit({preventDefault(){}});assert.equal(f.voice.uploads.length,1);assert.equal(f.voice.uploads[0].name,'new.jpg');assert.equal(f.voice.uploads[0].dataUrl,'data:image/jpeg;base64,BAUG');
 });
