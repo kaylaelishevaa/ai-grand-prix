@@ -6,7 +6,7 @@ import {errorResponse,AppError} from '@/lib/server/errors';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
-const inputSchema=z.object({action:z.enum(['hatch','start','message','resumeInterview','finishInterview']),requestId:z.string().trim().min(1).max(100),message:z.string().trim().max(3000).optional()});
+const inputSchema=z.object({action:z.enum(['hatch','start','message','resumeInterview','finishInterview']),requestId:z.string().trim().min(1).max(100),message:z.string().trim().max(3000).optional(),personalizationDraftId:z.string().trim().min(1).max(100).optional()});
 
 export async function POST(request:Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request:Request) {
       requireLocalOrigin(request);
       if(Number(request.headers.get('content-length')||0)>8_500_000)throw new AppError('PHOTO_TOO_LARGE','Keep photos under 8 MB.',413);
       const form=await request.formData(),file=form.get('file');
-      raw={action:form.get('action'),requestId:form.get('requestId'),message:form.get('message')||undefined};
+      raw={action:form.get('action'),requestId:form.get('requestId'),message:form.get('message')||undefined,personalizationDraftId:form.get('personalizationDraftId')||undefined};
       if(file instanceof File&&file.size>0) {
         if(file.size>8_000_000)throw new AppError('PHOTO_TOO_LARGE','Keep photos under 8 MB.',413);
         image={buffer:Buffer.from(await file.arrayBuffer()),mime:file.type};

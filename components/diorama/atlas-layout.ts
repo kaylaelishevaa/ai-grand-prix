@@ -12,7 +12,7 @@ export function atlasLayout(count:number,compact=false) {
       : size===3?[{u:-4,v:-1.4},{u:0,v:2.7},{u:4,v:-1.4}]
         : size===4?[{u:-4.5,v:-1.1},{u:-1.55,v:3.7},{u:3.8,v:2.3},{u:3,v:-3.45}]
           : [{u:-5.1,v:2.7},{u:0,v:3.1},{u:5.1,v:2.7},{u:-5.1,v:-3.5},{u:0,v:-3.1},{u:5.1,v:-3.5}];
-  const scale=compact?(size<=2?.62:size<=4?.48:.42):(size<=4?.67:.58);
+  const scale=compact?(size<=2?.62:size<=4?.54:.51):(size<=4?.67:.58);
   return points.slice(0,size).map((point,index)=>({
     x:(point.u-point.v)/Math.SQRT2,z:(-point.u-point.v)/Math.SQRT2,
     y:compact?0:Math.sin(index*1.7)*.14,scale,

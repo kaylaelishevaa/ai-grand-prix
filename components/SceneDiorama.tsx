@@ -19,6 +19,7 @@ export default function SceneDiorama({scene,phase,onSelect,fallback}:{
   const engine=useRef<DioramaController|null>(null);
   const markers=useRef(new Map<string,HTMLButtonElement>());
   const leaders=useRef(new Map<string,SVGLineElement>());
+  const endpoints=useRef(new Map<string,SVGCircleElement>());
   const displayed=useRef(new Map<string,SceneTouchpoint>());
   const interaction=useRef({hover:'',focus:'',pressed:''});
   const dimensions=useRef('');
@@ -62,8 +63,10 @@ export default function SceneDiorama({scene,phase,onSelect,fallback}:{
               marker.style.opacity=String(entry.opacity);
               marker.style.visibility=entry.visible?'visible':'hidden';
               marker.style.pointerEvents=entry.visible&&entry.opacity>.8?'auto':'none';
+              const endpoint=endpoints.current.get(entry.skuId);
+              if(endpoint){endpoint.setAttribute('cx',String(entry.x));endpoint.setAttribute('cy',String(entry.y));endpoint.style.opacity=entry.visible&&Math.hypot(entry.x-point.x,entry.y-point.y)>9?String(entry.opacity):'0';}
               const leader=leaders.current.get(entry.skuId);
-              if(leader){leader.setAttribute('x1',String(entry.x));leader.setAttribute('y1',String(entry.y));leader.setAttribute('x2',String(point.x));leader.setAttribute('y2',String(point.y));leader.style.opacity=entry.visible&&Math.hypot(entry.x-point.x,entry.y-point.y)>9?String(entry.opacity*.45):'0';}
+              if(leader){leader.setAttribute('x1',String(entry.x));leader.setAttribute('y1',String(entry.y));leader.setAttribute('x2',String(point.x));leader.setAttribute('y2',String(point.y));leader.style.opacity=entry.visible&&Math.hypot(entry.x-point.x,entry.y-point.y)>9?String(entry.opacity*.7):'0';}
               // Keep labels within the viewport, including dots close to an edge.
               marker.dataset.edge=point.x<110?'left':point.x>width-110?'right':'center';
             }
@@ -97,7 +100,7 @@ export default function SceneDiorama({scene,phase,onSelect,fallback}:{
     <div className="scene-sky" aria-hidden="true"><span className="scene-celestial"/><span className="scene-cloud cloud-near"/><span className="scene-cloud cloud-far"/></div>
     <canvas ref={canvas} className="scene-diorama-canvas" aria-hidden="true"/>
     {mode==='loading'&&<div className="scene-diorama-loading">{fallback}</div>}
-    {mode==='ready'&&<div className="scene-touchpoints" aria-label="Little things in this world"><svg className="scene-touchpoint-leaders" aria-hidden="true">{items.map(item=><line key={item.skuId} ref={element=>{if(element)leaders.current.set(item.skuId,element);else leaders.current.delete(item.skuId);}}/>)}</svg>{items.map((item,index)=><button key={item.skuId} className="scene-touchpoint" type="button" style={{animationDelay:`${index*270}ms`}}
+    {mode==='ready'&&<div className="scene-touchpoints" aria-label="Little things in this world"><svg className="scene-touchpoint-leaders" aria-hidden="true">{items.map(item=><g key={item.skuId}><line ref={element=>{if(element)leaders.current.set(item.skuId,element);else leaders.current.delete(item.skuId);}}/><circle r="2.6" ref={element=>{if(element)endpoints.current.set(item.skuId,element);else endpoints.current.delete(item.skuId);}}/></g>)}</svg>{items.map((item,index)=><button key={item.skuId} className="scene-touchpoint" type="button" style={{animationDelay:`${index*270}ms`}}
       ref={element=>{if(element)markers.current.set(item.skuId,element);else markers.current.delete(item.skuId);}}
       onPointerEnter={event=>{if(event.pointerType!=='touch')interaction.current.hover=item.skuId;}}
       onPointerLeave={()=>{interaction.current.hover='';interaction.current.pressed='';}}

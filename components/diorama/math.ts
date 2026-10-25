@@ -1,4 +1,5 @@
 import type { SceneKind } from '../../lib/scenes';
+import type {SceneContext} from '../../lib/world-context';
 
 /** Tiny renderer-independent motion helpers, shared by the room and hatch. */
 export function clamp(value: number, min: number, max: number): number {
@@ -160,7 +161,15 @@ const dressingSlots: RoomSlot[] = [
 ];
 
 /** Layout semantics match the furniture, including clothes hung from their hook. */
-export function assignRoomSlots(items: { type: string; name: string }[], kind: SceneKind = 'kitchen'): RoomSlot[] {
+export function assignRoomSlots(items: { type: string; name: string }[], kind: SceneKind = 'kitchen',context?:SceneContext): RoomSlot[] {
+  if(kind==='kitchen'&&(context?.setting==='riverside'||context?.setting==='rooftop')){
+    const picnic=context.setting==='riverside';
+    const points=picnic?[[-.83,.33],[.55,.27],[-.72,1.18],[.72,1.18],[-1.68,.48],[1.7,.48]]:[[-1.05,.17],[0,.17],[1.05,.17],[-1.05,1.12],[0,1.12],[1.05,1.12]];
+    const used=new Set<number>();
+    const priorities=items.map(item=>picnic?(/cushion|pillow|blanket|towel/.test(item.type)?4:/mug|cup|bowl/.test(item.type)?0:/tray|board|plate/.test(item.type)?1:/speaker|radio/.test(item.type)?2:3):-1);
+    const reserved=priorities.map(index=>{if(index<0||used.has(index))return -1;used.add(index);return index;});
+    return items.map((item,index)=>{const slot=reserved[index]>=0?reserved[index]:points.findIndex((_,i)=>!used.has(i));used.add(slot);const p=points[Math.max(0,slot)],floor=picnic&&slot>=4;return{key:`${picnic?'picnic':'dinner'}-${slot}`,x:p[0],z:p[1],y:floor?.265:picnic?.625:1.002,surface:floor?.265:picnic?.625:1.002,scale:picnic?.8:.83};});
+  }
   if (kind === 'kitchen') return assignKitchenSlots(items);
   const layout = kind === 'dressing' ? dressingSlots : kind === 'reading' ? readingSlots : deskSlots;
   const preferred = items.map(item => {

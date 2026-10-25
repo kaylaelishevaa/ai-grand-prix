@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
+import {IMMERSIVE_CAMERA,immersiveCameraFit} from './scene-camera';
+import {solidMeshes,visibleGeometryBounds,visibleGeometryPoints,productSurfacePoint} from './composition';
+import {createSurfaceLibrary,roomSurface,configureSunShadow,prepareSurfaceShadows} from './surfaces';
 import { assignRoomSlots, cameraOrbit, clamp, createFrameBudgetMonitor, damp, spring01 } from './math';
 import { createProductMeshLibrary } from './product-meshes';
 import { buildRoomArchitecture, createRoomGeometries } from './rooms';
@@ -6,7 +10,7 @@ import { getSceneMood } from '../../lib/scene-moods';
 import type { SceneKind } from '../../lib/scenes';
 import type {SceneContext} from '../../lib/world-context';
 import {BLUEPRINT_MATERIALS,type SceneBlueprint} from '../../lib/scene-blueprint';
-import {buildBlueprintArchitecture,createBlueprintGeometryPool,normalizeBlueprintProduct,blueprintCameraFit,type BlueprintArchitecture} from './blueprint';
+import {buildBlueprintArchitecture,createBlueprintGeometryPool,normalizeBlueprintProduct,type BlueprintArchitecture} from './blueprint';
 
 export type DioramaPhase = 'dawn' | 'noon' | 'store' | 'night';
 export type DioramaItem = { skuId: string; type: string; name: string; imageUrl?: string; color?: string };
@@ -32,7 +36,7 @@ export type DioramaController = {
 };
 
 type Piece = { group: THREE.Group; position: THREE.Vector3; rotation: THREE.Euler };
-type Anchor = { object: THREE.Object3D; projection: DioramaProjection };
+type Anchor = { object: THREE.Object3D; product:THREE.Group; projection: DioramaProjection };
 
 /** Constrained scene renderer: catalog meshes and validated blueprint geometry
  * stay local; projected product touchpoints remain accessible DOM controls. */
@@ -58,38 +62,31 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = 1.02;
+    renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
 
     const scene = new THREE.Scene();
+    // Generated local studio reflections: no remote HDR or asset request.
+    const reflectionScene=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer);
+    try{const environment=own(pmrem.fromScene(reflectionScene,.055));scene.environment=environment.texture;scene.environmentIntensity=.34;}finally{reflectionScene.dispose();pmrem.dispose();}
     const room = new THREE.Group();
     scene.add(room);
     const camera = new THREE.OrthographicCamera(-4, 4, 3, -3, 0.1, 60);
     const target = new THREE.Vector3(0, 1.15, 0);
     const projected = new THREE.Vector3();
     const hemisphere = new THREE.HemisphereLight('#fff8f0', '#a2ae96', 2.5);
-    const sun = new THREE.DirectionalLight('#fff0d3', 2.6);
-    sun.position.set(-3, 7, 4);
+    const sun = own(new THREE.DirectionalLight('#fff0d3', 2.6));
+    sun.position.set(-3, 7, 4);configureSunShadow(sun,6,1024);
     scene.add(hemisphere, sun);
 
     const geometries = createRoomGeometries(own);
     const blueprintGeometries=createBlueprintGeometryPool(geometries,own);
-    const blueprintPaint=Object.fromEntries(BLUEPRINT_MATERIALS.map(key=>[key,own(new THREE.MeshLambertMaterial({color:'#fff8f0',flatShading:true,side:THREE.DoubleSide}))])) as Record<(typeof BLUEPRINT_MATERIALS)[number],THREE.MeshLambertMaterial>;
-    const materials = {
-      paper: own(new THREE.MeshLambertMaterial({ color: '#fff8f0', flatShading: true })),
-      floor: own(new THREE.MeshLambertMaterial({ color: '#e9ddc8', flatShading: true })),
-      wall: own(new THREE.MeshLambertMaterial({ color: '#eadbc4', flatShading: true })),
-      teal: own(new THREE.MeshLambertMaterial({ color: '#16424a', flatShading: true })),
-      sage: own(new THREE.MeshLambertMaterial({ color: '#91a88d', flatShading: true })),
-      wood: own(new THREE.MeshLambertMaterial({ color: '#bf9370', flatShading: true })),
-      clay: own(new THREE.MeshLambertMaterial({ color: '#c57e64', flatShading: true })),
-      orange: own(new THREE.MeshLambertMaterial({ color: '#e8681a', flatShading: true })),
-      brass: own(new THREE.MeshLambertMaterial({ color: '#d0b16c', flatShading: true })),
-      leaf: own(new THREE.MeshLambertMaterial({ color: '#637f5c', flatShading: true })),
-      blush: own(new THREE.MeshLambertMaterial({ color: '#dfb4aa', flatShading: true })),
-      mirror: own(new THREE.MeshLambertMaterial({ color: '#adc6c0', flatShading: true })),
-      ink: own(new THREE.MeshLambertMaterial({ color: '#31545a', flatShading: true })),
-      window: own(new THREE.MeshBasicMaterial({ color: '#f8edd0' })),
-      ray: own(new THREE.MeshBasicMaterial({ color: '#ffe8b8', transparent: true, opacity: 0.11, depthWrite: false, side: THREE.DoubleSide })),
+    const surfaces=createSurfaceLibrary(own);
+    const blueprintPaint=Object.fromEntries(BLUEPRINT_MATERIALS.map(key=>[key,surfaces.paint('#fff8f0',roomSurface(key),`blueprint:${key}`)])) as Record<(typeof BLUEPRINT_MATERIALS)[number],THREE.MeshStandardMaterial>;
+    const materialKeys=['paper','floor','wall','teal','sage','wood','clay','orange','brass','leaf','blush','mirror','ink'] as const;
+    const materials={...Object.fromEntries(materialKeys.map(key=>[key,surfaces.paint('#fff8f0',roomSurface(key),`room:${key}`)])) as Record<(typeof materialKeys)[number],THREE.MeshStandardMaterial>,
+      window:own(new THREE.MeshStandardMaterial({color:'#f8edd0',emissive:'#f8edd0',emissiveIntensity:.35,roughness:.5})),
+      ray:own(new THREE.MeshBasicMaterial({color:'#ffe8b8',transparent:true,opacity:.11,depthWrite:false,side:THREE.DoubleSide})),
     };
 
     materials.wall.side=THREE.DoubleSide;materials.teal.side=THREE.DoubleSide;
@@ -143,6 +140,8 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     let currentBlueprint=options.blueprint;
     let pendingBlueprint:SceneBlueprint|undefined;
     let generatedBounds:THREE.Box3|null=null;
+    let usableBounds:THREE.Box3|null=null;
+    let compositionPoints:THREE.Vector3[]=[];
     let pendingContext:SceneContext|undefined;
     let pendingKind: SceneKind | null = null;
     let furnitureCount = 0;
@@ -154,6 +153,9 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       else buildRoomArchitecture(kind, { piece, mesh, blob },currentContext);
       // Builders may rotate a whole window or furniture group after creating it.
       for (const part of pieces) part.rotation.copy(part.group.rotation);
+      // Inside the place the cut ground reads as a foundation, not a floating toy pedestal.
+      const foundation=room.getObjectByName(currentBlueprint?'room:blueprint-terrain':'room:organic-island');
+      if(foundation?.children[currentBlueprint?1:2])foundation.children[currentBlueprint?1:2].visible=false;
       furnitureCount = pieces.length;
     }
     buildRoom(currentKind);
@@ -162,6 +164,7 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     const productBounds = new THREE.Box3();
     let productGroups: THREE.Group[] = [];
     let anchors: Anchor[] = [];
+    let roomOccluders:THREE.Mesh[]=[];
     let projections: DioramaProjection[] = [];
     let pendingItems: DioramaItem[] | null = null;
     let currentItems = options.items.slice(0, 6);
@@ -176,6 +179,7 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
     let pointerX = 0;
     let pointerY = 0;
     let lastFrame: number | null = null;
+    let lastShadowFrame=-1;
     let animationFrame = 0;
     let disposed = false;
     let ready = false;
@@ -235,7 +239,7 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       for (const group of productGroups) room.remove(group);
       productGroups = [];
       pieces.splice(furnitureCount);
-      const slots = assignRoomSlots(items, currentKind);
+      const slots = assignRoomSlots(items, currentKind,currentContext);
       anchors = items.map((item, index) => {
         const slot = slots[index],generatedAnchor=generatedRoom?.anchors.get(item.skuId);
         if(currentBlueprint&&!generatedAnchor)throw new Error('Generated scene is missing a validated product anchor.');
@@ -265,11 +269,14 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
           contact.scale.set(.95 * footprint, .8 * footprint, 1);
           model.add(contact);
         }
-        return { object, projection: { skuId: item.skuId, x: 0, y: 0, scale: 1, visible: false, opacity: 0 } };
+        return { object, product:model, projection: { skuId: item.skuId, x: 0, y: 0, scale: 1, visible: false, opacity: 0 } };
       });
       projections = anchors.map(anchor => anchor.projection);
+      restorePieces();
+      prepareSurfaceShadows(room);renderer.shadowMap.needsUpdate=true;
       room.updateMatrixWorld(true);
-      generatedBounds=currentBlueprint?new THREE.Box3().setFromObject(room):null;
+      generatedBounds=visibleGeometryBounds(room);compositionPoints=visibleGeometryPoints(room);roomOccluders=solidMeshes(room);
+      usableBounds=new THREE.Box3();for(const group of productGroups)usableBounds.union(visibleGeometryBounds(group));
       if(!currentBlueprint)target.set(0,1.15,0);
       if(width>1&&height>1)resize(width,height);
       setPhase(currentPhase);
@@ -281,13 +288,16 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       const light=currentBlueprint?.atmosphere;
       hemisphere.color.set(light?.skyTop??mood.sky);
       hemisphere.groundColor.set(light?.skyBottom??mood.ground);
-      hemisphere.intensity=light?light.intensity*(night?.8:1.25):night?1.35:currentKind==='reading'?1.7:2.15;
+      hemisphere.intensity=light?light.intensity*(night?.65:.9):night?.85:currentKind==='reading'?1.15:1.35;
       sun.color.set(light?.lightColor??(night?'#E6BC9F':mood.key));
       sun.intensity=light?light.intensity*(night?.8:1.35):night?1.35:mood.keyIntensity;
       if(currentBlueprint)for(const key of BLUEPRINT_MATERIALS)blueprintPaint[key].color.set(currentBlueprint.palette[key]);
       for(const [key,color] of Object.entries(mood.palette))materials[key as keyof typeof materials].color.set(color);
       materials.ray.opacity=currentKind==='reading'?.09:.1;
-      renderer.toneMappingExposure=currentKind==='reading'?1.03:1.09;
+      renderer.toneMappingExposure=currentContext?.setting==='riverside'?.9:currentKind==='reading'?1.12:1.03;
+      shadowMaterial.opacity=currentContext?.setting==='riverside'?.72:.52;
+      if(currentContext?.setting==='riverside'&&!currentBlueprint)hemisphere.intensity=1.08;
+      renderer.shadowMap.needsUpdate=true;
       setAtmosphere();
     }
 
@@ -297,7 +307,7 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       height = Math.max(1, nextHeight);
       renderer.setSize(width, height, false);
       const aspect = width / height;
-      const fit=generatedBounds?blueprintCameraFit(generatedBounds,aspect):undefined;
+      const fit=generatedBounds?immersiveCameraFit(usableBounds||generatedBounds,generatedBounds,aspect,height,compositionPoints):undefined;
       if(fit)target.copy(fit.target);
       const viewHeight = fit?.height??Math.max(6.3, 8.6 / aspect);
       camera.left = -viewHeight * aspect / 2;
@@ -385,8 +395,13 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       }
     }
 
+    let lastSurfaceSample=-1;
     function projectItems() {
       room.updateMatrixWorld(true);
+      if(clock-lastSurfaceSample>.25){
+        for(const anchor of anchors){const surface=productSurfacePoint(anchor.product,camera,roomOccluders);anchor.object.position.copy(anchor.product.worldToLocal(surface.point));anchor.object.updateMatrixWorld(true);}
+        lastSurfaceSample=clock;
+      }
       for (let index = 0; index < anchors.length; index++) {
         const anchor = anchors[index];
         anchor.object.getWorldPosition(projected);
@@ -446,16 +461,17 @@ export function createDiorama(canvas: HTMLCanvasElement, options: DioramaOptions
       pointerX = damp(pointerX, targetX, 4.5, delta);
       pointerY = damp(pointerY, targetY, 4.5, delta);
       const orbit = reducedMotion ? { yaw: 0, pitch: 0 } : cameraOrbit(clock, pointerX, pointerY);
-      const yaw = Math.PI / 4 + orbit.yaw;
-      const pitch = Math.atan(1 / Math.sqrt(2)) + orbit.pitch;
+      const yaw = IMMERSIVE_CAMERA.yaw + orbit.yaw;
+      const pitch = IMMERSIVE_CAMERA.pitch + orbit.pitch;
       const radius = 12;
       camera.position.set(target.x+Math.sin(yaw) * Math.cos(pitch) * radius, target.y + Math.sin(pitch) * radius, target.z+Math.cos(yaw) * Math.cos(pitch) * radius);
       camera.lookAt(target);
       camera.updateMatrixWorld();
-      room.position.y = reducedMotion ? 0 : Math.sin(clock * 0.7) * 0.025;
+      room.position.y = 0; // Architecture feels grounded; foliage carries the idle motion.
       animatePieces();
       animateAtmosphere(delta);
       try {
+        if((firstAssembly||rebuildStart!==null)&&clock-lastShadowFrame>.1){renderer.shadowMap.needsUpdate=true;lastShadowFrame=clock;}
         renderer.render(scene, camera);
         projectItems();
       } catch {

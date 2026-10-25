@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { SceneKind } from '../../lib/scenes';
 import type {SceneContext} from '../../lib/world-context';
 
-export type RoomGeometry = 'box' | 'cylinder' | 'tapered' | 'sphere' | 'leaf' | 'plane' | 'oval' | 'arch' | 'ring' | 'island' | 'wallArc';
+export type RoomGeometry = 'box' | 'cylinder' | 'tapered' | 'sphere' | 'leaf' | 'plane' | 'oval' | 'arch' | 'ring' | 'island' | 'wallArc' | 'cloth' | 'foliage';
 export type RoomMaterial = 'paper' | 'floor' | 'wall' | 'teal' | 'sage' | 'wood' | 'clay' | 'orange' | 'brass' | 'leaf' | 'window' | 'ray' | 'blush' | 'mirror' | 'ink';
 export type RoomKit = {
   piece(name: string, x?: number, y?: number, z?: number): THREE.Group;
@@ -20,13 +22,23 @@ export function createRoomGeometries(own:<T extends {dispose():void}>(resource:T
     positions.setXYZ(index,x*offset,positions.getY(index),z*offset);
   }
   island.computeVertexNormals();
+  const cloth=new THREE.PlaneGeometry(1,1,24,5),clothPositions=cloth.getAttribute('position');
+  for(let i=0;i<clothPositions.count;i++){const x=clothPositions.getX(i),y=clothPositions.getY(i);clothPositions.setZ(i,Math.sin((x+.5)*Math.PI*8)*.038+(1-y)*.007);}
+  cloth.computeVertexNormals();
+  // Fine smooth leaflets form a compact crown; no oversized spear silhouettes.
+  const leafParts:THREE.BufferGeometry[]=[],leafSeed=new THREE.SphereGeometry(.5,6,4);
+  for(let i=0;i<86;i++){
+    const angle=i*2.39996,t=(i+.5)/86,y=(t-.5)*.68,radius=Math.sqrt(1-(t*2-1)**2)*(.29+.065*Math.sin(i*1.7));
+    const leaf=leafSeed.clone();leaf.scale(.14+(i%3)*.012,.19+(i%4)*.009,.07);leaf.rotateZ(.35+Math.sin(i)*.4);leaf.rotateY(angle);leaf.translate(Math.cos(angle)*radius,y,Math.sin(angle)*radius);leafParts.push(leaf);
+  }
+  const foliage=mergeGeometries(leafParts)!;leafSeed.dispose();leafParts.forEach(part=>part.dispose());foliage.computeBoundingBox();foliage.computeBoundingSphere();
   return {
-    box:own(new THREE.BoxGeometry()),cylinder:own(new THREE.CylinderGeometry(.5,.5,1,18)),
-    tapered:own(new THREE.CylinderGeometry(.45,.32,1,14)),sphere:own(new THREE.IcosahedronGeometry(.5,1)),
+    box:own(new RoundedBoxGeometry(1,1,1,2,.035)),cylinder:own(new THREE.CylinderGeometry(.5,.5,1,32)),
+    tapered:own(new THREE.CylinderGeometry(.45,.32,1,24)),sphere:own(new THREE.SphereGeometry(.5,20,12)),
     leaf:own(new THREE.IcosahedronGeometry(.5,0)),plane:own(new THREE.PlaneGeometry()),
-    oval:own(new THREE.SphereGeometry(.5,16,10)),arch:own(new THREE.TorusGeometry(.5,.055,6,24,Math.PI)),
+    oval:own(new THREE.SphereGeometry(.5,24,16)),arch:own(new THREE.TorusGeometry(.5,.055,6,24,Math.PI)),
     ring:own(new THREE.TorusGeometry(.5,.025,6,32)),island:own(island),
-    wallArc:own(new THREE.CylinderGeometry(.5,.5,1,32,1,true,Math.PI*.5,Math.PI*1.06)),
+    foliage:own(foliage),cloth:own(cloth),wallArc:own(new THREE.CylinderGeometry(.5,.5,1,32,1,true,Math.PI*.5,Math.PI*1.06)),
   };
 }
 
@@ -47,15 +59,17 @@ function island(kind:SceneKind,{piece,mesh}:RoomKit){
 function tree(kit:RoomKit,x:number,z:number,size:number,tint:RoomMaterial='leaf',shape='round'){
   const {piece,mesh,blob}=kit;
   const group=piece('tree',x,.15,z);group.userData.motion='tree';
-  mesh(group,'tapered','wood',0,size*.64,0,size*.14,size*1.28,size*.14).rotation.z=-.075;
-  for(let i=0;i<3;i++){
-    const angle=i*2.3;
-    const branch=mesh(group,'cylinder','wood',Math.cos(angle)*size*.16,size*(.9+i*.12),Math.sin(angle)*size*.15,size*.06,size*.52,size*.06);
-    branch.rotation.z=(i%2?1:-1)*.65;
-  }
-  const crowns=shape==='tall'?[[0,1.75,0,.72,1.45],[.2,1.35,.16,.65,1.05],[-.22,1.3,-.1,.7,.95]]:[[0,1.5,0,1.2,.88],[-.35,1.3,.15,.9,.75],[.34,1.3,-.1,.9,.75],[.18,1.7,.05,.85,.73]];
-  crowns.forEach(([cx,cy,cz,sx,sy])=>mesh(group,'oval',tint,cx*size,cy*size,cz*size,sx*size,sy*size,sx*size*.86));
-  blob(group,0,0,size*1.8,size*1.5,.04);
+  const branch=(from:THREE.Vector3,to:THREE.Vector3,width:number)=>{
+    const center=from.clone().lerp(to,.5),direction=to.clone().sub(from),object=mesh(group,'tapered','wood',center.x,center.y,center.z,width,direction.length(),width);
+    object.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());
+  };
+  let previous=new THREE.Vector3(0,0,0);
+  for(let i=0;i<4;i++){const next=new THREE.Vector3(Math.sin(i*1.8)*size*.045,(i+1)*size*.34,Math.cos(i*1.3)*size*.03);branch(previous,next,size*(.15-i*.023));previous=next;}
+  for(let i=0;i<5;i++){const a=i*2.2;branch(new THREE.Vector3(0,size*(.65+i*.1),0),new THREE.Vector3(Math.cos(a)*size*.42,size*(1.2+i*.08),Math.sin(a)*size*.42),size*(.052-i*.005));}
+  for(let i=0;i<3;i++){const a=i*2.1;branch(new THREE.Vector3(0,.12,0),new THREE.Vector3(Math.cos(a)*size*.27,.025,Math.sin(a)*size*.27),size*.065);}
+  const crowns=shape==='tall'?[[0,1.54,0,.91,1.2],[-.23,1.24,.13,.86,.95],[.24,1.28,-.18,.82,.96]]:[[0,1.48,0,1.15,1],[-.31,1.25,.17,.98,.85],[.31,1.23,-.16,.96,.86]];
+  crowns.forEach(([cx,cy,cz,sx,sy],i)=>{const crown=mesh(group,'foliage',i===1?'leaf':tint,cx*size,cy*size,cz*size,sx*size,sy*size,sx*size);crown.rotation.y=i*1.8;});
+  blob(group,0,0,size*1.85,size*1.6,.04);
   return group;
 }
 
@@ -109,9 +123,10 @@ function kitchenWorld(kit:RoomKit,scenic=true){
   for(let i=0;i<5;i++)mesh(fruit,'sphere','orange',Math.sin(i*2)*.47,Math.cos(i*1.3)*.21,Math.cos(i*2)*.44,.16,.16,.16);
   }
   const counter=piece('counter',-1.34,0,-1.36);
-  ovalTop(kit,counter,'sage',0,.67,0,2.13,.89,.9);
-  ovalTop(kit,counter,'paper',0,1.105,0,2.3,.99,.12);
-  mesh(counter,'arch','floor',0,.56,.39,.68,.68,.65);
+  mesh(counter,'box','sage',0,.67,0,2.13,.9,.89);
+  mesh(counter,'box','paper',0,1.105,0,2.3,.12,.99);
+  for(const x of [-.69,0,.69]){mesh(counter,'box','wood',x,.64,.455,.65,.77,.025);mesh(counter,'box','brass',x+.19,.87,.48,.11,.022,.028);}
+  mesh(counter,'box','teal',0,.235,.405,1.98,.09,.025);
   blob(counter,0,0,2.5,1.5);
   const table=piece('table',.34,0,.89);
   ovalTop(kit,table,'wood',0,.942,0,2.62,1.63,.12);
@@ -146,6 +161,7 @@ function deskWorld(kit:RoomKit){
   const monitor=piece('desk-monitor',-.4,1.06,-1.29);
   mesh(monitor,'box','teal',0,.41,0,.76,.49,.06);mesh(monitor,'box','mirror',0,.41,.038,.68,.4,.013);
   mesh(monitor,'cylinder','teal',0,.17,0,.045,.3,.045);ovalTop(kit,monitor,'teal',0,.02,.05,.3,.2,.035);
+  const inputs=piece('desk-keyboard',-.4,1.065,-.65);mesh(inputs,'box','paper',0,.018,0,.61,.036,.22);for(let row=0;row<3;row++)for(let col=0;col<9;col++)mesh(inputs,'box','mirror',-.26+col*.065,.04,-.07+row*.065,.047,.012,.045);mesh(inputs,'oval','teal',.49,.018,.02,.11,.055,.17);
   const chair=piece('desk-chair',-.42,0,.24);
   ovalTop(kit,chair,'clay',0,.65,0,.83,.83,.16);mesh(chair,'oval','clay',0,.98,.28,.83,.78,.19).rotation.x=.13;
   for(const x of [-.27,.27])for(const z of [-.24,.24])mesh(chair,'cylinder','wood',x,.42,z,.06,.4,.06);
@@ -215,7 +231,8 @@ function dressingWorld(kit:RoomKit,scenic=true){
   }
   archedPortal(kit,'evening-curtain-arch',-1.42,-1.85,2.6,3.04,'clay');
   const curtain=piece('evening-curtains',-1.42,.18,-1.91);curtain.userData.motion='curtain';
-  for(const sign of [-1,1])for(let i=0;i<3;i++)mesh(curtain,'oval',i%2?'paper':'blush',sign*(1.03+i*.13),1.27,0,.21,2.5,.16);
+  for(const sign of [-1,1]){mesh(curtain,'cloth','blush',sign*1.2,1.27,0,.65,2.5,1);for(let i=0;i<5;i++){const r=mesh(curtain,'ring','brass',sign*1.2-.26+i*.13,2.55,0,.055,.055,.055);r.rotation.y=Math.PI/2;}}
+  mesh(curtain,'cylinder','brass',0,2.59,0,.035,3.12,.035).rotation.z=Math.PI/2;
   const vanity=piece('vanity-table',1.15,0,-1.02);ovalTop(kit,vanity,'paper',0,1,0,2.17,1.4,.11);
   for(const x of [-.68,.68]){mesh(vanity,'cylinder','brass',x,.62,0,.05,.72,.05);ovalTop(kit,vanity,'brass',x,.24,0,.43,.6,.04);}
   blob(vanity,0,0,2.6,1.6);
@@ -243,6 +260,45 @@ function dressingWorld(kit:RoomKit,scenic=true){
   }
 }
 
+function diningChair(kit:RoomKit,x:number,z:number,rotation=0){
+  const {piece,mesh}=kit,chair=piece('dining-chair',x,.18,z);chair.rotation.y=rotation;
+  mesh(chair,'box','wood',0,.37,0,.66,.07,.61);
+  mesh(chair,'box','blush',0,.425,.015,.61,.065,.56);
+  mesh(chair,'box','wood',0,.75,-.26,.66,.59,.055).rotation.x=-.08;
+  mesh(chair,'box','blush',0,.75,-.215,.58,.42,.045).rotation.x=-.08;
+  for(const px of [-.25,.25])for(const pz of [-.22,.22])mesh(chair,'cylinder','wood',px,.17,pz,.045,.35,.045);
+}
+function dinnerWorld(kit:RoomKit){
+  const {piece,mesh,blob}=kit,table=piece('two-person-dinner-table',0,0,.65);
+  mesh(table,'box','wood',0,.95,0,3.55,.104,1.85);
+  for(const x of [-1.45,1.45])for(const z of [-.65,.65])mesh(table,'cylinder','teal',x,.58,z,.065,.74,.065);
+  // Cloth stays below the catalog supports: no product hovers above a decorative runner.
+  mesh(table,'box','paper',0,1.004,0,.55,.004,1.8);
+  const edge=mesh(table,'cloth','paper',0,.9,.94,.55,.21,1);edge.rotation.y=Math.PI;
+  blob(table,0,0,4,2.4);
+  diningChair(kit,-.85,-.78,0);diningChair(kit,.85,2.1,Math.PI);
+  const flowers=piece('dinner-flowers',0,1.01,.66);
+  mesh(flowers,'tapered','clay',0,.12,0,.16,.24,.16);
+  for(let i=0;i<3;i++){const x=Math.sin(i*2)*.085,z=Math.cos(i*2)*.06;mesh(flowers,'cylinder','leaf',x,.29,z,.012,.35,.012);mesh(flowers,'sphere','blush',x,.47,z,.105,.095,.105);}
+}
+function picnicWorld(kit:RoomKit){
+  const {piece,mesh,blob}=kit;
+  const blanket=piece('large-picnic-blanket',0,.245,.75);
+  mesh(blanket,'box','blush',0,0,0,4.3,.04,2.65);
+  for(let i=0;i<8;i++)mesh(blanket,'box','paper',-1.9+i*.54,.022,0,.075,.003,2.59);
+  for(let i=0;i<5;i++)mesh(blanket,'box','paper',0,.023,-1.07+i*.54,4.24,.003,.075);
+  for(const side of [-1,1])for(let i=0;i<11;i++)mesh(blanket,'cylinder','paper',-1.98+i*.39,-.005,side*1.35,.012,.1,.012).rotation.x=Math.PI/2;
+  const table=piece('low-picnic-table',0,0,.75);
+  mesh(table,'box','wood',0,.58,0,2.65,.09,1.72);
+  for(const x of [-1.0,1.0])for(const z of [-.54,.54])mesh(table,'cylinder','wood',x,.405,z,.055,.26,.055);
+  blob(table,0,0,3,1.9,.27);
+  const cushion=piece('picnic-seat',-1.64,.27,1.73);mesh(cushion,'box','paper',0,.09,0,.69,.18,.65);mesh(cushion,'box','blush',0,.185,0,.5,.006,.48);
+  const basket=piece('picnic-wicker-basket',1.7,.265,1.7);mesh(basket,'box','clay',0,.18,0,.58,.36,.42);
+  for(let i=0;i<7;i++)mesh(basket,'box','wood',-.25+i*.083,.18,.216,.014,.31,.009);
+  for(let i=0;i<5;i++)mesh(basket,'box','paper',0,.055+i*.061,.223,.54,.01,.006);
+  mesh(basket,'arch','wood',0,.37,0,.42,.42,.64);
+}
+
 function indoorSetting(kit:RoomKit,kind:SceneKind){
   const {piece,mesh}=kit;
   const wall=piece('curved-home-interior',0,.18,-.04);
@@ -251,6 +307,10 @@ function indoorSetting(kit:RoomKit,kind:SceneKind){
   mesh(window,'oval','mirror',0,1.8,-.03,1.2,1.5,.04);
   mesh(window,'box','paper',0,1.69,.015,.045,1.5,.035);
   mesh(window,'box','paper',0,1.6,.015,1.19,.045,.035);
+  mesh(window,'box','wood',0,.97,.11,1.64,.07,.33);
+  const curtain=piece('window-linen-drape',kind==='dressing'?2.8:.59,1.6,-2.29);curtain.userData.motion='curtain';mesh(curtain,'cloth','paper',0,0,0,.48,2.23,1);
+  const skirting=piece('interior-skirting',0,.26,-.04);mesh(skirting,'wallArc','paper',0,0,0,6.24,.14,5.05);
+  if(kind==='kitchen'){const tiles=piece('kitchen-tile-splash',-1.35,1.46,-1.85);for(let row=0;row<3;row++)for(let col=0;col<6;col++)mesh(tiles,'box',row%2?'paper':'wall',-.94+col*.376,row*.17,0,.358,.155,.035);}
   const pendant=piece('home-pendant',.1,2.8,.08);
   mesh(pendant,'cylinder','brass',0,.28,0,.018,.56,.018);
   mesh(pendant,'tapered','paper',0,-.06,0,.64,.3,.64).rotation.z=Math.PI;
@@ -278,6 +338,9 @@ function cafeSetting(kit:RoomKit){
   mesh(cafe,'wallArc','teal',0,1.24,.7,6.3,2.48,2.6);
   archedPortal(kit,'cafe-glazed-door',-.8,-2.03,1.7,2.89,'wood');
   const glass=piece('cafe-window-glass',-.8,1.84,-2.05);mesh(glass,'oval','mirror',0,0,0,1.52,1.7,.04);mesh(glass,'box','paper',0,0,.03,.04,1.65,.03);
+  const mullions=piece('cafe-window-mullions',-.8,1.84,-2.0);for(const x of [-.55,0,.55])mesh(mullions,'box','wood',x,0,0,.035,1.65,.045);mesh(mullions,'box','wood',0,-.4,0,1.5,.035,.045);
+  const bench=piece('cafe-window-bench',.13,.18,-1.92);mesh(bench,'box','wood',0,.4,0,2.14,.09,.61);mesh(bench,'box','blush',0,.49,.04,2.05,.1,.54);for(const x of [-.88,.88])mesh(bench,'box','teal',x,.2,0,.07,.4,.5);
+  const menu=piece('cafe-menu-stand',2.6,.18,.64);mesh(menu,'box','wood',0,.74,0,.57,.96,.07).rotation.x=-.12;mesh(menu,'box','teal',0,.76,.046,.48,.83,.012).rotation.x=-.12;for(let i=0;i<4;i++)mesh(menu,'box','paper',0,.93-i*.12,.105,.29-i*.025,.015,.005);
   const awning=piece('striped-cafe-awning',0,2.68,-1.99);
   for(let i=0;i<9;i++)mesh(awning,'box',i%2?'paper':'clay',-2.16+i*.54,0,.24,.54,.07,1.15).rotation.x=.2;
   const sign=piece('cafe-round-sign',2.59,2.33,-1.75);mesh(sign,'cylinder','brass',0,0,0,.63,.07,.63).rotation.x=Math.PI/2;
@@ -286,11 +349,13 @@ function cafeSetting(kit:RoomKit){
 }
 function riversideSetting(kit:RoomKit){
   const {piece,mesh}=kit;
-  const water=piece('riverside-water',-.05,.17,2.48);water.userData.motion='water';
-  ovalTop(kit,water,'mirror',0,0,0,5.6,1.45,.04);
-  for(let i=0;i<5;i++){const ripple=mesh(water,'ring','paper',-1.9+i*.88,.025,Math.sin(i)*.2,.55,.2,1);ripple.rotation.x=-Math.PI/2;}
+  const water=piece('riverside-water',-.05,.18,2.57);water.userData.motion='water';
+  mesh(water,'island','mirror',0,-.025,0,6.5,.09,1.68);
+  // Broken reflections follow the current instead of concentric pond rings.
+  for(let i=0;i<14;i++){const x=-2.7+(i%7)*.86,z=(i<7?-.23:.31)+Math.sin(i*1.7)*.09;mesh(water,'box',i%3===0?'sage':'paper',x,.028,z,.16+(i%4)*.11,.003,.012).rotation.y=-.09;}
+  const bank=piece('rocky-riverbank',0,.2,1.9);
+  for(let i=0;i<14;i++){const x=-2.85+i*.44,z=Math.sin(i*.8)*.11;const stone=mesh(bank,'leaf',i%3?'wood':'floor',x,.025,z,.21+(i%3)*.08,.12+(i%2)*.07,.2);stone.rotation.y=i*.71;}
   tree(kit,-2.71,-1.42,1.3,'leaf');tree(kit,2.65,-1.6,1.13,'sage');
-  const blanket=piece('picnic-blanket',.16,.22,1.7);ovalTop(kit,blanket,'blush',0,0,0,2.4,.8,.025);
   for(let side=0;side<2;side++){
     const reeds=piece('river-reeds',side?2.58:-2.63,.2,1.96);
     for(let i=0;i<5;i++){mesh(reeds,'cylinder','leaf',Math.sin(i)*.15,.37+i*.035,Math.cos(i)*.13,.025,.74+i*.07,.025).rotation.z=(i-2)*.07;mesh(reeds,'oval','wood',Math.sin(i)*.15,.73+i*.07,Math.cos(i)*.13,.055,.17,.055);}
@@ -298,14 +363,37 @@ function riversideSetting(kit:RoomKit){
   shrub(kit,-2.62,.9,.75);shrub(kit,2.66,.85,.78);
 }
 
+/** Human-scale joinery and thresholds make an authored place read as a room.
+ * Only shared primitives are used, and no product support or anchor changes. */
+function architecturalFloor(kit:RoomKit,setting:SceneContext['setting']){
+  if(setting!=='home'&&setting!=='cafe'&&setting!=='studio'&&setting!=='rooftop')return;
+  const {piece,mesh}=kit,details=piece('floor-joinery');
+  const timber=setting==='home'||setting==='studio';
+  for(let i=0;i<9;i++){
+    const x=-2+i*.5,extent=Math.abs(x)>1.8?3.0:4.1;
+    mesh(details,'box',timber?'wood':'wall',x,.218,0,.009,.004,extent);
+  }
+  if(timber){
+    for(let i=0;i<8;i++)mesh(details,'box','wood',-1.75+i*.5,.218,i%2?.77:-.62,.49,.004,.008);
+  }else{
+    for(let i=0;i<7;i++){const z=-1.5+i*.5;mesh(details,'box','wall',0,.218,z,Math.abs(z)>1.4?3.7:4.5,.004,.009);}
+  }
+  const threshold=piece('arrival-threshold',-.35,.24,2.12);
+  mesh(threshold,'cylinder','wood',0,0,0,1.3,.025,.43);
+  for(let i=0;i<7;i++)mesh(threshold,'box','paper',-.48+i*.16,.015,0,.01,.004,.31);
+}
+
 /** Product-placement kind and setting are independent: a dinner can be at home or above a city. */
 export function buildRoomArchitecture(kind:SceneKind,kit:RoomKit,context?:SceneContext):void{
   island(kind,kit);
   const setting=context?.setting;
+  if(setting)architecturalFloor(kit,setting);
   const scenic=!setting||setting==='garden'||setting==='forest';
   if(kind==='dressing')dressingWorld(kit,scenic);
   else if(kind==='reading')readingWorld(kit,scenic);
   else if(kind==='desk')deskWorld(kit);
+  else if(setting==='riverside')picnicWorld(kit);
+  else if(setting==='rooftop')dinnerWorld(kit);
   else kitchenWorld(kit,scenic);
   if(setting==='home')indoorSetting(kit,kind);
   else if(setting==='rooftop')rooftopSetting(kit);

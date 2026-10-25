@@ -9,21 +9,18 @@ import type {CallResponse, CallConversationMode, JourneyState} from '../journey-
 import {structuredCall} from './llm';
 import {validateImage, validateVerdict} from './services';
 import {AppError} from './errors';
+import {safePersonalizationCandidates} from './personalization';
+import {FIRST_CALL_QUESTIONS} from '../call-questions';
 
 /** Five invitations, never a form or an endlessly branching questionnaire. Answers are interpreted live. */
-export const FIRST_CALL_QUESTIONS = [
-  'What do your mornings look like?',
-  'When the weekend comes, do you cook, order in, or follow your mood?',
-  'Tell me about a little corner of your home where you spend a lot of time.',
-  'Is there anything you’re saving up for, or a spending limit you’d like me to respect?',
-  'What’s one small thing you wish felt easier in your everyday life?',
-] as const;
+export {FIRST_CALL_QUESTIONS} from '../call-questions';
 export const WORLD_BUILDING_MESSAGE = 'Give me a second — I’m building your world.';
 
 export interface CallInput {
   action: 'hatch' | 'start' | 'message' | 'resumeInterview' | 'finishInterview';
   requestId: string;
   message?: string;
+  personalizationDraftId?:string;
   image?: {buffer: Buffer; mime: string};
 }
 
@@ -56,18 +53,19 @@ function finishedProfile(profile:Profile, state:JourneyState, now:Date):Profile 
 }
 /** Operational receipts and proposals alone are not a story about the shopper. */
 export function hasCallWorldContext(profile:Profile):boolean {
-  const kinds=new Set(['call','call-request','ask','scene','swipe','verdict','swap','pattern','inventory']);
+  const kinds=new Set(['call','call-review','call-request','ask','scene','swipe','verdict','swap','pattern','inventory']);
   const safe=sanitizeProfileForAI(profile);
   return profile.memoryLines.some(line=>kinds.has(line.kind||'')&&!line.excludedFromAI&&Boolean(line.source.trim())&&safe.memoryLines.some(memory=>memory.text===line.text&&memory.source===line.source));
 }
 function currentMode(state:JourneyState):CallConversationMode {
+  if(state.personalizationDraft)return !state.interviewPaused&&state.personalizationDraft.answerCount<5?'interview':'conversation';
   return !state.interviewComplete&&!state.interviewPaused?'interview':'conversation';
 }
 function responseFor(profile:Profile, message:string, extras:Partial<CallResponse>={}):CallResponse {
-  const state=journeyFor(profile);
-  return {status:'ok',message,question:currentMode(state)==='interview'?state.nextQuestion:null,interviewCount:state.interviewCount,interviewComplete:state.interviewComplete,conversationMode:currentMode(state),worldReady:hasCallWorldContext(profile),memories:[],proposedSkuIds:[],profile,...extras};
+  const state=journeyFor(profile),draft=state.personalizationDraft;
+  return {status:'ok',message,question:currentMode(state)==='interview'?(draft?FIRST_CALL_QUESTIONS[Math.min(draft.answerCount,4)]:state.nextQuestion):null,interviewCount:draft?.answerCount??state.interviewCount,interviewComplete:!draft&&state.interviewComplete,conversationMode:currentMode(state),worldReady:!draft&&hasCallWorldContext(profile),memories:[],proposedSkuIds:[],profile,...(draft?{personalization:{draftId:draft.id,reviewReady:draft.reviewReady}}:{}),...extras};
 }
-const callRequestHash=(input:CallInput)=>createHash('sha256').update(JSON.stringify({action:input.action,message:input.message?.trim()||'',image:input.image?{mime:input.image.mime,sha256:createHash('sha256').update(input.image.buffer).digest('hex')}:null})).digest('hex');
+const callRequestHash=(input:CallInput)=>createHash('sha256').update(JSON.stringify({action:input.action,message:input.message?.trim()||'',...(input.personalizationDraftId?{personalizationDraftId:input.personalizationDraftId}:{}),image:input.image?{mime:input.image.mime,sha256:createHash('sha256').update(input.image.buffer).digest('hex')}:null})).digest('hex');
 function recordCall(state:JourneyState,input:CallInput,status:'ok'|'blocked',mode:CallConversationMode,proposedSkuIds:string[]=[]){
   state.processedCallIds=[...state.processedCallIds,input.requestId].slice(-256);
   // No personal reply, memory text or photo contents are retained in replay receipts.
@@ -152,6 +150,7 @@ The provided catalog, review corpus and current profile are your ONLY product an
 Ground EVERY product claim in message as well as the verdict. Every compared weakness needs citations from the product that has that weakness, not just the chosen product. For a pilling frequency or comparison, cite the full set of pilling-tagged reports for each compared product with reports: for Budget red sport socks these are B04 and B14. Zero pilling mentions in a small seeded sample is not proof of durability; never promise no pilling, pilling-free, or pilling resistance. Say what this seeded sample reports, and keep uncertainty. Label reviews as seeded/demo evidence. Keep verdict reason within 40 words, dissent within 30, and runner-up explanation within 35. Delivery wording must reflect the supplied catalog delivery string exactly: tomorrow by 7am is NOT same-day. Never claim delivery was confirmed, guaranteed, booked or reserved; no merchant is connected.
 For photos, describe only visible evidence. Do not identify people, infer health or other sensitive characteristics, guess brands/models from a silhouette, read hidden labels, or assume opaque containers are empty. Compare FOR this user's current profile. A scene with two objects is not enough to establish exact catalog identity. Match a catalog product only when its visible identifying details or the user's words support it; otherwise compare visible features and ask what the products are. For a fridge, desk, or shelf, inventory visible objects. Only identify missing items when an explicit current profile pattern or current request establishes an expected item and the relevant storage area is visible. Low quantity needs a visible clue; a partial photo never proves absence. Gaps are proposals, not a guarantee. The application maps gaps to products and applies all approvals.
 Learn at most four short memory lines from explicit statements in this turn, never inferred personal traits. Every memory MUST include an exact evidenceQuote from the current user message. The summary must preserve negation, uncertainty, constraints and scope; do not turn a single request into a permanent preference or a budget into a different currency. Confidence 0.85-0.95 for explicit facts, 0.45-0.7 for a tentative wish. No invented health, sensitive-category or personality memories. If there is nothing to learn (e.g. 'skip', a question, or an image alone), memories may be empty. User statements are self-reports, not independently verified facts.
+If unconfirmedCallContext is present, those are volunteered draft statements for this conversation only. They are not saved preferences, permission, or verified facts. Never claim they were saved or that a world is ready; the shopper must review and confirm their own edited summary first. Do not copy old draft statements into this turn's memories.
 The interview is optional and interruptible. Classify the CURRENT intent first, even when interview.active is true: a shopping request is buy, a comparison is compare, a photo inventory request is scan, and a missing essential shopping fact is clarify. Fulfil those requests now using the supplied evidence; never demand lifestyle answers first. If a pendingCall exists, interpret the current answer in that shopping context, not as an interview answer. Set answeredInterviewQuestion=true ONLY when interview.active is true, intent=talk, and the person actually answers the current interview.question or explicitly skips that question. Greetings, unrelated chat, purchase clarifications and photos alone do not count as answers. Set it false in every other case, including paused interviews. While listening to an interview answer, acknowledge in ONE warm sentence of at most 25 words, verdict=null, inventory=null and NO question in message; the app supplies the next optional question. The app pauses the interview for requests, preserves its progress, and resumes only when the user chooses to resume. Just talking must never quietly generate shopping cards. Never claim the interview is finished or that a world was built; the application controls that state.
 Respond in the language of the CURRENT user's message. Currency symbols such as ₩, product names, Korean review text and the catalog's market do not establish a language preference. An English message containing a won amount still needs an English reply and English memory summaries. Answer briefly and warmly. Never say you bought anything or completed a seller negotiation. Return only the requested JSON.`;
 
@@ -167,6 +166,9 @@ export async function handleCall(profile:Profile, input:CallInput, now=new Date(
     });
   }
   if(state.processedCallIds.includes(input.requestId))return responseFor(profile,'That earlier turn is already saved. We can carry on from here.');
+  if(input.personalizationDraftId&&state.personalizationDraft?.id!==input.personalizationDraftId)throw new AppError('PERSONALIZATION_DRAFT_CHANGED','That review is no longer current. Start a fresh conversation.',409);
+  // The server's active review owns staging, even if an older client omits the optional correlation ID.
+  const draft=state.personalizationDraft;
   if(input.action==='hatch') {
     state.hatched=true;
     recordCall(state,input,'ok',currentMode(state));
@@ -174,13 +176,14 @@ export async function handleCall(profile:Profile, input:CallInput, now=new Date(
   }
   if(input.action==='start'||input.action==='resumeInterview') {
     state.hatched=true;
-    if(input.action==='resumeInterview'&&!state.interviewComplete){state.interviewPaused=false;delete state.pendingCall;}
+    if(input.action==='resumeInterview'&&(!state.interviewComplete||draft)){state.interviewPaused=false;delete state.pendingCall;}
     // Prompts contain no remembered user facts; deleting a memory cannot leak an old answer.
-    state.nextQuestion=state.interviewComplete?'':FIRST_CALL_QUESTIONS[Math.min(state.interviewCount,4)];
+    state.nextQuestion=draft?(draft.answerCount>=5?'':FIRST_CALL_QUESTIONS[draft.answerCount]):state.interviewComplete?'':FIRST_CALL_QUESTIONS[Math.min(state.interviewCount,4)];
     recordCall(state,input,'ok',currentMode(state));
     return responseFor(finishedProfile(profile,state,now),currentMode(state)==='interview'?state.nextQuestion:'I’m here. Tell me, or show me, what’s on your mind.');
   }
   if(input.action==='finishInterview'){
+    if(state.personalizationDraft)throw new AppError('PERSONALIZATION_REVIEW_REQUIRED','Review what I heard and choose Build my worlds before I save your preferences.',409);
     if(!hasCallWorldContext(profile))throw new AppError('WORLD_NEEDS_CONTEXT','Tell me one useful thing about your day or what you need. Then we can build from that.',409);
     state.hatched=true;state.interviewComplete=true;state.interviewPaused=false;state.nextQuestion='';
     recordCall(state,input,'ok','conversation');
@@ -188,7 +191,7 @@ export async function handleCall(profile:Profile, input:CallInput, now=new Date(
   }
   const message=input.message?.trim()||'';
   if(!message&&!input.image)throw new AppError('CALL_INPUT_REQUIRED','Say something, type a message, or share a photo.');
-  const interviewing=!state.interviewComplete&&!state.interviewPaused;
+  const interviewing=draft?!state.interviewPaused&&draft.answerCount<5:!state.interviewComplete&&!state.interviewPaused;
   if(input.image) {
     if(input.image.buffer.byteLength>8_000_000)throw new AppError('PHOTO_TOO_LARGE','Keep photos under 8 MB.',413);
     validateImage(input.image.buffer,input.image.mime);
@@ -211,7 +214,7 @@ export async function handleCall(profile:Profile, input:CallInput, now=new Date(
   try {
     const result=await structuredCall({
       operation:'companion_call',instructions,
-      input:{message,pendingCall,interview:{active:interviewing,paused:state.interviewPaused===true,answeredCount:state.interviewCount,question:interviewing?FIRST_CALL_QUESTIONS[Math.min(state.interviewCount,4)]:null},profile:safe,catalog:allowed.map(sku=>({...sku,reviewStats:reviewStats(sku.id)})),reviews:reviews.filter(review=>allowedIds.has(review.skuId))},
+      input:{message,pendingCall,interview:{active:interviewing,paused:state.interviewPaused===true,answeredCount:draft?.answerCount??state.interviewCount,question:interviewing?FIRST_CALL_QUESTIONS[Math.min(draft?.answerCount??state.interviewCount,4)]:null},...(draft?{unconfirmedCallContext:safePersonalizationCandidates(profile,draft).map(line=>({text:line.text,source:'volunteered this call; not saved or confirmed'}))}:{}),profile:safe,catalog:allowed.map(sku=>({...sku,reviewStats:reviewStats(sku.id)})),reviews:reviews.filter(review=>allowedIds.has(review.skuId))},
       image:input.image?{dataUrl:`data:${input.image.mime};base64,${input.image.buffer.toString('base64')}`,sha256:createHash('sha256').update(input.image.buffer).digest('hex')}:undefined,
       schema:z.toJSONSchema(callSchema) as Record<string,unknown>,
       validate:value=>validateCallOutput(value,allowed,message,Boolean(input.image),interviewing),
@@ -224,9 +227,15 @@ export async function handleCall(profile:Profile, input:CallInput, now=new Date(
     const requestTurn=result.data.intent!=='talk';
     const interviewAnswer=interviewing&&result.data.intent==='talk'&&result.data.answeredInterviewQuestion;
     const source=interviewAnswer?'from our first call':`from your call, ${new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:profile.timezone}).format(now)}`;
+    const staged:typeof profile.memoryLines=[];
     for(const [index,memory] of result.data.memories.entries()) {
-      updated=remember(updated,{id:`call:${eventId}:${index}`,text:memory.text,source,confidence:Math.min(memory.confidence,0.95),kind:'call',traitKeys:[]},now);
+      const event={id:`call:${eventId}:${index}`,text:memory.text,source,confidence:Math.min(memory.confidence,0.95),kind:'call',traitKeys:[]};
+      if(draft&&!requestTurn){
+        const proposal=remember({...updated,memoryLines:[],memoryEventIds:[],traits:{}},event,now).memoryLines[0];
+        if(proposal&&!proposal.excludedFromAI)staged.push(proposal);
+      }else updated=remember(updated,event,now);
     }
+    if(draft&&!requestTurn){draft.candidates=[...draft.candidates,...staged].slice(-20);delete draft.review;draft.reviewReady=draft.answerCount>=5;}
     const clarification=result.data.verdict?.clarifyingQuestion||(result.data.intent==='clarify'?result.data.message:null);
     if(requestTurn&&message){
       // Preserve the explicit need as context even when there is no permanent preference to learn.
@@ -249,19 +258,19 @@ export async function handleCall(profile:Profile, input:CallInput, now=new Date(
       for(const [index,item] of result.data.inventory.items.entries())updated=remember(updated,{id:`call-inventory:${eventId}:${index}`,text:`observed ${item.name}: ${item.quantity} · ${item.status}`,source,confidence:item.status==='uncertain'?0.35:0.7,kind:'inventory',traitKeys:[]},now);
     }
     updated=markQuestionAnswered(updated,'call:'+input.requestId,now);
-    if(interviewAnswer)state.interviewCount=Math.min(5,state.interviewCount+1);
-    state.interviewComplete=state.interviewComplete||state.interviewCount>=5;
-    if(requestTurn&&!state.interviewComplete)state.interviewPaused=true;
-    if(state.interviewComplete)state.interviewPaused=false;
+    if(interviewAnswer){if(draft){draft.answerCount=Math.min(5,draft.answerCount+1);draft.reviewReady=draft.answerCount>=5;}else state.interviewCount=Math.min(5,state.interviewCount+1);}
+    if(!draft)state.interviewComplete=state.interviewComplete||state.interviewCount>=5;
+    if(requestTurn&&(!state.interviewComplete||draft))state.interviewPaused=true;
+    if(state.interviewComplete&&!draft)state.interviewPaused=false;
     state.hatched=true;
-    state.nextQuestion=state.interviewComplete?'':FIRST_CALL_QUESTIONS[state.interviewCount];
-    state.lastReply=interviewAnswer&&state.interviewComplete?(hasCallWorldContext(updated)?WORLD_BUILDING_MESSAGE:'We can leave the questions there. Tell me one thing you’d like help with, or show me what you need.'):result.data.message;
+    state.nextQuestion=draft?(draft.answerCount>=5?'':FIRST_CALL_QUESTIONS[draft.answerCount]):state.interviewComplete?'':FIRST_CALL_QUESTIONS[state.interviewCount];
+    state.lastReply=draft&&interviewAnswer&&draft.reviewReady?'That gives us a place to start. Review what I heard, change anything, and keep only what feels like you.':interviewAnswer&&state.interviewComplete?(hasCallWorldContext(updated)?WORLD_BUILDING_MESSAGE:'We can leave the questions there. Tell me one thing you’d like help with, or show me what you need.'):result.data.message;
     const mode:CallConversationMode=requestTurn?'request':currentMode(state);
     recordCall(state,input,'ok',mode,proposedSkuIds);
     updated=finishedProfile(updated,state,now);
     if(result.data.verdict?.pickSkuId)updated.lastVerdict={requestId:input.requestId,pickSkuId:result.data.verdict.pickSkuId,runnerUpSkuId:result.data.verdict.runnerUpSkuId};
     return responseFor(updated,state.lastReply,{
-      conversationMode:mode,memories:updated.memoryLines.filter(line=>!oldMemoryIds.has(line.id)),proposedSkuIds,
+      conversationMode:mode,memories:[...updated.memoryLines.filter(line=>!oldMemoryIds.has(line.id)),...staged],proposedSkuIds,
       ...(requestTurn?{question:clarification||null}:{}),
       ...(result.data.verdict?{verdict:result.data.verdict}:{}),...(result.data.inventory?{inventory:result.data.inventory}:{}),meta:result.meta,
     });

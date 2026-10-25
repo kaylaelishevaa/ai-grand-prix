@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import {createSurfaceLibrary} from './surfaces';
 
 type Product = { skuId: string; type: string; name: string; color?: string };
 type Own = <T extends { dispose(): void }>(resource: T) => T;
@@ -25,36 +27,29 @@ export function createProductMeshLibrary(own: Own) {
   blouse.lineTo(-.28, .77); blouse.lineTo(-.51, .42); blouse.lineTo(-.4, .31);
   blouse.lineTo(-.23, .51); blouse.closePath();
   // The lipstick's exposed tip is slanted geometry, not a flat picture.
-  const lipstick = new THREE.CylinderGeometry(.5, .5, 1, 12);
+  const lipstick = new THREE.CylinderGeometry(.5, .5, 1, 24);
   const bulletPositions = lipstick.getAttribute('position');
   for (let index = 0; index < bulletPositions.count; index++) {
     if (bulletPositions.getY(index) > 0) bulletPositions.setY(index, .5 + bulletPositions.getX(index) * .65);
   }
   lipstick.computeVertexNormals();
   const geometry = {
-    box: own(new THREE.BoxGeometry(1, 1, 1)),
-    cylinder: own(new THREE.CylinderGeometry(.5, .5, 1, 12)),
+    box: own(new RoundedBoxGeometry(1,1,1,2,.028)),
+    cylinder: own(new THREE.CylinderGeometry(.5, .5, 1, 24)),
     cone: own(new THREE.CylinderGeometry(.22, .5, 1, 10)),
     sphere: own(new THREE.IcosahedronGeometry(.5, 1)),
     leaf: own(new THREE.IcosahedronGeometry(.5, 0)),
     ring: own(new THREE.TorusGeometry(.5, .095, 6, 18)),
-    cup: own(new THREE.LatheGeometry(cupProfile, 12)),
-    bowl: own(new THREE.LatheGeometry(bowlProfile, 12)),
-    kettle: own(new THREE.LatheGeometry(kettleProfile, 14)),
+    cup: own(new THREE.LatheGeometry(cupProfile, 24)),
+    bowl: own(new THREE.LatheGeometry(bowlProfile, 24)),
+    kettle: own(new THREE.LatheGeometry(kettleProfile, 28)),
     apron: own(new THREE.ExtrudeGeometry(apron, { depth: .027, bevelEnabled: false, steps: 1 })),
     dress: own(new THREE.ExtrudeGeometry(dress, { depth: .065, bevelEnabled: false, steps: 1 })),
     blouse: own(new THREE.ExtrudeGeometry(blouse, { depth: .055, bevelEnabled: false, steps: 1 })),
     lipstick: own(lipstick),
   };
-  const palette = new Map<string, THREE.MeshLambertMaterial>();
-  function paint(color: string) {
-    let material = palette.get(color);
-    if (!material) {
-      material = own(new THREE.MeshLambertMaterial({ color, flatShading: true, side: THREE.DoubleSide }));
-      palette.set(color, material);
-    }
-    return material;
-  }
+  const surfaces=createSurfaceLibrary(own);
+  function paint(color:string) {return surfaces.paint(color,color==='#B9BEB3'?'metal':color==='#B78C61'?'wood':'ceramic');}
   const cream = '#FFF3D8', teal = '#16424A', orange = '#E8681A', wood = '#B78C61';
   const dark = '#344945', green = '#78956A', clay = '#C38267', metal = '#B9BEB3';
 

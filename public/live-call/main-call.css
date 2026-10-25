@@ -1,0 +1,405 @@
+/* Coupi's call uses the shared shell palette; camera and try-on behavior stay intact. */
+:root {
+  color-scheme: light;
+  --forest: #2d7879;
+  --cream: #173d43;
+  --sage: #d5f0f3;
+  --coral: #dc746e;
+  --font: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --call-ink: #173d43;
+  --call-teal: #2d7879;
+  --call-muted: #59787d;
+  --call-line: #cfe7e9;
+  --call-glass: rgb(249 254 254 / 92%);
+}
+
+.coupi-call-page { color: var(--call-ink); background: #e7f3f5; }
+.coupi-call-page button:focus-visible,
+.coupi-call-page a:focus-visible,
+.coupi-call-page input:focus-visible { outline-color: #378b91; }
+.coupi-call-page .phone-app { background: #e9f8fa; box-shadow: 0 22px 64px -38px #438d9638; }
+.coupi-call-page .wordmark { color: var(--call-teal); letter-spacing: -1.4px; }
+.coupi-call-page .wordmark .brand-dot { color: #80c9ce; font-weight: 700; }
+
+/* A quiet incoming-call screen, with room for the three-page navigation. */
+.incoming-screen,
+.end-screen {
+  color: var(--call-ink);
+  background: linear-gradient(155deg, #f3fcfc 0%, #e9f8fa 55%, #def2f5 100%);
+  padding-bottom: calc(var(--nav-height, 72px) + 20px + env(safe-area-inset-bottom));
+}
+.incoming-tag { color: var(--call-muted); font-size: 10px; letter-spacing: 0; }
+.incoming-tag > span { background: #61a6a6; }
+.incoming-person { padding: 16px 0 26px; }
+.nori-orbit {
+  width: 178px;
+  height: 178px;
+  padding: 8px;
+  margin: 6px 0 24px;
+  border: 1px solid #c6e4e7;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+.nori-orb {
+  overflow: hidden;
+  background: #f4f1df;
+  box-shadow: 0 7px 24px #285d6910;
+  animation: none;
+}
+.coupi-portrait,
+.coupi-avatar { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.orbit-dot { display: none; }
+.incoming-kicker { color: #527d83; font-size: 9px; letter-spacing: 1.4px; }
+.incoming-person h1 {
+  font-family: var(--font);
+  font-size: 45px;
+  line-height: 1.08;
+  font-weight: 650;
+  letter-spacing: -1.8px;
+}
+.incoming-subtitle { color: var(--call-muted); font-size: 13px; margin-top: 8px; }
+.incoming-wave { display: none; }
+.incoming-promise {
+  color: var(--call-ink);
+  font-family: var(--font);
+  font-size: 25px;
+  line-height: 1.25;
+  font-weight: 550;
+  letter-spacing: -.7px;
+  margin-bottom: 19px;
+}
+.answer-call {
+  color: white;
+  background: var(--call-teal);
+  border: 1px solid #2a7071;
+  border-radius: 19px;
+  box-shadow: 0 6px 18px #286e7718;
+}
+.answer-call:hover { background: #256b6c; }
+.answer-icon { background: #ffffff1a; border-radius: 12px; }
+.decline-call { color: #4b7278; }
+.vision-consent { color: #4b7278; font-size: 11px; }
+.vision-consent input { accent-color: var(--call-teal); }
+.privacy-note { color: #66858a; font-size: 9px; letter-spacing: 0; }
+.incoming-status { color: #a24941; }
+
+/* Translucent light surfaces stay legible over either camera without tinting it. */
+.call-screen { background: #e9f8fa; }
+.camera-fallback {
+  background: linear-gradient(155deg, #f1fbfc, #d5f0f3);
+  color: #476e76;
+}
+.fallback-orb {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border: 5px solid #f8ffff;
+  background: #f4f1df;
+  box-shadow: 0 9px 30px #336c7710;
+}
+.video-shade {
+  background: linear-gradient(180deg, #133b4520, transparent 30%, transparent 62%, #10343e55);
+}
+.call-person {
+  min-height: 43px;
+  padding: 4px 9px 4px 4px;
+  border: 1px solid #ffffff78;
+  border-radius: 25px;
+  background: var(--call-glass);
+  color: var(--call-ink);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 3px 12px #123f4510;
+}
+.mini-nori { width: 33px; height: 33px; overflow: hidden; background: #f4f1df; border-color: #e5ece3; }
+.call-person strong { font-weight: 650; font-size: 13px; }
+.ai-tag { color: #44787c; border-color: #bedce0; background: #eefafa; }
+#call-status { color: #557b81; }
+.call-timer { color: var(--call-ink); background: var(--call-glass); padding: 6px 7px; border-radius: 12px; }
+.call-timer:empty { display: none; }
+.catalog-button,
+.cart-button,
+.focus-product,
+.vision-toggle {
+  color: var(--call-ink);
+  background: var(--call-glass);
+  border-color: #ffffff91;
+  box-shadow: 0 3px 12px #123f4510;
+}
+#cart-count { color: white; background: var(--call-teal); }
+.vision-toggle[aria-pressed=false] { color: #58757a; }
+.vision-toggle[data-state=received] { border-color: #95c9cc; }
+.vision-toggle[data-state=error] { color: #a34842; }
+#vision-action { color: #286c71; }
+#call-notice { color: #6e493f; background: #fff7edee; border-color: #ecded0; }
+.inline-retry { color: #225f65; background: #d9f1f4; }
+.deck-label { color: var(--call-ink); text-shadow: none; }
+.deck-label > span { padding: 4px 7px; border-radius: 12px; background: var(--call-glass); }
+.product-card { color: var(--call-ink); background: #fbfffff5; box-shadow: 0 8px 28px #123f451a; }
+.product-picture-fallback { color: #93bdc2; }
+.product-retailer { color: #64858a; }
+.product-copy #product-price { color: #2e767c; }
+.product-actions { border-top-color: #dcecee; }
+.product-actions button { color: #356e74; background: #e7f5f7; }
+.product-actions .try-button { color: white; background: var(--call-teal); }
+.swipe-actions button { color: var(--call-ink); background: var(--call-glass); }
+.swipe-actions p { color: var(--call-ink); background: var(--call-glass); padding: 4px 7px; border-radius: 12px; }
+.swipe-feedback,
+.swipe-feedback:not(:empty) { color: #296e70; background: #dff5f3f2; }
+.swipe-feedback.reject,
+.product-card.reject .swipe-feedback { color: #ae514a; background: #fff0ecf2; }
+.product-empty { color: #3c737b; background: var(--call-glass); }
+/* One stable caption panel; streaming text follows the latest two lines. */
+.phone-app[data-focused] .conversation-area {
+  bottom: calc(114px + env(safe-area-inset-bottom));
+  gap: 9px;
+}
+.transcript {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
+  height: 88px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: #fff;
+  background: rgb(19 42 46 / 85%);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+.caption-speaker { font-size: 10px; line-height: 15px; font-weight: 650; color: #cce9e9; }
+.caption-text {
+  height: 44px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  line-height: 22px;
+  scrollbar-width: none;
+}
+.caption-text::-webkit-scrollbar { display: none; }
+.caption-text:focus-visible { outline: 2px solid #b6eeee; outline-offset: 2px; }
+.conversation-area .text-form { position: absolute; bottom: calc(100% + 9px); left: 0; right: 0; }
+.tryon-chip { color: #245f66; background: var(--call-glass); border-color: #cde5e8; }
+.tryon-chip button { color: #316c73; background: #deeff2; }
+.text-form { background: #fbfffff5; box-shadow: 0 5px 18px #123f4514; }
+.text-form input { color: var(--call-ink); }
+.text-form input::placeholder { color: #729096; }
+.text-form button { color: white; background: var(--call-teal); }
+.gesture-status { color: var(--call-ink); background: var(--call-glass); padding: 4px 8px; border-radius: 12px; }
+.call-control { color: var(--call-ink); background: #f5ffffe8; border-color: #ffffff91; box-shadow: 0 3px 10px #123f4510; }
+.call-control:hover { background: #e4f5f8; }
+.call-control[aria-pressed=true],
+.call-control.active { color: #fff; background: var(--call-teal); border-color: var(--call-teal); }
+.call-control#mute-call[aria-pressed=true]:after,
+.call-control#toggle-camera[aria-pressed=true]:after { box-shadow: 0 0 0 2px var(--call-teal); }
+.end-control { color: white; background: #db7772; border-color: #dd817a; box-shadow: 0 4px 15px #71363316; }
+.end-control:hover { background: #c76360; }
+
+/* Keep the small try-on controls while captions retain their fixed size. */
+.phone-app[data-focused=true] .call-person { min-height: 35px; padding: 3px 8px 3px 3px; gap: 6px; }
+.phone-app[data-focused=true] .mini-nori { width: 27px; height: 27px; }
+.phone-app[data-focused=true] .call-control { color: var(--call-ink); background: #f5ffffe8; }
+.phone-app[data-focused=true] .call-control[aria-pressed=true] { color: white; background: var(--call-teal); }
+.phone-app[data-focused=true] .end-control { color: white; background: #db7772; }
+.phone-app[data-focused=true] .video-shade { background: linear-gradient(180deg, #133b4515, transparent 22%, transparent 77%, #10343e36); }
+
+.end-orb { overflow: hidden; background: #f4f1df; box-shadow: 0 0 0 7px #ffffff80; }
+.end-message h1 { font-family: var(--font); font-size: 39px; font-weight: 550; letter-spacing: -1.5px; }
+.end-message #end-summary { color: var(--call-muted); }
+.toast { color: #205e65; background: #effcfbf5; border-color: #cde6e9; box-shadow: 0 6px 20px #123f4520; }
+
+/* Product sheets belong to the same light, uncluttered app. */
+.sheet-dialog { color: var(--call-ink); background: #f7fcfd; box-shadow: 0 -20px 80px #173d4333; }
+.sheet-dialog::backdrop { background: #163f4659; }
+.sheet-grip { background: #c9e1e5; }
+.sheet-kicker { color: #62858c; }
+.sheet-heading h2 { font-family: var(--font); font-size: 28px; font-weight: 550; letter-spacing: -.8px; }
+.sheet-close { color: #42777f; background: #e4f1f4; }
+.sheet-note { color: #66858c; }
+.cart-item,
+.bag-item { border-bottom-color: #dcebee; }
+.cart-item img { background: #edf6f8; }
+.cart-item p,
+.cart-item small,
+.empty-bag,
+.cart-items > p,
+.detail-body { color: #55787f; }
+.cart-item button,
+.bag-item button { color: #3c737a; background: #e1f0f3; }
+.cart-item a,
+.bag-item a,
+.catalog-download { color: #2e747c; }
+.sheet-primary { color: white; background: var(--call-teal); }
+.sheet-secondary { color: #356e76; background: #e1f1f4; }
+.catalog-tabs button { color: #47727b; background: #eef8fa; border-color: #d5e9ed; }
+.catalog-tabs button[aria-pressed=true] { color: white; background: var(--call-teal); border-color: var(--call-teal); }
+.catalog-item { background: white; border-color: #deedf0; }
+.catalog-item span { color: #61838a; }
+.catalog-item button { color: #286c74; background: #dff1f4; }
+
+@media (max-width: 520px) {
+  .incoming-screen,
+  .end-screen { padding-bottom: calc(var(--nav-height, 72px) + 17px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 380px) {
+  .incoming-tag { font-size: 9px; }
+  .incoming-person h1 { font-size: 40px; }
+  .nori-orbit { width: 150px; height: 150px; }
+  .incoming-promise { font-size: 23px; }
+  .call-person { gap: 6px; padding-right: 7px; }
+  .call-timer { padding: 5px; font-size: 9px; }
+}
+/* Desktop frames lose 40px to the outer margin; compact before the hero gets tight. */
+@media (max-height: 780px) {
+  .nori-orbit { width: 132px; height: 132px; padding: 6px; margin: 0 0 16px; box-shadow: none; }
+  .incoming-person > .incoming-kicker { display: none; }
+  .incoming-person h1 { font-size: 38px; }
+  .incoming-subtitle { font-size: 12px; margin-top: 5px; }
+  .incoming-promise { font-size: 22px; margin-bottom: 12px; }
+}
+@media (max-height: 700px) {
+  .incoming-screen { padding-top: max(20px, env(safe-area-inset-top)); }
+  .incoming-person { padding: 10px 0 24px; }
+  .nori-orbit { width: 116px; height: 116px; padding: 6px; margin: 0 0 15px; box-shadow: none; }
+  .incoming-person h1 { font-size: 35px; }
+  .incoming-subtitle { font-size: 12px; margin-top: 5px; }
+  .incoming-kicker { font-size: 8px; margin-bottom: 7px; }
+  .incoming-promise { font-size: 22px; margin-bottom: 12px; }
+  .vision-consent { font-size: 10px; }
+  .privacy-note { font-size: 8px; }
+  .end-message h1 { font-size: 35px; }
+}
+@media (max-height: 590px) {
+  .incoming-screen { overflow-y: auto; }
+  .incoming-person { flex: 0 0 auto; padding: 20px 0; }
+  .nori-orbit { width: 88px; height: 88px; margin-bottom: 12px; }
+  .incoming-person h1 { font-size: 30px; }
+}
+
+/* Integration adapters: the checked call lives inside the shared Main shell. */
+:root{--paper:#f8fdfe;--ink:#234b52;--orange:#347d7e;--muted:#789397;--line:#dcedef;--display:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--ui:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--font:var(--ui)}
+html,body.coupi-call-page{background:#edf8fa;color:#234b52;font-family:var(--ui)}
+body.coupi-call-page::after,.incoming-screen::before,.end-screen::before{display:none}
+.coupi-call-page .phone-app{border-radius:0;border:0;box-shadow:none;width:100%;height:100dvh;min-height:0}
+.incoming-screen,.end-screen{padding:22px 22px 24px;background:linear-gradient(155deg,#f3fcfc,#e9f8fa 55%,#def2f5)}
+.incoming-top{gap:10px}.world-return{color:#347d7e;font-size:12px;gap:7px}.incoming-tag{font:10px/1.4 var(--ui);letter-spacing:0;text-transform:none}.incoming-tag>span{background:#61a6a6;box-shadow:none}
+.incoming-person h1,.incoming-person h1 em{font-family:var(--ui);font-size:42px;line-height:1.08;font-weight:650;font-style:normal;letter-spacing:-1.6px;color:#234b52}
+.incoming-kicker{font:500 10px/1.5 var(--ui);letter-spacing:1.1px}.incoming-promise{font:550 24px/1.25 var(--ui);letter-spacing:-.7px}
+.nori-orbit{width:125px;height:118px;background:none;border:0;margin-bottom:20px}.nori-orb{overflow:visible;background:none;box-shadow:none}
+.answer-call{border-radius:19px;background:#347d7e;box-shadow:0 6px 18px #286e7718;font-weight:600;min-height:58px}.answer-call:hover{background:#256b6c}.answer-icon{border-radius:12px}
+.incoming-status{background:#edf8fa;border-color:#dcedef;color:#496970}.vision-consent input{accent-color:#347d7e}
+.call-side-panel{background:#f8fdfe;border-color:#dcedef}.chat-bubble.assistant,.transcript-bubble{background:#fff;color:#234b52;border-color:#dcedef}.chat-bubble.user{background:#d9f1f4;color:#234b52}
+.camera-fallback{background:linear-gradient(155deg,#f1fbfc,#d5f0f3)}.camera-fallback>#camera-fallback-text{font:500 23px/1.3 var(--ui);letter-spacing:-.5px}
+.call-person{color:#234b52;background:#f9fefeeb}.ai-tag{color:#44787c;background:#eefafa;border-color:#bedce0}#call-status{color:#557b81}
+.call-feedback #call-notice{color:#6e493f;background:#fff7edee;border-color:#ecded0}.inline-retry{color:#225f65;background:#d9f1f4;border-color:#cfe7e9}
+.product-card,.validated-call-result{background:#fff;color:#234b52;border-color:#dcedef}.product-copy #product-price{font-family:var(--ui);font-weight:650;color:#347d7e}.sheet-dialog{background:#f8fdfe;color:#234b52}.sheet-primary{background:#347d7e;color:#fff;border-radius:14px}.sheet-secondary{background:#d9f1f4;color:#234b52;border-color:#dcedef;border-radius:14px}
+.first-call-story,.first-call-learning{background:#f8fdfe;border-color:#dcedef;color:#234b52}.first-call-story p,.first-call-learning p{font-family:var(--ui)}
+@media(max-width:640px){.incoming-screen{padding:18px 22px 22px}.incoming-person{padding-top:10px;padding-bottom:10px}.incoming-person h1{font-size:39px}.incoming-subtitle{margin-top:10px;font-size:13px}.incoming-promise{font-size:22px;margin-bottom:16px}.incoming-bottom{max-width:400px}.vision-consent{margin-top:12px}.privacy-note{font-size:10px}.call-side-panel{padding-bottom:22px}}
+@media(max-height:680px){.incoming-person h1{font-size:34px}.nori-orbit{width:88px;height:80px;margin-bottom:15px}.incoming-person{padding:6px 0}.incoming-subtitle{margin-top:6px}.incoming-promise{font-size:20px;margin-bottom:10px}.privacy-note{margin-top:5px}.vision-consent{margin-top:8px}}
+
+/* The embedded call has one compact introduction, followed by one clear action.
+   These rules intentionally win over the old full-screen call breakpoints. */
+.coupi-call-page .incoming-screen{display:flex;flex-direction:column;gap:0;padding:16px 20px 18px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.coupi-call-page .incoming-top{flex:0 0 auto;min-height:28px;justify-content:center}
+.coupi-call-page .incoming-top .world-return{display:none}
+.coupi-call-page .incoming-tag{font:500 10px/1.4 var(--ui);color:#59787d}
+.coupi-call-page .incoming-person{flex:1 0 auto;justify-content:center;min-height:0;padding:14px 0 18px;text-align:center}
+.coupi-call-page .nori-orbit{width:88px;height:80px;margin:0 0 14px;padding:0;flex-shrink:0}
+.coupi-call-page .incoming-kicker,.coupi-call-page .incoming-wave,.coupi-call-page .incoming-promise{display:none}
+.coupi-call-page .incoming-person h1,.coupi-call-page .incoming-person h1 em,.coupi-call-page .phone-app[data-interview=true] .incoming-person h1{font:650 33px/1.08 var(--ui);letter-spacing:-1.1px;max-width:290px;margin:0;color:#234b52}
+.coupi-call-page .incoming-subtitle,.coupi-call-page .phone-app[data-interview=true] .incoming-subtitle{display:block;font:12px/1.5 var(--ui);max-width:285px;margin:10px 0 0;color:#59787d;text-wrap:pretty}
+.coupi-call-page .incoming-bottom{flex:0 0 auto;width:100%;max-width:380px;margin:0 auto;padding:0}
+.coupi-call-page .answer-call{min-height:50px;padding:8px 14px 8px 10px;border-radius:16px;font:600 13px/1.3 var(--ui);gap:11px;box-shadow:0 8px 24px -16px #286e7755}
+.coupi-call-page .answer-icon{width:31px;height:31px;border-radius:10px;flex-shrink:0}.coupi-call-page .answer-icon svg{width:19px;height:19px}
+.coupi-call-page .decline-call{min-height:34px;margin:3px 0;font:12px/1.4 var(--ui)}
+.coupi-call-page .vision-consent{justify-content:flex-start;align-items:center;min-height:36px;margin:7px 0 0;padding:3px 0;gap:8px;font:11px/1.4 var(--ui);color:#496970;cursor:pointer}
+.coupi-call-page .vision-consent input{width:17px;height:17px;flex:0 0 17px}
+.coupi-call-page .privacy-note{font:10px/1.5 var(--ui);letter-spacing:0;text-align:left;color:#59787d;margin:3px 0 0;text-wrap:pretty}
+.coupi-call-page .incoming-status{font:11px/1.5 var(--ui);margin:0 0 10px;padding:8px 11px;border-radius:12px}
+.coupi-call-page .personalization-strip,.coupi-call-page .personalization-memory{border-radius:18px;padding:13px 15px;background:#f8fdfe;border-color:#d3e9ec}
+.coupi-call-page .personalization-strip h2{font:600 21px/1.2 var(--ui);letter-spacing:-.4px;margin:5px 0 8px;text-wrap:pretty}
+.coupi-call-page .personalization-progress{font:600 9px/1.5 var(--ui);letter-spacing:.03em;color:#59787d}
+.coupi-call-page .personalization-strip>button{min-height:36px;font:12px/1.4 var(--ui);color:#347d7e;padding:5px 0}
+.coupi-call-page .personalization-memory{background:#e9f6f7}.coupi-call-page .personalization-memory-line{font:12px/1.5 var(--ui);margin:9px 0;overflow-wrap:anywhere}.coupi-call-page .personalization-memory-line small{font:10px/1.5 var(--ui);color:#59787d;margin-top:4px}
+.coupi-call-page #personalization-memory-list{max-height:112px;overscroll-behavior:contain}
+.coupi-call-page .call-control{min-height:42px;min-width:42px}.coupi-call-page .call-footer{padding-bottom:env(safe-area-inset-bottom)}
+.coupi-call-page .phone-app[data-interview=true] .call-controls #flip-camera,.coupi-call-page .phone-app[data-interview=true] .call-controls #gesture-toggle{display:none}
+@media(max-height:460px){
+ .coupi-call-page .incoming-screen{padding:12px 18px 14px}.coupi-call-page .incoming-person{padding:10px 0 12px}
+ .coupi-call-page .nori-orbit{width:63px;height:58px;margin-bottom:10px}
+ .coupi-call-page .incoming-person h1,.coupi-call-page .incoming-person h1 em,.coupi-call-page .phone-app[data-interview=true] .incoming-person h1{font-size:29px;max-width:270px;letter-spacing:-.8px}
+ .coupi-call-page .incoming-subtitle,.coupi-call-page .phone-app[data-interview=true] .incoming-subtitle{font-size:11px;line-height:1.4;margin-top:7px}
+ .coupi-call-page .answer-call{min-height:46px}.coupi-call-page .vision-consent{margin-top:4px;min-height:31px}
+ .coupi-call-page .privacy-note{font-size:9px;line-height:1.45}
+}
+
+/* A small place to meet, before the camera opens. Only the incoming surface. */
+.coupi-call-page .incoming-screen{
+  background:radial-gradient(ellipse at 18% 8%,#fffdf0a8,transparent 42%),linear-gradient(165deg,#f5fbf8 0%,#e6f4f4 48%,#d9eeee 100%);
+  isolation:isolate;
+}
+.coupi-call-page .incoming-screen::after{
+  content:'';position:absolute;z-index:0;pointer-events:none;width:140%;height:28%;left:-20%;top:31%;
+  border-top:1px solid #729b9c1c;border-radius:50%;transform:rotate(-7deg);
+  background:linear-gradient(180deg,#91bcbc0b,transparent 80%);
+}
+.coupi-call-page .incoming-screen .incoming-tag{max-width:none;text-align:center;white-space:nowrap;color:#587b7d;font-size:10px;letter-spacing:.02em}
+.coupi-call-page .incoming-screen .incoming-tag>span{width:5px;height:5px;background:#4f9290;box-shadow:0 0 0 4px #5c99980c}
+.coupi-call-page .incoming-screen .incoming-person{padding:12px 0 17px}
+.coupi-call-page .incoming-screen .nori-orbit{
+  width:230px;height:174px;margin:0 0 17px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;isolation:isolate;
+}
+.coupi-call-page .incoming-screen .nori-orbit::before{
+  content:'';position:absolute;z-index:-1;inset:0 14px 10px;border-radius:49% 49% 45% 45%;
+  border:1px solid #9dc7c74a;
+  background:radial-gradient(circle at 29% 28%,#fff7d3 0 14px,#fff7d300 15px),radial-gradient(ellipse 145% 50% at 50% 111%,#b8d7cb 0 73%,transparent 74%),linear-gradient(160deg,#d1e9e5,#c6e1df 70%,#d6e8dc);
+  box-shadow:inset 0 1px #ffffffb3,0 20px 40px -28px #3a717c40;
+}
+.coupi-call-page .incoming-screen .nori-orbit::after{
+  content:'';position:absolute;z-index:-1;left:0;right:0;bottom:16px;height:62px;border:1px solid #679a9b45;border-radius:50%;
+  transform:rotate(-11deg);pointer-events:none;
+}
+.coupi-call-page .incoming-screen .nori-orb{
+  position:absolute;width:79px;height:74px;left:calc(50% - 39.5px);bottom:39px;border:0;border-radius:0;background:none;box-shadow:none;
+}
+.coupi-call-page .incoming-screen .nori-orb::after{
+  content:'';position:absolute;z-index:-1;left:-9px;right:-9px;bottom:-17px;height:17px;border-radius:50%;
+  background:radial-gradient(ellipse,#366d6940,transparent 72%);transform:scaleY(.65);
+}
+.coupi-call-page .incoming-screen .coopy-blob{
+  background:linear-gradient(145deg,#4b9284 5%,#28615e 72%,#1d5057);
+  box-shadow:inset 2px 2px 5px #b0dbc12b,0 12px 18px -14px #234b5266;
+}
+.coupi-call-page .incoming-screen .coopy-blob::before,.coupi-call-page .incoming-screen .coopy-blob::after{background:#438478}
+.coupi-call-page .incoming-screen .orbit-dot{
+  display:block;width:7px;height:7px;top:auto;right:31px;bottom:27px;background:#e0ae83;box-shadow:0 0 0 5px #f6e2c82b;
+  animation:incoming-signal 7s cubic-bezier(.2,.9,.22,1.06) infinite;
+}
+.coupi-call-page .incoming-screen .incoming-person h1,.coupi-call-page .incoming-screen .incoming-person h1 em,.coupi-call-page .phone-app[data-interview=true] .incoming-screen .incoming-person h1{
+  font-size:34px;font-weight:600;line-height:1.08;letter-spacing:-1.2px;color:#244e53;
+}
+.coupi-call-page .incoming-screen .incoming-subtitle{color:#53767a;max-width:258px}
+.coupi-call-page .incoming-screen .answer-call{background:#286c70;border-color:#286c70;box-shadow:0 12px 24px -18px #154e5a80;border-radius:16px}
+.coupi-call-page .incoming-screen .answer-call:hover{background:#215d62}
+.coupi-call-page .incoming-screen .answer-icon{background:#ffffff17}
+.coupi-call-page .incoming-screen .vision-consent{color:#3e6469}
+.coupi-call-page .incoming-screen .privacy-note{color:#56767b}
+@keyframes incoming-signal{0%,100%{transform:translate(0,0)}50%{transform:translate(-9px,3px)}}
+@media(max-height:540px){
+  .coupi-call-page .incoming-screen .incoming-person{padding:8px 0 12px}
+  .coupi-call-page .incoming-screen .nori-orbit{width:184px;height:119px;margin-bottom:12px}
+  .coupi-call-page .incoming-screen .nori-orbit::before{inset:0 14px 7px}
+  .coupi-call-page .incoming-screen .nori-orbit::after{height:45px;bottom:11px}
+  .coupi-call-page .incoming-screen .nori-orb{width:60px;height:57px;left:calc(50% - 30px);bottom:23px}
+  .coupi-call-page .incoming-screen .orbit-dot{right:23px;bottom:22px;width:6px;height:6px}
+  .coupi-call-page .incoming-screen .incoming-person h1,.coupi-call-page .incoming-screen .incoming-person h1 em,.coupi-call-page .phone-app[data-interview=true] .incoming-screen .incoming-person h1{font-size:29px;letter-spacing:-.9px}
+  .coupi-call-page .incoming-screen .incoming-subtitle{margin-top:6px;font-size:11px}
+}
+@media(max-height:430px){
+  .coupi-call-page .incoming-screen .nori-orbit{width:164px;height:92px;margin-bottom:9px}
+  .coupi-call-page .incoming-screen .nori-orb{width:49px;height:46px;left:calc(50% - 24.5px);bottom:17px}
+  .coupi-call-page .incoming-screen .nori-orbit::after{height:33px;bottom:10px}
+  .coupi-call-page .incoming-screen .incoming-person{padding:8px 0 10px}
+  .coupi-call-page .incoming-screen .incoming-person h1,.coupi-call-page .incoming-screen .incoming-person h1 em,.coupi-call-page .phone-app[data-interview=true] .incoming-screen .incoming-person h1{font-size:27px}
+}
+@media(prefers-reduced-motion:reduce){.coupi-call-page .incoming-screen .orbit-dot{animation:none}}

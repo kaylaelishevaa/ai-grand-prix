@@ -5,6 +5,25 @@
   const SETUP_MS = 25000;
   const PERMISSION_MS = 60000;
   const bounded = (value, low, high) => Math.min(high, Math.max(low, Number(value)));
+  const PREFERENCE_INTERESTS = ['cozy_home','focused_work','everyday_style','beauty_play','outdoors'];
+  const PREFERENCE_VIBES = ['calm','bold','mixed'];
+  function preferenceFields(value,{strict=false,storyLimit=1200}={}) {
+    if(!value || typeof value!=='object' || Array.isArray(value))throw Error('Preferences must be an object.');
+    const allowed=['interests','vibe','budget','story'];
+    if(strict && Object.keys(value).some(key=>!allowed.includes(key)))throw Error('Only shopping interests, vibe, budget and a volunteered lifestyle summary can be drafted.');
+    if(strict && (!Array.isArray(value.interests)||value.interests.length>5||value.interests.some(item=>!PREFERENCE_INTERESTS.includes(item))))throw Error('Choose only the supported shopping interests.');
+    if(strict && !PREFERENCE_VIBES.includes(value.vibe))throw Error('Choose calm, bold or mixed style.');
+    if(strict && value.budget!==null && (!Number.isSafeInteger(value.budget)||value.budget<1||value.budget>10000000))throw Error('Budget must be null or a positive whole amount in won.');
+    if(strict && (typeof value.story!=='string'||value.story.length>1200))throw Error('Keep the volunteered lifestyle summary within 1,200 characters.');
+    const interests=[...new Set((Array.isArray(value.interests)?value.interests:[]).filter(item=>PREFERENCE_INTERESTS.includes(item)))];
+    const story=typeof value.story==='string'?value.story.replace(/[\u0000-\u001f]/g,' ').trim().slice(0,storyLimit):'';
+    if(strict && !interests.length&&!story)throw Error('Ask one easy preference question before preparing a draft.');
+    return {interests,vibe:PREFERENCE_VIBES.includes(value.vibe)?value.vibe:'mixed',budget:Number.isSafeInteger(value.budget)&&value.budget>0&&value.budget<=10000000?value.budget:null,story};
+  }
+  function personalizationContext(value) {
+    if(!value || typeof value!=='object' || Array.isArray(value))return null;
+    return {active:value.active===true,draft_pending:value.draft_pending===true,preferences:value.preferences&&typeof value.preferences==='object'&&!Array.isArray(value.preferences)?preferenceFields(value.preferences,{storyLimit:600}):null};
+  }
   function validatedCallFacts(value){
     if(!value||!['ok','blocked','fallback'].includes(value.status))throw Error('The app has not returned a checked answer.');
     const text=(v,n=2000)=>typeof v==='string'?v.slice(0,n):'',list=v=>Array.isArray(v)?v.filter(x=>typeof x==='string').slice(0,12).map(x=>x.slice(0,120)):[];
@@ -14,15 +33,17 @@
   }
   function contextText(value) {
     try {
-      const serialized=JSON.stringify(value || {});
+      const input={...(value||{})};if(Object.hasOwn(input,'personalization'))input.personalization=personalizationContext(input.personalization);
+      const serialized=JSON.stringify(input);
       if(serialized.length<=1600)return serialized;
       const safe=JSON.parse(serialized),short=value=>typeof value==='string'?value.slice(0,120):['number','boolean'].includes(typeof value)?value:undefined;
       const product=value=>value&&typeof value==='object'?Object.fromEntries(['id','title','category','productType','price','preview_kind','shade_color','shade_estimated'].filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
       const fields=(value,keys)=>value&&typeof value==='object'?Object.fromEntries(keys.filter(key=>['string','number','boolean'].includes(typeof value[key])).map(key=>[key,short(value[key])])):null;
-      const compact={mode:short(safe.mode),screen:short(safe.screen),cameraRunning:safe.cameraRunning===true,
+      const compact={personalization:safe.personalization||null,mode:short(safe.mode),screen:short(safe.screen),cameraRunning:safe.cameraRunning===true,
         vision:fields(safe.vision,['enabled','last_image_at','state']),
         tried_product:product(safe.tried_product),overlay:fields(safe.overlay,['color','opacity','scale','x','y','rotation','mirror']),
         visible_product:product(safe.visible_product),cart_count:Array.isArray(safe.cart_ids)?safe.cart_ids.length:0};
+      if(JSON.stringify(compact).length>1600&&compact.personalization?.preferences?.story)compact.personalization.preferences.story=compact.personalization.preferences.story.slice(0,160);
       if(JSON.stringify(compact).length>1600){if(compact.tried_product)delete compact.tried_product.title;if(compact.visible_product)delete compact.visible_product.title;}
       if(JSON.stringify(compact).length>1600){delete compact.vision;delete compact.visible_product;}
       if(JSON.stringify(compact).length>1600){delete compact.overlay;compact.tried_product=fields(safe.tried_product,['id','productType']);}
@@ -331,6 +352,17 @@
           if(Object.keys(args).length)throw Error('Resolve the existing shopper turn without new arguments or a second request.');
           if(!this.options.onResolveCall)throw Error('The checked shopping flow is unavailable on this page.');
           this._state('thinking','Waiting for the checked answer…');result=validatedCallFacts(await this.options.onResolveCall());
+        } else if(event.name==='draft_preferences' || event.name==='skip_personalization') {
+          if(this.options.getContext?.()?.personalization?.active!==true)throw new Error('Personalization is not active. The shopper must opt in before drafting preferences.');
+          if(!this.options.onPreferences)throw new Error('Preference review is unavailable on this page.');
+          const skip=event.name==='skip_personalization';
+          if(skip&&Object.keys(args).length)throw new Error('Skipping personalization does not accept profile fields or save anything.');
+          const preferences=skip?null:preferenceFields(args,{strict:true});
+          const reviewed=await this.options.onPreferences(skip?{action:'skip'}:{action:'draft',preferences});
+          if(!this._current(c))return;
+          if(!skip&&this.options.getContext?.()?.personalization?.active!==true)throw new Error('Personalization ended before the review was ready. No preferences were saved.');
+          if(!reviewed || typeof reviewed!=='object' || Array.isArray(reviewed) || reviewed.ok!==true || reviewed.saved===true || reviewed.persisted===true || (skip?reviewed.skipped!==true:reviewed.draft_ready!==true))throw new Error(reviewed?.error || 'The preference review did not open. No preferences were saved.');
+          result=skip?{ok:true,skipped:true,saved:false,instruction:'Personalization has ended without saving a draft. Stop onboarding questions. Continue with the shopper’s requested product, or ask what they want to buy.'}:{ok:true,draft_ready:true,confirmation_required:true,saved:false,preferences,instruction:'The editable preference review is open. Ask the shopper to check it and tap Build my worlds to save. Do not claim anything was saved or worlds were built yet. Avoid more questions while they review.'};
         } else if(event.name==='look_at_camera') {
           const snapshot=this._captureCamera(c,'tool');
           result=snapshot?{ok:true,captured_at:snapshot.metadata?.capturedAt || null,contains_tryon_preview:snapshot.images.some(image=>image.kind==='tryon_preview'),info:'Fresh camera images were sent immediately before this tool result. Use the raw camera for the real scene. A separate try-on preview uses the selected listing photo or an estimated lipstick shade; it is not a physical object or a fit/scale/colour guarantee.'}:{ok:false,captured_at:null,contains_tryon_preview:false,info:'No fresh camera image could be shared. Camera sharing may be paused, the camera may not be ready, or the connection is busy. Do not claim to see the current scene; ask the shopper to enable camera sharing or describe it.'};

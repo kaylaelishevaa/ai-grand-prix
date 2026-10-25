@@ -1,4 +1,5 @@
 import referenceData from '../data/teammate-catalog.json';
+import homeReferenceData from '../data/home-reference-catalog.json';
 import {getSku} from './catalog';
 import {effectiveNow,isDecisionLocked,localClock} from './guardrails';
 import {decisionApprovalIssue} from './delegation-policy';
@@ -7,9 +8,10 @@ import type {Profile,SKU} from './types';
 export type HomeScenario='normal'|'problem'|'first'|'quiet'|'night';
 export const HOME_SCENARIOS:{id:HomeScenario;label:string}[]=[{id:'normal',label:'Everyday'},{id:'problem',label:'Delivery issue'},{id:'first',label:'First call'},{id:'quiet',label:'Quiet day'},{id:'night',label:'Night'}];
 export interface HomeReference {id:string;name:string;productType:string;price:number|null;image:string;url:string;sourceNote:string;verifiedAttributes:string[];aliases:string[];}
-export const homeReferences=referenceData as HomeReference[];
+// Home-only reference updates do not enter the AI shopping or live-call catalogs.
+export const homeReferences=[...referenceData,...homeReferenceData] as HomeReference[];
 export const referenceById=(id:string)=>homeReferences.find(product=>product.id===id);
-const shortNames:Record<string,string>={'1814412512':'Romand Zero Matte 09','55518713':'Desk lamp','7612276799':'Blue-light glasses','20145368':'Office chair','7185725748':'Lip Monster 03','7322824636':'MAC Powder Kiss','7950092256':'Seoul chair'};
+const shortNames:Record<string,string>={'1814412512':'Romand Zero Matte 09','55518713':'Desk lamp','7612276799':'Blue-light glasses','7395651009':'Office chair','7185725748':'Lip Monster 03','7322824636':'MAC Powder Kiss','7330605115':'Study chair'};
 export const referenceName=(product:HomeReference)=>shortNames[product.id]||product.aliases[0]||product.name;
 export const homeMoney=(price:number|null)=>price===null?'price unverified':'₩'+price.toLocaleString('en-US');
 export interface HomeCard {id:string;kind:'problem'|'decision'|'arrival'|'receipt'|'followup'|'nudge';title:string;line:string;action:string;sku?:SKU;reference?:HomeReference;locked?:boolean;sourceId:string;reason?:string;demo:boolean;href?:string;}
@@ -54,7 +56,7 @@ export function createHomeDemo(scenario:HomeScenario):HomeDemoState {
   if(scenario==='night'){data.held=[{itemId:'7322824636',removed:false}];return data;}
   data.orders=[{id:'1043',itemId:'55518713',status:'out_for_delivery',eta:'2026-10-26T12:00:00+09:00'},{id:'1042',itemId:'1814412512',status:'delivered',deliveredAt:'2026-10-25T07:02:00+09:00'}];
   data.decisions=[{itemId:'7612276799',status:'waiting'}];data.saved=[{itemId:'7185725748',removed:false}];
-  if(scenario==='problem')data.orders.unshift({id:'1044',itemId:'20145368',status:'delayed',eta:'2026-10-30T07:00:00+09:00',originalEta:'2026-10-28T07:00:00+09:00',swapId:'7950092256',swapEta:'2026-10-27T07:00:00+09:00'});
+  if(scenario==='problem')data.orders.unshift({id:'1044',itemId:'7395651009',status:'delayed',eta:'2026-10-30T07:00:00+09:00',originalEta:'2026-10-28T07:00:00+09:00',swapId:'7330605115',swapEta:'2026-10-27T07:00:00+09:00'});
   return data;
 }
 export function demoDeliveryTime(value?:string):string {return value?new Date(value).toLocaleString('en-GB',{timeZone:'Asia/Seoul',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'time unconfirmed';}

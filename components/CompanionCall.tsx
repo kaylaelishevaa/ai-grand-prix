@@ -4,10 +4,12 @@ import {useEffect, useRef, useState, type FormEvent} from 'react';
 import {getReview, getSku} from '@/lib/catalog';
 import type {CallResponse} from '@/lib/journey-types';
 import type {Profile, Verdict} from '@/lib/types';
+import {safePersonalizationCandidates,type PersonalizationResponse,type PersonalizationReview} from '@/lib/personalization';
 import {Glyph} from './Glyph';
 import {ProductVisual,ProductEvidence} from './ProductEvidence';
 import VerdictComparison from './VerdictComparison';
 import SellerQA from './SellerQA';
+import FirstCallReview from './FirstCallReview';
 import './companion-call.css';
 
 interface CompanionCallProps {
@@ -56,6 +58,8 @@ function VoiceGlyph({muted}: {muted: boolean}) {
 /** One conversation surface. Intent is resolved by the server from words, context and an optional frame. */
 export default function CompanionCall(props: CompanionCallProps) {
   const callbacks = useRef(props); callbacks.current = props;
+  const currentProfile=useRef(props.profile);
+  if(props.profile.id!==currentProfile.current.id||props.profile.revision>=currentProfile.current.revision)currentProfile.current=props.profile;
   const [turns, setTurns] = useState<TranscriptTurn[]>([]);
   const [latest, setLatest] = useState<CallResponse | null>(null);
   const [draft, setDraft] = useState('');
@@ -66,6 +70,11 @@ export default function CompanionCall(props: CompanionCallProps) {
   const comparisonPending = useRef(false);
   const [started, setStarted] = useState(false);
   const [error, setError] = useState('');
+  const [review, setReview] = useState<PersonalizationReview | null>(null);
+  const [reviewError, setReviewError] = useState('');
+  const personalizationDraftId = useRef(props.profile.journey?.personalizationDraft?.id);
+  const reviewAutoOpened = useRef(false);
+  const confirmAttempt = useRef<{fingerprint:string;id:string}|null>(null);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [voiceOn, setVoiceOn] = useState(true);
@@ -76,6 +85,7 @@ export default function CompanionCall(props: CompanionCallProps) {
   const [elapsed, setElapsed] = useState(0);
   const mounted = useRef(false), busyRef = useRef(false), voiceOnRef = useRef(true), draftRef = useRef('');
   const request = useRef<AbortController | null>(null);
+  const callEpoch=useRef(0);
   const recognition = useRef<BrowserRecognition | null>(null);
   const stream = useRef<MediaStream | null>(null), cameraGeneration = useRef(0);
   const video = useRef<HTMLVideoElement | null>(null), fileInput = useRef<HTMLInputElement>(null);
@@ -85,13 +95,14 @@ export default function CompanionCall(props: CompanionCallProps) {
   const voiceEpoch = useRef(0);
   draftRef.current = draft;
   voiceOnRef.current = voiceOn;
-  const count = latest?.interviewCount ?? props.profile.journey?.interviewCount ?? 0;
+  const activeDraft = currentProfile.current.journey?.personalizationDraft;
+  const count = activeDraft?.answerCount ?? latest?.interviewCount ?? props.profile.journey?.interviewCount ?? 0;
   const complete = latest?.interviewComplete ?? props.profile.journey?.interviewComplete ?? false;
   const paused = !complete&&(latest?.profile.journey?.interviewPaused??props.profile.journey?.interviewPaused??false);
   const mode = latest?.conversationMode ?? (complete||paused?'conversation':'interview');
   const worldReady = latest?.worldReady ?? false;
   const rememberedIds = new Set(props.profile.memoryLines.map(line => line.id));
-  const newMemories = turns.flatMap(turn => turn.response?.memories || []).filter((line, index, all) => rememberedIds.has(line.id) && all.findIndex(other => other.id === line.id) === index);
+  const newMemories = activeDraft ? safePersonalizationCandidates(currentProfile.current,activeDraft) : turns.flatMap(turn => turn.response?.memories || []).filter((line, index, all) => rememberedIds.has(line.id) && all.findIndex(other => other.id === line.id) === index);
 
   function stopSpeech() {
     voiceEpoch.current++;
@@ -132,16 +143,73 @@ export default function CompanionCall(props: CompanionCallProps) {
     if (!enabled) stopSpeech();
     else if (latest) speak([latest.message, latest.question !== latest.message ? latest.question : null].filter(Boolean).join(' '));
   }
-  async function sendRequest(body: Record<string, string> | FormData): Promise<CallResponse> {
+  function acceptProfile(profile:Profile) {
+    if(profile.id!==currentProfile.current.id||profile.revision<currentProfile.current.revision)throw new Error('Your profile changed. Please try again with your current preferences.');
+    currentProfile.current=profile;callbacks.current.onProfile(profile);
+  }
+  async function checkedRequest<T>(url:string,body:Record<string,unknown>|FormData):Promise<T> {
     request.current?.abort();
     const controller = new AbortController(); request.current = controller;
-    const result = await fetch('/api/call', {method: 'POST', headers: body instanceof FormData ? undefined : {'Content-Type': 'application/json'}, body: body instanceof FormData ? body : JSON.stringify(body), signal: controller.signal, cache: 'no-store'});
+    const scope={epoch:callEpoch.current,profileId:currentProfile.current.id,draftId:currentProfile.current.journey?.personalizationDraft?.id};
+    const result = await fetch(url, {method: 'POST', headers: body instanceof FormData ? undefined : {'Content-Type': 'application/json'}, body: body instanceof FormData ? body : JSON.stringify(body), signal: controller.signal, cache: 'no-store'});
     const data = await result.json();
+    // A response may already be buffered when fetch is aborted. Re-check its
+    // conversation and draft before allowing it to update memory or navigation.
+    if(controller.signal.aborted||!mounted.current||scope.epoch!==callEpoch.current||scope.profileId!==currentProfile.current.id||scope.draftId!==currentProfile.current.journey?.personalizationDraft?.id)throw new DOMException('This call changed.','AbortError');
     if (!result.ok) throw new Error(data.error || 'That connection slipped. Your answer is still here.');
-    return data as CallResponse;
+    return data as T;
+  }
+  async function sendRequest(body: Record<string, string> | FormData): Promise<CallResponse> {
+    return checkedRequest<CallResponse>('/api/call',body);
+  }
+  async function sendPersonalization(body:Record<string,unknown>):Promise<PersonalizationResponse> {
+    return checkedRequest<PersonalizationResponse>('/api/personalization',body);
+  }
+  function withDraft(body:Record<string,string>):Record<string,string> {
+    return personalizationDraftId.current ? {...body,personalizationDraftId:personalizationDraftId.current} : body;
+  }
+  // The server derives this proposal from staged user statements. Opening it
+  // does not confirm memory or make worlds available.
+  async function loadReview() {
+    const draftId=personalizationDraftId.current;if(!draftId)return;
+    stopSpeech();stopRecognition();stopCamera();setReviewError('');
+    const data=await sendPersonalization({action:'draft',requestId:crypto.randomUUID(),draftId});
+    if(!mounted.current)return;
+    if(!data.review)throw new Error('I need a little of your story before there is anything to review.');
+    acceptProfile(data.profile);
+    setLatest(current=>current?{...current,profile:data.profile}:current);
+    reviewAutoOpened.current=true;setReview(data.review);
+  }
+  async function openReview() {
+    if(busyRef.current||comparisonPending.current)return;
+    busyRef.current=true;setBusy(true);setError('');
+    try{await loadReview();}
+    catch(failure){if(mounted.current&&!(failure instanceof DOMException&&failure.name==='AbortError'))setError(failure instanceof Error?failure.message:'The review could not open. Your call is still here.');}
+    finally{busyRef.current=false;if(mounted.current)setBusy(false);}
+  }
+  function keepTalking() {
+    if(busyRef.current)return;
+    setReview(null);setReviewError('');
+    requestAnimationFrame(()=>composer.current?.focus());
+  }
+  async function confirmReview(edits:PersonalizationReview) {
+    const draftId=personalizationDraftId.current;
+    if(busyRef.current||!draftId)return;
+    const fingerprint=JSON.stringify([draftId,edits]);
+    if(confirmAttempt.current?.fingerprint!==fingerprint)confirmAttempt.current={fingerprint,id:crypto.randomUUID()};
+    busyRef.current=true;setBusy(true);setReviewError('');
+    try{
+      const data=await sendPersonalization({action:'confirm',requestId:confirmAttempt.current.id,draftId,review:edits});
+      if(!mounted.current)return;
+      acceptProfile(data.profile);
+      if(!data.worldReady)throw new Error('Your review is not ready to build a world yet. Check your story, then try again.');
+      personalizationDraftId.current=undefined;setReview(null);
+      leave(()=>callbacks.current.onComplete(data.profile));
+    }catch(failure){if(mounted.current&&!(failure instanceof DOMException&&failure.name==='AbortError'))setReviewError(failure instanceof Error?failure.message:'That did not save. Your edits are still here.');}
+    finally{busyRef.current=false;if(mounted.current)setBusy(false);}
   }
   function acceptResponse(data: CallResponse, id: string) {
-    callbacks.current.onProfile(data.profile);
+    acceptProfile(data.profile);
     setLatest(data);
     const responseText = [data.message, data.question && data.question !== data.message ? data.question : ''].filter(Boolean).join('\n\n');
     setTurns(current => [...current, {id: id + '-reply', role: 'coopy', text: responseText, response: data}]);
@@ -160,7 +228,7 @@ export default function CompanionCall(props: CompanionCallProps) {
     setTurns(current => current.map(turn => turn.id === turnId && turn.response ? {...turn, response: update(turn.response)} : turn));
     setLatest(current => current?.verdict === previous ? update(current) : current);
     comparisonWorking(false);
-    callbacks.current.onProfile(profile);
+    acceptProfile(profile);
   }
   function comparisonWorking(value: boolean) {
     comparisonPending.current = value;
@@ -172,21 +240,29 @@ export default function CompanionCall(props: CompanionCallProps) {
     busyRef.current = true; setBusy(true); setError('');
     try {
       const id = crypto.randomUUID();
-      const data = await sendRequest({action: 'start', requestId: id});
+      if(!callbacks.current.profile.journey?.interviewComplete){
+        const staged=await sendPersonalization({action:'start',requestId:id+'-draft'});
+        if(!mounted.current)return;
+        if(!staged.draftId)throw new Error('I couldn’t start your preference draft. Please try again.');
+        personalizationDraftId.current=staged.draftId;acceptProfile(staged.profile);
+      }
+      const data = await sendRequest(withDraft({action: 'start', requestId: id}));
       if (!mounted.current) return;
       setStarted(true); acceptResponse(data, id);
+      if(personalizationDraftId.current&&!reviewAutoOpened.current&&(data.personalization?.reviewReady||data.interviewCount>=5))await loadReview();
     } catch (failure) {
       if (mounted.current && !(failure instanceof DOMException && failure.name === 'AbortError')) setError(failure instanceof Error ? failure.message : 'The call could not start. Try again.');
     } finally {busyRef.current = false; if (mounted.current) setBusy(false);}
   }
   async function changeInterview(action:'resumeInterview'|'finishInterview') {
     if(busyRef.current||comparisonPending.current||!started)return;
+    if(action==='finishInterview'&&personalizationDraftId.current){await openReview();return;}
     stopSpeech();stopRecognition();
     if(!interviewAttempt.current||interviewAttempt.current.action!==action)interviewAttempt.current={action,id:crypto.randomUUID()};
     const id=interviewAttempt.current.id;
     busyRef.current=true;setBusy(true);setError('');
     try{
-      const data=await sendRequest({action,requestId:id});
+      const data=await sendRequest(withDraft({action,requestId:id}));
       if(!mounted.current)return;
       acceptResponse(data,id);interviewAttempt.current=null;
       if(action==='finishInterview'&&data.status==='ok'&&data.interviewComplete&&data.worldReady)leave(()=>callbacks.current.onComplete(data.profile));
@@ -197,7 +273,7 @@ export default function CompanionCall(props: CompanionCallProps) {
   }
 
   useEffect(() => {
-    mounted.current = true;
+    mounted.current = true;callEpoch.current++;
     // Read the preference before begin() can speak. Offline suppresses output
     // without replacing the user's preference for their next online call.
     try {
@@ -212,7 +288,7 @@ export default function CompanionCall(props: CompanionCallProps) {
     const time = setInterval(() => setElapsed(value => value + 1), 1000);
     const visibility = () => {if (document.hidden) {stopSpeech(); stopRecognition(); stopCamera();}};
     document.addEventListener('visibilitychange', visibility);
-    return () => {mounted.current = false; clearTimeout(start); clearInterval(time); request.current?.abort(); stopSpeech(); stopRecognition(); stopCamera(); document.removeEventListener('visibilitychange', visibility);};
+    return () => {mounted.current = false; callEpoch.current++;clearTimeout(start); clearInterval(time); request.current?.abort(); stopSpeech(); stopRecognition(); stopCamera(); document.removeEventListener('visibilitychange', visibility);};
     // A call is scoped to one profile; updates inside that profile must not restart it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.profile.id]);
@@ -242,14 +318,14 @@ export default function CompanionCall(props: CompanionCallProps) {
     const fingerprint = JSON.stringify([message, chosenPhoto?.name, chosenPhoto?.size, chosenPhoto?.lastModified]);
     if (!attempt.current || attempt.current.fingerprint !== fingerprint) attempt.current = {fingerprint, id: crypto.randomUUID()};
     const id = attempt.current.id;
-    let body: FormData | Record<string, string> = {action: 'message', requestId: id, message};
-    if (chosenPhoto) {const form = new FormData(); form.set('action', 'message'); form.set('requestId', id); form.set('message', message); form.set('file', chosenPhoto); body = form;}
+    let body: FormData | Record<string, string> = withDraft({action: 'message', requestId: id, message});
+    if (chosenPhoto) {const form = new FormData(); form.set('action', 'message'); form.set('requestId', id); form.set('message', message); form.set('file', chosenPhoto); if(personalizationDraftId.current)form.set('personalizationDraftId',personalizationDraftId.current); body = form;}
     busyRef.current = true; setBusy(true); setError('');
     try {
       const data = await sendRequest(body);
       if (!mounted.current) return;
       if (data.status !== 'ok') {
-        callbacks.current.onProfile(data.profile);
+        acceptProfile(data.profile);
         setError(data.message);
         // A rejected/uncertain answer is not a completed turn: keep the question,
         // draft, attachment and request id so the user can edit or retry it.
@@ -262,8 +338,7 @@ export default function CompanionCall(props: CompanionCallProps) {
       acceptResponse(data, id);
       setDraft(''); setPhoto(null); attempt.current = null;
       if (fileInput.current) fileInput.current.value = '';
-      const finishedFive=data.status==='ok'&&!complete&&data.interviewComplete&&data.interviewCount>=5&&data.conversationMode==='conversation';
-      if(finishedFive&&data.worldReady)leave(()=>callbacks.current.onComplete(data.profile));
+      if(personalizationDraftId.current&&!reviewAutoOpened.current&&(data.personalization?.reviewReady||data.interviewCount>=5))await loadReview();
       else requestAnimationFrame(() => composer.current?.focus());
     } catch (failure) {
       if (mounted.current && !(failure instanceof DOMException && failure.name === 'AbortError')) setError(failure instanceof Error ? failure.message : 'That connection slipped. Your answer is still here.');
@@ -319,7 +394,7 @@ export default function CompanionCall(props: CompanionCallProps) {
     selectPhoto(new File([blob], 'your-view.jpg', {type: 'image/jpeg'})); stopCamera();
     composer.current?.focus();
   }
-  function leave(callback: () => void) {stopSpeech(); stopRecognition(); stopCamera(); callback();}
+  function leave(callback: () => void) {callEpoch.current++;request.current?.abort();stopSpeech(); stopRecognition(); stopCamera(); callback();}
 
   return <section className="companion-call" aria-label={complete ? 'Call Coopy' : 'Your first call with Coopy'}>
     <div className="call-topline"><span className="call-live"><i/>{mode==='request'?'YOUR NEED / FIRST':paused?'QUESTIONS PAUSED':complete?'YOUR OPEN LINE':'GETTING TO KNOW YOU'} <span>· {Math.floor(elapsed / 60).toString().padStart(2, '0')}:{(elapsed % 60).toString().padStart(2, '0')}</span></span><div className="call-top-actions">{speechSupported && !props.offline && <button className="call-icon-button" onClick={toggleVoice} aria-label={voiceOn ? 'Mute Coopy’s spoken voice' : 'Enable Coopy’s spoken voice'} aria-pressed={voiceOn}><VoiceGlyph muted={!voiceOn}/><span>{voiceOn ? 'voice on' : 'voice off'}</span></button>}<button className="call-icon-button" onClick={() => leave(props.onClose)} aria-label="Leave call"><Glyph name="close"/><span>leave call</span></button></div></div>
@@ -329,7 +404,7 @@ export default function CompanionCall(props: CompanionCallProps) {
         {!complete && <div className="call-question-progress"><div aria-label={`${count} of up to 5 optional stories shared`}>{Array.from({length: 5}, (_, i) => <i className={i < count ? 'done' : mode==='interview'&&i === count ? 'current' : ''} key={i}/>)}</div><span>{count} / up to 5 · optional{paused?' · paused':''}</span></div>}
         <h2 className="call-invitation">{mode==='interview'?'your life,\nin your words.':'show me.\ntell me.'}</h2>
         <p className="call-company-note">{complete||paused?'A shelf, two things you’re choosing between, something you need. I’ll follow your lead.':'Tell me a little, or ask for what you need right now. The questions can wait.'}</p>
-        <section className="call-memory-trace" aria-label="Memories from this call"><span className="eyebrow">{newMemories.length ? 'WRITING INTO MY HEAD' : 'NOTHING ASSUMED'}</span>{newMemories.length ? newMemories.slice(-5).map(line => <div className="call-memory-line" key={line.id}><Glyph name="spark"/><div><p>{line.text}</p><small>{line.source}<br/>{line.kind==='inventory'?(line.confidence>=.6?'visible in your frame':'tentative observation'):line.kind==='decision'?'recorded action':line.confidence>=.8?'said by you':'tentative · you can correct this'}</small></div></div>) : <p className="call-memory-empty">You’ll see what I remember, as we talk.</p>}</section>
+        <section className="call-memory-trace" aria-label={activeDraft?'Draft observations from this call':'Memories from this call'}><span className="eyebrow">{activeDraft?'HEARD SO FAR / DRAFT':newMemories.length ? 'WRITING INTO MY HEAD' : 'NOTHING ASSUMED'}</span>{newMemories.length ? newMemories.slice(-5).map(line => <div className="call-memory-line" key={line.id}><Glyph name="spark"/><div><p>{line.text}</p><small>{line.source}<br/>{activeDraft?'not added to memory · review first':line.kind==='inventory'?(line.confidence>=.6?'visible in your frame':'tentative observation'):line.kind==='decision'?'recorded action':line.confidence>=.8?'said by you':'tentative · you can correct this'}</small></div></div>) : <p className="call-memory-empty">{activeDraft?'Your story stays a draft until you review it.':'You’ll see what I remember, as we talk.'}</p>}</section>
       </aside>
       <div className="call-conversation">
         <div ref={transcript} className="call-transcript" role="log" aria-label="Your conversation" aria-live="polite" aria-relevant="additions">
@@ -343,11 +418,12 @@ export default function CompanionCall(props: CompanionCallProps) {
         </div>
         {error && <div className="call-error" role="alert"><Glyph name="help"/><span>{error}</span>{!started && <button className="text-button" onClick={() => void begin()} disabled={busy||comparisonBusy}>Try again</button>}</div>}
         {cameraOpen && <section className="call-camera-preview" aria-label="Your camera preview"><video ref={video} autoPlay muted playsInline/><div><span>PREVIEW · ONLY A CAPTURED FRAME IS SENT</span><button className="call-capture" onClick={() => void capture()} aria-label="Capture this frame"><Glyph name="camera"/> Capture frame</button><button className="call-icon-button" onClick={stopCamera} aria-label="Close camera"><Glyph name="close"/></button></div></section>}
-        {!complete&&started&&(paused||worldReady)&&<div className="call-complete" aria-label="Optional getting-to-know-you questions">
-          <p>{paused?'the questions can wait. we’ll take care of what you need first.':'a little context is enough to begin. keep talking, or start with what you’ve shared.'}</p>
+        {!complete&&started&&(paused||worldReady||Boolean(activeDraft&&newMemories.length))&&<div className="call-complete" aria-label="Optional getting-to-know-you questions">
+          <p>{paused?'the questions can wait. we’ll take care of what you need first.':activeDraft?'a little context is enough. review what I heard, or keep talking.':'a little context is enough to begin. keep talking, or start with what you’ve shared.'}</p>
           {paused&&<button className="text-button" disabled={busy||comparisonBusy} onClick={()=>void changeInterview('resumeInterview')}>Back to our questions <Glyph name="arrow-right"/></button>}
-          {worldReady&&<button className="text-button" disabled={busy||comparisonBusy} onClick={()=>void changeInterview('finishInterview')}>Build from what I’ve shared <Glyph name="scene"/></button>}
-          {!worldReady&&<small>No need to finish five questions. One useful story or request gives us a beginning.</small>}
+          {Boolean(activeDraft&&newMemories.length)&&<button className="text-button call-review-story" disabled={busy||comparisonBusy} onClick={()=>void openReview()}>Review my story <Glyph name="arrow-right"/></button>}
+          {!activeDraft&&worldReady&&<button className="text-button" disabled={busy||comparisonBusy} onClick={()=>void changeInterview('finishInterview')}>Build from what I’ve shared <Glyph name="scene"/></button>}
+          {activeDraft?<small>Preference memory is saved only after you confirm. No need to finish all five questions.</small>:!worldReady&&<small>No need to finish five questions. One useful story or request gives us a beginning.</small>}
         </div>}
         {complete&&worldReady&&!props.profile.journey?.districts.length&&<button className="text-button" disabled={busy||comparisonBusy} onClick={()=>void changeInterview('finishInterview')}>Build my world <Glyph name="scene"/></button>}
         <form className="call-composer" onSubmit={submit}>
@@ -359,5 +435,6 @@ export default function CompanionCall(props: CompanionCallProps) {
         </form>
       </div>
     </div>
+    {review&&<FirstCallReview review={review} onConfirm={edits=>void confirmReview(edits)} onContinue={keepTalking} busy={busy} error={reviewError}/>}
   </section>;
 }

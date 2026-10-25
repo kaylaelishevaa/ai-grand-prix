@@ -30,8 +30,8 @@ export function parseLiveCallTurn(value:unknown):LiveCallTurn|null {
   return turn;
 }
 
-export function liveCallBody(turn:LiveCallTurn):{body:string|FormData;headers?:Record<string,string>} {
-  const input={action:'message',requestId:'live-call:'+turn.id,message:turn.text};
+export function liveCallBody(turn:LiveCallTurn,personalizationDraftId?:string):{body:string|FormData;headers?:Record<string,string>} {
+  const input={action:'message',requestId:'live-call:'+turn.id,message:turn.text,...(personalizationDraftId?{personalizationDraftId}:{})};
   if(!turn.photo)return{body:JSON.stringify(input),headers:{'Content-Type':'application/json'}};
   const bytes=frameBytes(turn.photo.dataUrl);
   const body=new FormData();for(const [key,value] of Object.entries(input))body.set(key,value);
@@ -45,5 +45,6 @@ export function publicCallResult(result:CallResponse) {
   const verdict=result.verdict?{pickSkuId:result.verdict.pickSkuId,reason:result.verdict.reason,dissent:result.verdict.dissent,citations:[...result.verdict.citations],runnerUpSkuId:result.verdict.runnerUpSkuId,whyRunnerUpLost:result.verdict.whyRunnerUpLost,clarifyingQuestion:result.verdict.clarifyingQuestion}:undefined;
   const inventory=result.inventory?{items:result.inventory.items.map(item=>({name:item.name,quantity:item.quantity,status:item.status})),lowOrMissing:result.inventory.lowOrMissing.map(item=>({name:item.name,reason:item.reason,confidence:item.confidence})),uncertainties:[...result.inventory.uncertainties]}:undefined;
   return {status:result.status,message:result.message,question:result.question,conversationMode:result.conversationMode,interviewCount:result.interviewCount,interviewComplete:result.interviewComplete,worldReady:result.worldReady,verdict,inventory,proposedSkuIds:[...result.proposedSkuIds],
-    products:ids.flatMap(id=>{const sku=getSku(id);return sku?[{id:sku.id,name:sku.name,price:sku.price,delivery:sku.delivery,origin:sku.origin||'synthetic',priceBasis:sku.priceBasis,image:sku.image,sourceUrl:sku.sourceUrl,sourceNote:sku.sourceNote}]:[];})};
+    products:ids.flatMap(id=>{const sku=getSku(id);return sku?[{id:sku.id,name:sku.name,price:sku.price,delivery:sku.delivery,origin:sku.origin||'synthetic',priceBasis:sku.priceBasis,image:sku.image,sourceUrl:sku.sourceUrl,sourceNote:sku.sourceNote}]:[];}),
+    ...(result.personalization?{personalization:{reviewReady:result.personalization.reviewReady}}:{})};
 }

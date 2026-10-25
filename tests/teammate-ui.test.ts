@@ -34,7 +34,7 @@ function fixture(t,options={}){
     async setProduct(product){const token=++this.productGen;if(product&&options.productLoad)await options.productLoad(product);if(token!==this.productGen)return {ok:false,stale:true};this.product=product;return product?{ok:true,productId:product.id,kind:product.category==='makeup'?'lip':product.category==='clothes'?'garment':product.category==='glasses'?'glasses':'object',shadeColor:product.category==='makeup'?'#bc3c57':undefined,shadeEstimated:product.category==='makeup'}:{ok:true};}
   }
   class Voice {
-    constructor(opts){this.opts=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;}
+    constructor(opts){this.opts=opts;this.options=opts;this.call=null;this.ends=0;this.contexts=[];this.images=[];this.imageClears=0;}
     async start(){sequence.push('voice');voiceStarts++;this.call={ready:true};this.opts.onState({state:'connected',muted:false,connectedAt:Date.now()});return true;}
     end(){this.ends++;this.call=null;this.opts.onState({state:'idle',muted:false,connectedAt:null});}
     updateContext(value){this.contexts.push(value);} mute(){} sendText(text){if(!this.call)return false;this.opts.onTranscript({role:'user',key:'typed-'+Date.now(),text,final:true});return true;} async resumeAudio(){}
@@ -44,7 +44,7 @@ function fixture(t,options={}){
   class Snapshots {constructor(opts){this.opts=opts;}capture(reason){return this.opts.isEnabled()?{images:[{kind:'camera',dataUrl:'data:image/jpeg;base64,AQID'}],metadata:{reason,capturedAt:new Date().toISOString()}}:null;}clear(){}}
   class Hands {constructor(opts){this.opts=opts;this.running=false;}async start(){this.running=true;}stop(){this.running=false;}reset(){}}
   const context={window:{location:{origin:'https://coupi.test',assign(){}},parent:{postMessage:(data,target)=>messages.push({data,target})},matchMedia:()=>({matches:false}),COUPANG_PRODUCTS:catalog,NookCamera:Camera,NookVoiceSession:Voice,NookHandGestures:Hands,NookCameraSnapshots:Snapshots,addEventListener:(...a)=>events.addEventListener(...a)},document:{head:new Element(),querySelectorAll:()=>[],getElementById:id=>nodes.get(id)||null,createElement:()=>new Element(),addEventListener:(...a)=>docEvents.addEventListener(...a),hidden:false},setTimeout:(fn,ms)=>ms===220?setTimeout(fn,0):0,clearTimeout,setInterval:(fn,ms)=>{intervals.push({fn,ms});return intervals.length;},clearInterval,console,URL,URLSearchParams,fetch:async()=>({ok:true,json:async()=>options.status||{ready:true,offline:false}})};
-  context.location=context.window.location;context.location.search='';
+  context.location=context.window.location;context.location.search=options.search||'';
   vm.createContext(context);vm.runInContext(stateSource,context);vm.runInContext(bridgeSource,context);vm.runInContext(comparisonSource,context);vm.runInContext(source,context);
   const mobile=context.window.NookMobile;
   t.after(()=>nodes.get('end-call').onclick());
@@ -92,7 +92,7 @@ test('world result rows retain their simulation namespace and Details opens the 
 
 test('camera opt-out and hidden page never share a frame',async t=>{
   const f=fixture(t);f.nodes.get('vision-consent').checked=false;await f.nodes.get('answer-call').onclick();
-  f.visionTick();assert.equal(f.camera.running,true);assert.equal(f.voice.images.length,0);
+  f.visionTick();assert.equal(f.camera.running,false);assert.equal(f.cameraStarts,0);assert.equal(f.voiceStarts,1);assert.equal(f.voice.images.length,0);
   f.context.document.hidden=true;f.nodes.get('vision-toggle').onclick();f.visionTick();assert.equal(f.voice.images.length,0);
   f.docEvents.emit('visibilitychange');assert.equal(f.voice.call,null);assert.equal(f.camera.running,false);
 });
@@ -104,19 +104,59 @@ test('mobile entry boots against real HTML IDs, and Browse requests no camera or
   assert.equal(f.store.queue.length,new Set(catalog.map(p=>p.category)).size);assert.equal(f.nodes.get('product-zone').hidden,false);
 });
 
-test('Answer starts camera then real-call adapter; End closes both and shows ended screen',async t=>{
+test('consented Answer starts camera then voice; manual hangup returns incoming with both stopped',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();
   assert.deepEqual(f.sequence,['camera','voice']);assert.equal(f.nodes.get('phone-app').dataset.phase,'active');
-  f.nodes.get('end-call').onclick();assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');
+  f.nodes.get('end-call').onclick();assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
+  assert.equal(f.nodes.get('answer-call').disabled,false);assert.equal(f.voiceStarts,1);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,2);assert.equal(f.nodes.get('phone-app').dataset.phase,'active');
 });
 
-test('two bubble limit preserves a user who speaks before the first assistant transcript',async t=>{
+test('caption preserves the latest speaker and the two-message state when a user speaks first',async t=>{
   const f=fixture(t);await f.nodes.get('answer-call').onclick();
   const emit=e=>f.voice.opts.onTranscript(e);
   emit({role:'user',key:'early-user',text:'I want a shirt'});emit({role:'assistant',key:'reply',delta:'What colour?'});
   assert.equal(f.store.messages.length,2);assert.equal(f.store.messages[0].key,'early-user');
   emit({role:'user',key:'next-user',text:'Blue'});emit({role:'assistant',key:'next-reply',text:'Here are your picks'});
-  assert.equal(f.nodes.get('transcript').children.length,2);assert.deepEqual(Array.from(f.store.messages,m=>m.key),['next-user','next-reply']);
+  assert.equal(f.nodes.get('caption-speaker').textContent,'Coopy');assert.equal(f.nodes.get('caption-text').textContent,'Here are your picks');assert.deepEqual(Array.from(f.store.messages,m=>m.key),['next-user','next-reply']);
+});
+
+test('streaming captions keep stable DOM, follow new text and ignore superseded turns',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const root=f.nodes.get('transcript'),body=f.nodes.get('caption-text');
+  root.replaceChildren=()=>assert.fail('Streaming must preserve the caption DOM');
+  let writes=0,value=body.textContent;
+  Object.defineProperty(body,'textContent',{get:()=>value,set:next=>{writes++;value=next;}});body.scrollHeight=144;
+  f.voice.opts.onTranscript({role:'assistant',key:'stream',text:'A warm'});
+  f.voice.opts.onTranscript({role:'assistant',key:'stream',delta:' corner.'});
+  assert.equal(value,'A warm corner.');assert.equal(body.scrollTop,144);assert.equal(writes,2);
+  f.voice.opts.onTranscript({role:'assistant',key:'stream',text:'A warm corner.'});assert.equal(writes,2);
+  f.voice.opts.onTranscript({role:'user',key:'next',text:'For my desk'});assert.equal(f.nodes.get('caption-speaker').textContent,'You');
+  f.voice.opts.onTranscript({role:'user',key:'late',text:'Older audio',superseded:true});
+  assert.equal(value,'For my desk');assert.equal(writes,3);
+});
+
+test('camera status stays steady between sends, shows stale acknowledgements and clears on pause',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  const status=f.nodes.get('vision-status'),toggle=f.nodes.get('vision-toggle'),emit=f.voice.opts.onVisionState;
+  emit({state:'received',capturedAt:new Date().toISOString()});
+  let writes=0,value=status.textContent;
+  Object.defineProperty(status,'textContent',{get:()=>value,set:next=>{writes++;value=next;}});
+  for(let i=0;i<3;i++){emit({state:'sent'});assert.equal(toggle.dataset.state,'received');emit({state:'received',capturedAt:new Date().toISOString()});}
+  assert.equal(value,'Coopy sees snapshots');assert.equal(writes,0);
+  emit({state:'received',capturedAt:new Date(Date.now()-15000).toISOString()});emit({state:'sent'});
+  assert.equal(value,'Refreshing Coopy’s view…');assert.equal(toggle.dataset.state,'refreshing');
+  emit({state:'error'});assert.equal(value,'Camera sharing delayed');
+  toggle.onclick();assert.equal(status.hidden,true);assert.equal(value,'');assert.equal(toggle.dataset.state,'paused');
+  toggle.onclick();assert.equal(status.hidden,false);assert.equal(value,'Coopy sees snapshots');
+  await f.nodes.get('toggle-camera').onclick();assert.equal(value,'Camera off · Coopy can’t see');assert.equal(toggle.dataset.state,'paused');
+});
+
+test('connection errors retain an ended explanation instead of silently returning incoming',async t=>{
+  const f=fixture(t);await f.nodes.get('answer-call').onclick();
+  f.voice.opts.onState({state:'idle',message:'Connection interrupted.'});
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('end-summary').textContent,'Connection interrupted.');
+  assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
 });
 
 test('spoken partial overlay updates preserve existing settings and none fully clears',async t=>{
@@ -146,7 +186,7 @@ test('catalog exposes all six groups and selecting a row tries its exact product
 test('ending while a product image loads cannot restore try-on UI',async t=>{
   const wait=deferred();const f=fixture(t,{productLoad:()=>wait.promise});await f.nodes.get('answer-call').onclick();f.voice.opts.onRecommendations(catalog.filter(p=>p.category==='desk'));
   const loading=f.nodes.get('product-try').onclick();await tick();f.nodes.get('end-call').onclick();wait.resolve();await loading;
-  assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('tryon-chip').hidden,true);assert.equal(f.voice.opts.getContext().tried_product,null);
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('tryon-chip').hidden,true);assert.equal(f.voice.opts.getContext().tried_product,null);
 });
 
 test('camera-off during product loading clears a stale product claim',async t=>{
@@ -173,7 +213,7 @@ test('browse card action opens grounded details; saving only adds to local bag',
 
 test('ending during swipe animation prevents late bag mutation',async t=>{
   const f=fixture(t);f.nodes.get('decline-call').onclick();const pending=f.nodes.get('product-save').onclick();f.nodes.get('end-call').onclick();await pending;
-  assert.equal(f.store.cart.size,0);assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');
+  assert.equal(f.store.cart.size,0);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
 });
 
 test('old camera-permission completion cannot start voice inside a newer pending call',async t=>{
@@ -262,7 +302,7 @@ test('ending while a physical-camera switch is pending cannot restart either cam
   const wait=deferred();const f=fixture(t,{cameraStart:settings=>settings.strictFacing?wait.promise:true});await f.nodes.get('answer-call').onclick();
   const switching=f.nodes.get('flip-camera').onclick();await tick();f.nodes.get('end-call').onclick();wait.resolve(false);await switching;
   assert.equal(f.camera.starts.length,2);assert.equal(f.camera.running,false);assert.equal(f.voice.call,null);
-  assert.equal(f.nodes.get('phone-app').dataset.phase,'ended');assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
+  assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('phone-app').dataset.focused,'false');
 });
 
 
@@ -375,4 +415,52 @@ test('late prior transcripts persist their actual words without replacing the cu
   f.voice.opts.onTranscript({role:'user',key:'older',text:'a kettle',final:true,superseded:true});const older=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').at(-1).data;assert(!('photo' in older));assert.equal(older.text,'a kettle');
   let resolved=false;const waiting=f.voice.opts.onResolveCall().then(value=>{resolved=true;return value;});parentResult(f,older.id,{...checkedResult(),message:'OLD ANSWER'});await tick();assert.equal(resolved,false);assert.equal(f.nodes.get('validated-call').dataset.state,'pending');
   parentResult(f,current.id,checkedResult());assert.equal((await waiting).verdict.pickSkuId,'socks');assert(!descendants(f.nodes.get('validated-call-content')).some(n=>n.textContent==='OLD ANSWER'));
+});
+
+function personalizationContext(f,values={}){f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-context',active:true,question:'What is your favorite quiet corner?',count:2,draftPending:false,memories:[],...values}});}
+
+test('the stable embedded frame waits for parent context and keeps the camera off in both first and later calls',async t=>{
+  const f=fixture(t,{search:'?embedded=1'});await tick();assert.equal(f.nodes.get('answer-call').disabled,true);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,0);assert.equal(f.cameraStarts,0);
+  personalizationContext(f);await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,0);assert.equal(f.nodes.get('incoming-title').textContent,'let’s get to know you.');
+  f.nodes.get('end-call').onclick();f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-live-call-open'}});
+  personalizationContext(f,{active:false,question:'',count:5});assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');assert.equal(f.nodes.get('incoming-title').textContent,'let’s look together.');
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,2);assert.equal(f.cameraStarts,0);
+  await f.nodes.get('toggle-camera').onclick();assert.equal(f.cameraStarts,1);
+});
+const editablePreferences={interests:['focused_work'],vibe:'calm',budget:30000,story:'I like reading beside my desk.'};
+test('personalization bootstraps the current parent question and starts voice with camera off',async t=>{
+  const f=fixture(t,{search:'?interview=1'});await tick();assert(f.messages.some(row=>row.data.type==='coupi-live-call-ready'));assert.equal(f.nodes.get('answer-call').disabled,true);
+  await f.nodes.get('answer-call').onclick();assert.equal(f.voiceStarts,0);assert.equal(f.cameraStarts,0);
+  personalizationContext(f,{memories:[{text:'Quiet evenings',source:'from this call · draft',confidence:.9}]});await f.nodes.get('answer-call').onclick();
+  assert.equal(f.voiceStarts,1);assert.equal(f.cameraStarts,0);assert.equal(f.camera.running,false);assert.equal(f.voice.opts.greeting,'What is your favorite quiet corner?');assert.equal(f.voice.opts.getContext().personalization.active,true);
+  assert.equal(f.nodes.get('incoming-title').textContent,'let’s get to know you.');assert.equal(f.nodes.get('personalization-question').textContent,'What is your favorite quiet corner?');assert.equal(f.nodes.get('personalization-memory').hidden,false);
+  await f.nodes.get('toggle-camera').onclick();assert.equal(f.cameraStarts,1);assert.equal(f.camera.running,true);
+});
+
+test('voice preference draft opens parent review without saving or adding a transcript',async t=>{
+  const f=fixture(t,{search:'?interview=1'});personalizationContext(f);await f.nodes.get('answer-call').onclick();
+  const before=f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length;
+  const pending=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});const request=f.messages.find(row=>row.data.type==='coupi-personalization-review').data;
+  assert.deepEqual(JSON.parse(JSON.stringify(request.preferences)),editablePreferences);assert(request.id.startsWith('personalization-'));assert.equal(f.cameraStarts,0);
+  personalizationContext(f,{draftPending:true});assert.equal(f.voice.opts.getContext().personalization.draft_pending,true);
+  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:request.id,result:{ok:true,draft_ready:true,saved:false}}});
+  const result=await pending;assert.equal(result.draft_ready,true);assert.equal(result.saved,false);assert.equal(f.voice.call.ready,true);assert.equal(f.messages.filter(row=>row.data.type==='coupi-live-call-transcript').length,before);
+});
+
+test('skip personalization keeps voice running and late review replies cannot revive an ended call',async t=>{
+  const f=fixture(t,{search:'?interview=1'});personalizationContext(f);await f.nodes.get('answer-call').onclick();
+  const draft=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});const draftId=f.messages.find(row=>row.data.type==='coupi-personalization-review').data.id;
+  const skip=f.voice.opts.onPreferences({action:'skip'});assert.equal((await draft).ok,false);const skipId=f.messages.find(row=>row.data.type==='coupi-personalization-skip').data.id;
+  personalizationContext(f,{active:false});f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:skipId,result:{ok:true,skipped:true,saved:false}}});assert.equal((await skip).skipped,true);assert.equal(f.voice.call.ready,true);
+  assert.throws(()=>f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences}),/optional introduction/);
+  personalizationContext(f);const last=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences});f.nodes.get('end-call').onclick();assert.equal((await last).ok,false);
+  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id:draftId,result:{ok:true,draft_ready:true,saved:false}}});assert.equal(f.voice.call,null);assert.equal(f.nodes.get('phone-app').dataset.phase,'incoming');
+});
+
+test('preference acknowledgements reject foreign origins and any claim of tool persistence',async t=>{
+  const f=fixture(t,{search:'?intent=personalize'});personalizationContext(f);await f.nodes.get('answer-call').onclick();let settled=false;
+  const pending=f.voice.opts.onPreferences({action:'draft',preferences:editablePreferences}).then(result=>{settled=true;return result;});const id=f.messages.find(row=>row.data.type==='coupi-personalization-review').data.id;
+  f.events.emit('message',{origin:'https://attacker.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id,result:{ok:true,draft_ready:true,saved:false}}});await tick();assert.equal(settled,false);
+  f.events.emit('message',{origin:'https://coupi.test',source:f.context.window.parent,data:{type:'coupi-personalization-result',id,result:{ok:true,draft_ready:true,saved:true}}});assert.equal((await pending).ok,false);
 });

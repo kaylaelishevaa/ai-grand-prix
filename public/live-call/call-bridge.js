@@ -5,6 +5,8 @@
   const seen = new Set();
   const turns = new Map(), listeners = new Set(), waiting = new Set();
   let latestId = '';
+  let personalization={active:false,question:'',count:0,draftPending:false,memories:[],received:false},preferenceSerial=0;
+  const preferenceRequests=new Map();
   let stop = () => {}, lastState = '', availability;
   function post(message) {
     if (window.parent !== window && /^https?:\/\//.test(origin)) window.parent.postMessage(message, origin);
@@ -26,6 +28,26 @@
   }
   function notify(event){for(const listener of listeners){try{listener(event);}catch{}}}
   function finish(id,result,error){const turn=turns.get(id);if(!turn||turn.finished)return;turn.finished=true;clearTimeout(turn.timer);turn.result=result||{ok:false,status:'fallback',message:error||'That request could not be checked.'};turn.resolve(turn.result);notify({id,state:error?'error':'result',result:turn.result,error});}
+  function preferenceResult(id,result,error){
+    const pending=preferenceRequests.get(id);if(!pending)return;
+    preferenceRequests.delete(id);clearTimeout(pending.timer);
+    const valid=result&&result.ok===true&&result.saved===false&&result.persisted!==true&&(pending.action==='skip'?result.skipped===true:result.draft_ready===true);
+    pending.resolve(valid?{ok:true,saved:false,...(pending.action==='skip'?{skipped:true}:{draft_ready:true})}:{ok:false,saved:false,error:string(error||result?.error,300)||'The preference review could not open. Nothing was saved.'});
+  }
+  function cancelPreferences(message='The call ended. No preferences were saved.'){
+    for(const id of [...preferenceRequests.keys()])preferenceResult(id,null,message);
+  }
+  function preferenceRequest(request){
+    if(!personalization.active||window.parent===window)return Promise.resolve({ok:false,saved:false,error:'Preference discovery is not active.'});
+    const action=request?.action;if(!['draft','skip'].includes(action))return Promise.resolve({ok:false,saved:false,error:'Choose a preference review or skip.'});
+    if(action==='skip')cancelPreferences('The draft was discarded. Nothing was saved.');
+    else if(preferenceRequests.size)return Promise.resolve({ok:false,saved:false,error:'The preference review is already opening.'});
+    const id='personalization-'+Date.now().toString(36)+'-'+(++preferenceSerial);
+    return new Promise(resolve=>{
+      preferenceRequests.set(id,{action,resolve,timer:setTimeout(()=>preferenceResult(id,null,'The preference review took too long. Please try again.'),30000)});
+      post({type:action==='skip'?'coupi-personalization-skip':'coupi-personalization-review',id,...(action==='draft'?{preferences:request.preferences}:{})});
+    });
+  }
   async function getAvailability(refresh = false) {
     if (!availability || refresh) availability = fetch('/api/voice/status', {credentials:'same-origin', cache:'no-store'})
       .then(async response => {
@@ -39,6 +61,8 @@
   }
   window.CoupiCallBridge = {
     getAvailability,
+    personalizationContext:()=>({...personalization,memories:personalization.memories.map(item=>({...item}))}),
+    preferences:preferenceRequest,cancelPreferences,
     async openWorldProduct(skuId,details={}) {
       if (typeof skuId !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9-]{0,99}$/.test(skuId) || window.parent === window) return {ok:false,error:'Open a world product from the main Coopy app.'};
       const response = await fetch('/api/products/world', {method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'open',skuId}),cache:'no-store'});
@@ -77,11 +101,21 @@
   };
   window.addEventListener('message', event => {
     if (event.origin !== origin || event.source !== window.parent || !event.data || typeof event.data !== 'object') return;
-    if (event.data.type === 'coupi-live-call-stop') stop();
+    if (event.data.type === 'coupi-live-call-stop') {cancelPreferences();stop();}
+    if(event.data.type==='coupi-personalization-context'){
+      const value=event.data;
+      personalization={active:value.active===true,question:string(value.question,400),count:Number.isInteger(value.count)?Math.max(0,Math.min(5,value.count)):0,draftPending:value.draftPending===true,received:true,memories:(Array.isArray(value.memories)?value.memories:[]).slice(-8).filter(item=>item&&typeof item.text==='string').map(item=>({text:string(item.text,240),source:string(item.source,100),confidence:typeof item.confidence==='number'&&Number.isFinite(item.confidence)?Math.max(0,Math.min(1,item.confidence)):null}))};
+      if(!personalization.active)for(const [id,pending] of preferenceRequests)if(pending.action==='draft')preferenceResult(id,null,'Personalization ended before the review was ready. Nothing was saved.');
+      notify({state:'personalization-context',context:window.CoupiCallBridge.personalizationContext()});
+    }
+    if(event.data.type==='coupi-personalization-result'&&typeof event.data.id==='string')preferenceResult(event.data.id,event.data.result,event.data.error);
+
     if(event.data.type==='coupi-call-pending'&&typeof event.data.id==='string'){const old=turns.get(event.data.id);if(old?.finished){const id=event.data.id;let resolve;const promise=new Promise(done=>{resolve=done;});turns.set(id,{promise,resolve,finished:false,timer:setTimeout(()=>finish(id,null,'That request is taking too long. Please try again.'),150000)});latestId=id;notify({id,state:'pending',retry:true});}}
     if(event.data.type==='coupi-call-result'&&typeof event.data.id==='string'){const result=safeResult(event.data.result);if(result)finish(event.data.id,result);else finish(event.data.id,null,'The checked answer could not be read. Please try again.');}
     if(event.data.type==='coupi-call-error'&&typeof event.data.id==='string')finish(event.data.id,null,string(event.data.error,300)||'That request could not be checked.');
   });
+  window.addEventListener('pagehide',()=>cancelPreferences());
+  post({type:'coupi-live-call-ready'});
   document.querySelectorAll('[data-world-return]').forEach(button => button.addEventListener('click', () => window.CoupiCallBridge.exit()));
   // The shared stylesheet may reference Google font binaries. Never request it in offline mode.
   getAvailability().then(status => {

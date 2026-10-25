@@ -101,7 +101,7 @@ function fixture(t, options = {}) {
     onVisionState: value => visionStates.push(value),
     onState: value => states.push(value),
     onTranscript: value => transcripts.push(value),
-    onResolveCall:options.onResolveCall,onUserTurnStart:options.onUserTurnStart,
+    onResolveCall:options.onResolveCall,onUserTurnStart:options.onUserTurnStart,onPreferences:options.onPreferences,
     onRecommendations: (products, message) => recommendations.push({products, message}),
     onWorldRecommendations: (products, message) => worldRecommendations.push({products, message}),
     onWorldProduct: async skuId => {worldActions.push(skuId);return options.onWorldProduct?.(skuId) || {ok:true,skuId,purchased:false};},
@@ -693,4 +693,24 @@ test('a delayed earlier transcript cannot resolve or speak over a newer spoken t
   f.emit({type:'conversation.item.input_audio_transcription.completed',item_id:'new-b',transcript:'actually red socks'});assert.equal(resolutions,1);
   wait.resolve({status:'ok',message:'Red socks.',conversationMode:'request',proposedSkuIds:[],products:[]});await tick();await tick();assert.equal(countReplies(f.channel),2);
   assert.equal(f.transcripts.at(-1).superseded,undefined);
+});
+
+const personalizingContext=()=>({personalization:{active:true,draft_pending:false,preferences:null}});
+const personalDraft=()=>({interests:['cozy_home','focused_work'],vibe:'calm',budget:30000,story:'I like reading and a quiet workspace.'});
+test('personalization tool only opens a review and never invents a shopper caption or save',async t=>{
+  const requests=[];const f=fixture(t,{getContext:personalizingContext,onPreferences:async request=>{requests.push(request);return{ok:true,draft_ready:true,saved:false};}});await connect(f);
+  const before=f.transcripts.length;tool(f,'draft-1','draft_preferences',personalDraft());await tick();tool(f,'draft-1','draft_preferences',personalDraft());await tick();
+  assert.equal(requests.length,1);assert.deepEqual(JSON.parse(JSON.stringify(requests[0])),{action:'draft',preferences:personalDraft()});assert.equal(f.transcripts.length,before);
+  const result=JSON.parse(toolOutputs(f.channel).find(event=>event.item.call_id==='draft-1').item.output);assert.equal(result.saved,false);assert.equal(result.confirmation_required,true);assert.match(result.instruction,/tap Build my worlds/);
+});
+test('personalization tools enforce opt-in, strict draft fields and no hidden skip payload',async t=>{
+  let calls=0;const off=fixture(t,{onPreferences:()=>{calls++;}});await connect(off);tool(off,'off','draft_preferences',personalDraft());await tick();assert.equal(calls,0);
+  const f=fixture(t,{getContext:personalizingContext,onPreferences:()=>{calls++;return{ok:true,draft_ready:true,saved:false};}});await connect(f);
+  const invalid=[{...personalDraft(),photo:'private'},{...personalDraft(),interests:['health']},{...personalDraft(),budget:1.5},{...personalDraft(),budget:'30000'},{...personalDraft(),story:'x'.repeat(1201)},{interests:[],vibe:'mixed',budget:null,story:''}];
+  for(const [index,args] of invalid.entries()){tool(f,'invalid-'+index,'draft_preferences',args);await tick();assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);}
+  tool(f,'skip-payload','skip_personalization',{story:'save anyway'});await tick();assert.equal(calls,0);
+});
+test('a personalization draft cannot report success after skip or call end',async t=>{
+  let active=true;const pending=deferred();const f=fixture(t,{getContext:()=>({personalization:{active}}),onPreferences:()=>pending.promise});await connect(f);tool(f,'late-draft','draft_preferences',personalDraft());await tick();active=false;pending.resolve({ok:true,draft_ready:true,saved:false});await tick();assert.equal(JSON.parse(toolOutputs(f.channel).at(-1).item.output).ok,false);
+  const wait=deferred();const ended=fixture(t,{getContext:personalizingContext,onPreferences:()=>wait.promise});await connect(ended);const channel=ended.channel;tool(ended,'ended-draft','draft_preferences',personalDraft());await tick();ended.voice.end();wait.resolve({ok:true,draft_ready:true,saved:false});await tick();assert.equal(toolOutputs(channel).length,0);
 });

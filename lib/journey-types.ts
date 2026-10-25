@@ -1,4 +1,5 @@
 import type {CallMeta, MemoryLine, Profile, SceneResult, ScanResult, Verdict} from './types';
+import type {PersonalizationDraft} from './personalization';
 
 export interface DistrictJournalEntry {
   id: string;
@@ -26,11 +27,15 @@ export interface JourneyState {
   interviewCount: number;
   interviewComplete: boolean;
   interviewPaused?: boolean;
+  personalizationDraft?:PersonalizationDraft;
+  personalizationMemoryIds?:string[];
+  personalizationReceipts?:{requestId:string;requestHash:string}[];
   nextQuestion: string;
   districts: District[];
   processedCallIds: string[];
   callReceipts?: {requestId:string;requestHash:string;status:'ok'|'blocked';conversationMode:CallConversationMode;proposedSkuIds:string[]}[];
   processedWorldIds?: string[];
+  worldReceipts?: {requestId:string;requestHash:string}[];
   processedJournalIds?: string[];
   archivedJournals?: ArchivedJournal[];
   lastReply?: string;
@@ -46,6 +51,7 @@ export interface CallResponse {
   conversationMode: CallConversationMode;
   /** Enough surviving, safe context to finish the optional interview and build a world. */
   worldReady: boolean;
+  personalization?:{draftId:string;reviewReady:boolean};
   memories: MemoryLine[];
   proposedSkuIds: string[];
   profile: Profile;

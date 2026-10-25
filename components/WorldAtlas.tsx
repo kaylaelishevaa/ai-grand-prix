@@ -7,8 +7,9 @@ import {getSceneMood} from '@/lib/scene-moods';
 import {resolveSceneContext} from '@/lib/world-context';
 import {validatedBlueprintForScene} from '@/lib/blueprint-projection';
 import {GeneratedBlueprintSVG} from './SceneFallback';
+import WorldVignette from './WorldVignette';
 import {atlasLayout} from './diorama/atlas-layout';
-import type {AtlasController,AtlasPlace} from './diorama/atlas-engine';
+import type {AtlasController,AtlasPlace,AtlasProjection} from './diorama/atlas-engine';
 import './world-atlas.css';
 
 export type WorldPlace=AtlasPlace&{subtitle:string;moments?:number};
@@ -35,8 +36,10 @@ function IllustratedAtlas({places,compact}:{places:WorldPlace[];compact:boolean}
 export default function WorldAtlas({places,compact,onEnter}:{places:WorldPlace[];compact:boolean;onEnter:(id:string)=>void}) {
   const host=useRef<HTMLDivElement>(null),canvas=useRef<HTMLCanvasElement>(null),engine=useRef<AtlasController|null>(null);
   const labels=useRef(new Map<string,HTMLButtonElement>());
+  const projectedPlaces=useRef<AtlasProjection[]>([]),hovered=useRef<string|null>(null);
   const [mode,setMode]=useState<'loading'|'ready'|'fallback'>('loading');
   const [highlighted,setHighlighted]=useState<string|null>(null);
+  const focusPlace=(id:string|null)=>{if(hovered.current===id)return;hovered.current=id;if(id)setHighlighted(id);engine.current?.focusPlace(id);};
   const selected=places.find(place=>place.id===highlighted)||places[0],selectedIndex=places.indexOf(selected);
   const selectedMood=selected?getSceneMood(resolveSceneKind(selected.scene),resolveSceneContext(selected.scene)):null;
   const selectedBlueprint=selected?validatedBlueprintForScene(selected.scene):null;
@@ -50,7 +53,7 @@ export default function WorldAtlas({places,compact,onEnter}:{places:WorldPlace[]
     import('./diorama/atlas-engine').then(({createWorldAtlas})=>{
       if(cancelled||!canvas.current||!host.current)return;
       const instance=createWorldAtlas(canvas.current,places,{compact,reducedMotion:window.matchMedia('(prefers-reduced-motion: reduce)').matches,onReady:()=>{if(!cancelled)setMode('ready');},onFailure:()=>{if(!cancelled)setMode('fallback');},onProjection:points=>{
-        for(const point of points){const label=labels.current.get(point.id);if(!label)continue;label.style.transform=`translate3d(${point.x}px,${point.y}px,0) translate(-50%,0)`;label.style.opacity=point.visible?'1':'0';label.style.visibility=point.visible?'visible':'hidden';}
+        projectedPlaces.current=points;for(const point of points){const label=labels.current.get(point.id);if(!label)continue;label.style.transform=`translate3d(${point.x}px,${point.y}px,0) translate(-50%,0)`;label.style.opacity=point.visible?'1':'0';label.style.visibility=point.visible?'visible':'hidden';}
       }});
       engine.current=instance;
       if(!instance){setMode('fallback');return;}
@@ -61,20 +64,20 @@ export default function WorldAtlas({places,compact,onEnter}:{places:WorldPlace[]
   },[renderKey]);
   return <div className="world-atlas atlas-overview" data-state={mode} data-compact={compact} data-count={places.length} role="group" aria-label="Your world, a landscape of connected places">
     <div ref={host} className="atlas-stage"
-      onPointerMove={event=>{if(event.pointerType==='touch')return;const bounds=event.currentTarget.getBoundingClientRect();engine.current?.setPointer((event.clientX-bounds.left)/bounds.width*2-1,(event.clientY-bounds.top)/bounds.height*2-1);}}
-      onPointerLeave={()=>engine.current?.setPointer(0,0)}>
+      onPointerMove={event=>{if(event.pointerType==='touch')return;const bounds=event.currentTarget.getBoundingClientRect(),x=event.clientX-bounds.left,y=event.clientY-bounds.top;engine.current?.setPointer(x/bounds.width*2-1,y/bounds.height*2-1);const nearby=projectedPlaces.current.filter(point=>point.visible).map(point=>({id:point.id,distance:Math.hypot(x-(point.x-(compact?15:30)),y-(point.y-(compact?34:65)))})).sort((a,b)=>a.distance-b.distance)[0];focusPlace(nearby&&nearby.distance<(compact?65:130)?nearby.id:null);}}
+      onPointerLeave={()=>{engine.current?.setPointer(0,0);focusPlace(null);}}>
       <div className="atlas-light light-morning"/><div className="atlas-light light-twilight"/><div className="atlas-light light-rain"/>
       <canvas key={renderKey} ref={canvas} className="world-atlas-canvas" aria-hidden="true"/>
       {mode!=='ready'&&<IllustratedAtlas places={places} compact={compact}/>}
       <span className="atlas-coordinate" aria-hidden="true">A FEW PLACES / ONE LITTLE LIFE</span>
       <div className="atlas-beacons">{places.map((place,index)=>{const mood=getSceneMood(resolveSceneKind(place.scene),resolveSceneContext(place.scene)),point=positions[index],blueprint=validatedBlueprintForScene(place.scene);return <button key={place.id} ref={element=>{if(element)labels.current.set(place.id,element);else labels.current.delete(place.id);}} className="atlas-beacon"
         style={{'--place-accent':blueprint?.palette.accent||mood.accent,...(mode!=='ready'?{left:`${point.fallbackX}%`,top:`${point.fallbackY}%`,transform:'translate(-50%,0)',opacity:1,visibility:'visible'}:{left:0,top:0})} as CSSProperties & {'--place-accent':string}}
-        aria-label={`Enter ${place.name}`} data-highlighted={selected?.id===place.id} onPointerEnter={()=>setHighlighted(place.id)} onFocus={()=>setHighlighted(place.id)} onClick={()=>onEnter(place.id)}><span>{String(index+1).padStart(2,'0')}</span></button>;})}</div>
+        aria-label={`Enter ${place.name}`} data-highlighted={selected?.id===place.id} onPointerDown={event=>event.currentTarget.setPointerCapture(event.pointerId)} onPointerEnter={()=>focusPlace(place.id)} onFocus={()=>focusPlace(place.id)} onBlur={()=>focusPlace(null)} onClick={()=>onEnter(place.id)}><span>{String(index+1).padStart(2,'0')}</span></button>;})}</div>
       <p className="atlas-invitation"><span/><span>follow a feeling. choose a place.</span><Glyph name="arrow-up"/></p>
     </div>
     {selected&&selectedMood&&<div className="atlas-wayfinding"><button className="atlas-waypoint" style={{'--place-accent':selectedBlueprint?.palette.accent||selectedMood.accent} as CSSProperties} aria-label={`Wander into ${selected.name}`} onClick={()=>onEnter(selected.id)}>
       <span className="waypoint-number">{String(selectedIndex+1).padStart(2,'0')}</span><span className="waypoint-copy"><span className="destination-weather">{selectedBlueprint?.atmosphere.timeLabel||selectedMood.time}</span><span className="destination-name">{selected.name}<Glyph name="arrow-up"/></span><span className="destination-story">{selected.subtitle}</span></span>
     </button><span className="atlas-place-count">{places.length} {places.length===1?'PLACE':'PLACES'}<br/>ONE LITTLE WORLD</span></div>}
-    <nav className="atlas-place-index" aria-label="Districts in the whole world">{places.map((place,index)=><button key={place.id} type="button" onPointerEnter={()=>setHighlighted(place.id)} onFocus={()=>setHighlighted(place.id)} onClick={()=>onEnter(place.id)}><span>{String(index+1).padStart(2,'0')}</span>{place.name}</button>)}</nav>
+    <nav className="atlas-place-index" aria-label="Districts in the whole world" onPointerLeave={()=>focusPlace(null)}>{places.map((place,index)=><button key={place.id} type="button" aria-label={`Explore ${place.name}`} data-selected={selected?.id===place.id} onPointerEnter={()=>focusPlace(place.id)} onFocus={()=>focusPlace(place.id)} onBlur={()=>focusPlace(null)} onClick={()=>onEnter(place.id)}><WorldVignette scene={place.scene}/><span className="atlas-index-copy"><small>{String(index+1).padStart(2,'0')} / {resolveSceneContext(place.scene).type}</small><strong>{place.name}</strong></span><Glyph name="arrow-up"/></button>)}</nav>
   </div>;
 }

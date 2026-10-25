@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-  <meta name="theme-color" content="#FFF8F0">
+  <meta name="theme-color" content="#edf8fa">
   <meta name="description" content="A little call. A new way to shop. Try things on and find your next favourite with Coopy.">
   <title>Coopy — a little closer</title>
   <link rel="icon" type="image/png" href="/live-call/assets/coupi.png">
   <link rel="stylesheet" href="./mobile-call.css">
   <link rel="stylesheet" href="./warm-call.css">
+  <link rel="stylesheet" href="./main-call.css">
 </head>
 <body class="coupi-call-page">
   <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -33,16 +34,16 @@
       <div class="incoming-person">
         <div class="nori-orbit" aria-hidden="true"><div class="nori-orb"><span class="coopy-blob" aria-hidden="true"><span class="coopy-eyes"><i></i><i></i></span><span class="coopy-smile"></span></span></div><span class="orbit-dot"></span></div>
         <p class="incoming-kicker">A CALL WITH COOPY</p>
-        <h1>let’s look<br><em>together.</em></h1>
-        <p class="incoming-subtitle">Your companion, right here</p>
+        <h1 id="incoming-title">let’s look<br><em>together.</em></h1>
+        <p id="incoming-subtitle" class="incoming-subtitle">Your companion, right here</p>
         <div class="incoming-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       </div>
       <div class="incoming-bottom">
-        <p class="incoming-promise">show me your world.<br>we’ll find what fits.</p>
+        <p id="incoming-promise" class="incoming-promise">show me your world.<br>we’ll find what fits.</p>
         <p id="incoming-status" class="incoming-status" role="status" hidden></p>
-        <button id="answer-call" class="answer-call"><span class="answer-icon"><svg><use href="#i-video"/></svg></span><span>Call Coopy</span><svg class="answer-arrow"><use href="#i-arrow"/></svg></button>
+        <button id="answer-call" class="answer-call"><span class="answer-icon"><svg><use href="#i-video"/></svg></span><span id="answer-call-label">Call Coopy</span><svg class="answer-arrow"><use href="#i-arrow"/></svg></button>
         <button id="decline-call" class="decline-call">Explore the 18 reference picks</button>
-        <label class="vision-consent"><input id="vision-consent" type="checkbox"> Share camera snapshots with Coopy</label><p class="privacy-note">Starting a call shares microphone audio with OpenAI. Camera snapshots are shared only if you opt in. Try-on tracking stays in your browser.</p>
+        <label class="vision-consent"><input id="vision-consent" type="checkbox"> Share camera snapshots with Coopy</label><p id="incoming-privacy" class="privacy-note">Starting a call shares microphone audio with OpenAI. Camera snapshots are shared only if you opt in. Try-on tracking stays in your browser.</p>
       </div>
     </section>
 
@@ -59,7 +60,7 @@
       <div id="vision-strip" class="vision-strip" hidden><button id="vision-toggle" class="vision-toggle" aria-pressed="true" aria-label="Pause camera sharing with Coopy"><svg><use href="#i-eye"/></svg><span id="vision-status">Camera sharing ready</span><span id="vision-action">Pause</span></button></div>
       <div class="call-feedback"><p id="call-notice" role="status" hidden></p><button id="retry-call" class="inline-retry" hidden>Reconnect</button><button id="play-audio" class="inline-retry" hidden><svg><use href="#i-speaker"/></svg> Enable sound</button></div>
 
-      <aside class="call-side-panel" aria-label="Your conversation and finds"><section id="product-zone" class="product-zone" aria-label="Product preview" hidden>
+      <aside class="call-side-panel" aria-label="Your conversation and finds"><section id="personalization-strip" class="personalization-strip" aria-label="Your optional introduction" hidden><p id="personalization-progress" class="personalization-progress"></p><h2 id="personalization-question"></h2><button id="personalization-skip" type="button">Skip to shopping →</button></section><section id="personalization-memory" class="personalization-memory" aria-label="Your draft memories" hidden><p class="personalization-progress">A LITTLE I’M HEARING · DRAFT</p><div id="personalization-memory-list"></div></section><section id="product-zone" class="product-zone" aria-label="Product preview" hidden>
         <div class="deck-label"><span id="product-category">Picked for you</span><span id="product-position">1 / 3</span></div>
         <article id="product-card" class="product-card">
           <div id="swipe-feedback" class="swipe-feedback" aria-hidden="true"></div>
@@ -75,7 +76,7 @@
 
       <div class="conversation-area">
         <div id="tryon-chip" class="tryon-chip" hidden><svg><use href="#i-spark"/></svg><span id="tryon-label">Trying it on</span><button id="clear-tryon" aria-label="Remove try-on overlay"><svg><use href="#i-close"/></svg></button></div>
-        <div id="transcript" class="transcript" role="log" aria-live="polite" aria-relevant="additions text"></div>
+        <div id="transcript" class="transcript" role="log" aria-label="Latest call caption" aria-live="polite" aria-relevant="text"><span id="caption-speaker" class="caption-speaker"></span><div id="caption-text" class="caption-text" tabindex="0" aria-label="Current caption, scroll to read"></div></div>
         <form id="text-form" class="text-form" hidden><input id="text-input" type="text" maxlength="1000" autocomplete="off" placeholder="Tell Coopy…" aria-label="Message Coopy"><button type="submit" aria-label="Send message"><svg><use href="#i-arrow"/></svg></button></form>
       </div>
       </aside><footer class="call-footer">

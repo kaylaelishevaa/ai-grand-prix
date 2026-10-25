@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import homeReferenceData from '../data/home-reference-catalog.json';
 import {applyHomeDemoAction,buildDemoHome,buildLiveHome,createHomeDemo,HOME_SCENARIOS,homeReferences,referenceById} from '../lib/home-feed';
 import {createProfile} from '../lib/profile';
 import {getSku} from '../lib/catalog';
@@ -84,8 +87,8 @@ test('prepared story priorities suppress nudges on a delivery issue and cap the 
 
 test('prepared swaps use sourced reference price differences and only mutate isolated story data',()=>{
   const input=createHomeDemo('problem'),before=structuredClone(input),next=applyHomeDemoAction(input,{kind:'swap',orderId:'1044'});
-  assert.deepEqual(input,before);assert.equal(next.orders.find(order=>order.id==='1044')!.itemId,'7950092256');assert.equal(next.orders.find(order=>order.id==='1044')!.status,'packed');
-  assert.equal(referenceById('7950092256')!.price!-referenceById('20145368')!.price!,7530);
+  assert.deepEqual(input,before);assert.equal(next.orders.find(order=>order.id==='1044')!.itemId,'7330605115');assert.equal(next.orders.find(order=>order.id==='1044')!.status,'packed');
+  assert.equal(referenceById('7330605115')!.price!-referenceById('7395651009')!.price!,37930);
   assert(!buildDemoHome(next).cards.some(card=>card.kind==='problem'));
   assert(!('profile'in next));assert(!('owned'in next));
 });
@@ -109,7 +112,22 @@ test('briefs only mention arrivals that remain in their displayed card evidence'
 
 test('all prepared states keep briefs brief, use real local reference images and valid external sources',()=>{
   for(const state of HOME_SCENARIOS){const feed=buildDemoHome(createHomeDemo(state.id));assert(feed.brief.split(/\s+/).length<=25);assert(feed.cards.length<=3);
-    for(const card of feed.cards){assert(card.reference);assert.match(card.reference.image,/^\/live-call\/products\//);assert.match(card.reference.url,/^https:\/\/www\.coupang\.com\/vp\/products\//);assert(!card.reference.url.includes('/live-call/'));}
+    for(const card of feed.cards){assert(card.reference);assert.match(card.reference.image,/^\/(?:live-call|home-reference)\/products\//);assert.match(card.reference.url,/^https:\/\/www\.coupang\.com\/vp\/products\//);assert(!card.reference.url.includes('/live-call/'));}
   }
   for(const scenario of ['normal','night','quiet'] as const){const profile=createProfile(scenario,now);profile.pretend2am=scenario==='night';assert(buildLiveHome(profile,now).brief.split(/\s+/).length<=25);}
+});
+
+
+test('newest Main chair references remain Home-only with intact sourced photos and unknown reviews',()=>{
+  assert.deepEqual(homeReferenceData.map(product=>product.id),['7395651009','7330605115']);
+  for(const product of homeReferenceData){
+    assert.equal(getSku(product.id),undefined,'A prepared Home reference must not silently become an AI shopping fact');
+    assert.equal(homeReferences.filter(reference=>reference.id===product.id).length,1);
+    assert.equal(product.priceStatus,'reference');
+    assert.equal(product.reviewEvidence.status,'unavailable');
+    assert.deepEqual(product.reviewEvidence.reviews,[]);
+    assert.match(product.sourceNote,/historical reference price/);
+    assert.equal(createHash('sha256').update(readFileSync('public'+product.image)).digest('hex'),product.imageSha256);
+    assert.equal(product.url,`https://www.coupang.com/vp/products/${product.id}`);
+  }
 });

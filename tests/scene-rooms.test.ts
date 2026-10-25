@@ -170,7 +170,7 @@ test('each landscape has its own color, light, weather and recognizable environm
 });
 
 
-test('one furniture vocabulary can become an indoor room, a rooftop occasion, or a riverside picnic',()=>{
+test('context chooses meaningful indoor, rooftop dining, picnic and cafe architecture',()=>{
   const {scene,kit,dispose}=fixture();
   const contexts:SceneContext[]=[{type:'space',setting:'home',label:'home'},{type:'event',setting:'rooftop',label:'dinner'},{type:'outdoor',setting:'riverside',label:'picnic'},{type:'place',setting:'cafe',label:'cafe'}];
   const expected=['curved-home-interior','rooftop-balustrade','riverside-water','striped-cafe-awning'];
@@ -179,10 +179,33 @@ test('one furniture vocabulary can become an indoor room, a rooftop occasion, or
       scene.clear();buildRoomArchitecture(i===3?'reading':'kitchen',kit,context);
       assert(scene.getObjectByName('room:'+expected[i]));
       assert.equal(scene.getObjectByName('room:garden-pergola'),undefined);
-      if(i<3)assert(scene.getObjectByName('room:counter'));
+      if(i===0)assert(scene.getObjectByName('room:counter'));
+      if(i===1||i===2){assert.equal(scene.getObjectByName('room:counter'),undefined);assert.equal(scene.getObjectByName('room:hook'),undefined);assert(scene.getObjectByName(i===1?'room:two-person-dinner-table':'room:low-picnic-table'));}
       assert.notEqual(getSceneMood('kitchen',context).subtitle,SCENE_MOODS.kitchen.subtitle);
     });
     assert.notDeepEqual(getSceneMood('kitchen',contexts[0]).palette,getSceneMood('kitchen',contexts[1]).palette);
     assert.notDeepEqual(getSceneMood('kitchen',contexts[1]).palette,getSceneMood('kitchen',contexts[2]).palette);
+  }finally{dispose();}
+});
+
+
+test('picnic and rooftop catalog placements sit on their actual tables or blanket',()=>{
+  const {scene,kit,dispose}=fixture();
+  const items=['mugs','tray','cushion','speaker','glass','bowl'].map(type=>({type,name:type}));
+  try{for(const setting of ['riverside','rooftop'] as const){
+    const context:SceneContext={type:setting==='riverside'?'outdoor':'event',setting,label:setting};
+    scene.clear();buildRoomArchitecture('kitchen',kit,context);scene.updateMatrixWorld(true);
+    const slots=assignRoomSlots(items,'kitchen',context);
+    assert.equal(new Set(slots.map(slot=>`${slot.x}:${slot.z}`)).size,6);
+    if(setting==='riverside')assert.equal(slots[2].surface,.265,'cushion belongs on the blanket');
+    for(const slot of slots){const hit=new THREE.Raycaster(new THREE.Vector3(slot.x,slot.surface!+.025,slot.z),new THREE.Vector3(0,-1,0),0,.05).intersectObject(scene,true)[0];assert(hit,`${setting}/${slot.key} needs a physical supporting surface`);assert(Math.abs(hit.point.y-slot.surface!)<.01);}
+  }}finally{dispose();}
+});
+
+test('architectural details stay pooled and within the per-place draw budget',()=>{
+  const {scene,kit,geometries,dispose}=fixture();
+  const samples:[SceneKind,SceneContext['setting'],string][]=[['kitchen','home','kitchen-tile-splash'],['dressing','home','evening-curtains'],['reading','cafe','cafe-window-mullions'],['desk','studio','desk-keyboard'],['kitchen','riverside','picnic-wicker-basket']];
+  try{for(const [kind,setting,landmark] of samples){scene.clear();buildRoomArchitecture(kind,kit,{type:'space',setting,label:setting});assert(scene.getObjectByName('room:'+landmark));let meshes=0;scene.traverse(object=>{if(object instanceof THREE.Mesh){meshes++;assert(Object.values(geometries).includes(object.geometry));}});assert(meshes<230,`${kind}/${setting} uses ${meshes} meshes`);}
+    const positions=geometries.cloth.getAttribute('position');let min=Infinity,max=-Infinity;for(let i=0;i<positions.count;i++){min=Math.min(min,positions.getZ(i));max=Math.max(max,positions.getZ(i));}assert(max-min>.06,'curtains have actual depth and folds');
   }finally{dispose();}
 });
