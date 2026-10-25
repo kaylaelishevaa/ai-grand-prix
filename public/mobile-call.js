@@ -10,7 +10,7 @@
   const typeLabels={lipstick:'Lipstick',lipbalm:'Lip balm',sweater:'Sweaters',chair:'Chairs',lamp:'Desk lamps',tshirt:'T-shirts',hoodie:'Hoodies',glasses:'Glasses'};
   let phase='incoming',generation=0,facingMode='user',mode='none',trying=null,connectedAt=null,cameraBusy=false,ending=false;
   let toastTimer,initialGreeting=true,displayedTotal=0;
-  let entryFormat='video',inputMode='voice',formatBusy=false,composerWanted=false;
+  let entryCameraWanted=true,entryInputMode='voice',inputMode='voice',formatBusy=false,composerWanted=false;
   let visionWanted=true,visionWasActive=false,visionState='paused',visionLastAt=null;
   let previewEpoch=0,previewMeta=null,catalogType='recommended',loadingEpoch=0,loadingProductId=null;
   let recommendationsReceived=false,recommendedProducts=[],searchController=null;
@@ -31,38 +31,46 @@
   function sync(){voice?.updateContext(context());}
   function cameraUI(){updateCatalogTryButtons();formatUI();show('camera-fallback',!camera.running);$('toggle-camera').setAttribute('aria-pressed',String(!camera.running));$('toggle-camera').setAttribute('aria-label',camera.running?'Turn camera off':'Turn camera on');$('toggle-camera').classList.toggle('is-off',!camera.running);$('flip-camera').disabled=cameraBusy||!camera.running;$('flip-camera').setAttribute('aria-label',facingMode==='user'?'Flip to back camera':'Flip to front camera');$('flip-camera').title=facingMode==='user'?'Flip to back camera':'Flip to front camera';updateVisionUI();updateFocusUI();sync();}
   function selectEntry(format){
-    entryFormat=['video','voice','text'].includes(format)?format:'video';
-    for(const [id,value] of [['entry-video','video'],['entry-voice','voice'],['entry-chat','text']])$(id).setAttribute('aria-pressed',String(entryFormat===value));
-    text('answer-call-label',entryFormat==='video'?'Start video call':entryFormat==='voice'?'Start voice call':'Start chat');
-    $('answer-call-icon').setAttribute('href',entryFormat==='video'?'#i-video':entryFormat==='voice'?'#i-mic':'#i-chat');
-    show('entry-vision-consent',entryFormat==='video');
-    text('entry-privacy',entryFormat==='video'?'Mic + camera snapshots go to OpenAI during the call.':entryFormat==='voice'?'Your microphone is shared during the call. Camera stays off.':'Messages and images are shared with Coupi. No camera or microphone needed.');
+    if(format){entryCameraWanted=format==='video';entryInputMode=format==='text'?'text':'voice';}
+    $('entry-camera').setAttribute('aria-pressed',String(entryCameraWanted));
+    $('entry-camera').setAttribute('aria-label',entryCameraWanted?'Turn camera off before starting':'Turn camera on before starting');
+    $('entry-mic').setAttribute('aria-pressed',String(entryInputMode==='voice'));
+    $('entry-mic').setAttribute('aria-label',entryInputMode==='voice'?'Turn microphone off before starting':'Turn microphone on before starting');
+    text('answer-call-label','Start call');
+    $('answer-call-icon').setAttribute('href',entryCameraWanted?'#i-video':entryInputMode==='voice'?'#i-mic':'#i-chat');
+    show('entry-vision-consent',entryCameraWanted);
+    const sharesCamera=entryCameraWanted&&$('vision-consent').checked;
+    text('entry-privacy',sharesCamera?(entryInputMode==='voice'?'Mic + camera snapshots go to OpenAI during the call.':'Camera snapshots and messages go to OpenAI. Your microphone stays off.'):entryCameraWanted?(entryInputMode==='voice'?'Your microphone is shared. Camera preview stays on this device.':'Messages and uploads go to Coupi. Camera preview stays on this device.'):entryInputMode==='voice'?'Your microphone is shared during the call. Camera stays off.':'Messages and images are shared with Coupi. No camera or microphone needed.');
   }
   function formatUI(){
     const format=camera.running?'video':inputMode==='text'?'text':'voice';
     $('phone-app').dataset.camera=camera.running?'on':'off';$('phone-app').dataset.format=format;
-    for(const [id,value] of [['format-video','video'],['format-voice','voice'],['format-chat','text']]){$(id).setAttribute('aria-pressed',String(format===value));$(id).disabled=formatBusy||phase!=='active'||!voice?.call?.ready;}
     show('conversation-history',true);
-    show('text-form',!camera.running||inputMode==='text'||composerWanted);$('text-toggle').setAttribute('aria-expanded',String(!$('text-form').hidden));
-    if(!camera.running){$('conversation-box').dataset.collapsed='false';$('chat-minimize').setAttribute('aria-expanded','true');$('text-toggle').setAttribute('aria-expanded','true');}
-    $('mute-call').disabled=!voice?.call?.ready||inputMode==='text';
+    show('text-form',!camera.running||inputMode==='text'||composerWanted);
+    $('text-toggle').setAttribute('aria-expanded',String(!$('text-form').hidden));
+    $('text-toggle').setAttribute('aria-pressed',String(inputMode==='text'));
+    $('text-toggle').setAttribute('aria-label','Chat with Coupi');
+    $('text-toggle').disabled=formatBusy||!voice?.call?.ready;
+    if(!camera.running){$('conversation-box').dataset.collapsed='false';$('chat-minimize').setAttribute('aria-expanded','true');}
+    const micOff=inputMode==='text'||!!voice?.call?.muted;
+    $('mute-call').disabled=formatBusy||!voice?.call?.ready;
+    $('mute-call').setAttribute('aria-pressed',String(micOff));
+    $('mute-call').setAttribute('aria-label',micOff?'Turn microphone on':'Mute microphone');
+    $('mute-call').title=micOff?'Microphone off':'Microphone on';
+    $('mute-call').classList.toggle('is-off',micOff);
   }
-  async function switchFormat(format){
-    if(phase!=='active'||formatBusy||cameraBusy)return false;
+  async function switchInput(nextInput){
+    if(phase!=='active'||formatBusy)return false;
     const token=generation;formatBusy=true;formatUI();notice('');
     try{
-      // Stop video immediately for a camera-free format; never restart it after a cancelled switch.
-      if(format!=='video'){camera.stop(false);await setMode('none');cameraUI();}
-      if(token!==generation||phase!=='active')return false;
-      const nextInput=format==='text'?'text':'voice';
       const changed=await voice.setInputMode(nextInput);
       if(token!==generation||phase!=='active')return false;
-      if(!changed){notice('Microphone access was not enabled. You can keep typing or try Voice again.');return false;}
-      inputMode=nextInput;selectEntry(format);
-      if(format==='video')await startCamera();
-      return token===generation;
-    }catch(error){if(token===generation)notice(error.message||'Could not change format. You can keep using chat.');return false;}
-    finally{if(token===generation){formatBusy=false;cameraUI();}}
+      if(!changed){notice('Microphone access was not enabled. You can keep typing or tap the microphone to try again.');return false;}
+      inputMode=nextInput;entryInputMode=nextInput;
+      if(nextInput==='text'){composerWanted=true;$('conversation-box').dataset.collapsed='false';$('chat-minimize').setAttribute('aria-expanded','true');$('text-input').focus();}
+      return true;
+    }catch(error){if(token===generation)notice(error.message||'Could not change audio. You can keep typing.');return false;}
+    finally{if(token===generation){formatBusy=false;cameraUI();selectEntry();}}
   }
   const camera=new window.NookCamera({video:$('live-video'),canvas:$('live-canvas'),onStatus:(message,kind)=>{
     if(kind==='error'){notice(message,true);text('camera-fallback-text','Your camera is off');}
@@ -86,16 +94,7 @@
     const enabled=visionEnabled();
     if(visionWasActive&&!enabled){visionWasActive=false;visionLastAt=null;visionState='paused';snapshots.clear();voice?.clearCameraSnapshots?.();}
     else visionWasActive=enabled;
-    show('vision-strip',camera.running&&['connecting','active'].includes(phase));
-    $('vision-toggle').setAttribute('aria-pressed',String(visionWanted));
-    $('vision-toggle').setAttribute('aria-label',visionWanted?'Pause camera sharing with Coupi':'Resume camera sharing with Coupi');
-    const age=visionLastAt?Date.now()-Date.parse(visionLastAt):Infinity;
-    const displayState=!enabled?'paused':visionState==='error'?'error':age<12000?'received':visionLastAt?'refreshing':'sent';
-    $('vision-toggle').dataset.state=displayState;
-    const label=!visionWanted?'':!camera.running?'Camera off · Coupi can’t see':!enabled?'Camera sharing waiting':displayState==='error'?'Camera sharing delayed':displayState==='received'?'Coupi sees snapshots':displayState==='refreshing'?'Refreshing Coupi’s view…':'Sharing camera…';
-    show('vision-status',visionWanted);
-    if($('vision-status').textContent!==label)text('vision-status',label);
-    text('vision-action',visionWanted?'Pause':'Resume');
+
   }
   function shareSnapshot(reason='interval'){if(!visionEnabled())return false;const frame=snapshots.capture(reason);return frame?voice.sendCameraSnapshot(frame):false;}
 
@@ -141,8 +140,8 @@
   });
   window.NookMobile={camera,voice,store,discovery,checkout,personalization};
   async function startCamera({strictFacing=false}={}){if(cameraBusy)return false;cameraBusy=true;cameraUI();const token=generation;try{const ok=await camera.start({facingMode,portrait:true,strictFacing});if(token!==generation)return false;if(ok){facingMode=camera.actualFacingMode||facingMode;camera.setOptions({mirror:facingMode==='user'});}else if(!strictFacing)notice(camera.lastCameraError?.message||'Allow Camera in browser settings, then tap Retry.',true);return ok;}finally{if(token===generation){cameraBusy=false;cameraUI();}}}
-  async function answer(format=entryFormat){if(phase==='connecting'||voice.call)return;selectEntry(format);inputMode=format==='text'?'text':'voice';const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;lastPurchase=null;purchasePairings=[];screen('connecting');notice('');text('camera-fallback-text',format==='video'&&visionWanted?'Opening your camera…':'Camera off. Tap Camera to turn it on.');$('answer-call').disabled=true;store.clearMessages();conversation.reset();initialGreeting=true;voice.options.greeting=personalization.greeting;transcript({role:'assistant',key:'opening',text:personalization.greeting});initialGreeting=true;if(personalization.world&&!store.current)recommend(personalization.world.products,'',{mixed:true,sourceOnly:true,groupLabel:personalization.world.title,maxPrice:personalization.profile?.budget});
-    try{if(format==='video'&&visionWanted)await startCamera();else{camera.stop(false);cameraBusy=false;cameraUI();}if(token!==generation||phase!=='connecting')return;voice.options.greeting=personalization.greeting;await voice.start({inputMode});}catch{notice(format==='text'?'Could not connect. Check your connection and try again.':'Could not start the call. Check your microphone permission and connection.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
+  async function answer(format){if(phase==='connecting'||voice.call)return;if(format)selectEntry(format);inputMode=entryInputMode;const wantsCamera=entryCameraWanted;const token=++generation;visionWanted=$('vision-consent').checked;visionState='paused';visionLastAt=null;lastPurchase=null;purchasePairings=[];screen('connecting');notice('');text('camera-fallback-text',wantsCamera?'Opening your camera…':'Camera off. Tap Camera to turn it on.');$('answer-call').disabled=true;store.clearMessages();conversation.reset();initialGreeting=true;voice.options.greeting=personalization.greeting;transcript({role:'assistant',key:'opening',text:personalization.greeting});initialGreeting=true;if(personalization.world&&!store.current)recommend(personalization.world.products,'',{mixed:true,sourceOnly:true,groupLabel:personalization.world.title,maxPrice:personalization.profile?.budget});
+    try{if(wantsCamera)await startCamera();else{camera.stop(false);cameraBusy=false;cameraUI();}if(token!==generation||phase!=='connecting')return;voice.options.greeting=personalization.greeting;await voice.start({inputMode});}catch{notice(inputMode==='text'?'Could not connect. Check your connection and try again.':'Could not start the call. Check your microphone permission and connection.',true);}finally{if(token===generation)$('answer-call').disabled=false;}
   }
   function endCall(message='Call ended',markCompleted=true){
     searchController?.abort();searchController=null;$('catalog-search-submit').disabled=false;$('catalog-refresh').disabled=false;
@@ -151,7 +150,7 @@
     ending=true;generation++;previewEpoch++;personalization?.resetDraft();lastPurchase=null;purchasePairings=[];clearAttachment();$('text-input').value='';trying=null;previewMeta=null;mode='none';controlsExpanded=false;cameraBusy=false;formatBusy=false;composerWanted=false;
     snapshots.clear();voice.clearCameraSnapshots?.();voice.end();camera.stop(false);camera.setProduct(null);camera.setMode('none');camera.setOptions({opacity:0});
     loadingEpoch=0;loadingProductId=null;$('product-try').disabled=false;$('answer-call').disabled=false;show('tryon-chip',false);show('live-caption',false);connectedAt=null;
-    screen(message==='Call ended'?'incoming':'ended');cameraUI();selectEntry(entryFormat);personalization?.render();
+    screen(message==='Call ended'?'incoming':'ended');cameraUI();selectEntry();personalization?.render();
     text('end-title','A little closer to your thing.');
     text('end-summary',store.cart.size?`${store.cart.size} ${store.cart.size===1?'pick':'picks'} saved in your bag.`:message==='Call ended'?'Your camera and microphone are off.':message);
     closeDialogs();ending=false;
@@ -213,9 +212,8 @@
     $('catalog-dialog').dataset.view='search';show('catalog-collection-controls',false);
     if(recommendationsReceived)type='recommended';
     catalogType=type==='recommended'||Object.hasOwn(typeLabels,type)?type:'recommended';const root=$('catalog-items');root.replaceChildren();catalogTryButtons=[];
-    for(const key of ['recommended',...Object.keys(typeLabels)])$('type-'+key).setAttribute('aria-pressed',String(key===catalogType));
     const choices=catalogType==='recommended'?catalogChoices():[...store.catalog.values()].filter(p=>p.productType===catalogType).slice(0,10);
-    visibleChoices=choices;show('catalog-tabs',!!choices.length&&!recommendationsReceived);
+    visibleChoices=choices;
     show('catalog-refresh',(!!lastSearch||!!choices.length)&&lastSearchStatus!=='unsupported_category');
     text('catalog-refresh',lastSearchStatus==='listing_sources_unavailable'?'Retry search':'None of these? Show different products');
     const detailsOnly=!!choices.length&&choices.every(p=>!canPreview(p));
@@ -280,7 +278,6 @@
     text('inline-title',label);text('inline-scroll-hint',amount?`${amount} picks · scroll ↓`:'Ask Coupi for ideas');text('inline-peek-label',amount?`${amount} picks · ${label}`:'Your picks will appear here');
     const brands=new Set(discovery.visible.map(p=>p.brand).filter(Boolean));
     text('inline-description',brands.size>1?`${amount} similar picks · ${brands.size} brands · tap one to try.`:'A few ideas in the same direction. Pick one to explore.');
-    for(const key of Object.keys(typeLabels))$('inline-type-'+key).setAttribute('aria-pressed',String(key===discovery.productType));
     for(const p of discovery.visible){
       const row=document.createElement('article');row.className='inline-item';row.dataset.id=String(p.id);row.dataset.selected=String(String(p.id)===discovery.selectedId);
       const select=document.createElement('button');select.className='inline-item-select';select.setAttribute('aria-label','Select '+p.name);select.setAttribute('aria-pressed',row.dataset.selected);
@@ -307,7 +304,6 @@
     if($('catalog-dialog').dataset.view==='search')return openSearchCatalog();
     show('catalog-collection-controls',true);
     const root=$('catalog-items'),position=$('catalog-dialog').scrollTop;root.replaceChildren();
-    for(const key of Object.keys(typeLabels))$('type-'+key).setAttribute('aria-pressed',String(key===discovery.productType));
     text('catalog-group-label',`${discovery.label} · ${discovery.visible.length} of ${Math.min(10,discovery.total)}`);
     for(const p of discovery.visible){
       const row=document.createElement('article');row.className='discovery-item';row.dataset.selected=String(String(p.id)===discovery.selectedId);
@@ -412,37 +408,37 @@
   $('checkout-dialog').addEventListener('close',()=>{if(!$('checkout-dialog').open)checkout.cancel();sync();});
   async function productAction(action,productId){const p=productId?[...store.queue,...discovery.comparison,...purchasePairings,...store.cart.values(),...(store.detailProduct?[store.detailProduct]:[])].find(p=>String(p.id)===String(productId)):store.current;if(!p)throw Error('That product is not in the current picks, comparison, details or bag. Search first.');if(action==='try_on'&&p.preview?.available===false)return previewFailure(p);if(productId&&store.current?.id!==p.id&&discovery.products.some(x=>x.id===p.id))selectProduct(p);if($('checkout-dialog').open&&checkout.snapshot().step==='complete')$('checkout-dialog').close();if(action==='save')addToBag(p);else if(action==='skip')nextStyle();else if(action==='try_on'){if(!discovery.products.some(item=>item.id===p.id))recommend([p],'',{productType:p.productType,category:p.category});selectProduct(p);closeDialogs();backToCamera();if(!(await tryOn(p))?.ok)throw Error('The product preview was cancelled.');}else if(action==='details'||action==='browse')productDetails(p);else throw Error('Unsupported product action.');return {ok:true,action,product:p,cart_count:store.cart.size,purchased:false,preview_is_approximate:true,...(action==='try_on'?{preview_kind:previewMeta?.kind,shade_estimated:previewMeta?.shadeEstimated}:{} )};}
 
-  for(const [id,format] of [['entry-video','video'],['entry-voice','voice'],['entry-chat','text']])$(id).onclick=()=>selectEntry(format);
-  for(const [id,format] of [['format-video','video'],['format-voice','voice'],['format-chat','text']])$(id).onclick=()=>switchFormat(format);
-  $('personalization-skip').onclick=()=>{personalization.skip();if(voice?.call?.ready)voice.sendText('Let’s skip personalization and go straight to shopping.');};
-  $('answer-call').onclick=()=>answer();$('update-preferences').onclick=()=>{personalization.startUpdate();return answer();};$('call-again').onclick=()=>{screen('incoming');selectEntry(entryFormat);personalization.render();};$('end-call').onclick=()=>endCall();
-  $('mute-call').onclick=()=>voice.mute();$('text-toggle').onclick=()=>{composerWanted=$('text-form').hidden;show('text-form',!camera.running||inputMode==='text'||composerWanted);$('text-toggle').setAttribute('aria-expanded',String(!$('text-form').hidden));if(!$('text-form').hidden){$('conversation-box').dataset.collapsed='false';$('chat-minimize').setAttribute('aria-expanded','true');$('text-input').focus();}};$('text-form').onsubmit=sendMessage;
+  $('personalization-skip').onclick=()=>{personalization.skip();sync();voice.skipPersonalization();};
+  $('entry-camera').onclick=()=>{entryCameraWanted=!entryCameraWanted;selectEntry();};
+  $('entry-mic').onclick=()=>{entryInputMode=entryInputMode==='voice'?'text':'voice';selectEntry();};
+  $('entry-chat').onclick=()=>answer('text');
+  $('answer-call').onclick=()=>answer();$('update-preferences').onclick=()=>{personalization.startUpdate();return answer();};$('call-again').onclick=()=>{screen('incoming');selectEntry();personalization.render();};$('end-call').onclick=()=>endCall();
+  $('mute-call').onclick=()=>inputMode==='text'?switchInput('voice'):voice.mute();$('text-toggle').onclick=()=>switchInput('text');$('text-form').onsubmit=sendMessage;
   $('chat-attach').onclick=()=>{choosingImage=true;clearTimeout(pickerTimer);pickerTimer=setTimeout(()=>{choosingImage=false;if(document.hidden&&phase==='active')endCall('Call paused while you were away. Tap to call again.');},60000);$('chat-image-file').click();};$('chat-image-file').addEventListener('cancel',()=>{choosingImage=false;clearTimeout(pickerTimer);});$('chat-image-file').onchange=prepareAttachment;$('attachment-remove').onclick=clearAttachment;
   $('chat-minimize').onclick=()=>{const collapsed=$('conversation-box').dataset.collapsed!=='true';$('conversation-box').dataset.collapsed=String(collapsed);$('chat-minimize').setAttribute('aria-expanded',String(!collapsed));$('chat-minimize').setAttribute('aria-label',collapsed?'Show conversation':'Minimize conversation');text('chat-minimize',collapsed?'⌃':'⌄');if(collapsed){const body=$('caption-text');body.scrollTop=body.scrollHeight;}};
   $('chat-history-open').onclick=()=>{$('chat-history-dialog').showModal();conversation.openHistory();};$('close-chat-history').onclick=()=>$('chat-history-dialog').close();
   $('group-open').onclick=()=>openCatalog();$('save-group').onclick=saveGroup;$('catalog-save-group').onclick=saveGroup;$('catalog-more').onclick=()=>{discovery.viewMore();adoptDiscovery();renderCatalog();};$('catalog-next-style').onclick=nextStyle;
   $('inline-peek').onclick=()=>openCatalog();$('back-camera').onclick=backToCamera;
   $('inline-save').onclick=saveGroup;$('inline-saved').onclick=openCollections;$('inline-more').onclick=()=>{discovery.viewMore();adoptDiscovery();};$('inline-next').onclick=()=>{if(nextStyle())scrollToCollection();};$('inline-compare').onclick=openComparison;
-  $('inline-mute').onclick=()=>voice.mute();$('inline-end').onclick=()=>endCall();for(const key of Object.keys(typeLabels))$('inline-type-'+key).onclick=()=>openCatalog(key);
+  $('inline-mute').onclick=()=>voice.mute();$('inline-end').onclick=()=>endCall();
   $('collections-button').onclick=openCollections;$('close-collections').onclick=()=>$('collections-dialog').close();
   $('compare-open').onclick=openComparison;$('close-compare').onclick=()=>$('compare-dialog').close();$('compare-clear').onclick=()=>{discovery.clearCompare();updateCompare();$('compare-dialog').close();renderCatalog();renderInline();};
   $('compare-ask').onclick=()=>{const ids=discovery.comparison.map(p=>p.id).join(', ');if(!voice.sendText('Compare my selected catalog products (IDs: '+ids+'). Get the verified details for each, explain the meaningful differences in price, variant and sourced review evidence, and ask which factor matters most to me. Missing facts are unverified.'))toast('Start the call to ask Coupi.');else closeDialogs();};
   $('detail-compare').onclick=()=>{if(store.detailProduct)toggleCompare(store.detailProduct);};$('detail-add').onclick=()=>addToBag(store.detailProduct);$('detail-try').onclick=async()=>{const p=store.detailProduct;if(!p)return;if(!discovery.products.some(x=>x.id===p.id))discovery.recommend([p],{productType:p.productType});selectProduct(p);closeDialogs();backToCamera();try{await tryOn(p);}catch(e){notice(e.message);}};
   $('play-audio').onclick=()=>voice.resumeAudio().catch(()=>notice('Tap again to enable speaker audio.'));
-  $('retry-call').onclick=async()=>{text('retry-call','Retry');if(voice.call?.ready){if(entryFormat==='video')await startCamera();else notice('');return;}voice.end();screen('incoming');answer();};
-  $('toggle-camera').onclick=async()=>{if(cameraBusy||formatBusy)return;if(camera.running){camera.stop(false);await setMode('none');cameraUI();}else await startCamera();};
+  $('retry-call').onclick=async()=>{text('retry-call','Retry');if(voice.call?.ready){if(entryCameraWanted)await startCamera();else notice('');return;}voice.end();screen('incoming');answer();};
+  $('toggle-camera').onclick=async()=>{if(cameraBusy||formatBusy)return;if(camera.running){entryCameraWanted=false;camera.stop(false);await setMode('none');cameraUI();}else{entryCameraWanted=true;await startCamera();}selectEntry();};
   $('flip-camera').onclick=async()=>{if(cameraBusy||!camera.running)return;const token=generation,previous=facingMode;facingMode=previous==='user'?'environment':'user';const ok=await startCamera({strictFacing:true});if(token!==generation)return;if(!ok){facingMode=previous;const restored=await startCamera();if(token!==generation)return;notice(restored?'This device has no available camera on the other side. Your original camera is still on.':'The other camera is unavailable. Tap Camera to reconnect.',!restored);}else{notice('');toast(facingMode==='environment'?'Back camera':'Front camera');}};
   $('focus-toggle').onclick=()=>{controlsExpanded=!controlsExpanded;updateFocusUI();};
   $('focus-product').onclick=()=>openCatalog();
-  $('vision-toggle').onclick=()=>{visionWanted=!visionWanted;$('vision-consent').checked=visionWanted;updateVisionUI();updateFocusUI();sync();if(visionWanted)shareSnapshot('resume');toast(visionWanted?'Camera sharing on':'Coupi’s camera view paused');};
-  $('vision-consent').onchange=()=>{visionWanted=$('vision-consent').checked;updateVisionUI();updateFocusUI();};
+  $('vision-consent').onchange=()=>{visionWanted=$('vision-consent').checked;selectEntry();updateVisionUI();updateFocusUI();};
   $('clear-tryon').onclick=()=>setMode('none');$('product-try').onclick=()=>tryOn().catch(e=>notice(e.message));$('product-details').onclick=()=>productDetails();$('product-skip').onclick=()=>{if(phase==='active')nextStyle();};$('product-save').onclick=()=>{if(phase==='active')addToBag(store.current);};$('cart-button').onclick=openBag;$('close-cart').onclick=()=>$('cart-dialog').close();$('close-details').onclick=()=>$('details-dialog').close();
-  $('catalog-button').onclick=()=>openCatalog();$('close-catalog').onclick=()=>$('catalog-dialog').close();for(const key of Object.keys(typeLabels))$('type-'+key).onclick=()=>openSearchCatalog(key);text('catalog-button','Products');$('catalog-search-open').onclick=()=>openSearchCatalog('recommended');$('type-recommended').onclick=()=>openSearchCatalog('recommended');updateCompare();
+  $('catalog-button').onclick=()=>openCatalog();$('close-catalog').onclick=()=>$('catalog-dialog').close();text('catalog-button','Products');$('catalog-search-open').onclick=()=>openSearchCatalog('recommended');updateCompare();
   async function searchProducts(search,excluded=[]){
     searchController?.abort();const controller=new AbortController();searchController=controller;const token=generation;
     lastSearch=search;lastSearchMessage='';lastSearchStatus=null;excludedProductIds=excluded;visibleChoices=[];recommendedProducts=[];recommendationsReceived=true;
     const timeout=setTimeout(()=>controller.abort(),60000);
-    $('catalog-search-submit').disabled=true;$('catalog-refresh').disabled=true;show('catalog-refresh',true);show('catalog-match-note',false);show('catalog-tabs',false);
+    $('catalog-search-submit').disabled=true;$('catalog-refresh').disabled=true;show('catalog-refresh',true);show('catalog-match-note',false);
     text('catalog-summary',excluded.length?'Finding different matching products…':'Searching Coupang for 10 matching choices…');$('catalog-items').replaceChildren();
     try{
       let memories=[];

@@ -1421,3 +1421,93 @@ test('unavailable try-on keeps the real reason and offered alternatives without 
   assert.equal(result.ok,false);assert.match(result.error,/shows a person/);assert.deepEqual(result.alternatives,[alternative]);
   assert.match(result.instruction,/Do not claim the preview/);assert.equal(result.preview,undefined);assert.equal(result.notice,undefined);
 });
+
+const shoppingEvents=channel=>channel.sent.filter(event=>event.item?.id?.startsWith('coupi_skip_'));
+const ackShopping=(f,event)=>f.emit({type:'conversation.item.added',item:event.item});
+
+test('Skip during connection replaces the interview with one hidden shopping event, without acquiring media',async t=>{
+  let active=true;
+  const f=fixture(t,{greeting:'Tell me about your hobbies.',getContext:()=>({personalization:{active},input_mode:'text'})});
+  assert.equal(f.voice.skipPersonalization(),false);
+  const starting=f.voice.start({inputMode:'text'});active=false;
+  assert.equal(f.voice.skipPersonalization(),true);assert.equal(await starting,true);await tick();
+  assert.equal(f.permissions,0);assert.equal(countReplies(f.channel),0);
+  assert.equal(shoppingEvents(f.channel).length,1);
+  assert.equal(f.channel.sent.some(event=>event.item?.content?.[0]?.text?.includes('Begin with this brief greeting')),false);
+  const event=shoppingEvents(f.channel)[0];assert.equal(event.item.role,'system');
+  assert.match(event.item.content[0].text,/"active":false/);assert.match(event.item.content[0].text,/What do you want to buy/);
+  assert.match(event.item.content[0].text,/ONE-TIME transition acknowledgment/);
+  assert.match(event.item.content[0].text,/If a newer shopper request is present, answer that request normally instead/);
+  assert.match(event.item.content[0].text,/do not repeat the shopping opener in recommendations, tool follow-ups or later replies/);
+  ackShopping(f,event);await tick();assert.equal(countReplies(f.channel),1);assert.equal(f.transcripts.length,0);
+  ackShopping(f,event);f.voice.skipPersonalization();await tick();assert.equal(countReplies(f.channel),1);
+});
+
+test('Skip cancels an active interview, clears speech and suppresses late captions before the shopping question',async t=>{
+  let active=true;const f=fixture(t,{getContext:()=>({personalization:{active}})});await connect(f);
+  f.emit({type:'response.created',response:{id:'interview'}});
+  f.emit({type:'response.output_audio_transcript.delta',item_id:'interview-caption',response_id:'interview',delta:'Tell me about '});
+  f.peers[0].emit('track',{streams:[{}]});await tick();const call=f.voice.call,before=countReplies(f.channel);
+  active=false;assert.equal(f.voice.skipPersonalization(),true);
+  assert(f.channel.sent.some(event=>event.type==='response.cancel'&&event.response_id==='interview'));
+  assert(f.channel.sent.some(event=>event.type==='output_audio_buffer.clear'));
+  assert.equal(f.audio.muted,true);assert.equal(f.audio.paused,true);assert.equal(f.mic.track.stops,0);assert.equal(f.voice.call,call);
+  const appEvent=shoppingEvents(f.channel)[0];ackShopping(f,appEvent);await tick();assert.equal(countReplies(f.channel),before);
+  const captions=f.transcripts.length;
+  f.emit({type:'response.output_audio_transcript.done',item_id:'interview-caption',response_id:'interview',transcript:'Tell me about your hobbies.'});
+  assert.equal(f.transcripts.length,captions);assert.equal(await f.voice.resumeAudio(),false);
+  f.emit({type:'response.done',response:{id:'interview',status:'cancelled'}});await tick();assert.equal(countReplies(f.channel),before+1);
+  f.emit({type:'response.created',response:{id:'shopping'}});await tick();assert.equal(f.audio.muted,false);
+  f.emit({type:'response.output_audio_transcript.done',item_id:'shopping-caption',response_id:'shopping',transcript:'What do you want to buy?'});
+  assert.equal(f.transcripts.at(-1).text,'What do you want to buy?');assert(f.transcripts.every(row=>row.role==='assistant'));
+  done(f,'interview');f.voice.skipPersonalization();await tick();assert.equal(countReplies(f.channel),before+1);
+});
+
+test('Skip handles a greeting request whose response ID arrives after the button click',async t=>{
+  const f=fixture(t);await connect(f);const before=countReplies(f.channel);
+  assert.equal(f.voice.call.replyRequested,true);f.voice.skipPersonalization();ackShopping(f,shoppingEvents(f.channel)[0]);await tick();
+  assert.equal(countReplies(f.channel),before);
+  f.emit({type:'response.created',response:{id:'late-greeting'}});
+  assert(f.channel.sent.some(event=>event.type==='response.cancel'&&event.response_id==='late-greeting'));
+  f.emit({type:'response.done',response:{id:'late-greeting',status:'cancelled'}});await tick();
+  assert.equal(countReplies(f.channel),before+1);
+  f.emit({type:'response.created',response:{id:'shopping'}});done(f,'late-greeting');await tick();
+  assert.equal(countReplies(f.channel),before+1);assert(f.voice.call.activeResponses.has('shopping'));
+});
+
+test('Skip proceeds when cancellation reports no active response and ignores duplicate acknowledgments',async t=>{
+  const f=fixture(t);await connect(f);const before=countReplies(f.channel);f.voice.skipPersonalization();
+  const cancel=f.channel.sent.findLast(event=>event.type==='response.cancel'),appEvent=shoppingEvents(f.channel)[0];
+  ackShopping(f,appEvent);f.emit({type:'error',error:{code:'response_cancel_not_active',event_id:cancel.event_id}});await tick();
+  assert.equal(countReplies(f.channel),before+1);ackShopping(f,appEvent);await tick();assert.equal(countReplies(f.channel),before+1);
+});
+
+test('Skip retires a pending preference draft so its late callback cannot restart the interview',async t=>{
+  let active=true;const pending=deferred();
+  const f=fixture(t,{getContext:()=>({personalization:{active}}),onPreferences:()=>pending.promise});await connect(f);
+  f.emit({type:'response.created',response:{id:'interview'}});tool(f,'late-draft','draft_preferences',preferenceDraft(),'interview');await tick();
+  active=false;f.voice.skipPersonalization();ackShopping(f,shoppingEvents(f.channel)[0]);
+  f.emit({type:'response.done',response:{id:'interview',status:'cancelled'}});await tick();const replies=countReplies(f.channel);
+  assert.equal(replies,2);f.emit({type:'response.created',response:{id:'shopping'}});
+  pending.resolve({ok:true,draft_ready:true,saved:false});await tick();done(f,'shopping');await tick();
+  assert.equal(countReplies(f.channel),replies);assert.match(toolOutputs(f.channel).at(-1).item.output,/skipped the interview/);
+});
+
+test('Skip retries a missing application ACK once and ending the call discards pending shopping speech',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');f.voice.skipPersonalization();
+  const first=shoppingEvents(f.channel)[0];f.expireTimer(12000);assert.equal(shoppingEvents(f.channel).length,2);
+  ackShopping(f,first);await tick();assert.equal(countReplies(f.channel),2);
+  const oldChannel=f.channel;f.voice.end();oldChannel.emit('message',{data:JSON.stringify({type:'conversation.item.added',item:shoppingEvents(oldChannel)[1].item})});await tick();
+  assert.equal(countReplies(oldChannel),2);assert.equal(f.voice.skipPersonalization(),false);
+});
+
+test('an unconfirmed Skip never blocks an ordinary shopping message or cancels its later reply',async t=>{
+  const f=fixture(t);await connect(f);done(f,'greeting');f.voice.skipPersonalization();
+  f.expireTimer(12000);f.expireTimer(12000);assert.equal(f.voice.call.shoppingTransition.failed,true);
+  assert.equal(f.voice.sendText('Find a red lipstick'),true);await tick();assert.equal(countReplies(f.channel),2);
+  const cancels=f.channel.sent.filter(event=>event.type==='response.cancel').length;
+  f.emit({type:'response.created',response:{id:'ordinary-shopping'}});
+  assert.equal(f.channel.sent.filter(event=>event.type==='response.cancel').length,cancels);assert.equal(f.audio.muted,false);
+  f.emit({type:'response.output_audio_transcript.done',response_id:'ordinary-shopping',item_id:'ordinary-answer',transcript:'I will find a red lipstick.'});
+  assert.equal(f.transcripts.at(-1).text,'I will find a red lipstick.');
+});

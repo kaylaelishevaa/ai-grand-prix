@@ -63,20 +63,20 @@ To check that the server loaded your configuration, open [the local voice status
 
 ## 4. Try the demo
 
-1. Open **Call**, choose **Video**, **Voice**, or **Chat**, and start the session. Video uses your camera and microphone; Voice uses only the microphone; Chat works with typed messages and image uploads without asking for either permission.
+1. Open **Call** and tap **Start call**. The camera, microphone and message icons let you set up the call beforehand and change how you participate during the same session. Turn the camera off for an audio conversation, or use messages and image uploads without enabling either device.
 2. New shoppers hear a short welcome and can answer a few lifestyle questions in the same call. Tap **Skip to shopping**, say “skip,” or ask directly for something such as “Show me glasses under 30,000 won.”
 3. Scroll recommendations inside the fixed product window at the top of the call. Select **Try on** on a product. The window and secondary controls minimize during try-on; **Products** reopens the window and **Controls** restores controls.
 4. Use **Flip** to switch between front and back cameras when the device has both.
 5. Use **Next collection** for related options, and each product’s **Add to bag** action to add that exact item. The bag is an in-memory demo; nothing is purchased.
 6. Click **End call** when finished.
 
-Video, voice, and text with images share the same shopping session. There is no separate Browse mode or onboarding questionnaire. All AI conversation and image understanding require your own working API key. The automated checks below run without a key.
+Camera, voice, and text with images share one shopping session. Use the round controls at the bottom; there are no separate format tabs or category chips over the camera. Ask Coupi for products, use product search, or move through related collections in the fixed product window. There is no separate Browse mode or onboarding questionnaire. All AI conversation and image understanding require your own working API key. The automated checks below run without a key.
 
 At **/setting** (also **/settings**), save a suggested preference or type a custom memory. Saved preferences guide call recommendations and, if explicitly enabled, experimental live product searches while memory is on; pause or forget them there. Preferences stay in this browser and are sent to the AI only when used for a call or search.
 
 During a call, tap **Message** to open the full conversation history and a textbox that stays open after sending. Text mode mutes the microphone and Coupi’s spoken replies. Tap it again to return to live captions and restore the previous microphone and speaker settings. History stays in memory for the current call and clears when a new call starts.
 
-Camera snapshots are shared with OpenAI during an active call when **Let Coupi see my camera** is enabled. The eye/Pause control stops that sharing while local try-on continues. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
+Camera snapshots are shared with OpenAI during an active call when **Let Coupi see my camera** is enabled. Turn the camera off to stop capturing and sharing camera images; messages and explicit photo uploads remain available. Snapshot-status text does not occupy space over the call. The app does not write call audio or camera images to persistent storage. Calls end when the page is hidden or after the demo's ten-minute limit.
 
 ## Call discovery
 

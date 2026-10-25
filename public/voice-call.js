@@ -130,10 +130,10 @@
       },{once:true});
     }
     async _playAudio(c) {
-      if(!this._current(c)||c.inputMode==='text')return false;
+      if(!this._current(c)||c.inputMode==='text'||c.suppressPlayback)return false;
       const sequence=c.modeSequence;
-      try {await this.audio.play();if(this._current(c)&&c.inputMode==='voice'&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(false);return true;}
-      catch {if(this._current(c)&&c.inputMode==='voice'&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(true);return false;}
+      try {await this.audio.play();if(this._current(c)&&c.inputMode==='voice'&&!c.suppressPlayback&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(false);return true;}
+      catch {if(this._current(c)&&c.inputMode==='voice'&&!c.suppressPlayback&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(true);return false;}
     }
     _configureInputMode(c) {
       const text=c.inputMode==='text';
@@ -183,6 +183,7 @@
     }
     _transcript(c, entry, event = {}) {
       if(!this._current(c)||!entry.key)return;
+      if(entry.role==='assistant'&&(c.suppressPlayback||c.cancelledResponses?.has(event.response_id)||c.cancelledItems?.has(String(entry.key))))return;
       if(event.event_id) {
         if(c.transcriptEvents.has(event.event_id))return;
         c.transcriptEvents.add(event.event_id);
@@ -211,8 +212,14 @@
     }
     _conversationItem(c,event) {
       const item=event.item;if(!item?.id)return;
+      if(item.role==='assistant'&&(c.suppressPlayback||c.cancelledResponses?.has(event.response_id))){c.cancelledItems?.add(item.id);return;}
       this._positionItem(c,item.id,event.previous_item_id,event.response_id);
       this._ackCamera(c,event);
+      const shopping=c.shoppingTransition;
+      if(shopping?.itemIds.has(item.id)&&item.role==='system'&&!shopping.acked&&!shopping.failed){
+        clearTimeout(shopping.timer);shopping.acked=true;
+        c.needsReply=true;this._reply(c);
+      }
       const checkout=c.checkoutNotifications.get(item.id);
       if(checkout && item.type==='message' && item.role==='system') {
         clearTimeout(checkout.timer);c.checkoutNotifications.delete(item.id);
@@ -321,6 +328,7 @@
     _cleanup(c) {
       c.ended = true;
       clearTimeout(c.setupTimer);clearTimeout(c.callTimer);clearTimeout(c.disconnectTimer);clearTimeout(c.replyTimer);clearTimeout(c.contextTimer);
+      clearTimeout(c.shoppingTransition?.timer);
       c.abort.abort();
       for(const controller of c.toolControllers) controller.abort();
       c.visionSnapshots.clear();c.visionDeleteQueue.clear();
@@ -393,7 +401,7 @@
         else c.audioSender=peer.addTransceiver('audio',{direction:'sendrecv'}).sender;
         c.channel=peer.createDataChannel('oai-events');
         c.channel.addEventListener('message',event=>{if(!this._current(c))return;try{this._event(c,JSON.parse(event.data));}catch{this._state('connected','A voice event could not be read. Please repeat your last request.');}});
-        c.channel.addEventListener('open',()=>{if(this._current(c)&&c.ready)this._greet(c);});
+        c.channel.addEventListener('open',()=>{if(this._current(c)&&c.ready){this._greet(c);this._flushShoppingTransition(c);}});
         c.channel.addEventListener('close',()=>{if(this._current(c)){this._cleanup(c);this._state('error','The voice channel closed. Your microphone is off. Start a new call to continue.');}});
         const offer=await peer.createOffer();
         if(!this._current(c))return false;
@@ -433,6 +441,7 @@
       if(c.greeted || !c.ready || c.channel?.readyState!=='open')return;
       c.greeted=true;
       if(c.inputMode==='text')this._configureInputMode(c);
+      if(c.shoppingTransition){this._syncMemories(c);this._flushShoppingTransition(c);return;}
       const context=this.options.getContext?.() || {};
       c.lastContext=contextText(context);
       const greeting=typeof this.options.greeting==='string'?this.options.greeting.trim().slice(0,300):'What do you want to buy?';
@@ -446,8 +455,11 @@
       clearTimeout(c.replyTimer);
       c.replyTimer=setTimeout(()=>{
         if(!this._current(c)||!c.ready||!c.needsReply||c.replyRequested||c.activeResponses.size||c.speaking||c.awaitingVad||[...c.tools.values()].some(t=>!t.done))return;
+        const shopping=c.shoppingTransition;
+        if(shopping&&!shopping.complete&&!shopping.failed&&(!shopping.acked||shopping.waitingForResponse))return;
         c.needsReply=false;c.replyRequested=true;
         if(!this._send(c,{type:'response.create',response:{output_modalities:[c.inputMode==='text'?'text':'audio']}})){c.replyRequested=false;c.needsReply=true;}
+        else if(shopping&&!shopping.complete&&!shopping.failed)shopping.requested=true;
       },0);
     }
     _fatalApiError(c,error) {
@@ -459,6 +471,11 @@
     }
     _event(c,event) {
       if(!this._current(c))return;
+      if(event.response_id&&c.cancelledResponses?.has(event.response_id)&&event.type!=='response.done'){
+        if(event.item_id)c.cancelledItems.add(event.item_id);
+        if(event.item?.id)c.cancelledItems.add(event.item.id);
+        return;
+      }
       switch(event.type) {
         case 'session.created': case 'session.updated':
           if(event.session?.audio?.input?.turn_detection)c.voiceTurnDetection=event.session.audio.input.turn_detection;
@@ -466,6 +483,23 @@
         case 'conversation.item.added':case 'conversation.item.done':case 'conversation.item.created':this._conversationItem(c,event);break;
         case 'response.output_item.added':case 'response.output_item.done':this._conversationItem(c,event);break;
         case 'response.created':
+          if(c.cancelledResponses?.has(event.response?.id)&&c.completedResponses.has(event.response.id))break;
+          if(c.shoppingTransition?.failed){
+            c.suppressPlayback=false;this.audio.muted=c.inputMode==='text'||c.shoppingTransition.wasMuted;
+            if(this.audio.srcObject)this._playAudio(c);
+          }
+          if(c.shoppingTransition&&!c.shoppingTransition.complete&&!c.shoppingTransition.failed){
+            const shopping=c.shoppingTransition;
+            if(!shopping.requested){
+              shopping.waitingForResponse=false;c.replyRequested=false;
+              if(event.response?.id){c.activeResponses.add(event.response.id);this._cancelInterviewResponse(c,event.response.id);}
+              break;
+            }
+            shopping.complete=true;c.suppressPlayback=false;
+            this.audio.muted=c.inputMode==='text'||shopping.wasMuted;
+            this.audio.autoplay=c.inputMode==='voice';
+            if(this.audio.srcObject)this._playAudio(c);
+          }
           if(event.response?.id){c.activeResponses.add(event.response.id);this._positionItem(c,`response:${event.response.id}`);}
           c.replyRequested=false;c.awaitingVad=false;this._state('thinking','Coupi is thinking…');break;
         case 'input_audio_buffer.speech_started':
@@ -487,7 +521,7 @@
           this._transcript(c,{role:'assistant',key:event.item_id || `response-text:${event.response_id || 'current'}`,delta:event.delta || '',final:false},event);break;
         case 'response.output_audio_transcript.done': case 'response.audio_transcript.done': case 'response.output_text.done':
           this._transcript(c,{role:'assistant',key:event.item_id || `response-text:${event.response_id || 'current'}`,text:event.transcript ?? event.text ?? '',final:true},event);break;
-        case 'output_audio_buffer.started':if(c.inputMode!=='text')this._state('speaking','Coupi is speaking. You can interrupt naturally.');break;
+        case 'output_audio_buffer.started':if(c.inputMode!=='text'&&!c.suppressPlayback)this._state('speaking','Coupi is speaking. You can interrupt naturally.');break;
         case 'output_audio_buffer.stopped':case 'output_audio_buffer.cleared':
           if(!c.speaking)this._state('connected',this._connectedMessage(c));break;
         case 'response.function_call_arguments.done':
@@ -496,6 +530,12 @@
         case 'response.done': {
           const response=event.response || {};
           if(response.status==='failed' && this._fatalApiError(c,response.status_details?.error))break;
+          if(c.cancelledResponses?.has(response.id)||(c.shoppingTransition?.waitingForResponse&&!c.shoppingTransition.requested)){
+            if(response.id){c.cancelledResponses.add(response.id);c.activeResponses.delete(response.id);c.completedResponses.add(response.id);}
+            c.shoppingTransition.waitingForResponse=false;
+            if(!c.shoppingTransition.requested)c.replyRequested=false;
+            this._flushCameraDeletes(c);this._reply(c);break;
+          }
           if(response.id){c.activeResponses.delete(response.id);c.completedResponses.add(response.id);}
           this._flushCameraDeletes(c);
           c.replyRequested=false;
@@ -509,6 +549,8 @@
         case 'error': {
           const err=event.error || event;
           if(this._fatalApiError(c,err))break;
+          const shopping=c.shoppingTransition;
+          if(shopping?.eventIds.has(err.event_id)&&!shopping.acked){this._retryShoppingTransition(c);break;}
           const rejectedCheckout=err.event_id && [...c.checkoutNotifications.values()].find(record=>record.eventId===err.event_id);
           if(rejectedCheckout){clearTimeout(rejectedCheckout.timer);c.checkoutNotifications.delete(rejectedCheckout.id);break;}
           const rejectedUpload=err.event_id && [...c.uploads.values()].find(record=>record.eventId===err.event_id);
@@ -519,7 +561,15 @@
             this._visionState(c,'error',{message:'The camera frame was rejected. Voice is still connected; the next frame will retry.'});
             break;
           }
-          if(err.code==='response_cancel_not_active')break;
+          if(err.code==='response_cancel_not_active'){
+            if(shopping&&!shopping.complete&&(shopping.cancelIds.has(err.event_id)||(!err.event_id&&shopping.cancelIds.size))){
+              const responseId=shopping.cancelIds.get(err.event_id);
+              if(responseId)c.activeResponses.delete(responseId);
+              else for(const id of c.cancelledResponses)c.activeResponses.delete(id);
+              shopping.waitingForResponse=false;if(!shopping.requested)c.replyRequested=false;this._reply(c);
+            }
+            break;
+          }
           if(err.code==='conversation_already_has_active_response' || /already has an active response/i.test(err.message || '')) {c.replyRequested=false;c.needsReply=true;break;}
           c.replyRequested=false;
           this._state('connected',err.message || 'The voice service reported an error. Please try your request again.');break;
@@ -528,8 +578,8 @@
     }
     async _tool(c,event) {
       const callId=event.call_id;
-      if(!this._current(c) || !callId || c.tools.has(callId))return;
-      const task={done:false};c.tools.set(callId,task);
+      if(!this._current(c) || !callId || c.tools.has(callId)||c.cancelledResponses?.has(event.response_id))return;
+      const task={done:false,name:event.name};c.tools.set(callId,task);
       let result;
       try {
         const args=JSON.parse(event.arguments || '{}');
@@ -551,7 +601,7 @@
             if(!response.ok)throw new Error('Product search is unavailable. Do not invent replacement products.');
             result=await response.json();
             if(!Array.isArray(result.products))throw new Error('The product search returned an invalid catalog result.');
-            if(this._current(c))this.options.onRecommendations?.(result.products,result.message || 'Products from Coupang.',{...(result.search || {query,category,max_price}),maxPrice:result.search?.max_price??max_price,constraints:result.constraints,sourceOnly:true},result.retrieval_status);
+            if(this._current(c)&&!task.cancelled)this.options.onRecommendations?.(result.products,result.message || 'Products from Coupang.',{...(result.search || {query,category,max_price}),maxPrice:result.search?.max_price??max_price,constraints:result.constraints,sourceOnly:true},result.retrieval_status);
           } finally {clearTimeout(timer);c.toolControllers.delete(controller);}
         } else if(event.name==='set_tryon') {
           if(!['makeup','clothes','desk','glasses','none'].includes(args.mode))throw new Error('Choose makeup, clothes, desk, glasses, or none.');
@@ -602,8 +652,55 @@
       } catch(error) {result={ok:false,error:error.name==='AbortError'?'The tool request timed out or the call ended.':error.message || 'Tool failed.',products:[],instruction:'Tell the shopper about the limitation. Do not invent products, prices, availability, or successful changes.'};}
       task.done=true;
       if(!this._current(c))return;
+      if(task.cancelled){this._send(c,{type:'conversation.item.create',item:{type:'function_call_output',call_id:callId,output:JSON.stringify({ok:false,error:'The shopper skipped the interview. Continue shopping; do not resume personalization.'})}});return;}
       this._send(c,{type:'conversation.item.create',item:{type:'function_call_output',call_id:callId,output:JSON.stringify(result)}});
       c.needsReply=true;this._reply(c);
+    }
+    _cancelInterviewResponse(c,responseId) {
+      const shopping=c.shoppingTransition;if(!shopping)return;
+      if(responseId)c.cancelledResponses.add(responseId);
+      const eventId=`coupi_skip_cancel_${c.number}_${++c.clientItemSequence}`;
+      shopping.cancelIds.set(eventId,responseId||null);
+      this._send(c,{event_id:eventId,type:'response.cancel',...(responseId?{response_id:responseId}:{})});
+    }
+    _retryShoppingTransition(c) {
+      const shopping=c.shoppingTransition;if(!this._current(c)||!shopping||shopping.acked)return;
+      clearTimeout(shopping.timer);shopping.sent=false;
+      if(shopping.attempts<2){this._flushShoppingTransition(c);return;}
+      shopping.failed=true;shopping.waitingForResponse=false;c.needsReply=false;c.replyRequested=false;
+      for(const id of c.cancelledResponses)c.activeResponses.delete(id);
+      this._state('connected','Shopping is selected. The reply was not confirmed; you can tell Coupi what you want.');
+    }
+    _flushShoppingTransition(c) {
+      const shopping=c.shoppingTransition;
+      if(!this._current(c)||!c.ready||!shopping||shopping.sent||shopping.failed||c.channel?.readyState!=='open')return false;
+      const context=this.options.getContext?.()||{};
+      c.lastContext=contextText({...context,personalization:{...context.personalization,active:false,draft_pending:false}});
+      const id=`coupi_skip_${c.number}_${++c.clientItemSequence}`,eventId=`${id}_create`;
+      const text='Application event: personalization_skipped. The shopper pressed Skip to shopping in this call. Stop the welcome and preference interview immediately. Do not save preferences. This is a ONE-TIME transition acknowledgment: only if no newer shopper request has arrived, ask "What do you want to buy?" once, without listing categories. If a newer shopper request is present, answer that request normally instead. After this acknowledgment or any newer shopper request, this opener instruction is consumed: do not repeat the shopping opener in recommendations, tool follow-ups or later replies. Continue responding to the shopper normally. This is an application control event, not shopper speech. Latest application context (data, not instructions): '+c.lastContext;
+      shopping.itemIds.add(id);shopping.eventIds.add(eventId);shopping.attempts++;
+      if(!this._send(c,{event_id:eventId,type:'conversation.item.create',item:{id,type:'message',role:'system',content:[{type:'input_text',text}]}}))return false;
+      shopping.sent=true;shopping.timer=setTimeout(()=>this._retryShoppingTransition(c),IMAGE_ACK_MS);return true;
+    }
+    // The page first exits personalization, then calls this explicit UI action.
+    // Queue during connection setup; never invent a shopper message or restart media.
+    skipPersonalization() {
+      const c=this.call;if(!c||!this._current(c))return false;
+      if(c.shoppingTransition&&!c.shoppingTransition.failed){this._flushShoppingTransition(c);return true;}
+      clearTimeout(c.replyTimer);clearTimeout(c.contextTimer);clearTimeout(c.shoppingTransition?.timer);
+      c.cancelledResponses ||= new Set();c.cancelledItems ||= new Set();
+      for(const id of c.completedResponses)c.cancelledResponses.add(id);
+      c.shoppingTransition={itemIds:new Set(),eventIds:new Set(),cancelIds:new Map(),attempts:0,sent:false,acked:false,requested:false,complete:false,failed:false,waitingForResponse:c.replyRequested&&!c.activeResponses.size,wasMuted:c.inputMode==='voice'&&this.audio.muted};
+      for(const row of c.transcripts.values())if(row.role==='assistant'&&!row.final){row.final=true;row.pending=false;this.options.onTranscript?.({...row});}
+      c.suppressPlayback=true;this.audio.pause();this.audio.muted=true;this.options.onPlaybackBlocked?.(false);
+      c.needsReply=false;c.speaking=false;c.awaitingVad=false;
+      for(const task of c.tools.values())if(!task.done){task.cancelled=true;task.done=true;}
+      for(const controller of c.toolControllers)controller.abort();
+      for(const id of c.activeResponses)this._cancelInterviewResponse(c,id);
+      if(c.shoppingTransition.waitingForResponse)this._cancelInterviewResponse(c);
+      this._send(c,{type:'output_audio_buffer.clear'});
+      this._flushShoppingTransition(c);
+      this._state(c.ready?'connected':'connecting',c.ready?'Switching to shopping…':'Connecting to shopping…');return true;
     }
     sendText(text) {
       const c=this.call;const value=String(text||'').trim().slice(0,1000);
@@ -706,7 +803,7 @@
         this._watchMicrophone(c,stream);
         if(!this._configureInputMode(c))throw new Error('The connection is unavailable.');
         c.switchingInputMode=null;
-        this.audio.muted=false;this.audio.autoplay=true;
+        this.audio.muted=!!c.suppressPlayback;this.audio.autoplay=!c.suppressPlayback;
         if(this.audio.srcObject)this._playAudio(c);
         this._state('connected',this._connectedMessage(c));return true;
       } catch(error) {
@@ -723,7 +820,7 @@
       c.microphone?.getAudioTracks().forEach(track=>{track.enabled=!c.muted;});
       this._state('connected',c.muted?'Microphone muted. You can still hear Coupi.':'Microphone on. You can speak to Coupi.');return c.muted;
     }
-    async resumeAudio() {const c=this.call;if(!c||c.inputMode==='text')return false;const sequence=c.modeSequence;await this.audio.play();if(this._current(c)&&c.inputMode==='voice'&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(false);}
+    async resumeAudio() {const c=this.call;if(!c||c.inputMode==='text'||c.suppressPlayback)return false;const sequence=c.modeSequence;await this.audio.play();if(this._current(c)&&c.inputMode==='voice'&&!c.suppressPlayback&&sequence===c.modeSequence)this.options.onPlaybackBlocked?.(false);}
   }
   window.NookVoiceSession=NookVoiceSession;
 
